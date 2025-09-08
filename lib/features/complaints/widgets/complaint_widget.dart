@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/extensions/date_formatter.dart';
+import 'package:inldsevak/core/extensions/responsive_extension.dart';
+import 'package:inldsevak/core/helpers/common_helpers.dart';
+import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/utils/app_images.dart';
+import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
-
-
 
 class ComplaintThreadWidget extends StatelessWidget {
   final Data thread;
@@ -17,131 +21,123 @@ class ComplaintThreadWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: Dimens.elevation,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(Dimens.radiusX2),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Row
-              Row(
+    final textTheme = context.textTheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(Dimens.radiusX2),
+      child: Container(
+        padding: EdgeInsetsGeometry.all(Dimens.paddingX4),
+        decoration: boxDecorationRoundedWithShadow(
+          Dimens.radiusX2,
+          spreadRadius: 2,
+          blurRadius: 2,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: Dimens.gapX2,
+          children: [
+            IntrinsicHeight(
+              child: Row(
+                spacing: Dimens.gapX3,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Status Indicator
                   Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: true ? Colors.orange : Colors.green,
-                      shape: BoxShape.circle,
+                    child: CommonHelpers.buildIcons(
+                      color: AppPalettes.primaryColor.withOpacityExt(0.2),
+                      path: AppImages.emailIcon,
+                      iconColor: AppPalettes.primaryColor,
+                      iconSize: Dimens.scaleX1B,
+                      padding: Dimens.paddingX2B,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  
-                  // Title
                   Expanded(
                     child: Text(
-                      thread.subject??"",
-                      style: context.textTheme.bodyMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      thread.messages?.first.subject ?? "No Subject found !",
+                      style: textTheme.bodySmall,
                     ),
                   ),
-                  
-                  // Arrow Icon
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.grey,
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Dimens.paddingX3,
+                        vertical: Dimens.paddingX,
+                      ),
+                      decoration: boxDecorationRoundedWithShadow(
+                        Dimens.radius100,
+                        backgroundColor:
+                            (thread.isActive == true
+                                    ? AppPalettes.yellowColor
+                                    : AppPalettes.blueColor)
+                                .withOpacityExt(0.2),
+                      ),
+                      child: Text(
+                        thread.isActive == true ? "Pending" : "Resolved",
+                        style: textTheme.labelMedium?.copyWith(
+                          color: AppPalettes.lightTextColor,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 12),
-              
-              // Status Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: true 
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(Dimens.radiusX2),
-                ),
-                child: Text(
-                 false ? 'Resolved' : 'In Progress',
-                  style: TextStyle(
-                    color: true  ? Colors.orange : Colors.green,
-                    fontSize: 12,
+            ),
+
+            ConstrainedBox(
+              constraints: BoxConstraints(minHeight: 40.height()),
+              child: RichText(
+                text: TextSpan(
+                  style: textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
+                  children: [
+                    TextSpan(text: "Message : "),
+                    TextSpan(
+                      text:
+                          thread.messages?.first.snippet ?? "Unknown Description",
+                      style: textTheme.labelMedium?.copyWith(
+                        color: AppPalettes.lightTextColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              
-              const SizedBox(height: 12),
-              
-              // Footer
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDate(DateTime.now()),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  Row(
-                    children: [
-                      const Icon(Icons.email, size: 14, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Text(
-                        '0 messages',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  spacing: Dimens.gapX2,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CommonHelpers.buildIcons(
+                      path: AppImages.calenderIcon,
+                      iconColor: context.iconsColor,
+                      iconSize: Dimens.scaleX2,
+                    ),
+                    Text(
+                      thread.messages?.first.date?.toDdMmmYyyy() ?? "",
+                      style: textTheme.labelMedium,
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.email, size: 14, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Text(
+                      '0 messages',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  String _extractTitle(String subject) {
-    // Remove "Complaint:" or "Re: Complaint:" prefix
-    return subject
-        .replaceFirst(RegExp(r'^(Re:\s*)?Complaint:\s*', caseSensitive: false), '')
-        .trim();
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      return 'Today';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
   }
 }

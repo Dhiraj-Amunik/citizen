@@ -168,9 +168,7 @@ Widget donationWidget({
         ),
       ),
       const Spacer(),
-      Expanded(
-        child: Text(date?.toDdMmYyyy() ?? "", style: textTheme.bodySmall),
-      ),
+      Text(date?.toDdMmYyyy() ?? "", style: textTheme.bodySmall),
     ],
   );
 }

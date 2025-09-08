@@ -188,13 +188,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get complaint_title => 'Complaint Title';
 
   @override
-  String get brief_desc_of_the_issue => 'Brief description of the issue';
+  String get enter_title => 'Enter title';
 
   @override
   String get please_enter_a_title => 'Please enter a title';
 
   @override
   String get department => 'Department';
+
+  @override
+  String get select_department => 'Select Department';
 
   @override
   String get detailed_desc => 'Detailed Description';
@@ -208,13 +211,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please provide a detailed description';
 
   @override
-  String get official => 'Official';
+  String get authority => 'Authority';
 
   @override
-  String get lodge_complaint => 'Lodge Complaint';
+  String get select_authority => 'Select Authority';
 
   @override
-  String get submit_complaint => 'Submit Complaint';
+  String get submit_new_complaint => 'Submit New Complaint';
+
+  @override
+  String get raise_complaint => 'Raise Complaint';
 
   @override
   String get contact_information => 'Contact Information';

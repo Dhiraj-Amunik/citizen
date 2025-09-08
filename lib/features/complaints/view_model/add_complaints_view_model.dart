@@ -1,122 +1,48 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
+import 'package:inldsevak/core/mixin/transparent_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
-import 'package:inldsevak/features/complaints/model/official.dart';
-import 'package:inldsevak/features/complaints/model/request/add_complaint_request_model.dart';
+import 'package:inldsevak/features/complaints/model/request/request_authorities_model.dart';
+import 'package:inldsevak/features/complaints/model/response/authorites_model.dart'
+    as authorities;
+import 'package:inldsevak/features/complaints/model/response/complaint_departments_model.dart'
+    as departments;
+import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
+    as constituency;
 import 'package:inldsevak/features/complaints/repository/complaints_repository.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:provider/provider.dart';
 
-class AddComplaintsViewModel extends BaseViewModel with CupertinoDialogMixin {
+class AddComplaintsViewModel extends BaseViewModel
+    with CupertinoDialogMixin, TransparentCircular {
+  @override
+  Future<void> onInit() {
+    getConstituencies();
+    getDepartments();
+    return super.onInit();
+  }
+
   final formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
-  final constituenciesController = SingleSelectController<String>(null);
+  final constituenciesController = SingleSelectController<constituency.Data>(
+    null,
+  );
   final descriptionController = TextEditingController();
-  final departmentController = SingleSelectController<String>(null);
-  final officialController = SingleSelectController<Official>(null);
+  final departmentController = SingleSelectController<departments.Data>(null);
+  final authortiyController = SingleSelectController<authorities.Data>(null);
 
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
 
-  List<String> constituencies = [
-    "KALKA",
-    "PANCHKULA",
-    "NARAINGARH",
-    "AMBALA CANTT.",
-    "AMBALA CITY",
-    "MULANA (SC)",
-    "SADHAURA(SC)",
-    "JAGADHRI",
-    "YAMUNANAGAR",
-    "RADAUR",
-    "LADWA",
-    "SHAHBAD(SC)",
-    "THANESAR",
-    "PEHOWA",
-    "GUHLA(SC)",
-    "KALAYAT",
-    "KAITHAL",
-    "PUNDRI",
-    "NILOKHERI(SC)",
-    "INDRI",
-    "KARNAL",
-    "GHARAUNDA",
-    "ASSANDH",
-    "PANIPAT RURAL",
-    "PANIPAT CITY",
-    "ISRANA(SC)",
-    "SAMALKHA",
-    "GANAUR",
-    "RAI",
-    "KHARKHAUDA(SC)",
-    "SONIPAT",
-    "GOHANA",
-    "BARODA",
-    "MEHAM",
-    "GARHI SAMPLA-KILOI",
-    "ROHTAK",
-    "KALANAUR(SC)",
-    "BAHADURGARH",
-    "BADLI",
-    "JHAJJAR(SC)",
-    "BERI",
-    "BADHRA",
-    "DADRI",
-    "LOHARU",
-    "BHIWANI",
-    "TOSHAM",
-    "BAWANI KHERA(SC)",
-    "JULANA",
-    "SAFIDON",
-    "JIND",
-    "UCHANA KALAN",
-    "NARWANA(SC)",
-    "TOHANA",
-    "FATEHABAD",
-    "RATIA(SC)",
-    "KALAWALI(SC)",
-    "DABWALI",
-    "RANIA",
-    "SIRSA",
-    "ELLENABAD",
-    "ADAMPUR",
-    "UKLANA(SC)",
-    "NARNAUND",
-    "HANSI",
-    "BARWALA",
-    "HISAR",
-    "NALWA",
-    "ATELI",
-    "MAHENDRAGARH",
-    "NARNAUL",
-    "NANGAL CHAUDHRY",
-    "BAWAL(SC)",
-    "KOSLI",
-    "REWARI",
-    "PATAUDI(SC)",
-    "BADSHAHPUR",
-    "GURGAON",
-    "SOHNA",
-    "NUH",
-    "FEROZEPUR JHIRKA",
-    "PUNAHANA",
-    "HATHIN",
-    "HODAL(SC)",
-    "PALWAL",
-    "PRITHLA",
-    "FARIDABAD NIT",
-    "BADKHAL",
-    "BALLABHGARH",
-    "FARIDABAD",
-    "TIGAON",
-  ];
-
-  update() {
+  List<departments.Data> departmentLists = [];
+  List<authorities.Data> authoritiesLists = [];
+  List<constituency.Data> constituencyLists = [];
+ update() {
     notifyListeners();
   }
 
@@ -131,17 +57,16 @@ class AddComplaintsViewModel extends BaseViewModel with CupertinoDialogMixin {
       }
       isLoading = true;
 
-      final data = AddComplaintRequestModel(
-        department: officialController.value?.department,
-        endUserEmail: officialController.value?.email,
-        name: officialController.value?.name,
-        title: titleController.text,
-        description: descriptionController.text,
-      );
-      log(data.toJson().toString());
+      final FormData form = FormData.fromMap({
+        "department": departmentController.value?.sId,
+        "authorityId": authortiyController.value?.sId,
+        "constituency": constituenciesController.value?.sId,
+        "subject": titleController.text,
+        "message": descriptionController.text,
+      });
 
       final response = await ComplaintsRepository().addComplaints(
-        data: data,
+        data: form,
         token: token ?? '',
       );
       if (response.data?.success == true) {
@@ -160,6 +85,73 @@ class AddComplaintsViewModel extends BaseViewModel with CupertinoDialogMixin {
       debugPrint("Stack Trace: $stackTrace");
     } finally {
       isLoading = false;
+    }
+  }
+
+  Future<void> getDepartments() async {
+    try {
+      showCustomDialogTransperent(isShowing: true);
+      final response = await ComplaintsRepository().getDepartments(token);
+
+      if (response.data?.responseCode == 200) {
+        final data = response.data?.data;
+        if (data?.isEmpty == true) {
+          CommonSnackbar(text: "No departments found").showToast();
+        } else {
+          departmentLists = List<departments.Data>.from(data as List);
+          notifyListeners();
+        }
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    } finally {
+      showCustomDialogTransperent(isShowing: false);
+    }
+  }
+
+  Future<void> getConstituencies() async {
+    try {
+      final response = await ComplaintsRepository().getConstituencies(token);
+      if (response.data?.responseCode == 200) {
+        final data = response.data?.data;
+        if (data?.isEmpty == true) {
+          CommonSnackbar(text: "No constituencies found").showToast();
+        } else {
+          constituencyLists = List<constituency.Data>.from(data as List);
+          notifyListeners();
+        }
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    }
+  }
+
+  Future<void> getAuthorities({required String? id}) async {
+    try {
+      showCustomDialogTransperent(isShowing: true);
+
+      final model = RequestAuthoritiesModel(departemnetID: id);
+      final response = await ComplaintsRepository().getAuthorites(
+        token: token,
+        data: model,
+      );
+
+      if (response.data?.responseCode == 200) {
+        final data = response.data?.data;
+        if (data?.isEmpty == true) {
+          CommonSnackbar(text: "No departments found").showToast();
+        } else {
+          authoritiesLists = List<authorities.Data>.from(data as List);
+          notifyListeners();
+        }
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    } finally {
+      showCustomDialogTransperent(isShowing: false);
     }
   }
 

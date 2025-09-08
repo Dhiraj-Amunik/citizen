@@ -13,13 +13,6 @@ class URLs {
   static const editUser = "/api/user/editUser"; /*Put*/
   static const uploadImage = "/uploadImage"; /*Post*/
 
-  static const addComplaint = "/api/complaint/sendmail"; /*Post*/
-  static const getComplaintByUserID = "/api/complaint/getComplaints"; /*Get*/
-  static const getComplaintByThreadID =
-      "/api/complaint/getchatbythreadId"; /*Post*/
-  static const replyToComplaintByThreadID =
-      "/api/complaint/replythread"; /*Post*/
-
   //Donation
 
   //Party Member
@@ -38,5 +31,16 @@ class URLs {
   static const userLokVarta = "/api/user/lok-varta"; /*Post*/
   static const postDonation = "/api/user/create-donation"; /*Post*/
   static const pastDonation = "/api/user/list-of-donations-by-user"; /*Post*/
-  
+
+  //complaints
+
+  static const addComplaint = "/api/complaint/sendmail"; /*Post*/
+  static const getComplaintByThreadID =
+      "/api/complaint/getchatbythreadId"; /*Post*/
+  static const replyToComplaintByThreadID =
+      "/api/complaint/replythread"; /*Post*/
+  static const getComplaintByUserID = "/api/complaint/getComplaints"; /*Get*/
+  static const getDepartments = "/api/user/list-of-department-dropdown"; /*Get*/
+  static const getAuthority = "/api/user/list-of-authorities-dropdown"; /*Get*/
+  static const getConstituencies = "/api/user/list-of-constituencies-dropdown"; /*Get*/
 }

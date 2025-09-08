@@ -14,6 +14,7 @@ dependencies:
   dio: ^5.9.0
   flutter:
     sdk: flutter
+  flutter_dotenv: ^6.0.0
   flutter_keyboard_visibility: ^6.0.0
   flutter_localizations:
     sdk: flutter
@@ -46,6 +47,7 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
+    - .env
     - assets/images/
     - assets/icons/
     - assets/navigation_icons/

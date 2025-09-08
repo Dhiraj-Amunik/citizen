@@ -1,25 +1,16 @@
 class ReplyRequestModel {
-  final String to;
   final String message;
-  final String subject;
-  final String threadId;
-  final String inReplyTo;
+  final String complaintId;
 
   ReplyRequestModel({
-    required this.to,
     required this.message,
-    required this.subject,
-    required this.threadId,
-    required this.inReplyTo,
+    required this.complaintId,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'to': to,
       'message': message,
-      'subject': subject,
-      'threadId': threadId,
-      'inReplyTo': inReplyTo,
+      'complaintId': complaintId,
     };
   }
 }

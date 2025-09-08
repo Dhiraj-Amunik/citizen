@@ -1,8 +1,7 @@
 class ThreadModel {
   String? threadID;
   String? subject;
-  String? to;
-  String? inReplyTo;
+  String? complaintID;
 
-  ThreadModel({this.threadID, this.subject, this.to, this.inReplyTo});
+  ThreadModel({this.threadID, this.subject, this.complaintID});
 }

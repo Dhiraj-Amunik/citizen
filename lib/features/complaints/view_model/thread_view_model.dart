@@ -5,40 +5,58 @@ import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/complaints/model/request/reply_request_model.dart';
 import 'package:inldsevak/features/complaints/model/request/thread_request_model.dart';
-import 'package:inldsevak/features/complaints/model/response/complaint_by_thread.dart';
+import 'package:inldsevak/features/complaints/model/response/complaint_by_thread.dart'
+    as threads;
 import 'package:inldsevak/features/complaints/model/thread_model.dart';
 import 'package:inldsevak/features/complaints/repository/complaints_repository.dart';
 
 class ThreadViewModel extends BaseViewModel {
+  final ThreadModel arguments;
+
+  ThreadViewModel({required this.arguments}) {
+    onCreated(id: arguments.threadID!);
+  }
+
+  onCreated({required String id}) async {
+    await initialize();
+    await getThreads(threadID: id);
+  }
+
   final nextThreadController = TextEditingController();
 
-  List<Data> threadsList = [];
+  bool _loadMessages = false;
+  bool get loadMessages => _loadMessages;
+  set loadMessages(bool value) {
+    _loadMessages = value;
+    notifyListeners();
+  }
 
-  Future<List<Data>?> getThreads({required String threadID}) async {
+  List<threads.Data> threadsList = [];
+
+  Future<void> getThreads({required String threadID}) async {
     try {
-      
+      loadMessages = true;
+
       final data = ThreadRequestModel(threadID: threadID);
 
       final response = await ComplaintsRepository().getComplaintThread(
         data: data,
-        token: await controller.getToken() ?? '',
+        token: token,
       );
       if (response.data?.responseCode == 200) {
         threadsList.clear();
-        List<Data> tempList = [];
+        List<threads.Data> tempList = [];
         tempList.addAll(List.from(response.data?.data as List));
         threadsList.addAll(tempList.reversed);
       } else {
-        CommonSnackbar(
-          text: "Unable to fetch Complaints Records",
-        ).showSnackbar();
+        CommonSnackbar(text: "Unable load messages !").showSnackbar();
       }
-      return threadsList;
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
-      return threadsList;
-    } finally {}
+    } finally {
+      loadMessages = false;
+    }
   }
 
   Future<void> replyThread({required ThreadModel model}) async {
@@ -49,19 +67,17 @@ class ThreadViewModel extends BaseViewModel {
       isLoading = true;
 
       final data = ReplyRequestModel(
-        to: model.to!,
         message: nextThreadController.text,
-        subject: model.subject ?? "",
-        threadId: model.threadID ?? "",
-        inReplyTo: model.inReplyTo ?? "",
+        complaintId: model.complaintID!,
       );
       log(data.toJson().toString());
 
       final response = await ComplaintsRepository().replyComplaints(
         data: data,
-        token: token ?? '',
+        token: token,
       );
       if (response.data?.responseCode == 200) {
+        getThreads(threadID: arguments.threadID!);
         nextThreadController.clear();
       } else {
         CommonSnackbar(

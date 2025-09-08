@@ -1,85 +1,69 @@
 class ComplaintsByThreadsModel {
+  List<Data>? data;
   int? responseCode;
   String? message;
-  List<Data>? data;
 
-  ComplaintsByThreadsModel({this.responseCode, this.message, this.data});
+  ComplaintsByThreadsModel({this.data, this.responseCode, this.message});
 
   ComplaintsByThreadsModel.fromJson(Map<String, dynamic> json) {
-    responseCode = json['responseCode'];
-    message = json['message'];
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
         data!.add(new Data.fromJson(v));
       });
     }
+    responseCode = json['responseCode'];
+    message = json['message'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['responseCode'] = this.responseCode;
-    data['message'] = this.message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
+    data['responseCode'] = this.responseCode;
+    data['message'] = this.message;
     return data;
   }
 }
 
 class Data {
-  String? sId;
   String? messageId;
-  String? threadId;
   String? from;
+  String? to;
   String? subject;
   String? snippet;
-  String? receivedAt;
-  String? type;
-  String? createdAt;
-  String? updatedAt;
-  int? iV;
+  String? date;
+  String? body;
 
   Data(
-      {this.sId,
-      this.messageId,
-      this.threadId,
+      {this.messageId,
       this.from,
+      this.to,
       this.subject,
       this.snippet,
-      this.receivedAt,
-      this.type,
-      this.createdAt,
-      this.updatedAt,
-      this.iV});
+      this.date,
+      this.body});
 
   Data.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
     messageId = json['messageId'];
-    threadId = json['threadId'];
     from = json['from'];
+    to = json['to'];
     subject = json['subject'];
     snippet = json['snippet'];
-    receivedAt = json['receivedAt'];
-    type = json['type'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
-    iV = json['__v'];
+    date = json['date'];
+    body = json['body'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
     data['messageId'] = this.messageId;
-    data['threadId'] = this.threadId;
     data['from'] = this.from;
+    data['to'] = this.to;
     data['subject'] = this.subject;
     data['snippet'] = this.snippet;
-    data['receivedAt'] = this.receivedAt;
-    data['type'] = this.type;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['__v'] = this.iV;
+    data['date'] = this.date;
+    data['body'] = this.body;
     return data;
   }
 }

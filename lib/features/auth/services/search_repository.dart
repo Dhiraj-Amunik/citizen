@@ -5,11 +5,12 @@ import 'package:inldsevak/core/dio/network_requester.dart';
 import 'package:inldsevak/core/dio/repo_reponse.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_seach_place_id_modal.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SearchRepository extends NetworkRequester {
   final NetworkRequester _network = NetworkRequester();
 
-  String key = "add you api key";
+  String key = dotenv.env['MAP_KEYS'] ?? "";
 
   Future<RepoResponse<GeoCodingSerachModal>> searchLocation({
     required String placeName,

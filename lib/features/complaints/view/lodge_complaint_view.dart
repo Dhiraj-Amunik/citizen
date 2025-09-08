@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
-import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/core/widgets/upload_image_widget.dart';
-import 'package:inldsevak/features/complaints/model/official.dart';
 import 'package:inldsevak/features/complaints/view_model/add_complaints_view_model.dart';
-import 'package:inldsevak/features/complaints/widgets/officials_data.dart';
-import 'package:inldsevak/features/quick_access/appointments/viewmodel/request_appointment_view_model.dart';
+import 'package:inldsevak/features/complaints/model/response/complaint_departments_model.dart'
+    as departments;
+import 'package:inldsevak/features/complaints/model/response/authorites_model.dart'
+    as authorities;
+import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
+    as constituency;
 import 'package:provider/provider.dart';
 
 class LodgeComplaintView extends StatelessWidget {
@@ -21,13 +23,12 @@ class LodgeComplaintView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localization = context.localizations;
-    final textTheme = context.textTheme;
 
     return ChangeNotifierProvider(
       create: (context) => AddComplaintsViewModel(),
       child: Scaffold(
         appBar: commonAppBar(
-          title: localization.lodge_complaint,
+          title: localization.submit_new_complaint,
           elevation: Dimens.elevation,
         ),
 
@@ -46,113 +47,86 @@ class LodgeComplaintView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     FormTextFormField(
+                      isRequired: true,
                       controller: value.titleController,
                       headingText: localization.complaint_title,
-                      hintText: localization.brief_desc_of_the_issue,
+                      hintText: localization.enter_title,
                       validator: (value) => value?.validate(
                         argument: localization.please_enter_a_title,
                       ),
                     ),
-                    FormCommonDropDown<String>(
+                    FormCommonDropDown<constituency.Data>(
                       isRequired: true,
-                      onChanged: (p0) {
-                        value.update();
-                        value.officialController.clear();
-                      },
-                      heading: "Constituencies",
-                      items: value.constituencies,
+                      heading: localization.constituency,
+                      hintText: localization.select_your_constituency,
+                      items: value.constituencyLists,
                       controller: value.constituenciesController,
+                      listItemBuilder: (p0, constituency, p2, p3) {
+                        return Text(
+                          "${constituency.name}",
+                          style: context.textTheme.bodySmall,
+                        );
+                      },
+                      headerBuilder: (p0, constituency, p2) {
+                        return Text(
+                          "${constituency.name}",
+                          style: context.textTheme.bodySmall,
+                        );
+                      },
                     ),
-
-                    FormCommonDropDown<String>(
-                      onChanged: (p0) {
-                        value.update();
-                        value.officialController.clear();
+                    FormCommonDropDown<departments.Data>(
+                      isRequired: true,
+                      onChanged: (department) {
+                        value.getAuthorities(id: department?.sId);
                       },
                       heading: localization.department,
-                      items: OfficialsData.getAllDepartments(),
+                      hintText: localization.select_department,
+                      items: value.departmentLists,
                       controller: value.departmentController,
+                      listItemBuilder: (p0, department, p2, p3) {
+                        return Text(
+                          "${department.name}",
+                          style: context.textTheme.bodySmall,
+                        );
+                      },
+                      headerBuilder: (p0, department, p2) {
+                        return Text(
+                          "${department.name}",
+                          style: context.textTheme.bodySmall,
+                        );
+                      },
                     ),
-
-                    Column(
-                      children: [
-                        FormCommonDropDown<Official>(
-                          onChanged: (p0) => value.update(),
-                          heading: localization.official,
-                          items: OfficialsData.getOfficialsByDepartment(
-                            value.departmentController.value ?? "",
-                          ),
-                          controller: value.officialController,
-                          headerBuilder: (p0, p1, p2) {
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(p1.name, style: textTheme.bodySmall),
-                                Text(
-                                  " (${p1.designation})",
-                                  style: textTheme.labelMedium?.copyWith(
-                                    color: AppPalettes.lightTextColor,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                          listItemBuilder: (p0, p1, p2, _) {
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(p1.name, style: textTheme.bodySmall),
-                                Text(
-                                  " (${p1.designation})",
-                                  style: textTheme.labelMedium?.copyWith(
-                                    color: AppPalettes.lightTextColor,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                        if (value.officialController.value != null)
-                          Container(
-                            margin: EdgeInsets.only(top: Dimens.marginX2),
-                            padding: EdgeInsets.all(Dimens.paddingX3),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.blue.shade200),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.email,
-                                  color: Colors.blue,
-                                  size: Dimens.scaleX2,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    value.officialController.value!.email,
-                                    style: textTheme.labelMedium,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
+                    FormCommonDropDown<authorities.Data>(
+                      isRequired: true,
+                      heading: localization.authority,
+                      hintText: localization.select_authority,
+                      items: value.authoritiesLists,
+                      controller: value.authortiyController,
+                      listItemBuilder: (p0, authoritie, p2, p3) {
+                        return Text(
+                          "${authoritie.name}",
+                          style: context.textTheme.bodySmall,
+                        );
+                      },
+                      headerBuilder: (p0, authoritie, p2) {
+                        return Text(
+                          "${authoritie.name}",
+                          style: context.textTheme.bodySmall,
+                        );
+                      },
                     ),
-
                     FormTextFormField(
+                      isRequired: true,
                       maxLines: 6,
                       controller: value.descriptionController,
-                      headingText: localization.detailed_desc,
+                      headingText: localization.description,
                       hintText: localization.provide_detailed_info,
                       validator: (value) => value?.validate(
                         argument: localization.please_provide_a_detailed_desc,
                       ),
                     ),
                     UploadImageWidget(
+                      title: localization.upload_photo,
                       onTap: () => value.selectImage(),
                       onRemoveTap: () => value.removeImage(),
                       imageFile: value.image,
@@ -168,7 +142,7 @@ class LodgeComplaintView extends StatelessWidget {
             return CommonButton(
                   isEnable: !value.isLoading,
                   isLoading: value.isLoading,
-                  text: localization.submit_complaint,
+                  text: localization.raise_complaint,
                   onTap: () => value.lodgeComplaints(),
                 )
                 .symmetricPadding(horizontal: Dimens.horizontalspacing)

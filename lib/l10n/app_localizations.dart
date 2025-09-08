@@ -448,11 +448,11 @@ abstract class AppLocalizations {
   /// **'Complaint Title'**
   String get complaint_title;
 
-  /// No description provided for @brief_desc_of_the_issue.
+  /// No description provided for @enter_title.
   ///
   /// In en, this message translates to:
-  /// **'Brief description of the issue'**
-  String get brief_desc_of_the_issue;
+  /// **'Enter title'**
+  String get enter_title;
 
   /// No description provided for @please_enter_a_title.
   ///
@@ -465,6 +465,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Department'**
   String get department;
+
+  /// No description provided for @select_department.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Department'**
+  String get select_department;
 
   /// No description provided for @detailed_desc.
   ///
@@ -484,23 +490,29 @@ abstract class AppLocalizations {
   /// **'Please provide a detailed description'**
   String get please_provide_a_detailed_desc;
 
-  /// No description provided for @official.
+  /// No description provided for @authority.
   ///
   /// In en, this message translates to:
-  /// **'Official'**
-  String get official;
+  /// **'Authority'**
+  String get authority;
 
-  /// No description provided for @lodge_complaint.
+  /// No description provided for @select_authority.
   ///
   /// In en, this message translates to:
-  /// **'Lodge Complaint'**
-  String get lodge_complaint;
+  /// **'Select Authority'**
+  String get select_authority;
 
-  /// No description provided for @submit_complaint.
+  /// No description provided for @submit_new_complaint.
   ///
   /// In en, this message translates to:
-  /// **'Submit Complaint'**
-  String get submit_complaint;
+  /// **'Submit New Complaint'**
+  String get submit_new_complaint;
+
+  /// No description provided for @raise_complaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise Complaint'**
+  String get raise_complaint;
 
   /// No description provided for @contact_information.
   ///
