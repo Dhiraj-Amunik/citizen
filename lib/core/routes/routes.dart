@@ -26,6 +26,8 @@ import 'package:inldsevak/features/home/view/home_view.dart';
 import 'package:inldsevak/features/party_member/view/become_part_member_view.dart';
 import 'package:inldsevak/features/profile/view/profile_edit_view.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/party/view/wall_of_help_party_view.dart';
+import 'package:inldsevak/features/terms_and_conditions/view/privacy_policy_view.dart';
+import 'package:inldsevak/features/terms_and_conditions/view/terms_and_conditions_view.dart';
 import 'package:inldsevak/wrapper_view.dart';
 part "./enum.dart";
 
@@ -39,9 +41,7 @@ class RouteManager {
 
   static Route<dynamic> onGenerateRoute(RouteSettings? settings) {
     try {
-      final route = Routes.values.firstWhere(
-        (r) => r.path == settings?.name,
-      );
+      final route = Routes.values.firstWhere((r) => r.path == settings?.name);
       return _factory.createRoute(route, settings);
     } catch (error) {
       log("$error");

@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> {
               ],
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.lightTheme,
-              initialRoute: Routes.wrapperPage.path,
+              initialRoute: Routes.privacyPolicyView.path,
               navigatorKey: RouteManager.navigatorKey,
               onGenerateRoute: RouteManager.onGenerateRoute,
             ),

@@ -25,7 +25,10 @@ enum Routes {
   contributePage(path: "/contributePage"),
   requestWallOfHelpPage(path: "/RequestWallOfHelpPage"),
   beVolunteerPage(path: "/BeVolunteerPage"),
-  idCardPage(path: "/IdCardPage");
+  idCardPage(path: "/IdCardPage"),
+
+  privacyPolicyView(path: '/PrivacyPolicyView'),
+  termsAndConditionsView(path: "/TermsAndConditionsView");
 
   final String path;
   final AxisDirection direction;
@@ -85,6 +88,12 @@ Widget getPage(Routes route, {dynamic arguments}) {
       return BeAVolunteerView();
     case Routes.idCardPage:
       return IdCardView();
+
+    case Routes.termsAndConditionsView:
+      return TermsAndConditionsView();
+    case Routes.privacyPolicyView:
+      return PrivacyPolicyView();
+
     default:
       return WrapperView();
   }

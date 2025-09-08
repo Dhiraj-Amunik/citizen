@@ -26,6 +26,8 @@ class AppImages {
   static const clockIcon = '$_iconsURL/clock_icon.svg';
   static const searchIcon = '$_iconsURL/search_icon.svg';
 
+  static const leadingBackIcon = '$_iconsURL/appbarbackicon.svg';
+
   static const navComplaintIcon = '$_navIconsURL/complaint_icon.svg';
   static const navDonateIcon = '$_navIconsURL/donate_icon.svg';
   static const navINLDIcon = '$_navIconsURL/inld_icon.png';
@@ -74,5 +76,4 @@ class AppImages {
 
   //placeholders
   static const placeholderEmpty = "$_placeholders/empty.svg";
-
 }
