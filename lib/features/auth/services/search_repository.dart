@@ -9,13 +9,13 @@ import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.d
 class SearchRepository extends NetworkRequester {
   final NetworkRequester _network = NetworkRequester();
 
-  String key = "AIzaSyDjhRfuZD95rSJSqXRhuxvELmmO1lFLV-k";
+  String key = "add you api key";
 
   Future<RepoResponse<GeoCodingSerachModal>> searchLocation({
     required String placeName,
   }) async {
     final url =
-        "";
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&key=$key";
 
     log(url);
 
