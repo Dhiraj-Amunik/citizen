@@ -26,6 +26,11 @@ class AppImages {
   static const clockIcon = '$_iconsURL/clock_icon.svg';
   static const searchIcon = '$_iconsURL/search_icon.svg';
 
+  static const bankIcon = '$_iconsURL/bankicon.svg';
+  static const cardsIcon = '$_iconsURL/cardsicon.svg';
+  static const rupeeIcon = '$_iconsURL/rupeeicon.svg';
+  static const clipboardicon = '$_iconsURL/clipboardicon.svg';
+
   static const leadingBackIcon = '$_iconsURL/appbarbackicon.svg';
 
   static const navComplaintIcon = '$_navIconsURL/complaint_icon.svg';

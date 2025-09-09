@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
+import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
@@ -24,7 +25,9 @@ class PrivacyPolicyView extends StatelessWidget {
             ),
             Text(
               'This Privacy Policy explains how Citizen Connect (“App”, “we”, “our”, or “us”) collects, uses, and protects your personal information. By using the app, you agree to the practices described in this policy.',
-              style: context.textTheme.bodySmall,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: AppPalettes.lightTextColor,
+              ),
             ),
 
             Text('Information We Collect', style: context.textTheme.titleSmall),
@@ -36,14 +39,17 @@ class PrivacyPolicyView extends StatelessWidget {
 •  Donation Data: Transaction details when you make donations (note: we do not store card/UPI details).
 •  Device Information: Device type, operating system, and app usage data to improve services.
 ''',
-              style: context.textTheme.bodySmall,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: AppPalettes.lightTextColor,
+              ),
             ),
 
             Text(
               'How We Use Your Information',
               style: context.textTheme.titleSmall,
             ),
-            Text('''Your data is used for the following purposes:
+            Text(
+              '''Your data is used for the following purposes:
 •  To verify your identity and create a secure account.
 •  To submit and process complaints with the relevant authorities.
 •  To update you on the status of your complaints.
@@ -51,20 +57,32 @@ class PrivacyPolicyView extends StatelessWidget {
 •  To process donations securely and generate receipts.
 •  To provide customer support and resolve technical issues.
 •  To improve app features, security, and user experience. and app usage data to improve services.
-''', style: context.textTheme.bodySmall),
+''',
+              style: context.textTheme.bodySmall?.copyWith(
+                color: AppPalettes.lightTextColor,
+              ),
+            ),
 
             Text('Data Security', style: context.textTheme.titleSmall),
             Text(
               'All sensitive information, including Aadhaar and payment data, is encrypted. Access to your data is restricted to authorized officials and administrators. We regularly review our security measures to protect against unauthorized access, loss, or misuse.',
-              style: context.textTheme.bodySmall,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: AppPalettes.lightTextColor,
+              ),
             ),
             Text('User Rights', style: context.textTheme.titleSmall),
-            Text('''As a user of Citizen Connect, you have the right to:
+
+            Text(
+              '''As a user of Citizen Connect, you have the right to:
 •  Access: Request a copy of your personal data.
 •  Correction: Update incorrect or outdated information.
 •  Deletion: Request deletion of your account and data permanently.
 •  Withdraw Consent: Stop using the app and revoke data permissions at any time.
-''', style: context.textTheme.bodySmall),
+''',
+              style: context.textTheme.bodySmall?.copyWith(
+                color: AppPalettes.lightTextColor,
+              ),
+            ),
             SizeBox.sizeHX1,
           ],
         ).symmetricPadding(horizontal: Dimens.horizontalspacing),

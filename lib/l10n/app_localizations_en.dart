@@ -100,7 +100,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get donate => 'Donate';
 
   @override
-  String get donation_history => 'Donate History';
+  String get donation_history => 'Donation History';
 
   @override
   String get enter_amount => 'Enter Amount';

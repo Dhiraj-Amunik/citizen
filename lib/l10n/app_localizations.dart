@@ -277,7 +277,7 @@ abstract class AppLocalizations {
   /// No description provided for @donation_history.
   ///
   /// In en, this message translates to:
-  /// **'Donate History'**
+  /// **'Donation History'**
   String get donation_history;
 
   /// No description provided for @enter_amount.

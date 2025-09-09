@@ -73,11 +73,14 @@ class ProfileView extends StatelessWidget {
               'Terms and Conditions',
               subtext: "App usage rules",
               icon: AppImages.termsServices,
+              onTap: () =>
+                  RouteManager.pushNamed(Routes.termsAndConditionsView),
             ),
             ProfileHelper.getCommonBox(
               'Privacy Policy',
               subtext: "Your data safety",
               icon: AppImages.privacyPolicy,
+              onTap: () => RouteManager.pushNamed(Routes.privacyPolicyView),
             ),
             ProfileHelper.getCommonBox(
               'Help & Support',

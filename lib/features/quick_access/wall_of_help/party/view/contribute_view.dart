@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
-import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
-import 'package:inldsevak/core/helpers/decoration.dart';
-import 'package:inldsevak/core/routes/routes.dart';
-import 'package:inldsevak/core/secure/secure_storage.dart';
+import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
@@ -13,9 +10,6 @@ import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/features/donation/view/donate_view.dart';
-import 'package:inldsevak/features/donation/view_model/donation_view_model.dart';
-import 'package:inldsevak/restart_app.dart';
-import 'package:provider/provider.dart';
 
 class ContributeView extends StatelessWidget {
   const ContributeView({super.key});
@@ -78,22 +72,22 @@ class ContributeView extends StatelessWidget {
 
                 Text(localization.payment_options, style: textTheme.bodyMedium),
                 iconBuilder(
-                  icon: Icons.currency_rupee_sharp,
+                  icon: AppImages.rupeeIcon,
                   text: localization.razorpay,
                   textTheme: textTheme,
                 ),
                 iconBuilder(
-                  icon: Icons.currency_rupee_sharp,
+                  icon: AppImages.rupeeIcon,
                   text: localization.upi,
                   textTheme: textTheme,
                 ),
                 iconBuilder(
-                  icon: Icons.other_houses_outlined,
+                  icon: AppImages.bankIcon,
                   text: localization.net_banking,
                   textTheme: textTheme,
                 ),
                 iconBuilder(
-                  icon: Icons.credit_card,
+                  icon: AppImages.cardsIcon,
                   text: localization.cards,
                   textTheme: textTheme,
                 ),
@@ -107,11 +101,7 @@ class ContributeView extends StatelessWidget {
           horizontal: Dimens.horizontalspacing,
           vertical: Dimens.verticalspacing,
         ),
-        child: CommonButton(
-            onTap: () async {
-              },
-          text: localization.confirm,
-        ),
+        child: CommonButton(onTap: () async {}, text: localization.confirm),
       ),
     );
   }
