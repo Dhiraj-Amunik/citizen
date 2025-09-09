@@ -8,8 +8,9 @@ import 'package:inldsevak/core/utils/dimens.dart';
 class AuthUtils {
   static PreferredSizeWidget appbar({String? title, bool canPop = false}) {
     return AppBar(
+    scrolledUnderElevation: 0,
       automaticallyImplyLeading: canPop,
-      toolbarHeight: 80,
+      toolbarHeight: 60,
       backgroundColor: AppPalettes.whiteColor,
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: AppPalettes.whiteColor,
@@ -19,7 +20,7 @@ class AuthUtils {
       title: title != null
           ? Text(
               title,
-              style: AppStyles.titleMedium,
+              style: AppStyles.headlineSmall,
             ).horizontalPadding(Dimens.paddingX3)
           : null,
     );

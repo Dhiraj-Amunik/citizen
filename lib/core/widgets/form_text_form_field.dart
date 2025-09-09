@@ -90,7 +90,7 @@ class FormTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final respRadius = radius ?? Dimens.radiusX2;
+    final respRadius = radius ?? Dimens.radiusX4;
     final border = OutlineInputBorder(
       borderSide: BorderSide.none,
       borderRadius: BorderRadius.circular(respRadius),

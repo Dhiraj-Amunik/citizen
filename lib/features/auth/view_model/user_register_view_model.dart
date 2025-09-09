@@ -9,7 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/features/auth/models/request/user_register_request_model.dart';
 import 'package:inldsevak/features/auth/services/user_profile_repository.dart';
-import 'package:inldsevak/features/auth/view_model/search_view_model.dart';
+import 'package:inldsevak/features/common_fields/view_model/search_view_model.dart';
 import 'package:inldsevak/restart_app.dart';
 
 class UserRegisterViewModel extends BaseViewModel with CupertinoDialogMixin {
@@ -24,6 +24,7 @@ class UserRegisterViewModel extends BaseViewModel with CupertinoDialogMixin {
   final dobController = TextEditingController();
   String? companyDateFormat;
   final aadharController = TextEditingController();
+  final voterIdController = TextEditingController();
 
   List<String> genderList = ['Male', 'Female', 'others'];
   final genderController = SingleSelectController<String>(null);
@@ -73,7 +74,7 @@ class UserRegisterViewModel extends BaseViewModel with CupertinoDialogMixin {
         dateOfBirth: companyDateFormat!,
         gender: genderController.value!.toLowerCase(),
         document: [
-          Document(documentUrl: "", documentNumber: aadharController.text),
+          Document(documentUrl: "", documentNumber: aadharController.text.replaceAll(" ", ''),),
         ],
         address: address,
         avatar: "",
@@ -144,6 +145,18 @@ class UserRegisterViewModel extends BaseViewModel with CupertinoDialogMixin {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
     }
+  }
+
+  
+  void generateAadhar(String? value) {
+    // Remove all spaces first
+    String digitsOnly = value!.replaceAll(RegExp(r'\s+'), '');
+
+    // Add spaces after every 4 characters
+    String formattedValue = digitsOnly
+        .replaceAllMapped(RegExp(r".{1,4}"), (match) => "${match.group(0)} ")
+        .trim();
+    aadharController.value = TextEditingValue(text: formattedValue);
   }
 
   @override

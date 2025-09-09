@@ -36,4 +36,7 @@ class AppPalettes {
   static const yellowColor = Color(0xFFFFB700);
 
   static const ratingColor = Color(0xFFFCC21B);
+
+  static const liteGreenTextFieldColor = Color(0xFFC9FACC);
+
 }

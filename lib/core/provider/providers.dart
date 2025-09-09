@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/features/auth/view_model/login_view_model.dart';
-import 'package:inldsevak/features/auth/view_model/search_view_model.dart';
+import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
+import 'package:inldsevak/features/common_fields/view_model/search_view_model.dart';
 import 'package:inldsevak/features/auth/view_model/user_register_view_model.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:inldsevak/features/events/view_model/events_view_model.dart';
@@ -46,5 +47,7 @@ class AppProviders {
     ChangeNotifierProvider(create: (_) => WallOfHelpUserViewModel()),
     ChangeNotifierProvider(create: (_) => EventsViewModel()),
     ChangeNotifierProvider(create: (_) => LokVartaViewModel()),
+    ChangeNotifierProvider(create: (_) => ConstituencyViewModel()),
+    
   ];
 }

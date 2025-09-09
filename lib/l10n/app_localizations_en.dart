@@ -40,10 +40,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter 4 - digit verification code sent to your mobile number.';
 
   @override
-  String get not_received => 'Not Received?';
+  String get resend_otp => 'Resend Otp';
 
   @override
-  String get resend_code_in => 'Resend code in';
+  String get change_your_phone_no => 'Change your Phone No ? ';
 
   @override
   String get seconds => 'seconds';
@@ -88,7 +88,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gender_validator => '     Select your Gender';
 
   @override
-  String get aadhar_card_number => 'Aadhar card Number';
+  String get aadhaar_no => 'Aadhar No';
+
+  @override
+  String get voter_id => 'Voter Id';
 
   @override
   String get aadhar_validator => 'Please enter Id proof';
@@ -341,6 +344,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get address => 'Address';
+
+  @override
+  String get address_details => 'Address Details';
+
+  @override
+  String get eg_address => 'E.g. Floor, House no, Street';
+
+  @override
+  String get select_address => 'Select address';
 
   @override
   String get upload_photo => 'Upload Photo';

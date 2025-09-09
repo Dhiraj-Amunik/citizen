@@ -38,7 +38,7 @@ class CommonPinput extends StatelessWidget {
     final width = 0.125.screenWidth;
     return Pinput(
       mainAxisAlignment: MainAxisAlignment.center,
-      
+
       controller: controller,
       showCursor: showCursor ?? true,
       length: length,
@@ -51,7 +51,7 @@ class CommonPinput extends StatelessWidget {
             decoration ??
             boxDecorationRoundedWithShadow(
               radius ?? Dimens.radiusX2,
-              backgroundColor: color ?? AppPalettes.liteGreyColor,
+              backgroundColor: color ?? AppPalettes.liteGreenTextFieldColor,
             ),
         padding: padding,
         margin: margin,
@@ -65,7 +65,7 @@ class CommonPinput extends StatelessWidget {
             boxDecorationRoundedWithShadow(
               radius ?? Dimens.radiusX2,
               backgroundColor: AppPalettes.whiteColor,
-              border: Border.all(width: 1),
+              border: Border.all(width: 1, color: AppPalettes.primaryColor),
             ),
         padding: padding,
         margin: margin,

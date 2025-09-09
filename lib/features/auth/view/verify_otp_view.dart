@@ -26,14 +26,28 @@ class VerifyOtpView extends StatelessWidget {
       child: Scaffold(
         appBar: AuthUtils.appbar(canPop: true),
         body: Column(
-          spacing: Dimens.gapX1B,
+          spacing: Dimens.gapX2,
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(localization.enter_otp, style: textTheme.titleLarge),
+            Column(
+              spacing: Dimens.gapX1,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    localization.verify_otp,
+                    style: textTheme.headlineSmall,
+                  ),
+                ),
+                Text(
+                  localization.otp_description,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: AppPalettes.lightTextColor,
+                  ),
+                ),
+              ],
             ),
-            Text(localization.otp_description, style: textTheme.labelLarge),
-            SizeBox.sizeHX3,
+
+            SizeBox.size,
             CommonPinput(
               controller: provider.otpController,
               length: 4,
@@ -42,24 +56,6 @@ class VerifyOtpView extends StatelessWidget {
                   value?.validateOTP(4, argument: "Invalid otp"),
             ),
             SizeBox.sizeHX1,
-            RichText(
-              text: TextSpan(
-                style: textTheme.labelLarge?.copyWith(
-                  color: AppPalettes.lightTextColor,
-                ),
-                children: [
-                  TextSpan(
-                    text: localization.not_received,
-                    style: textTheme.bodySmall,
-                  ),
-                  TextSpan(text: " "),
-                  TextSpan(text: localization.resend_code_in),
-                  TextSpan(text: " 60 "),
-                  TextSpan(text: localization.seconds),
-                ],
-              ),
-            ),
-            SizeBox.sizeHX3,
             Consumer<LoginViewModel>(
               builder: (context, value, _) {
                 return CommonButton(
@@ -72,6 +68,23 @@ class VerifyOtpView extends StatelessWidget {
                 );
               },
             ),
+            RichText(
+              text: TextSpan(
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppPalettes.lightTextColor,
+                ),
+                children: [
+                  TextSpan(text: localization.change_your_phone_no),
+                  TextSpan(
+                    text: localization.resend_otp,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: AppPalettes.primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizeBox.sizeHX3,
           ],
         ).horizontalPadding(Dimens.horizontalspacing),
       ),

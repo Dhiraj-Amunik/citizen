@@ -26,22 +26,9 @@ class IndlView extends StatelessWidget {
     return Scaffold(
       appBar: commonAppBar(
         elevation: 2,
-        action: roleProvider.isPartyMember
-            ? null
-            : [
-                CommonButton(
-                  color: AppPalettes.whiteColor,
-                  textColor: AppPalettes.primaryColor,
-                  onTap: () =>
-                      RouteManager.pushNamed(Routes.becomePartMemberPage),
-                  text: "Join Party",
-                  fullWidth: false,
-                  fontSize: 10,
-                  height: 30,
-                  elevation: Dimens.elevation,
-                  padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX2),
-                ),
-              ],
+        action: [
+          //
+        ],
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.max,
@@ -51,26 +38,19 @@ class IndlView extends StatelessWidget {
               builder: (context, value, _) {
                 return Text(
                   "Hi, ${value.profile?.name ?? '...'}",
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: AppPalettes.whiteColor,
-                  ),
+                  style: textTheme.headlineMedium,
                 );
               },
             ),
             Row(
-              spacing: Dimens.gapX2,
+              spacing: Dimens.gapX1,
               children: [
                 Icon(
                   Icons.location_on_outlined,
                   size: Dimens.scaleX2,
-                  color: AppPalettes.whiteColor,
+                  color: AppPalettes.primaryColor,
                 ),
-                Text(
-                  "Gurgaon Constituency",
-                  style: textTheme.labelLarge?.copyWith(
-                    color: AppPalettes.whiteColor,
-                  ),
-                ),
+                Text("Gurgaon Constituency", style: textTheme.labelMedium),
               ],
             ),
           ],

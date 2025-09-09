@@ -9,7 +9,7 @@ class AppTheme {
   static const Color accentColor = Color(0xFF4CAF50);
 
   static ThemeData lightTheme = ThemeData(
-    fontFamily: AppFonts.poppins,
+    fontFamily: AppFonts.afacad,
     primarySwatch: Colors.blue,
     primaryColor: primaryColor,
     colorScheme: ColorScheme.light(
@@ -30,7 +30,7 @@ class AppTheme {
         borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
     ),
-    iconTheme: IconThemeData(color: AppPalettes.blackColor),
+    iconTheme: IconThemeData(color: AppPalettes.lightTextColor),
     inputDecorationTheme: InputDecorationTheme(
       focusColor: AppPalettes.textFieldColor,
       hoverColor: AppPalettes.textFieldColor,

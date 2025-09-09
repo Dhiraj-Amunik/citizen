@@ -1,24 +1,23 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
-import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/mixin/dateTime_mixin.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
-import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
-import 'package:inldsevak/core/utils/sizedBox.dart';
-import 'package:inldsevak/core/widgets/commom_text_form_field.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
-import 'package:inldsevak/core/widgets/common_dropDown.dart';
-import 'package:inldsevak/core/widgets/common_search_dropdown.dart';
+import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
+import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/features/auth/models/request/validate_otp_request_model.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
 import 'package:inldsevak/features/auth/utils/auth_appbar.dart';
-import 'package:inldsevak/features/auth/view_model/search_view_model.dart';
+import 'package:inldsevak/features/common_fields/view_model/search_view_model.dart';
 import 'package:inldsevak/features/auth/view_model/user_register_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:inldsevak/features/common_fields/widget/constituency_drop_down.dart';
+import 'package:inldsevak/features/common_fields/widget/map_search_field.dart';
 import 'package:provider/provider.dart';
+import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
+    as constituency;
 
 class UserRegisterView extends StatefulWidget {
   final OtpRequestModel data;
@@ -30,14 +29,13 @@ class UserRegisterView extends StatefulWidget {
 
 class _UserRegisterViewState extends State<UserRegisterView>
     with DateAndTimePicker {
-  //
-  SingleSelectController<Predictions?> searchController =
-      SingleSelectController<Predictions?>(null);
-  //
+  final searchController = SingleSelectController<Predictions?>(null);
+  final constituencyController = SingleSelectController<constituency.Data>(
+    null,
+  );
   @override
   Widget build(BuildContext context) {
     final localization = context.localizations;
-    final textTheme = context.textTheme;
     return PopScope(
       canPop: false,
       child: ChangeNotifierProvider(
@@ -48,8 +46,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
             appBar: AuthUtils.appbar(title: localization.complete_your_profile),
             backgroundColor: context.cardColor,
             body: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.symmetric(
                 horizontal: Dimens.horizontalspacing,
               ),
@@ -59,125 +56,36 @@ class _UserRegisterViewState extends State<UserRegisterView>
                     .watch<UserRegisterViewModel>()
                     .autoValidateMode,
                 child: Column(
-                  spacing: Dimens.widgetSpacing,
+                  spacing: Dimens.textFromSpacing,
                   children: [
-                    CommonTextFormField(
+                    FormTextFormField(
+                      isRequired: true,
+                      headingText: localization.name,
+                      hintText: localization.name,
                       focus: provider.nameFocus,
                       nextFocus: provider.emailFocus,
                       prefixIcon: AppImages.userIcon,
 
                       controller: provider.nameController,
-                      hintText: localization.name,
                       keyboardType: TextInputType.name,
                       validator: (text) =>
                           text?.validate(argument: localization.name_validator),
                     ),
-                    CommonTextFormField(
+                    FormTextFormField(
+                      isRequired: true,
+                      headingText: localization.email,
+                      hintText: "abc@gmail.com",
                       focus: provider.emailFocus,
                       controller: provider.emailController,
                       prefixIcon: AppImages.emailIcon,
-
-                      hintText: localization.email,
                       validator: (text) => text?.validateEmail(
                         argument: localization.email_validator,
                       ),
                     ),
-                    Consumer<SearchViewModel>(
-                      builder: (context, value, _) {
-                        return CommonSearchDropDown<Predictions?>(
-                          onChanged: (place) {
-                            value.getLocationByPlaceID(place?.placeId ?? "");
-                          },
-                          hintStyle: textTheme.bodyMedium,
-                          future: (text) async {
-                            final data = await value.getSearchPlaces(text);
-                            return data;
-                          },
-                          heading: "Address",
-                          items: value.searchplaces,
-                          controller: searchController,
-                          listItemBuilder: (p0, p1, p2, onTap) {
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(Dimens.paddingX1B),
-                                  decoration: boxDecorationRoundedWithShadow(
-                                    Dimens.radius100,
-                                    backgroundColor: AppPalettes.liteGreyColor,
-                                  ),
-                                  child: Icon(
-                                    Icons.location_on_sharp,
-                                    color: AppPalettes.lightTextColor,
-                                    size: Dimens.scaleX2,
-                                  ),
-                                ),
-                                SizeBox.sizeWX3,
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        (p1?.structuredFormatting?.mainText ??
-                                                "")
-                                            .toString(),
-                                        style: textTheme.labelMedium?.copyWith(
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        maxLines: 1,
-                                      ),
-                                      Text(
-                                        p1
-                                                ?.structuredFormatting
-                                                ?.secondaryText ??
-                                            "~~~",
-                                        style: textTheme.labelMedium?.copyWith(
-                                          fontWeight: FontWeight.w400,
-                                          color: AppPalettes.lightTextColor,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Divider(
-                                        height: 10,
-                                        color: AppPalettes.liteGreyColor,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                          headerBuilder: (p0, p1, p2) {
-                            return Row(
-                              children: [
-                                SvgPicture.asset(AppImages.locationIcon),
-                                SizeBox.sizeWX3,
-                                Flexible(
-                                  child: Text(
-                                    (p1?.description ?? "").toString(),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: textTheme.bodySmall,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                    ),
-                    CommonTextFormField(
-                      prefixIcon: AppImages.phoneIcon,
-
-                      controller: TextEditingController(
-                        text: widget.data.phoneNo,
-                      ),
-                      keyboardType: TextInputType.none,
-                      enabled: false,
-                    ),
-                    CommonTextFormField(
+                    FormTextFormField(
+                      isRequired: true,
+                      headingText: localization.date_of_birth,
+                      hintText: "01-01-2000",
                       controller: provider.dobController,
                       prefixIcon: AppImages.calenderIcon,
                       showCursor: false,
@@ -188,32 +96,55 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           provider.companyDateFormat = companyDateFormat(date);
                         }
                       },
-                      hintText: localization.date_of_birth,
                       keyboardType: TextInputType.none,
                       validator: (text) => text?.validate(
                         argument: localization.date_of_birth_validator,
                       ),
                     ),
-                    CommonDropDown<String>(
+                    FormCommonDropDown<String>(
+                      isRequired: true,
+                      heading: localization.gender,
+                      hintText: localization.select_gender,
                       prefixIcon: AppImages.genderIcon,
                       controller: provider.genderController,
                       items: provider.genderList,
-                      hintText: "Gender",
                       validator: (text) => text.toString().validateDropDown(
                         argument: localization.gender_validator,
                       ),
                     ),
-                    CommonTextFormField(
-                      maxLength: 12,
+                    FormTextFormField(
+                      isRequired: true,
+                      headingText: localization.aadhaar_no,
+                      hintText: "0000 0000 0000",
+                      maxLength: 14,
                       controller: provider.aadharController,
                       prefixIcon: AppImages.aadharIcon,
-                      hintText: localization.aadhar_card_number,
                       keyboardType: TextInputType.number,
                       validator: (text) => text?.validate(
                         argument: localization.aadhar_validator,
                       ),
+                      onChanged: (value) => provider.generateAadhar(value),
                     ),
-                    //
+                    FormTextFormField(
+                      isRequired: true,
+                      headingText: localization.voter_id,
+                      hintText: "ABC1234567",
+                      maxLength: 10,
+                      controller: provider.aadharController,
+                      prefixIcon: AppImages.aadharIcon,
+                      keyboardType: TextInputType.name,
+                      validator: (text) => text?.validate(
+                        argument: localization.aadhar_validator,
+                      ),
+                    ),
+                    MapSearchField(
+                      searchController: searchController,
+                      text: localization.address_details,
+                      hintText: localization.eg_address,
+                    ),
+                    ConstituencyDropDownWidget(
+                      constituencyController: constituencyController,
+                    ),
                   ],
                 ),
               ),

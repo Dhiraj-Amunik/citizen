@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
@@ -63,13 +65,19 @@ class CommonButton extends StatefulWidget {
 }
 
 class _CommonButtonState extends State<CommonButton>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   double _scale = 1.0;
-  AnimationController? _controller;
+  late AnimationController _gradientController;
+  late AnimationController _controller;
 
   @override
   void initState() {
     if (widget.enableScaleAnimation.validate(value: widget.isAnimationEnable)) {
+      _gradientController =
+          AnimationController(vsync: this, duration: Duration(seconds: 6))
+            ..forward()
+            ..repeat();
+
       _controller =
           AnimationController(
             vsync: this,
@@ -85,23 +93,24 @@ class _CommonButtonState extends State<CommonButton>
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _controller.dispose();
+    _gradientController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_controller != null && widget.isAnimationEnable) {
-      _scale = 1 - _controller!.value;
+    if (widget.isAnimationEnable) {
+      _scale = 1 - _controller.value;
     }
 
     if (widget.enableScaleAnimation.validate(value: true)) {
       return Listener(
         onPointerDown: (details) {
-          _controller?.forward();
+          _controller.forward();
         },
         onPointerUp: (details) {
-          _controller?.reverse();
+          _controller.reverse();
         },
         child: Transform.scale(scale: _scale, child: buildButton()),
       );
@@ -111,51 +120,78 @@ class _CommonButtonState extends State<CommonButton>
   }
 
   Widget buildButton() {
-    return MaterialButton(
-      minWidth: widget.fullWidth ? widget.width ?? double.infinity : null,
-      elevation: widget.elevation ?? 2.0,
-      height: widget.height ?? 55.height(),
-      color: widget.color ?? AppPalettes.buttonColor,
-      focusColor: widget.focusColor ?? AppPalettes.buttonColor,
-      disabledColor:
-          widget.disabledColor ?? AppPalettes.buttonColor.withOpacityExt(0.5),
-      splashColor: widget.splashColor,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      animationDuration: const Duration(milliseconds: 300),
-      padding:
-          widget.padding ?? EdgeInsets.symmetric(horizontal: Dimens.paddingX10),
-      shape: RoundedRectangleBorder(
-        side: BorderSide.none,
-        borderRadius:
-            widget.onlyRadius ??
-            BorderRadius.circular(widget.radius ?? Dimens.radiusX2),
-      ),
-      onPressed: widget.isAnimationEnable || widget.isEnable
-          ? widget.onTap as void Function()?
-          : null,
-      child: widget.isLoading
-          ? SizedBox(
-              height: 30.height(),
-              width: 30.height(),
-              child: CircularProgressIndicator(
-                color: AppPalettes.whiteColor,
-                strokeWidth: 2.height(),
+    return AnimatedBuilder(
+      animation: _gradientController,
+      builder: (context, _) {
+        return InkWell(
+          onTap: widget.isAnimationEnable || widget.isEnable
+              ? widget.onTap as void Function()?
+              : null,
+          overlayColor: WidgetStatePropertyAll(AppPalettes.transparentColor),
+          child: Container(
+            width: widget.fullWidth ? widget.width ?? double.infinity : null,
+            height: widget.height ?? 50.height(),
+            padding:
+                widget.padding ??
+                EdgeInsets.symmetric(horizontal: Dimens.paddingX10,vertical: Dimens.paddingX2B),
+            decoration: BoxDecoration(
+              borderRadius:
+                  widget.onlyRadius ??
+                  BorderRadius.circular(widget.radius ?? Dimens.radiusX4),
+              border: Border.all(
+                color: AppPalettes.whiteColor.withOpacityExt(0.2),
+                width: 2,
               ),
-            )
-          : FittedBox(
-              fit: BoxFit.fitHeight,
-              child:
-                  widget.child ??
-                  Text(
-                    widget.text ?? "",
-                    style:
-                        widget.textStyle ??
-                        context.textTheme.bodyMedium?.copyWith(
-                          color: widget.textColor ?? AppPalettes.whiteColor,
-                          fontSize: widget.fontSize?.spMax,
-                        ),
-                  ),
+              gradient: LinearGradient(
+                colors: [
+                  AppPalettes.gradientFirstColor,
+                  AppPalettes.gradientSecondColor,
+                ],
+                transform: GradientRotation(_gradientController.value * 2 * pi),
+              ),
+              //  boxShadow: [
+              //   BoxShadow(
+              //     color: AppPalettes.gradientSecondColor.withOpacityExt(0.4),
+              //     blurRadius: 2,
+              //     spreadRadius:1,
+              //     offset: Offset.fromDirection(
+              //       _gradientController.value * 2 * pi,
+              //       3.5,
+              //     ),
+              //   ),
+              //   BoxShadow(
+              //     color: AppPalettes.gradientFirstColor.withOpacityExt(0.4),
+              //     blurRadius: 2,
+              //     spreadRadius: 1,
+              //     offset: Offset.fromDirection(
+              //       _gradientController.value + 0.5 * 2 * pi,
+              //       3.5,
+              //     ),
+              //   ),
+              // ],
             ),
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: widget.isLoading
+                  ? CircularProgressIndicator(
+                    color: AppPalettes.whiteColor,
+                    strokeWidth: 2.height(),
+                  )
+                  : widget.child ??
+                        Text(
+                          widget.text ?? "",
+                          style:
+                              widget.textStyle ??
+                              context.textTheme.bodyLarge?.copyWith(
+                                color:
+                                    widget.textColor ?? AppPalettes.whiteColor,
+                                fontSize: widget.fontSize?.spMax,
+                              ),
+                        ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -174,3 +210,8 @@ extension BooleanExtensions on bool? {
     }
   }
 }
+
+/*
+
+   
+*/

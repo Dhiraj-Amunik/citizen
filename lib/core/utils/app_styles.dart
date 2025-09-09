@@ -23,15 +23,16 @@ class AppStyles {
   // headings Light -------------------------->
   static final headlineSmall = TextStyle(
     fontSize: 22.sp,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
+    color: AppPalettes.blackColor,
   );
   static final headlineMedium = TextStyle(
     fontSize: 24.sp,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
   );
   static final headlineLarge = TextStyle(
     fontSize: 26.sp,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
   );
   //<-----------------------------------------
 
@@ -55,15 +56,16 @@ class AppStyles {
 
   // Body Light ---------------------------->
   static final bodySmall = TextStyle(
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
     fontSize: 14.spMax,
   );
   static final bodyMedium = TextStyle(
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
     fontSize: 16.spMax,
+    height: 1.2,
   );
   static final bodyLarge = TextStyle(
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
     fontSize: 18.spMin,
   );
   //<-----------------------------------------

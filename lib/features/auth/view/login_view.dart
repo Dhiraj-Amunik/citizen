@@ -4,6 +4,7 @@ import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
+import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/commom_text_form_field.dart';
@@ -22,6 +23,7 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
   @override
   Widget build(BuildContext context) {
     final localizations = context.localizations;
+    final textTheme = context.textTheme;
     final provider = context.read<LoginViewModel>();
     onTap() {
       FocusScopeNode currentFocus = FocusScope.of(context);
@@ -44,7 +46,19 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
                 width: 200.spMax,
                 height: 200.spMax,
               ),
-              SizeBox.sizeHX12,
+              SizeBox.sizeHX6,
+              Text(
+                "Login Or Signup",
+                style: textTheme.headlineSmall?.copyWith(height: 0),
+              ),
+              Text(
+                "Hello, welcome to your account",
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppPalettes.lightTextColor,
+                  height: 0,
+                ),
+              ),
+              SizeBox.sizeHX4,
               Form(
                 key: loginFormKey,
                 autovalidateMode: provider.autoValidateMode,
@@ -57,6 +71,8 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
                           spacing: Dimens.widgetSpacing,
                           children: [
                             CommonTextFormField(
+                              backgroundColor:
+                                  AppPalettes.liteGreenTextFieldColor,
                               prefixIcon: AppImages.phoneIcon,
                               controller: provider.numberController,
                               hintText: localizations.mobile_number,
@@ -74,7 +90,6 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
                                 provider.generateOTP(loginFormKey);
                               },
                             ),
-                            LaunchURL(),
                           ],
                         );
                       },
@@ -84,6 +99,13 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
               ),
             ],
           ),
+        ),
+        bottomNavigationBar: Padding(
+          padding: EdgeInsetsGeometry.symmetric(
+            horizontal: Dimens.horizontalspacing,
+            vertical: Dimens.horizontalspacing,
+          ),
+          child: LaunchURL(),
         ),
       ),
     );

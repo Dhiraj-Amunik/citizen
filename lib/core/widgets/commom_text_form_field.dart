@@ -35,7 +35,6 @@ class CommonTextFormField extends StatelessWidget {
   final Color? fillColor;
   final bool? alignLabel;
   final double? fontSize;
-  final double elevation;
   final Color? backgroundColor;
   final Color? shadowColor;
   final EdgeInsetsGeometry? contentPadding;
@@ -72,15 +71,14 @@ class CommonTextFormField extends StatelessWidget {
     this.initialValue,
 
     //Material
-    this.elevation = 0.0,
-    this.backgroundColor = AppPalettes.whiteColor,
+    this.backgroundColor,
     this.shadowColor,
     this.contentPadding,
   });
 
   @override
   Widget build(BuildContext context) {
-    final respRadius = radius ?? Dimens.radiusX2;
+    final respRadius = radius ?? Dimens.radiusX4;
     final border = OutlineInputBorder(
       borderSide: BorderSide.none,
       borderRadius: BorderRadius.circular(respRadius),
@@ -100,26 +98,38 @@ class CommonTextFormField extends StatelessWidget {
       keyboardType: keyboardType,
       controller: controller,
       decoration: InputDecoration(
+        fillColor: backgroundColor == null
+            ? null
+            : WidgetStateColor.resolveWith((states) {
+                return states.contains(WidgetState.focused)
+                    ? AppPalettes.whiteColor
+                    : backgroundColor!;
+              }),
         labelText: labelText,
         labelStyle: labelStyle,
         isDense: true,
         filled: true,
+
         alignLabelWithHint: alignLabel,
         counterText: "",
         contentPadding:
             contentPadding ??
             EdgeInsets.symmetric(
-              vertical: Dimens.paddingX4,
+              vertical: Dimens.paddingX3,
               horizontal: Dimens.paddingX5,
             ),
         hintText: hintText,
-        hintStyle: textStyle ?? context.textTheme.bodyMedium,
+        hintStyle:
+            textStyle ??
+            context.textTheme.bodyMedium?.copyWith(
+              color: AppPalettes.lightTextColor,
+            ),
         errorStyle: AppStyles.errorStyle,
         border: border,
         enabledBorder: border,
         disabledBorder: border,
         focusedBorder: border.copyWith(
-          borderSide: const BorderSide(color: AppPalettes.blackColor),
+          borderSide: const BorderSide(color: AppPalettes.primaryColor),
         ),
         focusedErrorBorder: border.copyWith(
           borderSide: const BorderSide(color: AppPalettes.redColor),

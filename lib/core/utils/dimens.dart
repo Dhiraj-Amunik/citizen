@@ -84,7 +84,7 @@ class Dimens {
   static final screenHeight = 1.sh;
   static final screenHAlfHeight = 0.5.sh;
 
-  static final textFromSpacing = 16.r;
+  static final textFromSpacing = 12.r;
   static final widgetSpacing = 18.r;
   static final horizontalspacing = 22.r;
   static final verticalspacing = 22.r;

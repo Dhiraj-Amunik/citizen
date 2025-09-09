@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
-import 'package:inldsevak/features/auth/services/search_repository.dart';
+import 'package:inldsevak/features/common_fields/services/search_repository.dart';
 
 class SearchViewModel extends ChangeNotifier {
   //
@@ -8,6 +8,7 @@ class SearchViewModel extends ChangeNotifier {
   List<Predictions> searchplaces = [];
 
   LatLng? latlong;
+
 
   Future<List<Predictions>> getSearchPlaces(String placeName) async {
     searchplaces.clear();

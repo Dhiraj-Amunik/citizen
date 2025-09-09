@@ -16,7 +16,7 @@ import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/core/widgets/upload_image_widget.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
-import 'package:inldsevak/features/auth/view_model/search_view_model.dart';
+import 'package:inldsevak/features/common_fields/view_model/search_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/avatar_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/features/profile/widget/profile_avatar.dart';
@@ -38,7 +38,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
   void initState() {
     provider = context.read<ProfileViewModel>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    provider.loadProfile();
+      provider.loadProfile();
     });
     super.initState();
   }
@@ -112,7 +112,9 @@ class _ProfileEditViewState extends State<ProfileEditView>
                                 final data = await value.getSearchPlaces(text);
                                 return data;
                               },
-                              heading: "Address",
+                              isRequired: true,
+                              heading: localization.address,
+                              hintText: localization.select_address,
                               items: value.searchplaces,
                               initialData: provider.address,
                               controller: searchController,
@@ -227,7 +229,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                       maxLength: 12,
                       controller: provider.aadharController,
                       prefixIcon: AppImages.aadharIcon,
-                      labelText: localization.aadhar_card_number,
+                      labelText: localization.aadhaar_no,
                       keyboardType: TextInputType.number,
                       validator: (text) => text?.validate(
                         argument: localization.aadhar_validator,

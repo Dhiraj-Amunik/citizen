@@ -44,7 +44,7 @@ class FormCommonDropDown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final respRadius = radius ?? Dimens.radiusX2;
+    final respRadius = radius ?? Dimens.radiusX4;
     final border = Border.fromBorderSide(BorderSide.none);
     final iconColor = ColorFilter.mode(context.iconsColor, BlendMode.srcIn);
 

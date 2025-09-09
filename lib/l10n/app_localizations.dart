@@ -154,17 +154,17 @@ abstract class AppLocalizations {
   /// **'Enter 4 - digit verification code sent to your mobile number.'**
   String get otp_description;
 
-  /// No description provided for @not_received.
+  /// No description provided for @resend_otp.
   ///
   /// In en, this message translates to:
-  /// **'Not Received?'**
-  String get not_received;
+  /// **'Resend Otp'**
+  String get resend_otp;
 
-  /// No description provided for @resend_code_in.
+  /// No description provided for @change_your_phone_no.
   ///
   /// In en, this message translates to:
-  /// **'Resend code in'**
-  String get resend_code_in;
+  /// **'Change your Phone No ? '**
+  String get change_your_phone_no;
 
   /// No description provided for @seconds.
   ///
@@ -250,11 +250,17 @@ abstract class AppLocalizations {
   /// **'     Select your Gender'**
   String get gender_validator;
 
-  /// No description provided for @aadhar_card_number.
+  /// No description provided for @aadhaar_no.
   ///
   /// In en, this message translates to:
-  /// **'Aadhar card Number'**
-  String get aadhar_card_number;
+  /// **'Aadhar No'**
+  String get aadhaar_no;
+
+  /// No description provided for @voter_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Voter Id'**
+  String get voter_id;
 
   /// No description provided for @aadhar_validator.
   ///
@@ -735,6 +741,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Address'**
   String get address;
+
+  /// No description provided for @address_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Address Details'**
+  String get address_details;
+
+  /// No description provided for @eg_address.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Floor, House no, Street'**
+  String get eg_address;
+
+  /// No description provided for @select_address.
+  ///
+  /// In en, this message translates to:
+  /// **'Select address'**
+  String get select_address;
 
   /// No description provided for @upload_photo.
   ///
