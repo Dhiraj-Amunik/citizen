@@ -12,6 +12,10 @@ import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/features/party_member/view_model/become_party_mem_view_model.dart';
 import 'package:inldsevak/features/party_member/widgets/image_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
+    as constituency;
+import 'package:inldsevak/features/party_member/model/response/parties_model.dart'
+    as parties;
 
 class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
   const BecomePartMemberView({super.key});
@@ -44,6 +48,29 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                 child: Column(
                                   spacing: Dimens.textFromSpacing,
                                   children: [
+                                    FormCommonDropDown<parties.Data>(
+                                      heading: localization.party,
+                                      controller: provider.partiesController,
+                                      items: provider.partiesLists,
+                                      hintText: localization.select_yout_party,
+                                      listItemBuilder: (p0, parties, p2, p3) {
+                                        return Text(
+                                          "${parties.name}",
+                                          style: context.textTheme.bodySmall,
+                                        );
+                                      },
+                                      headerBuilder: (p0, parties, p2) {
+                                        return Text(
+                                          "${parties.name}",
+                                          style: context.textTheme.bodySmall,
+                                        );
+                                      },
+                                      validator: (text) =>
+                                          text.toString().validateDropDown(
+                                            argument:
+                                                "      Please select a Party to join as  a member",
+                                          ),
+                                    ),
                                     FormTextFormField(
                                       headingText: localization.full_name,
                                       hintText:
@@ -129,19 +156,34 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                                 "     Select your marital status",
                                           ),
                                     ),
-                                    FormCommonDropDown<String>(
+                                    FormCommonDropDown<constituency.Data>(
                                       heading: localization.constituency,
                                       controller:
                                           provider.constituencyController,
-                                      items: provider.constituencyList,
+                                      items: provider.constituencyLists,
                                       hintText:
                                           localization.select_your_constituency,
+                                      listItemBuilder:
+                                          (p0, constituency, p2, p3) {
+                                            return Text(
+                                              "${constituency.name}",
+                                              style:
+                                                  context.textTheme.bodySmall,
+                                            );
+                                          },
+                                      headerBuilder: (p0, constituency, p2) {
+                                        return Text(
+                                          "${constituency.name}",
+                                          style: context.textTheme.bodySmall,
+                                        );
+                                      },
                                       validator: (text) =>
                                           text.toString().validateDropDown(
                                             argument:
                                                 "     Select your constituency",
                                           ),
                                     ),
+
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,

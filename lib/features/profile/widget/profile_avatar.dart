@@ -37,10 +37,8 @@ class ProfileAvatar extends StatelessWidget with CupertinoDialogMixin {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(Dimens.radius100),
-              child: file == null
-                  ? CommonHelpers.getCacheNetworkImage(
-                      image,
-                      placeholder: GestureDetector(
+              child: image == null || image == "" && file == null
+                  ? GestureDetector(
                         onTap: onTap,
                         child:
                             SvgPicture.asset(
@@ -55,8 +53,9 @@ class ProfileAvatar extends StatelessWidget with CupertinoDialogMixin {
                               left: Dimens.paddingX2,
                               right: Dimens.paddingX2,
                             ),
-                      ),
                     )
+                  : file == null
+                  ? CommonHelpers.getCacheNetworkImage(image)
                   : ClipRRect(
                     borderRadius: BorderRadius.circular(Dimens.radius100),
                     child: Image.file(file!, fit: BoxFit.cover),

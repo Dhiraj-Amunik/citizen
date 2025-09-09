@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
-import 'package:inldsevak/core/utils/app_images.dart';
+import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
-import 'package:inldsevak/features/home/complaints_utils/complaints_widget.dart';
+import 'package:inldsevak/core/utils/sizedBox.dart';
+import 'package:inldsevak/features/complaints/model/thread_model.dart';
+import 'package:inldsevak/features/complaints/widgets/complaint_widget.dart';
+import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
 
 class MyLatestComplaintsWidgets extends StatelessWidget {
-  const MyLatestComplaintsWidgets({super.key});
+  final List<Data> complaintList;
+  const MyLatestComplaintsWidgets({super.key, required this.complaintList});
 
   @override
   Widget build(BuildContext context) {
@@ -23,23 +27,29 @@ class MyLatestComplaintsWidgets extends StatelessWidget {
             color: AppPalettes.primaryColor,
           ),
         ).horizontalPadding(Dimens.horizontalspacing),
-        ComplaintsWidget(
-          color: AppPalettes.blueColor,
-          icon: AppImages.electricBoardIcon,
-          title: "Broken Street light on main road",
-          date: "15",
-          description:
-              "The street light near the bus stop has been broken for a issue",
-          status: "In progress",
-        ),
-         ComplaintsWidget(
-          color: AppPalettes.yellowColor,
-          icon: AppImages.waterDeptIcon,
-          title: "Water leakage in residential area",
-          date: "12",
-          description:
-              "Continues water leakage causing road damage and flood the area due to which facing multiple issues.",
-          status: "Pending",
+        ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          padding: EdgeInsets.symmetric(horizontal: Dimens.horizontalspacing),
+          separatorBuilder: (_, index) => SizeBox.widgetSpacing,
+          itemCount: complaintList.length,
+          itemBuilder: (context, index) {
+            final thread = complaintList[index];
+            return ComplaintThreadWidget(
+              thread: thread,
+              onTap: () async {
+                await RouteManager.pushNamed(
+                  Routes.threadComplaintPage,
+                  arguments: ThreadModel(
+                    threadID: thread.threadId,
+                    subject:
+                        thread.messages?.first.subject ?? "No Subject found !",
+                    complaintID: thread.sId,
+                  ),
+                );
+              },
+            );
+          },
         ),
       ],
     );

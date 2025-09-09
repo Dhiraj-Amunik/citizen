@@ -37,7 +37,7 @@ class ComplaintsView extends StatelessWidget {
             }
             return RefreshIndicator(
               onRefresh: () => value.getComplaints(),
-              child: _buildComplaintsList(value.complaintsList),
+              child: buildComplaintsList(value.complaintsList),
             );
           },
         ),
@@ -52,37 +52,38 @@ class ComplaintsView extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildComplaintsList(List<Data> complaintList) {
-    if (complaintList.isEmpty) {
-      return Center(
-        child: Text("No Complaints Found", style: AppStyles.bodyMedium),
-      );
-    }
-
-    return ListView.separated(
-      padding: EdgeInsets.symmetric(
-        horizontal: Dimens.paddingX2,
-        vertical: Dimens.appBarSpacing,
-      ),
-      separatorBuilder: (_, index) => SizeBox.widgetSpacing,
-      itemCount: complaintList.length,
-      itemBuilder: (context, index) {
-        final thread = complaintList[index];
-        return ComplaintThreadWidget(
-          thread: thread,
-          onTap: () async {
-            await RouteManager.pushNamed(
-              Routes.threadComplaintPage,
-              arguments: ThreadModel(
-                threadID: thread.threadId,
-                subject: thread.messages?.first.subject ?? "No Subject found !",
-                complaintID: thread.sId,
-              ),
-            );
-          },
-        );
-      },
+Widget buildComplaintsList(List<Data> complaintList) {
+  if (complaintList.isEmpty) {
+    return Center(
+      child: Text("No Complaints Found", style: AppStyles.bodyMedium),
     );
   }
+
+  return ListView.separated(
+    shrinkWrap: true,
+    padding: EdgeInsets.symmetric(
+      horizontal: Dimens.paddingX2,
+      vertical: Dimens.appBarSpacing,
+    ),
+    separatorBuilder: (_, index) => SizeBox.widgetSpacing,
+    itemCount: complaintList.length,
+    itemBuilder: (context, index) {
+      final thread = complaintList[index];
+      return ComplaintThreadWidget(
+        thread: thread,
+        onTap: () async {
+          await RouteManager.pushNamed(
+            Routes.threadComplaintPage,
+            arguments: ThreadModel(
+              threadID: thread.threadId,
+              subject: thread.messages?.first.subject ?? "No Subject found !",
+              complaintID: thread.sId,
+            ),
+          );
+        },
+      );
+    },
+  );
 }

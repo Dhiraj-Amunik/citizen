@@ -19,6 +19,7 @@ class URLs {
 
   static const getUserDetails = "/api/user/get-user-details-by-phone"; /*Post*/
   static const becomePartyMember = "/api/user/become-party-member"; /*Post*/
+  static const getParties = "/api/user/list-of-parties-dropdown";
   static const createVolunter = "/api/partymember/create-volunteer"; /*Post*/
 
   //User
@@ -42,5 +43,6 @@ class URLs {
   static const getComplaintByUserID = "/api/complaint/getComplaints"; /*Get*/
   static const getDepartments = "/api/user/list-of-department-dropdown"; /*Get*/
   static const getAuthority = "/api/user/list-of-authorities-dropdown"; /*Get*/
-  static const getConstituencies = "/api/user/list-of-constituencies-dropdown"; /*Get*/
+  static const getConstituencies =
+      "/api/user/list-of-constituencies-dropdown"; /*Get*/
 }

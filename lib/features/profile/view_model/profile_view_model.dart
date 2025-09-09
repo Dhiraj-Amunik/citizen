@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
+import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/list_extension.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
@@ -143,7 +144,7 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
     phoneNumberController.text = profile?.phone ?? "";
     dobController.text = profile?.dateOfBirth ?? "";
     aadharController.text = profile?.address ?? "";
-    genderController.value = _safeFindMatch(genderList, profile?.gender);
+    genderController.value = _safeFindMatch(genderList, profile?.gender?.capitalize());
   }
 
   @override

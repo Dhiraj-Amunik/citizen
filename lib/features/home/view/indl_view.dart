@@ -8,6 +8,7 @@ import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:inldsevak/features/home/widgets/upcoming_home_events_widget.dart';
 import 'package:inldsevak/features/home/widgets/my_latest_complaints_widgets.dart';
 import 'package:inldsevak/features/home/widgets/quick_access_widget.dart';
@@ -93,8 +94,20 @@ class IndlView extends StatelessWidget {
               ),
             ).horizontalPadding(Dimens.horizontalspacing),
             QuickAccessWidget(showParty: roleProvider.isPartyMember),
+
             UpComingHomeEventsWidget(),
-            if (!roleProvider.isPartyMember) MyLatestComplaintsWidgets(),
+            Consumer<ComplaintsViewModel>(
+              builder: (_, value, _) {
+                if (!roleProvider.isPartyMember &&
+                    value.complaintsList.isNotEmpty) {
+                  return MyLatestComplaintsWidgets(
+                    complaintList: value.complaintsList,
+                  );
+                }
+                return Container();
+              },
+            ),
+
             SizeBox.sizeHX4,
           ],
         ),

@@ -60,6 +60,7 @@ class UpComingHomeEventsWidget extends StatelessWidget {
             EventsHelpers.upComingPlaceholder(onRefresh: () async {}),
           //
           ListView.separated(
+            physics: NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             itemBuilder: (_, index) {

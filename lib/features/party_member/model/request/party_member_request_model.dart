@@ -5,36 +5,59 @@ class PartyMemberRequestModel {
   final String? dateOfBirth;
   final String? gender;
   final String? maritalStatus;
-  final String? constituency;
-  final String? avatar;
+  final String? constituencyId;
+  final String? partyId;
+  final List<Document?>? documents;
   final String? reason;
   final String? preferredRole;
 
   PartyMemberRequestModel({
-    required this.phone,
-    required this.userName,
-    required this.parentName,
-    required this.dateOfBirth,
-    required this.gender,
-    required this.maritalStatus,
-    required this.constituency,
-    required this.avatar,
-    required this.reason,
-    required this.preferredRole,
+     this.phone,
+     this.userName,
+     this.parentName,
+     this.dateOfBirth,
+     this.gender,
+     this.maritalStatus,
+     this.constituencyId,
+     this.partyId,
+     this.documents,
+     this.reason,
+     this.preferredRole,
   });
 
   Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['phone'] = phone;
-    map['userName'] = userName;
-    map['parentName'] = parentName;
-    map['dateOfBirth'] = dateOfBirth;
-    map['gender'] = gender;
-    map['maritalStatus'] = maritalStatus;
-    map['constituency'] = constituency;
-    map['avatar'] = avatar;
-    map['reason'] = reason;
-    map['preferredRole'] = preferredRole;
-    return map;
+    return {
+      'phone': phone,
+      'userName': userName,
+      'parentName': parentName,
+      'dateOfBirth': dateOfBirth,
+      'gender': gender,
+      'maritalStatus': maritalStatus,
+      'constituencyId': constituencyId,
+      'partyId': partyId,
+      'document': documents?.map((doc) => doc?.toJson()).toList(),
+      'reason': reason,
+      'preferredRole': preferredRole,
+    };
+  }
+}
+
+class Document {
+  final String? documentType;
+  final String? documentUrl;
+  final String? documentNumber;
+
+  Document({
+     this.documentType,
+     this.documentUrl,
+     this.documentNumber,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'documentType': documentType,
+      'documentUrl': documentUrl,
+      'documentNumber': documentNumber,
+    };
   }
 }

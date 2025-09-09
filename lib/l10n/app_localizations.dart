@@ -328,6 +328,18 @@ abstract class AppLocalizations {
   /// **'Become a Party Member'**
   String get become_part_mem;
 
+  /// No description provided for @party.
+  ///
+  /// In en, this message translates to:
+  /// **'Party'**
+  String get party;
+
+  /// No description provided for @select_yout_party.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your party'**
+  String get select_yout_party;
+
   /// No description provided for @full_name.
   ///
   /// In en, this message translates to:
@@ -759,6 +771,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select MLA'**
   String get select_mla;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// No description provided for @please_select_your_appointment_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your appointment date'**
+  String get please_select_your_appointment_date;
 
   /// No description provided for @mla_validator.
   ///

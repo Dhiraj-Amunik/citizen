@@ -91,7 +91,7 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
 
                     FormTextFormField(
                       isRequired: true,
-                      headingText: localization.date_of_birth,
+                      headingText: localization.date,
                       hintText: localization.dd_mm_yyyy,
                       controller: provider.dateController,
                       suffixIcon: AppImages.calenderIcon,
@@ -104,7 +104,7 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                         }
                       },
                       validator: (text) => text?.validate(
-                        argument: localization.date_of_birth_validator,
+                        argument: localization.please_select_your_appointment_date,
                       ),
                     ),
                     FormCommonDropDown<String>(

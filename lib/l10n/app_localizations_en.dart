@@ -127,6 +127,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get become_part_mem => 'Become a Party Member';
 
   @override
+  String get party => 'Party';
+
+  @override
+  String get select_yout_party => 'Select your party';
+
+  @override
   String get full_name => 'Full Name';
 
   @override
@@ -354,6 +360,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get select_mla => 'Select MLA';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get please_select_your_appointment_date =>
+      'Please select your appointment date';
 
   @override
   String get mla_validator => 'Please select one MLA';

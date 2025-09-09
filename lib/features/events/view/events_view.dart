@@ -90,36 +90,32 @@ class _EventsViewState extends State<EventsView> with TickerProviderStateMixin {
     if (data.isEmpty) {
       return EventsHelpers.eventPlaceholder(type: type, onRefresh: onRefresh);
     }
-    return Column(
-      children: [
-        RefreshIndicator(
-          onRefresh: onRefresh,
-          child: Container(
-            margin: EdgeInsets.symmetric(
-              horizontal: Dimens.paddingX2B,
-              vertical: Dimens.appBarSpacing,
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: Dimens.paddingX3,
-              vertical: Dimens.paddingX3,
-            ),
-            decoration: boxDecorationRoundedWithShadow(
-              Dimens.radiusX2,
-              spreadRadius: 2,
-              blurRadius: 2,
-            ),
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              itemBuilder: (_, index) {
-                return EventWidget(event: data[index]);
-              },
-              separatorBuilder: (_, _) => EventsHelpers.eventDivider(),
-              itemCount: data.length,
-            ),
-          ),
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: Container(
+        margin: EdgeInsets.symmetric(
+          horizontal: Dimens.paddingX2B,
+          vertical: Dimens.appBarSpacing,
         ),
-      ],
+        padding: EdgeInsets.symmetric(
+          horizontal: Dimens.paddingX3,
+          vertical: Dimens.paddingX3,
+        ),
+        decoration: boxDecorationRoundedWithShadow(
+          Dimens.radiusX2,
+          spreadRadius: 2,
+          blurRadius: 2,
+        ),
+        child: ListView.separated(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          itemBuilder: (_, index) {
+            return EventWidget(event: data[index]);
+          },
+          separatorBuilder: (_, _) => EventsHelpers.eventDivider(),
+          itemCount: data.length,
+        ),
+      ),
     );
   }
 }

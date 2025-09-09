@@ -37,7 +37,9 @@ class _ProfileEditViewState extends State<ProfileEditView>
   @override
   void initState() {
     provider = context.read<ProfileViewModel>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
     provider.loadProfile();
+    });
     super.initState();
   }
 

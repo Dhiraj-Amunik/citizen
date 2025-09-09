@@ -38,6 +38,8 @@
      "net_banking":"NetBanking",
      "cards":"Cards",
      "become_part_mem":"Become a Party Member",
+     "party":"Party",
+     "select_yout_party":"Select your party",
      "full_name":"Full Name",
      "enter_your_full_name":"Enter your full name",
      "father_name":"Father's / Mother's Name",
@@ -69,7 +71,7 @@
      "select_authority":"Select Authority",
      "submit_new_complaint":"Submit New Complaint",
      "raise_complaint":"Raise Complaint",
-
+    
 
     "contact_information":"Contact Information",
     "get_in_touch_with_our_support_team":"Get in touch with our support team",
@@ -120,6 +122,8 @@
 
     "request_appointment":"Request Appointment",
     "select_mla":"Select MLA",
+    "date":"Date",
+    "please_select_your_appointment_date":"Please select your appointment date",
     "mla_validator":"Please select one MLA",
     "choose_your_mla":"Choose your MLA",
     "membership_id":"Membership ID",
