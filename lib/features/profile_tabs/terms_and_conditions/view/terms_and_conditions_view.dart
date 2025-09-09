@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
-import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
-import 'package:inldsevak/features/events/widgets/events_helpers.dart';
-import 'package:inldsevak/features/profile_tabs/terms_and_conditions/widgets/custom_event_container_widget.dart';
 
 class TermsAndConditionsView extends StatelessWidget {
   const TermsAndConditionsView({super.key});

@@ -11,7 +11,6 @@ import 'package:inldsevak/features/events/model/request_event_model.dart';
 import 'package:inldsevak/features/events/view_model/events_view_model.dart';
 import 'package:inldsevak/features/events/widgets/event_widget.dart';
 import 'package:inldsevak/features/events/widgets/events_helpers.dart';
-import 'package:inldsevak/features/profile_tabs/terms_and_conditions/widgets/custom_event_container_widget.dart';
 import 'package:provider/provider.dart';
 
 class EventsView extends StatefulWidget {
