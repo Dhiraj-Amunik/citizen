@@ -72,7 +72,7 @@ class EventDetailsView extends StatelessWidget {
                             Dimens.radius100,
                           ),
                           child: CommonHelpers.getCacheNetworkImage(
-                            event?.poster,
+                            event.poster,
                           ),
                         ),
                       ),
@@ -90,7 +90,8 @@ class EventDetailsView extends StatelessWidget {
                         children: [
                           EventInfoContainer(
                             icon: AppImages.calenderIcon,
-                            text: event.createdAt?.toDdMmmYyyy() ?? "00-00-0000",
+                            text:
+                                event.createdAt?.toDdMmmYyyy() ?? "00-00-0000",
                           ),
                           EventInfoContainer(
                             icon: AppImages.clockIcon,

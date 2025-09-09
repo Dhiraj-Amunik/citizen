@@ -8,10 +8,10 @@ import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/default_tabbar.dart';
 import 'package:inldsevak/features/events/model/events_model.dart' as model;
 import 'package:inldsevak/features/events/model/request_event_model.dart';
-
 import 'package:inldsevak/features/events/view_model/events_view_model.dart';
 import 'package:inldsevak/features/events/widgets/event_widget.dart';
 import 'package:inldsevak/features/events/widgets/events_helpers.dart';
+import 'package:inldsevak/features/profile_tabs/terms_and_conditions/widgets/custom_event_container_widget.dart';
 import 'package:provider/provider.dart';
 
 class EventsView extends StatefulWidget {
@@ -92,30 +92,32 @@ class _EventsViewState extends State<EventsView> with TickerProviderStateMixin {
     }
     return Column(
       children: [
-        RefreshIndicator(
-          onRefresh: onRefresh,
-          child: Container(
-            margin: EdgeInsets.symmetric(
-              horizontal: Dimens.paddingX2B,
-              vertical: Dimens.appBarSpacing,
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: Dimens.paddingX3,
-              vertical: Dimens.paddingX3,
-            ),
-            decoration: boxDecorationRoundedWithShadow(
-              Dimens.radiusX2,
-              spreadRadius: 2,
-              blurRadius: 2,
-            ),
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              itemBuilder: (_, index) {
-                return EventWidget(event: data[index]);
-              },
-              separatorBuilder: (_, _) => EventsHelpers.eventDivider(),
-              itemCount: data.length,
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: onRefresh,
+            child: Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: Dimens.paddingX2B,
+                vertical: Dimens.appBarSpacing,
+              ),
+              padding: EdgeInsets.symmetric(
+                horizontal: Dimens.paddingX3,
+                vertical: Dimens.paddingX3,
+              ),
+              decoration: boxDecorationRoundedWithShadow(
+                Dimens.radiusX2,
+                spreadRadius: 2,
+                blurRadius: 2,
+              ),
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemBuilder: (_, index) {
+                  return EventWidget(event: data[index], onTap: () {});
+                },
+                separatorBuilder: (_, _) => EventsHelpers.eventDivider(),
+                itemCount: data.length,
+              ),
             ),
           ),
         ),

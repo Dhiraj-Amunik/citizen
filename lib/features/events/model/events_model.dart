@@ -69,20 +69,21 @@ class Events {
   String? updatedAt;
   int? iV;
 
-  Events(
-      {this.sId,
-      this.title,
-      this.eventType,
-      this.description,
-      this.dateAndTime,
-      this.location,
-      this.poster,
-      this.mla,
-      this.isActive,
-      this.isDeleted,
-      this.createdAt,
-      this.updatedAt,
-      this.iV});
+  Events({
+    this.sId,
+    this.title,
+    this.eventType,
+    this.description,
+    this.dateAndTime,
+    this.location,
+    this.poster,
+    this.mla,
+    this.isActive,
+    this.isDeleted,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
 
   Events.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
