@@ -170,6 +170,7 @@ Widget donationWidget({
     child:
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
+
           spacing: Dimens.gapX3,
           children: [
             CircleAvatar(
@@ -184,7 +185,7 @@ Widget donationWidget({
                   Text("₹ $amount", style: textTheme.bodySmall),
                   Text(
                     reason ?? "Purpose",
-                    style: textTheme.bodySmall,
+                    style: textTheme.labelMedium,
                     maxLines: 1,
                   ),
                 ],
@@ -196,6 +197,7 @@ Widget donationWidget({
                 date?.toDdMmYyyy() ?? "",
                 style: textTheme.bodySmall?.copyWith(
                   color: AppPalettes.lightTextColor,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
