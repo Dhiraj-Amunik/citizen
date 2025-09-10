@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/profile_helper.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/secure/secure_storage.dart';
@@ -20,11 +21,7 @@ class ProfileView extends StatelessWidget {
     final roleProvider = context.read<RoleViewModel>();
 
     return Scaffold(
-      appBar: commonAppBar(
-        title: "Profile",
-        center: true,
-        elevation: Dimens.elevation,
-      ),
+      appBar: commonAppBar(title: localization.profile),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
           horizontal: Dimens.horizontalspacing,
@@ -91,14 +88,35 @@ class ProfileView extends StatelessWidget {
               icon: AppImages.phoneIcon,
               onTap: () => RouteManager.pushNamed(Routes.emergencyContactsPage),
             ),
-            ProfileHelper.getCommonBox(
+            ProfileHelper.getLogout(
               'Logout',
-              icon: AppImages.logout,
-              iconColor: AppPalettes.redColor,
               onTap: () async {
                 await SessionController.instance.clearSession();
               },
-              showArrow: false,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: Dimens.gapX2,
+              children: [
+                CommonHelpers.buildIcons(
+                  path: AppImages.instIcon,
+                  color: AppPalettes.liteGreyColor,
+                  padding: Dimens.paddingX3,
+                  iconSize: Dimens.scaleX3,
+                ),
+                CommonHelpers.buildIcons(
+                  path: AppImages.facebookIcon,
+                  color: AppPalettes.liteGreyColor,
+                  padding: Dimens.paddingX3,
+                  iconSize: Dimens.scaleX3,
+                ),
+                CommonHelpers.buildIcons(
+                  path: AppImages.twitterIcon,
+                  color: AppPalettes.liteGreyColor,
+                  padding: Dimens.paddingX3,
+                  iconSize: Dimens.scaleX3,
+                ),
+              ],
             ),
           ],
         ),

@@ -8,6 +8,7 @@ class AppImages {
   static const _emergencyIcons = "assets/emergency_icons";
   static const _quickAccess = "assets/quick_access";
   static const _placeholders = "assets/placeholders";
+  static const _donations = "assets/donations";
 
   static const backIcon = '$_iconsURL/back_icon.svg';
 
@@ -56,6 +57,9 @@ class AppImages {
   static const aboutProfileIcon = "$_profile/about_icon.svg";
   static const partyInfoProfileIcon = "$_profile/party_info_icon.svg";
   static const leadershipProfileIcon = "$_profile/leadership_icon.svg";
+  static const instIcon = "$_profile/insta.svg";
+  static const facebookIcon = "$_profile/facebook.svg";
+  static const twitterIcon = "$_profile/twitter.svg";
 
   //emergency
   static const ambulanceIcon = "$_emergencyIcons/ambulance_icon.svg";
@@ -71,8 +75,16 @@ class AppImages {
   static const memberShipAccess = "$_quickAccess/membership_access.svg";
   static const wallOFHelpAccess = "$_quickAccess/wall_of_help_access.svg";
   static const volunteerAccess = "$_quickAccess/be_a_volunteer_access.svg";
+  static const complaintAccess = "$_quickAccess/complaint_access.svg";
+  static const partyAccess = "$_quickAccess/party_access.png";
 
   //placeholders
   static const placeholderEmpty = "$_placeholders/empty.svg";
 
+  //donations Icon
+
+  static const bankIcon = '$_donations/bankicon.svg';
+  static const cardsIcon = '$_donations/cardsicon.svg';
+  static const rupeeIcon = '$_donations/rupeeicon.svg';
+  static const clipboardicon = '$_donations/clipboardicon.svg';
 }

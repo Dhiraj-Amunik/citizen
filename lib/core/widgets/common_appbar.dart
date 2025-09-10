@@ -7,7 +7,7 @@ import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 
 PreferredSize commonAppBar({
-  double appBarHeight = 70,
+  double appBarHeight = 60,
   PreferredSize? bottom,
   bool showClipper = true,
   Color? statusBarColor = AppPalettes.gradientFirstColor,
@@ -23,7 +23,6 @@ PreferredSize commonAppBar({
 }) => PreferredSize(
   preferredSize: Size.fromHeight(appBarHeight),
   child: AppBar(
-    iconTheme: IconThemeData(color: AppPalettes.whiteColor),
     leadingWidth: 60.height(),
     toolbarHeight: appBarHeight,
     surfaceTintColor: AppPalettes.transparentColor,
@@ -32,9 +31,9 @@ PreferredSize commonAppBar({
       statusBarIconBrightness: statusBarMode,
     ),
     elevation: elevation,
-    foregroundColor: AppPalettes.transparentColor,
-    titleSpacing: 0,
-    backgroundColor: AppPalettes.transparentColor,
+    shadowColor: AppPalettes.shadowColor,
+    foregroundColor: AppPalettes.redColor,
+    backgroundColor: AppPalettes.whiteColor,
     centerTitle: center,
     bottom: bottom,
     title:
@@ -43,7 +42,7 @@ PreferredSize commonAppBar({
                   title ?? "",
                   style:
                       style ??
-                      AppStyles.titleMedium.copyWith(
+                      AppStyles.headlineMedium.copyWith(
                         color: AppPalettes.blackColor,
                       ),
                 ))

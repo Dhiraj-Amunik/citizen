@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
+import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
+import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
 import 'package:inldsevak/features/complaints/model/thread_model.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:inldsevak/features/complaints/widgets/complaint_widget.dart';
+import 'package:inldsevak/features/navigation/view/navigation_view.dart';
 import 'package:provider/provider.dart';
 
 class ComplaintsView extends StatelessWidget {
@@ -16,6 +20,7 @@ class ComplaintsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localization = context.localizations;
     return Scaffold(
       appBar: commonAppBar(
         title: "My Complaints",
@@ -28,28 +33,30 @@ class ComplaintsView extends StatelessWidget {
         ],
       ),
 
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX3),
-        child: Consumer<ComplaintsViewModel>(
-          builder: (context, value, child) {
-            if (value.isLoading) {
-              return Center(child: CustomAnimatedLoading());
-            }
-            return RefreshIndicator(
-              onRefresh: () => value.getComplaints(),
-              child: buildComplaintsList(value.complaintsList),
-            );
-          },
-        ),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX3),
+            child: Consumer<ComplaintsViewModel>(
+              builder: (context, value, child) {
+                if (value.isLoading) {
+                  return Center(child: CustomAnimatedLoading());
+                }
+                return RefreshIndicator(
+                  onRefresh: () => value.getComplaints(),
+                  child: buildComplaintsList(value.complaintsList),
+                );
+              },
+            ),
+          ),
+          Spacer(),
+          CommonButton(
+            text: localization.raise_complaint,
+            onTap: () => RouteManager.pushNamed(Routes.lodgeComplaintPage),
+          ).horizontalPadding(Dimens.horizontalspacing),
+        ],
       ),
-
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          RouteManager.pushNamed(Routes.lodgeComplaintPage);
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Raise Complaint'),
-      ),
+      bottomNavigationBar: DummyNav(),
     );
   }
 }

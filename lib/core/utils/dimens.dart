@@ -63,6 +63,7 @@ class Dimens {
   static final scaleX9 = 72.0.r;
   static final scaleX10 = 80.0.r;
   static final scaleX15 = 120.0.r;
+  static final scaleX20 = 160.0.r;
 
   //dividers
   static const gap = 0.0;
@@ -87,7 +88,7 @@ class Dimens {
   static final textFromSpacing = 12.r;
   static final widgetSpacing = 18.r;
   static final horizontalspacing = 22.r;
-  static final verticalspacing = 22.r;
+  static final verticalspacing = 18.r;
 
   static final borderWidth = 1.w;
 

@@ -20,7 +20,7 @@ class ReadMoreWidget extends StatelessWidget {
       trimExpandedText: ' Show less',
       moreStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w500),
       lessStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w500),
-      style: AppStyles.labelMedium.copyWith(
+      style: AppStyles.bodyMedium.copyWith(
         color: AppPalettes.lightTextColor,
         fontWeight: FontWeight.w500,
       ),

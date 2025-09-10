@@ -24,9 +24,8 @@ class UserCardHelpWidget extends StatelessWidget {
         vertical: Dimens.paddingX3,
       ),
       decoration: boxDecorationRoundedWithShadow(
-        Dimens.radiusX2,
-        spreadRadius: 2,
-        blurRadius: 2,
+        Dimens.radiusX4,
+        border: BoxBorder.all(color: AppPalettes.primaryColor),
       ),
       child: Column(
         spacing: Dimens.gapX2,
@@ -66,7 +65,7 @@ class UserCardHelpWidget extends StatelessWidget {
                     child: Text(
                       "Solved",
                       style: textTheme.labelMedium?.copyWith(
-                        color: AppPalettes.greenColor,
+                        color: AppPalettes.lightTextColor,
                       ),
                     ),
                   ),
@@ -101,7 +100,7 @@ class UserCardHelpWidget extends StatelessWidget {
                 iconSize: Dimens.scaleX2,
               ),
               Text(
-                "Submitted : ${help.createdAt?.toDdMmYyyy()}",
+                "Submitted : ${help.createdAt?.toDdMmmYyyy()}",
                 style: textTheme.labelMedium,
               ),
             ],

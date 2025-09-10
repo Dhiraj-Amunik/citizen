@@ -64,10 +64,5 @@ class EventsHelpers {
     );
   }
 
-  static Widget eventDivider() {
-    return Padding(
-      padding: EdgeInsets.only(left: 70.width()),
-      child: Divider(height: Dimens.paddingX4, color: AppPalettes.dividerColor),
-    );
-  }
+ 
 }

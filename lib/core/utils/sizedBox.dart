@@ -26,6 +26,6 @@ class SizeBox {
   static final sizeWX7 = 28.horizontalSpace;
 
   static final appBarSize = 18.r.verticalSpace;
-  static final widgetSpacing = 18.r.verticalSpace;
+  static final widgetSpacing = 12.r.verticalSpace;
 
 }

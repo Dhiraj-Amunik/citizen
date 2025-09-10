@@ -5,6 +5,7 @@ import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/features/lok_varta/model/lok_varta_model.dart'
     as model;
 import 'package:inldsevak/features/lok_varta/model/request_lok_varta_model.dart';
@@ -33,50 +34,76 @@ class PressReleasesWidget extends StatelessWidget {
       children: [
         RefreshIndicator(
           onRefresh: onRefresh,
-          child: Container(
-            margin: EdgeInsets.symmetric(
-              horizontal: Dimens.paddingX2B,
-              vertical: Dimens.appBarSpacing,
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: Dimens.paddingX3,
-              vertical: Dimens.paddingX3,
-            ),
-            decoration: boxDecorationRoundedWithShadow(
-              Dimens.radiusX2,
-              spreadRadius: 2,
-              blurRadius: 2,
-            ),
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              itemBuilder: (_, index) {
-                final media = medias[index];
-
-                return Row(
+          child: ListView.separated(
+            padding:  EdgeInsets.symmetric(
+            horizontal: Dimens.paddingX2B,
+          ),
+            shrinkWrap: true,
+            itemBuilder: (_, index) {
+              final media = medias[index];
+          
+              return Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Dimens.paddingX3,
+                  vertical: Dimens.paddingX3,
+                ),
+                decoration: boxDecorationRoundedWithShadow(
+                  Dimens.radiusX5,
+                  spreadRadius: 2,
+                  blurRadius: 2,
+                  border: Border.all(width: 1,color: AppPalettes.primaryColor)
+                ),
+                child: Row(
                   spacing: Dimens.gapX2,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Image.asset("assets/logo/login_image.png", height: 60),
                     Expanded(
                       child: Column(
-                        spacing: Dimens.gapX,
+                        spacing: Dimens.gapX1,
                         crossAxisAlignment: CrossAxisAlignment.start,
+          
                         children: [
-                          Text(
-                            media.createdAt?.toRelativeTime() ?? "unknown Date",
-                            style: textTheme.labelSmall?.copyWith(
-                              color: AppPalettes.lightTextColor,
-                            ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  media.title ?? "unknown title",
+                                  style: textTheme.bodySmall,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: Dimens.paddingX2,
+                                    vertical: Dimens.paddingX1,
+                                  ),
+                                  decoration: boxDecorationRoundedWithShadow(
+                                    Dimens.radius100,
+                                    backgroundColor:
+                                        AppPalettes.liteGreenTextFieldColor,
+                                  ),
+                                  child: Text(
+                                    media.createdAt?.toRelativeTime() ??
+                                        "unknown Date",
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: AppPalettes.lightTextColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            media.title ?? "unknown title",
-                            style: textTheme.bodySmall,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-
+          
                           ConstrainedBox(
-                            constraints: BoxConstraints(minHeight: 40.height()),
+                            constraints: BoxConstraints(
+                              minHeight: 20.height(),
+                            ),
                             child: Text(
                               media.content ??
                                   "no content available at the moment",
@@ -90,13 +117,12 @@ class PressReleasesWidget extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Image.asset("assets/logo/login_image.png", height: 60),
                   ],
-                );
-              },
-              separatorBuilder: (_, _) => LokvartaHelpers.lokVartaDivider(),
-              itemCount: medias.length,
-            ),
+                ),
+              );
+            },
+            separatorBuilder: (_, _) => SizeBox.widgetSpacing,
+            itemCount: medias.length,
           ),
         ),
       ],

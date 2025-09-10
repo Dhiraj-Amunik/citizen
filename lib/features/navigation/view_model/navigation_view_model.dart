@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
+import 'package:inldsevak/features/complaints/view/complaints_view.dart';
 import 'package:inldsevak/features/donation/view/donate_view.dart';
 import 'package:inldsevak/features/home/view/indl_view.dart';
 import 'package:inldsevak/features/id_card/view/id_card_view.dart';
@@ -23,8 +24,8 @@ class NavigationViewModel extends ChangeNotifier {
   List<NavigationModel> userTabIconData = [
     NavigationModel(imagePath: AppImages.navINLDIcon, text: "INLD"),
     NavigationModel(imagePath: AppImages.navDonateIcon, text: "Donate"),
-    NavigationModel(imagePath: null, text: ""),
-    NavigationModel(imagePath: AppImages.navMediaIcon, text: "Lok Varta"),
+    NavigationModel(imagePath: AppImages.complaintAccess, text: "Complaint"),
+    NavigationModel(imagePath: AppImages.aadharIcon, text: "Lok Varta"),
     NavigationModel(imagePath: AppImages.navProfileIcon, text: "Profile"),
   ];
 
@@ -39,7 +40,7 @@ class NavigationViewModel extends ChangeNotifier {
   List<Widget> userWidgets = [
     IndlView(),
     DonateView(),
-    SizedBox(),
+    ComplaintsView(),
     LokVartaView(),
     ProfileView(),
   ];

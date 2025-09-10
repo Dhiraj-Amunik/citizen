@@ -32,8 +32,7 @@ class PhotoWidget extends StatelessWidget {
       cacheExtent: 0,
       padding: EdgeInsets.symmetric(
         horizontal: Dimens.paddingX2B,
-        vertical: Dimens.appBarSpacing,
-      ),
+      ).copyWith(bottom: Dimens.verticalspacing),
       gridDelegate: SliverQuiltedGridDelegate(
         crossAxisCount: 4,
         mainAxisSpacing: 4,

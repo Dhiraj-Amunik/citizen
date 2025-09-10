@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
-import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/routes/routes.dart';
@@ -10,9 +9,9 @@ import 'package:inldsevak/core/utils/dimens.dart';
 
 final List<QuickAccessModel> userQuickAccess = [
   QuickAccessModel(
-    icon: AppImages.wallOFHelpAccess,
-    text: "Wall of Help",
-    route: Routes.userWallOfHelpPage,
+    icon: AppImages.complaintAccess,
+    text: "Raise Complaint",
+    route: Routes.complaintsPage,
   ),
   QuickAccessModel(
     icon: AppImages.appointmentAccess,
@@ -20,9 +19,14 @@ final List<QuickAccessModel> userQuickAccess = [
     route: Routes.requestAppointmentPage,
   ),
   QuickAccessModel(
-    icon: AppImages.memberShipAccess,
-    text: "  Join Party  ",
+    icon: AppImages.partyAccess,
+    text: "Become a Team Member",
     route: Routes.becomePartMemberPage,
+  ),
+  QuickAccessModel(
+    icon: AppImages.wallOFHelpAccess,
+    text: "Wall of Help",
+    route: Routes.userWallOfHelpPage,
   ),
 ];
 
@@ -52,33 +56,41 @@ class QuickAccessWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final localization = context.localizations;
     final textTheme = context.textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: Dimens.gapX1,
-      children: [
-        Text(
-          localization.quick_access,
-          style: textTheme.bodyMedium?.copyWith(
-            color: AppPalettes.primaryColor,
+    return Padding(
+      padding: EdgeInsetsGeometry.symmetric(
+        horizontal: Dimens.horizontalspacing,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: Dimens.gapX2,
+        children: [
+          Text(
+            localization.quick_access,
+            style: textTheme.headlineSmall?.copyWith(
+              color: AppPalettes.primaryColor,
+            ),
           ),
-        ).horizontalPadding(Dimens.horizontalspacing),
-        SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX3B),
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            spacing: Dimens.gapX3,
-            children: List.generate(
-              (showParty ? partyQuickAccess : userQuickAccess).length,
-              (index) {
-                return _getDialog(
-                  textTheme,
-                  (showParty ? partyQuickAccess : userQuickAccess)[index],
-                );
-              },
-            ).toList(),
+
+          GridView.builder(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            physics:
+                const NeverScrollableScrollPhysics(), // Disables GridView's scrolling
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.7,
+              crossAxisSpacing: Dimens.paddingX2,
+              mainAxisSpacing: Dimens.paddingX2,
+            ),
+            itemCount: (showParty ? partyQuickAccess : userQuickAccess).length,
+            itemBuilder: (context, index) => _getDialog(
+              textTheme,
+              (showParty ? partyQuickAccess : userQuickAccess)[index],
+            ),
           ),
-        ).horizontalPadding(Dimens.paddingX2),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -87,26 +99,25 @@ Widget _getDialog(TextTheme style, QuickAccessModel data) {
   return GestureDetector(
     onTap: () => RouteManager.pushNamed(data.route),
     child: Container(
-      margin: EdgeInsets.symmetric(vertical: Dimens.paddingX1),
       padding: EdgeInsets.symmetric(
         horizontal: Dimens.paddingX4,
-        vertical: Dimens.paddingX6,
+        vertical: Dimens.paddingX,
       ),
       decoration: boxDecorationRoundedWithShadow(
-        Dimens.radiusX2,
-        spreadRadius: 2,
-        blurRadius: 2,
-        shadowColor: AppPalettes.blackColor.withOpacityExt(0.2),
-        backgroundColor: AppPalettes.greenColor,
+        Dimens.radiusX4,
+        border: Border.all(color: AppPalettes.primaryColor),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         spacing: Dimens.gapX2,
         children: [
-          CommonHelpers.buildIcons(path: data.icon, iconSize: Dimens.scaleX3),
-          Text(
-            data.text,
-            style: style.bodySmall?.copyWith(color: AppPalettes.whiteColor),
+          CommonHelpers.buildIcons(
+            path: data.icon,
+            iconSize: Dimens.scaleX2,
+            iconColor: AppPalettes.blackColor,
           ),
+          Text(data.text, style: style.bodyMedium),
         ],
       ),
     ),

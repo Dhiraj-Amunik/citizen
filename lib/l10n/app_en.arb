@@ -29,6 +29,10 @@
      "voter_id":"Voter Id",
      "aadhar_validator":"Please enter your aadhar number",
      "register":"Register",
+
+
+
+     "contribute_with_love":"Contribute with love",
      "donate":"Donate",
      "donation_history":"Donate History",
      "enter_amount":"Enter Amount",
@@ -57,6 +61,7 @@
      "preferred_role":"Preferred Role(If applicable)",
      "enter_your_role":"Enter your role",
      "submit_application":"Submit Application",
+     "events":"Events",
      "event_details":"Event Details",
      "edit_details":"Edit Details",
      "update_profile":"Update profile",
@@ -221,6 +226,9 @@
 
     "about":"About",
     "about_section":"About Section",
-    "app_mission_vision_history":"App mission, vision & history"
+    "app_mission_vision_history":"App mission, vision & history",
 
+    "lok_varta":"Lok Varta",
+
+    "profile":"Profile"
 }

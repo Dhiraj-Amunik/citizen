@@ -105,13 +105,15 @@ class CommonHelpers {
         onTap: onTap,
         child: FittedBox(
           fit: BoxFit.scaleDown,
-          child: SvgPicture.asset(
-            path,
-            height: iconSize,
-            colorFilter: iconColor == null
-                ? null
-                : ColorFilter.mode(iconColor, BlendMode.srcIn),
-          ),
+          child: path.endsWith('.svg')
+              ? SvgPicture.asset(
+                  path,
+                  height: iconSize,
+                  colorFilter: iconColor == null
+                      ? null
+                      : ColorFilter.mode(iconColor, BlendMode.srcIn),
+                )
+              : Image.asset(path, height: iconSize, color: iconColor),
         ),
       ),
     );

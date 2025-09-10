@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
+import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
@@ -35,62 +36,66 @@ class _LokVartaViewState extends State<LokVartaView>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: commonAppBar(
-        appBarHeight: 130,
-        title: "Lok Varta",
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(0),
-          child: Column(
-            children: [
-              DefaultTabBar(
-                isScrollable: true,
-                controller: tabController,
-                tabLabels: const [
-                  "Press Releases",
-                  "Interviews",
-                  "Articles",
-                  "Videos",
-                  "Photo",
-                ],
-              ).symmetricPadding(horizontal: Dimens.paddingX4),
-              SizeBox.sizeHX7,
-            ],
-          ),
-        ),
-      ),
-      body: Consumer<LokVartaViewModel>(
-        builder: (context, value, _) {
-          if (value.isLoading) {
-            return Center(child: CustomAnimatedLoading());
-          }
-          return TabBarView(
-            controller: tabController,
-            children: [
-              PressReleasesWidget(
-                medias: value.pressReleasesList,
-                onRefresh: () => value.getLokVarta(LokVartaFilter.PressRelease),
-              ),
-              InterviewWidget(
-                medias: value.interviewsList,
-                onRefresh: () => value.getLokVarta(LokVartaFilter.Interview),
-              ),
+    final localization = context.localizations;
 
-              LokvartaHelpers.lokVartaPlaceholder(
-                type: LokVartaFilter.Article,
-                onRefresh: () async {},
-              ),
-              LokvartaHelpers.lokVartaPlaceholder(
-                type: LokVartaFilter.Video,
-                onRefresh: () async {},
-              ),
-              PhotoWidget(
-                medias: value.photoLists,
-                onRefresh: () => value.getLokVarta(LokVartaFilter.PhotoGallery),
-              ),
+    return Scaffold(
+      appBar: commonAppBar(title: localization.lok_varta),
+      body: Column(
+        children: [
+          DefaultTabBar(
+            isScrollable: true,
+            controller: tabController,
+            tabLabels: const [
+              "Press Releases",
+              "Interviews",
+              "Articles",
+              "Videos",
+              "Photo",
             ],
-          ).horizontalPadding(Dimens.paddingX3);
-        },
+          ).symmetricPadding(horizontal: Dimens.paddingX4),
+          Expanded(
+            child: Consumer<LokVartaViewModel>(
+              builder: (context, value, _) {
+                if (value.isLoading) {
+                  return Center(child: CustomAnimatedLoading());
+                }
+                return TabBarView(
+                  controller: tabController,
+                  children: [
+                    PressReleasesWidget(
+                      medias: value.pressReleasesList,
+                      onRefresh: () =>
+                          value.getLokVarta(LokVartaFilter.PressRelease),
+                    ),
+                    InterviewWidget(
+                      medias: value.interviewsList,
+                      onRefresh: () =>
+                          value.getLokVarta(LokVartaFilter.Interview),
+                    ),
+
+                    LokvartaHelpers.lokVartaPlaceholder(
+                      type: LokVartaFilter.Article,
+                      onRefresh: () async {},
+                    ),
+                    LokvartaHelpers.lokVartaPlaceholder(
+                      type: LokVartaFilter.Video,
+                      onRefresh: () async {},
+                    ),
+                    PhotoWidget(
+                      medias: value.photoLists,
+                      onRefresh: () =>
+                          value.getLokVarta(LokVartaFilter.PhotoGallery),
+                    ),
+                  ],
+                ).onlyPadding(
+                  left: Dimens.paddingX3,
+                  right: Dimens.paddingX3,
+                  top: Dimens.verticalspacing,
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

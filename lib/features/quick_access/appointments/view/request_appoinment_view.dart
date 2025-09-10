@@ -29,13 +29,12 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
         return Scaffold(
           appBar: commonAppBar(
             title: localization.request_appointment,
-            elevation: Dimens.elevation,
           ),
           body: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsetsGeometry.symmetric(
                 horizontal: Dimens.horizontalspacing,
-                vertical: Dimens.verticalspacing,
+                vertical: Dimens.paddingX2,
               ),
               child: Form(
                 key: provider.formKey,

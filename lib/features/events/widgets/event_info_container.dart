@@ -17,21 +17,20 @@ class EventInfoContainer extends StatelessWidget {
     return Container(
       decoration: boxDecorationRoundedWithShadow(
         Dimens.radiusX3,
-        spreadRadius: 2,
-        blurRadius: 2,
+        backgroundColor: AppPalettes.liteGreyColor,
       ),
       child:
           Row(
             children: [
               CommonHelpers.buildIcons(
-                color: AppPalettes.primaryColor.withOpacityExt(0.2),
+                color: AppPalettes.liteGreenTextFieldColor,
                 path: icon,
                 iconColor: AppPalettes.primaryColor,
                 iconSize: Dimens.scaleX2B,
-                padding:Dimens.paddingX2
+                padding: Dimens.paddingX2,
               ),
               SizeBox.sizeWX4,
-              Flexible(child: Text(text, style: context.textTheme.labelMedium)),
+              Flexible(child: Text(text, style: context.textTheme.bodyMedium)),
             ],
           ).symmetricPadding(
             horizontal: Dimens.paddingX3,

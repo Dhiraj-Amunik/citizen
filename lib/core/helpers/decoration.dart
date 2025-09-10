@@ -40,7 +40,7 @@ List<BoxShadow> defaultBoxShadow({
 }) {
   return [
     BoxShadow(
-      color: shadowColor ?? Colors.grey.withOpacity(0.2),
+      color: shadowColor ?? Colors.grey.withOpacityExt(0.2),
       blurRadius: blurRadius ?? 4.0,
       spreadRadius: spreadRadius ?? 1.0,
       offset: offset,

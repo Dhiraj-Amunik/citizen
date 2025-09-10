@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
@@ -24,9 +25,8 @@ class ProfileHelper {
           vertical: Dimens.paddingX3,
         ),
         decoration: boxDecorationRoundedWithShadow(
-          Dimens.radiusX3,
-          spreadRadius: 2,
-          blurRadius: 2,
+          Dimens.radiusX5,
+          backgroundColor: AppPalettes.liteGreyColor,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -37,7 +37,7 @@ class ProfileHelper {
               child: Container(
                 height: Dimens.scaleX7,
                 width: Dimens.scaleX7,
-                color: AppPalettes.backGroundColor,
+                color: AppPalettes.whiteColor,
                 child: CommonHelpers.getNetworkImage(
                   image,
                   placeholder: CommonHelpers.showInitials(
@@ -89,8 +89,7 @@ class ProfileHelper {
   }) {
     return InkWell(
       borderRadius: BorderRadius.circular(Dimens.radiusX2),
-      overlayColor: const WidgetStatePropertyAll(AppPalettes.liteGreyColor),
-
+      overlayColor: const WidgetStatePropertyAll(AppPalettes.transparentColor),
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(
@@ -98,17 +97,16 @@ class ProfileHelper {
           vertical: Dimens.paddingX3,
         ),
         decoration: boxDecorationRoundedWithShadow(
-          Dimens.radiusX3,
-          spreadRadius: 2,
-          blurRadius: 2,
+          Dimens.radiusX4,
+          backgroundColor: AppPalettes.liteGreyColor,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CommonHelpers.buildIcons(
-              color: iconColor?.withOpacityExt(0.2),
-              padding: Dimens.paddingX3,
+              color: AppPalettes.whiteColor,
+              padding: Dimens.paddingX2B,
               path: icon,
               iconColor: iconColor,
               iconSize: Dimens.scaleX2,
@@ -121,14 +119,17 @@ class ProfileHelper {
                 children: [
                   Text(
                     text,
-                    style: AppStyles.bodyMedium,
+                    style: AppStyles.bodyLarge,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (subtext != null)
                     Text(
                       subtext,
-                      style: AppStyles.labelLarge,
+                      style: AppStyles.labelMedium.copyWith(
+                        color: AppPalettes.lightTextColor,
+                      ),
+
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -142,6 +143,46 @@ class ProfileHelper {
                 size: Dimens.scaleX2,
                 color: AppPalettes.primaryColor,
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget getLogout(String text, {VoidCallback? onTap}) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(Dimens.radiusX2),
+      overlayColor: const WidgetStatePropertyAll(AppPalettes.transparentColor),
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: Dimens.paddingX3,
+          vertical: Dimens.paddingX3,
+        ),
+        decoration: boxDecorationRoundedWithShadow(
+          Dimens.radiusX4,
+          backgroundColor: AppPalettes.whiteColor,
+          border: Border.all(color: AppPalettes.redColor),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CommonHelpers.buildIcons(
+              color: AppPalettes.redColor.withOpacityExt(0.2),
+              padding: Dimens.paddingX2,
+              path: AppImages.logout,
+              iconColor: AppPalettes.redColor,
+              iconSize: Dimens.scaleX2B,
+              borderColor: AppPalettes.transparentColor,
+            ),
+            SizeBox.sizeWX4,
+            Text(
+              text,
+              style: AppStyles.bodyLarge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),

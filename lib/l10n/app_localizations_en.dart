@@ -100,6 +100,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get register => 'Register';
 
   @override
+  String get contribute_with_love => 'Contribute with love';
+
+  @override
   String get donate => 'Donate';
 
   @override
@@ -183,6 +186,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get submit_application => 'Submit Application';
+
+  @override
+  String get events => 'Events';
 
   @override
   String get event_details => 'Event Details';
@@ -590,4 +596,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get app_mission_vision_history => 'App mission, vision & history';
+
+  @override
+  String get lok_varta => 'Lok Varta';
+
+  @override
+  String get profile => 'Profile';
 }

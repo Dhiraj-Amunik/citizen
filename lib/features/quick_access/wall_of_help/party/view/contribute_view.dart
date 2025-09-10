@@ -77,26 +77,26 @@ class ContributeView extends StatelessWidget {
                 ),
 
                 Text(localization.payment_options, style: textTheme.bodyMedium),
-                iconBuilder(
-                  icon: Icons.currency_rupee_sharp,
-                  text: localization.razorpay,
-                  textTheme: textTheme,
-                ),
-                iconBuilder(
-                  icon: Icons.currency_rupee_sharp,
-                  text: localization.upi,
-                  textTheme: textTheme,
-                ),
-                iconBuilder(
-                  icon: Icons.other_houses_outlined,
-                  text: localization.net_banking,
-                  textTheme: textTheme,
-                ),
-                iconBuilder(
-                  icon: Icons.credit_card,
-                  text: localization.cards,
-                  textTheme: textTheme,
-                ),
+                // iconBuilder(
+                //   icon: Icons.currency_rupee_sharp,
+                //   text: localization.razorpay,
+                //   textTheme: textTheme,
+                // ),
+                // iconBuilder(
+                //   icon: Icons.currency_rupee_sharp,
+                //   text: localization.upi,
+                //   textTheme: textTheme,
+                // ),
+                // iconBuilder(
+                //   icon: Icons.other_houses_outlined,
+                //   text: localization.net_banking,
+                //   textTheme: textTheme,
+                // ),
+                // iconBuilder(
+                //   icon: Icons.credit_card,
+                //   text: localization.cards,
+                //   textTheme: textTheme,
+                // ),
               ],
             ),
           ],

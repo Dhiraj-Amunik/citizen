@@ -28,9 +28,8 @@ class ComplaintThreadWidget extends StatelessWidget {
       child: Container(
         padding: EdgeInsetsGeometry.all(Dimens.paddingX4),
         decoration: boxDecorationRoundedWithShadow(
-          Dimens.radiusX2,
-          spreadRadius: 2,
-          blurRadius: 2,
+          Dimens.radiusX4,
+          border: Border.all(color: AppPalettes.primaryColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +42,7 @@ class ComplaintThreadWidget extends StatelessWidget {
                 children: [
                   Container(
                     child: CommonHelpers.buildIcons(
-                      color: AppPalettes.primaryColor.withOpacityExt(0.2),
+                      color: AppPalettes.liteGreenTextFieldColor,
                       path: AppImages.emailIcon,
                       iconColor: AppPalettes.primaryColor,
                       iconSize: Dimens.scaleX1B,
@@ -53,7 +52,7 @@ class ComplaintThreadWidget extends StatelessWidget {
                   Expanded(
                     child: Text(
                       thread.messages?.first.subject ?? "No Subject found !",
-                      style: textTheme.bodySmall,
+                      style: textTheme.bodyMedium,
                     ),
                   ),
                   Align(
@@ -94,7 +93,8 @@ class ComplaintThreadWidget extends StatelessWidget {
                     TextSpan(text: "Message : "),
                     TextSpan(
                       text:
-                          thread.messages?.first.snippet ?? "Unknown Description",
+                          thread.messages?.first.snippet ??
+                          "Unknown Description",
                       style: textTheme.labelMedium?.copyWith(
                         color: AppPalettes.lightTextColor,
                         fontWeight: FontWeight.w500,

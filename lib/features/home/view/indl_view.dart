@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
-import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
-import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
-import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:inldsevak/features/home/widgets/upcoming_home_events_widget.dart';
 import 'package:inldsevak/features/home/widgets/my_latest_complaints_widgets.dart';
@@ -25,7 +22,6 @@ class IndlView extends StatelessWidget {
     final roleProvider = context.read<RoleViewModel>();
     return Scaffold(
       appBar: commonAppBar(
-        elevation: 2,
         action: [
           //
         ],
@@ -62,7 +58,9 @@ class IndlView extends StatelessWidget {
           children: [
             Container(
               margin: EdgeInsets.only(top: Dimens.appBarSpacing),
-              padding: EdgeInsets.zero,
+              padding: EdgeInsets.symmetric(
+                horizontal: Dimens.horizontalspacing,
+              ),
               decoration: boxDecorationRoundedWithShadow(
                 Dimens.radiusX2,
                 blurRadius: 2,
@@ -72,7 +70,7 @@ class IndlView extends StatelessWidget {
                 "assets/banners/banner_1.png",
                 fit: BoxFit.cover,
               ),
-            ).horizontalPadding(Dimens.horizontalspacing),
+            ),
             QuickAccessWidget(showParty: roleProvider.isPartyMember),
 
             UpComingHomeEventsWidget(),
@@ -88,7 +86,7 @@ class IndlView extends StatelessWidget {
               },
             ),
 
-            SizeBox.sizeHX4,
+            SizeBox.sizeHX11,
           ],
         ),
       ),

@@ -36,7 +36,7 @@ class InterviewWidget extends StatelessWidget {
           child: Container(
             margin: EdgeInsets.symmetric(
               horizontal: Dimens.paddingX2B,
-              vertical: Dimens.appBarSpacing,
+              vertical: Dimens.paddingX,
             ),
             padding: EdgeInsets.symmetric(
               horizontal: Dimens.paddingX3,
@@ -44,6 +44,7 @@ class InterviewWidget extends StatelessWidget {
             ),
             decoration: boxDecorationRoundedWithShadow(
               Dimens.radiusX2,
+              border: Border.all(color: AppPalettes.primaryColor),
               spreadRadius: 2,
               blurRadius: 2,
             ),
@@ -54,6 +55,7 @@ class InterviewWidget extends StatelessWidget {
                 final media = medias[index];
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: Dimens.gapX,
                   children: [
                     Text(
                       media.createdAt?.toDdMmmYyyy() ?? "unknown Date",
@@ -69,6 +71,7 @@ class InterviewWidget extends StatelessWidget {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: Dimens.gapX,
                             children: [
                               Text(
                                 media.title ?? "unknown title",

@@ -26,6 +26,7 @@ class DonationViewModel extends BaseViewModel {
 
   Future<void> postDonation() async {
     try {
+      isLoading=true;
       if (donationFormKey.currentState!.validate()) {
         autoValidateMode = AutovalidateMode.disabled;
       } else {

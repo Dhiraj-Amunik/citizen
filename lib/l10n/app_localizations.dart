@@ -274,6 +274,12 @@ abstract class AppLocalizations {
   /// **'Register'**
   String get register;
 
+  /// No description provided for @contribute_with_love.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribute with love'**
+  String get contribute_with_love;
+
   /// No description provided for @donate.
   ///
   /// In en, this message translates to:
@@ -441,6 +447,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submit Application'**
   String get submit_application;
+
+  /// No description provided for @events.
+  ///
+  /// In en, this message translates to:
+  /// **'Events'**
+  String get events;
 
   /// No description provided for @event_details.
   ///
@@ -1227,6 +1239,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'App mission, vision & history'**
   String get app_mission_vision_history;
+
+  /// No description provided for @lok_varta.
+  ///
+  /// In en, this message translates to:
+  /// **'Lok Varta'**
+  String get lok_varta;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
 }
 
 class _AppLocalizationsDelegate

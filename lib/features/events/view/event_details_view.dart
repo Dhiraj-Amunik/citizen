@@ -30,15 +30,12 @@ class EventDetailsView extends StatelessWidget {
       builder: (contextP, _) {
         final provider = contextP.read<EventDetailsViewModel>();
         return Scaffold(
-          appBar: commonAppBar(
-            title: localization.event_details,
-            elevation: Dimens.elevation,
-          ),
+          appBar: commonAppBar(title: localization.event_details),
           body: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsetsGeometry.symmetric(
                 horizontal: Dimens.horizontalspacing,
-                vertical: Dimens.verticalspacing,
+                vertical: Dimens.paddingX2,
               ),
               child: FutureBuilder(
                 future: provider.getEvents(eventModel: eventModel),
@@ -65,22 +62,27 @@ class EventDetailsView extends StatelessWidget {
                   return Column(
                     children: [
                       SizedBox(
-                        height: Dimens.scaleX10,
-                        width: Dimens.scaleX10,
+                        height: Dimens.scaleX15,
+                        width: Dimens.scaleX15,
                         child: ClipRRect(
                           borderRadius: BorderRadiusGeometry.circular(
                             Dimens.radius100,
                           ),
                           child: CommonHelpers.getCacheNetworkImage(
-                            event?.poster,
+                            event.poster,
                           ),
                         ),
                       ),
-                      Text(
-                        event.title ?? "Unknown title",
-                        style: textTheme.bodyMedium,
+                      SizeBox.sizeHX2,
+                      SizedBox(
+                        width: 0.5.screenWidth,
+                        child: Text(
+                          event.title ?? "Unknown title",
+                          style: textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      // Text("Sambaralu 2024", style: textTheme.bodyMedium),
+                      SizeBox.sizeHX1,
                       ReadMoreWidget(
                         text: event.description ?? "Unknown description",
                       ),
@@ -90,7 +92,8 @@ class EventDetailsView extends StatelessWidget {
                         children: [
                           EventInfoContainer(
                             icon: AppImages.calenderIcon,
-                            text: event.createdAt?.toDdMmmYyyy() ?? "00-00-0000",
+                            text:
+                                event.createdAt?.toDdMmmYyyy() ?? "00-00-0000",
                           ),
                           EventInfoContainer(
                             icon: AppImages.clockIcon,
@@ -101,6 +104,7 @@ class EventDetailsView extends StatelessWidget {
                             text: event.location ?? "No Location found",
                           ),
                           CommonExpandedWidget(
+                            color: AppPalettes.lightTextColor,
                             title: "View Poster",
                             childrenPadding: Dimens.paddingX3,
                             padding: EdgeInsets.symmetric(
@@ -109,13 +113,11 @@ class EventDetailsView extends StatelessWidget {
                             ),
                             radius: Dimens.radiusX3,
                             svg: CommonHelpers.buildIcons(
-                              color: AppPalettes.primaryColor.withOpacityExt(
-                                0.2,
-                              ),
+                              color: AppPalettes.liteGreenTextFieldColor,
                               path: AppImages.cameraIcon,
                               iconColor: AppPalettes.primaryColor,
-                              iconSize: Dimens.scaleX2B,
-                              padding: Dimens.paddingX2,
+                              iconSize: Dimens.scaleX2,
+                              padding: Dimens.paddingX2B,
                             ),
                             children: [
                               CommonHelpers.getNetworkImage(

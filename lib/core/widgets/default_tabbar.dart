@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:inldsevak/core/clipper/app_bar_clipper.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
@@ -46,7 +45,7 @@ class DefaultTabBar extends StatelessWidget {
         unselectedLabelStyle: context.textTheme.bodySmall,
         dividerColor: AppPalettes.transparentColor,
         indicatorSize: tabBarSize,
-        indicatorColor: AppPalettes.whiteColor,
+        indicatorColor: AppPalettes.primaryColor,
         indicatorPadding: EdgeInsetsGeometry.zero,
         tabs: tabLabels.asMap().entries.map((entry) {
           return Padding(
@@ -58,7 +57,7 @@ class DefaultTabBar extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textTheme.bodySmall?.copyWith(
-                color: AppPalettes.whiteColor,
+                color: AppPalettes.blackColor,
               ),
             ),
           );

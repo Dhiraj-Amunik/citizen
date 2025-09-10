@@ -57,6 +57,7 @@ flutter:
     - assets/emergency_icons/
     - assets/quick_access/
     - assets/placeholders/
+    - assets/donations/
   fonts:
     - family: Afacad
       fonts:

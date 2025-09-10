@@ -40,7 +40,10 @@ class LokvartaHelpers {
   static Widget lokVartaDivider() {
     return Padding(
       padding: EdgeInsets.only(right: 70.width()),
-      child: Divider(height: Dimens.paddingX4, color: AppPalettes.dividerColor),
+      child: Divider(
+        height: Dimens.paddingX4,
+        color: AppPalettes.primaryColor.withOpacityExt(0.5),
+      ),
     );
   }
 }
