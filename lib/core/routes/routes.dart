@@ -32,6 +32,7 @@ part "./enum.dart";
 class RouteManager {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
+  static final BuildContext context = navigatorKey.currentContext!;
 
   static RouteFactory _factory = CustomRouteFactory();
 
@@ -39,9 +40,7 @@ class RouteManager {
 
   static Route<dynamic> onGenerateRoute(RouteSettings? settings) {
     try {
-      final route = Routes.values.firstWhere(
-        (r) => r.path == settings?.name,
-      );
+      final route = Routes.values.firstWhere((r) => r.path == settings?.name);
       return _factory.createRoute(route, settings);
     } catch (error) {
       log("$error");

@@ -104,7 +104,8 @@ class EventDetailsView extends StatelessWidget {
                             text: event.location ?? "No Location found",
                           ),
                           CommonExpandedWidget(
-                            color: AppPalettes.lightTextColor,
+                            color: AppPalettes.liteGreyColor,
+                            
                             title: "View Poster",
                             childrenPadding: Dimens.paddingX3,
                             padding: EdgeInsets.symmetric(

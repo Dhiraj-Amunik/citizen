@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/secure/secure_storage.dart';
+import 'package:inldsevak/features/auth/models/request/validate_otp_request_model.dart';
 import 'package:inldsevak/features/auth/view/login_view.dart';
+import 'package:inldsevak/features/auth/view/user_register_view.dart';
 import 'package:inldsevak/features/home/view/home_view.dart';
 import 'package:inldsevak/splash_view.dart';
 
@@ -23,7 +25,7 @@ class _WrapperViewState extends State<WrapperView> {
             return SplashView();
           }
           if (snapshot.data != null) {
-            return HomeView();
+            return UserRegisterView(data: OtpRequestModel(phoneNo: "9789876545"),);
           }
           return LoginView();
         },

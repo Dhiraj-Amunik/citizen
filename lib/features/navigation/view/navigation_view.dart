@@ -64,16 +64,6 @@ class DummyNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: Dimens.paddingX3,
-        vertical: Dimens.paddingX4,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: Dimens.paddingX4,
-        vertical: Dimens.paddingX4B,
-      ),
-      height: Dimens.scaleX4,
-    );
+    return Container(height: Dimens.scaleX5);
   }
 }

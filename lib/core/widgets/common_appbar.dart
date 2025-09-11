@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
@@ -21,10 +22,10 @@ PreferredSize commonAppBar({
   TextStyle? style,
   double? elevation,
 }) => PreferredSize(
-  preferredSize: Size.fromHeight(appBarHeight),
+  preferredSize: Size.fromHeight(appBarHeight.r),
   child: AppBar(
     leadingWidth: 60.height(),
-    toolbarHeight: appBarHeight,
+    toolbarHeight: appBarHeight.r,
     surfaceTintColor: AppPalettes.transparentColor,
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: statusBarColor,

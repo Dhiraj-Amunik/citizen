@@ -438,10 +438,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get view_details => 'View Details';
 
   @override
+  String get raise_amount => 'Raise Amount';
+
+  @override
+  String get raised_amount => 'Raised Amount';
+
+  @override
+  String get raise_amount_validator => 'Amount cannot be empty';
+
+  @override
   String get requested_amount => 'Requested Amount';
 
   @override
   String get description => 'Description';
+
+  @override
+  String get enter_your_issue => 'Enter your issue';
 
   @override
   String get enter_your_name => 'Enter your name';
@@ -451,6 +463,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enter_your_title => 'Enter your title';
+
+  @override
+  String get please_enter_the_cause_for_raising_request =>
+      'Please enter cause for raising request';
+
+  @override
+  String get please_enter_few_words => 'Please enter few words';
 
   @override
   String get enter_detail_description => 'Enter detail description';

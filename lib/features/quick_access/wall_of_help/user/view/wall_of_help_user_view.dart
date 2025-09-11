@@ -10,7 +10,7 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/user/widgets/user_card_help_widget.dart';
-import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_user_view_model.dart';
+import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_view_model.dart';
 import 'package:provider/provider.dart';
 
 class WallOfHelpUserView extends StatelessWidget {
@@ -20,7 +20,7 @@ class WallOfHelpUserView extends StatelessWidget {
   Widget build(BuildContext context) {
     final localization = context.localizations;
     final textTheme = context.textTheme;
-    final provider = context.read<WallOfHelpUserViewModel>();
+    final provider = context.read<WallOfHelpViewModel>();
     return Scaffold(
       appBar: commonAppBar(title: localization.wall_of_help),
       body: RefreshIndicator(
@@ -85,7 +85,7 @@ class WallOfHelpUserView extends StatelessWidget {
                 style: textTheme.headlineSmall,
               ),
               Expanded(
-                child: Consumer<WallOfHelpUserViewModel>(
+                child: Consumer<WallOfHelpViewModel>(
                   builder: (context, value, _) {
                     if (provider.isLoading) {
                       return Center(child: CustomAnimatedLoading());

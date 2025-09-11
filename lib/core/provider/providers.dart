@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/features/auth/view_model/login_view_model.dart';
 import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
+import 'package:inldsevak/features/common_fields/view_model/mla_view_model.dart';
 import 'package:inldsevak/features/common_fields/view_model/search_view_model.dart';
 import 'package:inldsevak/features/auth/view_model/user_register_view_model.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
@@ -14,7 +15,7 @@ import 'package:inldsevak/features/donation/view_model/donation_view_model.dart'
 import 'package:inldsevak/features/navigation/view_model/navigation_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/avatar_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
-import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_user_view_model.dart';
+import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_view_model.dart';
 import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -42,12 +43,12 @@ class AppProviders {
 
     //
     ChangeNotifierProvider(create: (_) => QrCodeViewModel()),
-
+    //user-party
+    ChangeNotifierProvider(create: (_) => WallOfHelpViewModel()),
     //User Providers
-    ChangeNotifierProvider(create: (_) => WallOfHelpUserViewModel()),
     ChangeNotifierProvider(create: (_) => EventsViewModel()),
     ChangeNotifierProvider(create: (_) => LokVartaViewModel()),
     ChangeNotifierProvider(create: (_) => ConstituencyViewModel()),
-    
+    ChangeNotifierProvider(create: (_) => MlaViewModel()),
   ];
 }

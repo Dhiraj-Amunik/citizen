@@ -7,7 +7,9 @@ import 'package:inldsevak/core/secure/secure_storage.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
+import 'package:inldsevak/features/navigation/view/navigation_view.dart';
 import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:provider/provider.dart';
@@ -118,9 +120,12 @@ class ProfileView extends StatelessWidget {
                 ),
               ],
             ),
+            SizeBox.size
           ],
+          
         ),
       ),
+      bottomNavigationBar: DummyNav(),
     );
   }
 }

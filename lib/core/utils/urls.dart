@@ -25,8 +25,7 @@ class URLs {
   //User
   static const userMLAs = "/api/user/list-of-mlas-dropdown"; /*Get*/
   static const userAppointment = "/api/user/create-appointment"; /*Get*/
-  static const getUserWallOFHelpData =
-      "/api/user/listOfFinancialHelpRequests"; /*Get*/
+
   static const userEvents = "/api/user/list-of-events"; /*Post*/
   static const userEventsDetails = "/api/user/get-single-event"; /*Post*/
   static const userLokVarta = "/api/user/lok-varta"; /*Post*/
@@ -45,4 +44,13 @@ class URLs {
   static const getAuthority = "/api/user/list-of-authorities-dropdown"; /*Get*/
   static const getConstituencies =
       "/api/user/list-of-constituencies-dropdown"; /*Get*/
+
+  // wall of help
+  static const getUserWallOFHelpData =
+      "/api/user/listOfFinancialHelpRequests"; /*Get*/
+  static const requestFinancialHelp =
+      "/api/user/createFinancialHelpRequest"; /*Post*/
+static const donateToHelpRequest =
+      "/api/user/donateToFinancialHelpRequest"; /*Post*/
+
 }

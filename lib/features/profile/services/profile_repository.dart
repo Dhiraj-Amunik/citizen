@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:inldsevak/core/dio/exception_handlers.dart';
 import 'package:inldsevak/core/dio/network_requester.dart';
 import 'package:inldsevak/core/dio/repo_reponse.dart';
@@ -15,7 +17,6 @@ class ProfileRepository {
       path: URLs.getUserProfile,
       token: token,
     );
-
     return response is APIException
         ? RepoResponse(error: response)
         : RepoResponse(data: UserProfileModel.fromJson(response));

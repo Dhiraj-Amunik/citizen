@@ -78,7 +78,7 @@ Widget getPage(Routes route, {dynamic arguments}) {
     case Routes.partyWallOfHelpPage:
       return WallOfHelpPartyView();
     case Routes.contributePage:
-      return ContributeView();
+      return ContributeView(helpRequest: arguments,);
     case Routes.requestWallOfHelpPage:
       return RequestWallOfHelpView();
     case Routes.beVolunteerPage:

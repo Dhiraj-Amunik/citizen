@@ -54,8 +54,6 @@ extension ExtendedString on String {
     return null;
   }
 
-
-
   String? validateDropDown({String? argument}) {
     if (this == 'null') {
       return argument;
@@ -109,5 +107,27 @@ extension ExtendedString on String {
       return argument;
     }
     return null;
+  }
+
+  String? validateMaxAmount(
+    int maxAmount, {
+    String? argument,
+    String? argument2,
+  }) {
+    try {
+      if ((this).isEmpty) {
+        return argument;
+      }
+      final amount = int.parse(this);
+      if (amount < 10) {
+        return argument;
+      }
+      if (maxAmount < amount) {
+        return argument2;
+      }
+      return null;
+    } catch (err) {
+      return argument;
+    }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
@@ -23,7 +24,25 @@ class IndlView extends StatelessWidget {
     return Scaffold(
       appBar: commonAppBar(
         action: [
-          //
+          ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: Container(
+              height: Dimens.scaleX6,
+              width: Dimens.scaleX6,
+              color: AppPalettes.liteGreyColor,
+              child: Consumer<ProfileViewModel>(
+                builder: (context, profile, _) {
+                  return CommonHelpers.getNetworkImage(
+                    profile.profile?.avatar,
+                    placeholder: CommonHelpers.showInitials(
+                      profile.profile?.name ?? '',
+                      style: textTheme.titleMedium,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
         ],
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -31,9 +50,9 @@ class IndlView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Consumer<ProfileViewModel>(
-              builder: (context, value, _) {
+              builder: (context, profile, _) {
                 return Text(
-                  "Hi, ${value.profile?.name ?? '...'}",
+                  "Hi, ${profile.profile?.name ?? '...'}",
                   style: textTheme.headlineMedium,
                 );
               },
@@ -57,10 +76,9 @@ class IndlView extends StatelessWidget {
           spacing: Dimens.widgetSpacing,
           children: [
             Container(
-              margin: EdgeInsets.only(top: Dimens.appBarSpacing),
-              padding: EdgeInsets.symmetric(
+              margin: EdgeInsets.symmetric(
                 horizontal: Dimens.horizontalspacing,
-              ),
+              ).copyWith(top: Dimens.paddingX2),
               decoration: boxDecorationRoundedWithShadow(
                 Dimens.radiusX2,
                 blurRadius: 2,

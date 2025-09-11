@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/extensions/date_formatter.dart';
+import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
+import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
+    as model;
 
 class PartyHelpCard extends StatelessWidget {
-  const PartyHelpCard({super.key});
+  final model.Data helpRequest;
+
+  const PartyHelpCard({super.key, required this.helpRequest});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +38,62 @@ class PartyHelpCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: Dimens.gapX1,
         children: [
-          topWidget(textTheme),
+          Row(
+            spacing: Dimens.gapX2,
+            children: [
+              SizedBox(
+                height: Dimens.scaleX6,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(Dimens.radius100),
+                  ),
+                  child: CommonHelpers.getCacheNetworkImage(
+                    "https://media.gettyimages.com/id/164928990/photo/young-woman-portrait.jpg?s=612x612&w=0&k=20&c=c9tonf-iDbD5Ig85gsIZxZ_ws1nksxQBgeUwMs2_sKM=",
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  spacing: Dimens.gapX,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          helpRequest.user?.name ?? "Unknown name",
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        CommonHelpers.buildStatus(
+                          helpRequest.isActive == true ? "Pending" : "Resolved",
+                          textColor: AppPalettes.lightTextColor,
+                          statusColor: helpRequest.isActive == true
+                              ? AppPalettes.yellowColor
+                              : AppPalettes.greenColor,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      spacing: Dimens.gapX1,
+                      children: [
+                        CommonHelpers.buildIcons(
+                          path: AppImages.calenderIcon,
+                          iconSize: Dimens.scaleX1B,
+                          iconColor: AppPalettes.blackColor,
+                        ),
+                        Text(
+                          helpRequest.createdAt?.toDdMmmYyyy() ?? "",
+                          style: textTheme.labelMedium,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           RichText(
             textAlign: TextAlign.start,
             text: TextSpan(
@@ -40,7 +102,7 @@ class PartyHelpCard extends StatelessWidget {
                 TextSpan(text: localization.requested_amount),
                 TextSpan(text: " : "),
                 TextSpan(
-                  text: "₹1000",
+                  text: "₹${helpRequest.amountRequested}",
                   style: textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w400,
                   ),
@@ -56,7 +118,7 @@ class PartyHelpCard extends StatelessWidget {
                 TextSpan(text: localization.description),
                 TextSpan(text: " : "),
                 TextSpan(
-                  text: "Medical Treatment",
+                  text: helpRequest.reason,
                   style: textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w400,
                   ),
@@ -70,18 +132,30 @@ class PartyHelpCard extends StatelessWidget {
             children: [
               Expanded(
                 child: CommonButton(
-                  onTap: () => RouteManager.pushNamed(Routes.contributePage),
+                  onTap: () {
+                    if (helpRequest.isActive == true &&
+                        (helpRequest.amountCollected !=
+                            helpRequest.amountRequested)) {
+                      RouteManager.pushNamed(
+                        Routes.contributePage,
+                        arguments: helpRequest,
+                      );
+                      return;
+                    }
+                    CommonSnackbar(
+                      text: "Amount has been raised successfully",
+                    ).showToast();
+                  },
                   text: localization.contribute,
-                  height: 0,
-                  fontSize: 14,
-                  padding: EdgeInsets.symmetric(
-                    vertical: Dimens.paddingX1,
-                    horizontal: Dimens.paddingX2,
-                  ),
+                  height: 30.height(),
+                  radius: Dimens.radiusX2,
+                  padding: EdgeInsets.symmetric(vertical: Dimens.paddingX1),
                 ),
               ),
               Expanded(
                 child: CommonButton(
+                  color: AppPalettes.whiteColor,
+                  borderColor: AppPalettes.primaryColor,
                   onTap: () => showModalBottomSheet(
                     isScrollControlled: true,
                     context: context,
@@ -91,17 +165,20 @@ class PartyHelpCard extends StatelessWidget {
                         child: Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: Dimens.horizontalspacing,
-                            vertical: Dimens.paddingX2,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: Dimens.gapX2,
+                            spacing: Dimens.gapX1B,
                             children: [
-                              topWidget(textTheme),
                               getRow(
                                 textTheme,
                                 text: localization.requested_amount,
-                                desc: "₹1000",
+                                desc: "${helpRequest.amountRequested ?? 'Nil'}",
+                              ),
+                              getRow(
+                                textTheme,
+                                text: localization.raised_amount,
+                                desc: "${helpRequest.amountCollected ?? 'Nil'}",
                               ),
                               getRow(
                                 textTheme,
@@ -116,28 +193,14 @@ class PartyHelpCard extends StatelessWidget {
                               getRow(
                                 textTheme,
                                 text: localization.detailed_desc,
-                                desc: "",
-                              ),
-                              Text(
-                                "My mother requires urgent treatment for a chronic illness. We are unable to manage the hospital expenses and need financial help.",
-                                style: textTheme.labelMedium?.copyWith(
-                                  fontWeight: FontWeight.w400,
-                                  color: AppPalettes.blackColor,
-                                ),
+                                desc: helpRequest.reason,
                               ),
                               getRow(
                                 textTheme,
                                 text: localization.previous_contributions,
-                                desc: "",
-                              ),
-                              Text(
-                                '''• Amount contributed: ₹1000.
-• Number of contributors: 2.
-• Status: Partially Funded.''',
-                                style: textTheme.labelMedium?.copyWith(
-                                  fontWeight: FontWeight.w400,
-                                  color: AppPalettes.blackColor,
-                                ),
+                                desc: helpRequest.transactions?.isEmpty == true
+                                    ? ''
+                                    : "Total ${helpRequest.transactions?.length} users have contributed",
                               ),
                             ],
                           ),
@@ -146,15 +209,10 @@ class PartyHelpCard extends StatelessWidget {
                     },
                   ),
                   textColor: AppPalettes.primaryColor,
-                  color: AppPalettes.liteGreyColor,
-                  fontSize: 14,
-                  elevation: 0.1,
                   text: localization.view_details,
-                  height: 0,
-                  padding: EdgeInsets.symmetric(
-                    vertical: Dimens.paddingX1,
-                    horizontal: Dimens.paddingX2,
-                  ),
+                  height: 30.height(),
+                  radius: Dimens.radiusX2,
+                  padding: EdgeInsets.symmetric(vertical: Dimens.paddingX1),
                 ),
               ),
             ],
@@ -164,75 +222,25 @@ class PartyHelpCard extends StatelessWidget {
     );
   }
 
-  Widget topWidget(TextTheme textTheme) {
-    return Row(
-      spacing: Dimens.gapX2,
-      children: [
-        SizedBox(
-          height: Dimens.scaleX6,
-          child: ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(Dimens.radius100)),
-            child: CommonHelpers.getCacheNetworkImage(
-              "https://media.gettyimages.com/id/164928990/photo/young-woman-portrait.jpg?s=612x612&w=0&k=20&c=c9tonf-iDbD5Ig85gsIZxZ_ws1nksxQBgeUwMs2_sKM=",
+  Widget getRow(TextTheme style, {required String text, String? desc}) {
+    return RichText(
+      text: TextSpan(
+        style: style.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w500,
+          color: AppPalettes.blackColor,
+        ),
+        children: [
+          TextSpan(text: text),
+          TextSpan(text: " : "),
+          TextSpan(
+            text: desc,
+            style: style.labelLarge?.copyWith(
+              fontWeight: FontWeight.w400,
+              color: AppPalettes.blackColor,
             ),
           ),
-        ),
-        Expanded(
-          child: Column(
-            spacing: Dimens.gapX,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    "Ravi Kumar",
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const Spacer(),
-                  CommonHelpers.buildStatus(
-                    "Health",
-                    statusColor: AppPalettes.greenColor,
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                spacing: Dimens.gapX1,
-                children: [
-                  CommonHelpers.buildIcons(
-                    path: AppImages.locationIcon,
-                    iconSize: Dimens.scaleX2,
-                  ),
-                  Text("Hyderabad, Telangana", style: textTheme.labelMedium),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
-}
-
-Widget getRow(TextTheme style, {required String text, String? desc}) {
-  return RichText(
-    text: TextSpan(
-      style: style.bodySmall?.copyWith(
-        fontWeight: FontWeight.w500,
-        color: AppPalettes.blackColor,
-      ),
-      children: [
-        TextSpan(text: text),
-        TextSpan(text: " : "),
-        TextSpan(
-          text: desc,
-          style: style.labelMedium?.copyWith(
-            fontWeight: FontWeight.w400,
-            color: AppPalettes.blackColor,
-          ),
-        ),
-      ],
-    ),
-  );
 }

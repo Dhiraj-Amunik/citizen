@@ -35,25 +35,27 @@ class ComplaintsView extends StatelessWidget {
 
       body: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX3),
-            child: Consumer<ComplaintsViewModel>(
-              builder: (context, value, child) {
-                if (value.isLoading) {
-                  return Center(child: CustomAnimatedLoading());
-                }
-                return RefreshIndicator(
-                  onRefresh: () => value.getComplaints(),
-                  child: buildComplaintsList(value.complaintsList),
-                );
-              },
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX3),
+              child: Consumer<ComplaintsViewModel>(
+                builder: (context, value, child) {
+                  if (value.isLoading) {
+                    return Center(child: CustomAnimatedLoading());
+                  }
+                  return RefreshIndicator(
+                    onRefresh: () => value.getComplaints(),
+                    child: buildComplaintsList(value.complaintsList),
+                  );
+                },
+              ),
             ),
           ),
-          Spacer(),
           CommonButton(
             text: localization.raise_complaint,
             onTap: () => RouteManager.pushNamed(Routes.lodgeComplaintPage),
           ).horizontalPadding(Dimens.horizontalspacing),
+          SizeBox.sizeHX4
         ],
       ),
       bottomNavigationBar: DummyNav(),

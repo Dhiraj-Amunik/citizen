@@ -17,19 +17,23 @@ class HomeView extends StatelessWidget {
         if (!role.isUIEnabled) {
           return Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-        return Scaffold(
-          body: Consumer<NavigationViewModel>(
-            builder: (_, navigation, _) {
-              return role.isPartyMember
-                  ? navigation.partyWidgets[navigation.selectedTab]
-                  : navigation.userWidgets[navigation.selectedTab];
-            },
-          ).onlyPadding(bottom: Dimens.paddingX10),
-          extendBody: true,
+        return SafeArea(
+          top: false,
+          child: Scaffold(
+            body: Consumer<NavigationViewModel>(
+              builder: (_, navigation, _) {
+                return role.isPartyMember
+                    ? navigation.partyWidgets[navigation.selectedTab]
+                    : navigation.userWidgets[navigation.selectedTab];
+              },
+            ).onlyPadding(bottom: Dimens.paddingX10),
+            extendBody: true,
 
-          bottomNavigationBar: Container(
-            color: AppPalettes.transparentColor,
-            child: NavigationView()),
+            bottomNavigationBar: Container(
+              color: AppPalettes.transparentColor,
+              child: NavigationView(),
+            ),
+          ),
         );
       },
     );

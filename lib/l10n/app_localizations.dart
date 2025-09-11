@@ -922,6 +922,24 @@ abstract class AppLocalizations {
   /// **'View Details'**
   String get view_details;
 
+  /// No description provided for @raise_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise Amount'**
+  String get raise_amount;
+
+  /// No description provided for @raised_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Raised Amount'**
+  String get raised_amount;
+
+  /// No description provided for @raise_amount_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount cannot be empty'**
+  String get raise_amount_validator;
+
   /// No description provided for @requested_amount.
   ///
   /// In en, this message translates to:
@@ -933,6 +951,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Description'**
   String get description;
+
+  /// No description provided for @enter_your_issue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your issue'**
+  String get enter_your_issue;
 
   /// No description provided for @enter_your_name.
   ///
@@ -951,6 +975,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter your title'**
   String get enter_your_title;
+
+  /// No description provided for @please_enter_the_cause_for_raising_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter cause for raising request'**
+  String get please_enter_the_cause_for_raising_request;
+
+  /// No description provided for @please_enter_few_words.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter few words'**
+  String get please_enter_few_words;
 
   /// No description provided for @enter_detail_description.
   ///

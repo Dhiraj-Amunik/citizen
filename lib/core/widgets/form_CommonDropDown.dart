@@ -67,7 +67,7 @@ class FormCommonDropDown<T> extends StatelessWidget {
             right: Dimens.paddingX5,
           ),
           closedHeaderPadding: EdgeInsets.symmetric(
-            vertical: Dimens.paddingX3B,
+            vertical: Dimens.paddingX3,
             horizontal: Dimens.paddingX4,
           ),
           listItemPadding: EdgeInsets.only(bottom: Dimens.paddingX3),

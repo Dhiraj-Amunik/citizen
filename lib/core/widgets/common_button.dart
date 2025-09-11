@@ -29,6 +29,7 @@ class CommonButton extends StatefulWidget {
   final bool isAnimationEnable;
   final bool isEnable;
   final Color? splashColor;
+  final Color? borderColor;
   final Color? textColor;
   final BorderSide? side;
   final double? fontSize;
@@ -55,6 +56,7 @@ class CommonButton extends StatefulWidget {
     this.enableScaleAnimation = true,
     this.radius,
     this.isLoading = false,
+    this.borderColor,
     this.side,
     super.key,
     this.fontSize,
@@ -133,22 +135,32 @@ class _CommonButtonState extends State<CommonButton>
             height: widget.height ?? 50.height(),
             padding:
                 widget.padding ??
-                EdgeInsets.symmetric(horizontal: Dimens.paddingX10,vertical: Dimens.paddingX2B),
+                EdgeInsets.symmetric(
+                  horizontal: Dimens.paddingX10,
+                  vertical: Dimens.paddingX2B,
+                ),
             decoration: BoxDecoration(
+              color: widget.color,
               borderRadius:
                   widget.onlyRadius ??
                   BorderRadius.circular(widget.radius ?? Dimens.radiusX4),
               border: Border.all(
-                color: AppPalettes.whiteColor.withOpacityExt(0.2),
+                color:
+                    widget.borderColor ??
+                    AppPalettes.whiteColor.withOpacityExt(0.2),
                 width: 2,
               ),
-              gradient: LinearGradient(
-                colors: [
-                  AppPalettes.gradientFirstColor,
-                  AppPalettes.gradientSecondColor,
-                ],
-                transform: GradientRotation(_gradientController.value * 2 * pi),
-              ),
+              gradient: widget.color == null
+                  ? LinearGradient(
+                      colors: [
+                        AppPalettes.gradientFirstColor,
+                        AppPalettes.gradientSecondColor,
+                      ],
+                      transform: GradientRotation(
+                        _gradientController.value * 2 * pi,
+                      ),
+                    )
+                  : null,
               //  boxShadow: [
               //   BoxShadow(
               //     color: AppPalettes.gradientSecondColor.withOpacityExt(0.4),
@@ -174,9 +186,9 @@ class _CommonButtonState extends State<CommonButton>
               fit: BoxFit.contain,
               child: widget.isLoading
                   ? CircularProgressIndicator(
-                    color: AppPalettes.whiteColor,
-                    strokeWidth: 2.height(),
-                  )
+                      color: AppPalettes.whiteColor,
+                      strokeWidth: 2.height(),
+                    )
                   : widget.child ??
                         Text(
                           widget.text ?? "",

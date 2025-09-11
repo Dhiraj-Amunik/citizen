@@ -7,6 +7,7 @@ import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_common_child.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/features/common_fields/widget/mla_drop_down.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/view_model/be_a_volunteer_view_model.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/widgets/availability_options_widget.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/widgets/interest_choice_widget.dart';
@@ -21,20 +22,19 @@ class BeAVolunteerView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => BeAVolunteerViewModel(),
       builder: (contextP, _) {
-        print("object");
         final provider = contextP.read<BeAVolunteerViewModel>();
         return Scaffold(
           appBar: commonAppBar(title: localization.be_a_volunteer),
           body: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
               horizontal: Dimens.horizontalspacing,
-              vertical: Dimens.appBarSpacing,
             ),
             child: Form(
               key: provider.formKey,
               child: Column(
                 spacing: Dimens.textFromSpacing,
                 children: [
+                  MlaDropDownWidget(mlaController: provider.mlaController),
                   FormTextFormField(
                     isRequired: true,
                     focus: provider.nameFocus,
@@ -155,7 +155,7 @@ class BeAVolunteerView extends StatelessWidget {
                   isEnable: !value.isLoading,
                   isLoading: value.isLoading,
                   text: localization.become_a_volunteer,
-                  onTap: () => value.creatNewVolunterr(),
+                  onTap: () => value.creatNewVolunteer(),
                 );
               },
             ),

@@ -10,10 +10,9 @@ import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/core/widgets/upload_image_widget.dart';
+import 'package:inldsevak/features/common_fields/widget/mla_drop_down.dart';
 import 'package:inldsevak/features/quick_access/appointments/viewmodel/request_appointment_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:inldsevak/features/quick_access/appointments/model/mla_dropdown_model.dart'
-    as mla;
 
 class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
   const RequestAppointmentView({super.key});
@@ -21,15 +20,12 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
   @override
   Widget build(BuildContext context) {
     final localization = context.localizations;
-    final textTheme = context.textTheme;
     return ChangeNotifierProvider(
       create: (context) => RequestAppointmentViewModel(),
       builder: (context, child) {
         final provider = context.read<RequestAppointmentViewModel>();
         return Scaffold(
-          appBar: commonAppBar(
-            title: localization.request_appointment,
-          ),
+          appBar: commonAppBar(title: localization.request_appointment),
           body: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsetsGeometry.symmetric(
@@ -42,30 +38,7 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                 child: Column(
                   spacing: Dimens.textFromSpacing,
                   children: [
-                    FormCommonDropDown<mla.Data>(
-                      isRequired: true,
-                      heading: localization.select_mla,
-                      hintText: localization.choose_your_mla,
-                      controller: provider.mlaController,
-                      items: provider.mlaLists,
-                      listItemBuilder: (p0, mla, p2, p3) {
-                        return Text(
-                          mla.user?.name ?? "",
-                          style: textTheme.bodySmall,
-                        );
-                      },
-                      headerBuilder: (p0, mla, p2) {
-                        return Text(
-                          mla.user?.name ?? "",
-                          style: textTheme.bodySmall,
-                        );
-                      },
-                      validator: (data) {
-                        if (data == null) {
-                          return localization.mla_validator;
-                        }
-                      },
-                    ),
+                    MlaDropDownWidget(mlaController: provider.mlaController),
                     FormTextFormField(
                       isRequired: true,
                       headingText: localization.name,
@@ -103,7 +76,8 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                         }
                       },
                       validator: (text) => text?.validate(
-                        argument: localization.please_select_your_appointment_date,
+                        argument:
+                            localization.please_select_your_appointment_date,
                       ),
                     ),
                     FormCommonDropDown<String>(

@@ -119,7 +119,7 @@ class CommonHelpers {
     );
   }
 
-  static Widget buildStatus(String text, {required Color statusColor}) {
+  static Widget buildStatus(String text, {required Color statusColor,Color? textColor}) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: Dimens.paddingX3,
@@ -131,7 +131,7 @@ class CommonHelpers {
       ),
       child: Text(
         text,
-        style: AppStyles.labelMedium.copyWith(color: statusColor),
+        style: AppStyles.labelMedium.copyWith(color: textColor),
       ),
     );
   }

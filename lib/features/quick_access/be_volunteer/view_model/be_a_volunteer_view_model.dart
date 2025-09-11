@@ -2,10 +2,13 @@ import 'dart:developer';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
+import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/model/request_volunteer_model.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/services/volunterr_repository.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:inldsevak/features/quick_access/appointments/model/mla_dropdown_model.dart'
+    as mla;
 
 class BeAVolunteerViewModel extends BaseViewModel {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -21,6 +24,8 @@ class BeAVolunteerViewModel extends BaseViewModel {
   final ageFocus = FocusNode();
   final genderController = SingleSelectController<String>(null);
   final occupationController = SingleSelectController<String>(null);
+  final SingleSelectController<mla.Data> mlaController =
+      SingleSelectController<mla.Data>(null);
   final occupationFocus = FocusNode();
   final addressController = TextEditingController();
   final addressFocus = FocusNode();
@@ -54,13 +59,14 @@ class BeAVolunteerViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> creatNewVolunterr() async {
+  Future<void> creatNewVolunteer() async {
     if (formKey.currentState!.validate()) {
       autoValidateMode = AutovalidateMode.disabled;
     } else {
       autoValidateMode = AutovalidateMode.onUserInteraction;
       return;
     }
+
     isLoading = true;
     try {
       final data = RequestVolunteerModel(
@@ -75,25 +81,33 @@ class BeAVolunteerViewModel extends BaseViewModel {
         availability: selectedAvailability!,
         preferredTimeSlot: preferredTimeSlotsController.value!,
         hoursPerWeek: hoursPerWeekController.value!,
-        mlaId: "68b570d04c0125eb01d61866",
+        mlaId: mlaController.value!.sId!,
       );
-      print(data.toJson());
 
       final response = await VolunterrRepository().createVolunteer(data, token);
       if (response.data?.responseCode == 200) {
-        CommonSnackbar(
-          text: "Success",
+        await CommonSnackbar(
+          text:
+              response.data?.message ??
+              "Volunteer request sended successfully !",
         ).showAnimatedDialog(type: QuickAlertType.success);
       } else {
-        CommonSnackbar(
-          text: "Failed",
-        ).showAnimatedDialog(type: QuickAlertType.error);
+        await CommonSnackbar(
+          text: response.data?.message ?? "Something went wrong",
+        ).showAnimatedDialog(type: QuickAlertType.warning);
       }
+      RouteManager.pop();
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
       isLoading = false;
     }
+  }
+
+  @override
+  void dispose() {
+    mlaController.dispose();
+    super.dispose();
   }
 }

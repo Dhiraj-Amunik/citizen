@@ -4,8 +4,12 @@ class WallOfHelpModel {
   List<Data>? data;
   Pagination? pagination;
 
-  WallOfHelpModel(
-      {this.responseCode, this.message, this.data, this.pagination});
+  WallOfHelpModel({
+    this.responseCode,
+    this.message,
+    this.data,
+    this.pagination,
+  });
 
   WallOfHelpModel.fromJson(Map<String, dynamic> json) {
     responseCode = json['responseCode'];
@@ -54,24 +58,25 @@ class Data {
   String? updatedAt;
   int? iV;
 
-  Data(
-      {this.sId,
-      this.user,
-      this.subject,
-      this.reason,
-      this.amountRequested,
-      this.additionalDetails,
-      this.party,
-      this.constituency,
-      this.documents,
-      this.status,
-      this.isActive,
-      this.isDeleted,
-      this.amountCollected,
-      this.transactions,
-      this.createdAt,
-      this.updatedAt,
-      this.iV});
+  Data({
+    this.sId,
+    this.user,
+    this.subject,
+    this.reason,
+    this.amountRequested,
+    this.additionalDetails,
+    this.party,
+    this.constituency,
+    this.documents,
+    this.status,
+    this.isActive,
+    this.isDeleted,
+    this.amountCollected,
+    this.transactions,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
 
   Data.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -213,14 +218,15 @@ class Transactions {
   String? sId;
   String? donatedAt;
 
-  Transactions(
-      {this.donor,
-      this.donorModel,
-      this.amount,
-      this.paymentMethod,
-      this.transactionId,
-      this.sId,
-      this.donatedAt});
+  Transactions({
+    this.donor,
+    this.donorModel,
+    this.amount,
+    this.paymentMethod,
+    this.transactionId,
+    this.sId,
+    this.donatedAt,
+  });
 
   Transactions.fromJson(Map<String, dynamic> json) {
     donor = json['donor'];

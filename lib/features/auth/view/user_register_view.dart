@@ -130,7 +130,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                       headingText: localization.voter_id,
                       hintText: "ABC1234567",
                       maxLength: 10,
-                      controller: provider.aadharController,
+                      controller: provider.voterIdController,
                       prefixIcon: AppImages.aadharIcon,
                       keyboardType: TextInputType.name,
                       validator: (text) => text?.validate(
