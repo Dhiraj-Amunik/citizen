@@ -19,7 +19,7 @@ final List<QuickAccessModel> userQuickAccess = [
     route: Routes.requestAppointmentPage,
   ),
   QuickAccessModel(
-    icon: AppImages.partyAccess,
+    icon: AppImages.partySign,
     text: "Become a Team Member",
     route: Routes.becomePartMemberPage,
   ),
@@ -101,7 +101,7 @@ Widget _getDialog(TextTheme style, QuickAccessModel data) {
     child: Container(
       padding: EdgeInsets.symmetric(
         horizontal: Dimens.paddingX4,
-        vertical: Dimens.paddingX,
+        vertical: Dimens.paddingX2,
       ),
       decoration: boxDecorationRoundedWithShadow(
         Dimens.radiusX4,
@@ -112,10 +112,12 @@ Widget _getDialog(TextTheme style, QuickAccessModel data) {
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: Dimens.gapX2,
         children: [
-          CommonHelpers.buildIcons(
-            path: data.icon,
-            iconSize: Dimens.scaleX2,
-            iconColor: AppPalettes.blackColor,
+          Flexible(
+            child: CommonHelpers.buildIcons(
+              path: data.icon,
+              iconSize: Dimens.scaleX2,
+              iconColor: AppPalettes.blackColor,
+            ),
           ),
           Text(data.text, style: style.bodyMedium),
         ],

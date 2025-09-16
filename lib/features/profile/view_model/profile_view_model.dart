@@ -1,6 +1,5 @@
+import 'dart:developer';
 import 'dart:io';
-
-import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/list_extension.dart';
@@ -12,9 +11,11 @@ import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/auth/models/request/user_register_request_model.dart';
-import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
+import 'package:inldsevak/features/common_fields/model/address_model.dart';
 import 'package:inldsevak/features/profile/services/profile_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:inldsevak/core/models/response/user_profile_model.dart'
+    as userProfileModel;
 
 class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
   GlobalKey<FormState> userDetailsFormKey = GlobalKey<FormState>();
@@ -28,27 +29,34 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
   final dobController = TextEditingController();
   String? companyDateFormat;
   final aadharController = TextEditingController();
+  final voterIdController = TextEditingController();
+  userProfileModel.Constituency? constituencyData;
 
   List<String> genderList = ['Male', 'Female', 'others'];
-  final genderController = SingleSelectController<String>(null);
+  String? gender;
 
   model.Data? profile;
-  Predictions? address;
+  AddressModel? address;
 
   @override
   Future<void> onInit() async {
     await getUserProfile();
   }
 
-  File? image;
+  File? aadharImage;
+  File? voterIdImage;
 
-  Future<void> selectImage() async {
+  Future<void> selectImage({required bool isAadhar}) async {
     customRightCupertinoDialog(
       content: "Choose Image",
       rightButton: "Sure",
       onTap: () async {
         try {
-          image = await pickGalleryImage();
+          if (isAadhar) {
+            aadharImage = await pickGalleryImage();
+          } else {
+            voterIdImage = await pickGalleryImage();
+          }
           notifyListeners();
         } catch (err, stackTrace) {
           debugPrint("Error: $err");
@@ -59,8 +67,12 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
     );
   }
 
-  void removeImage() {
-    image = null;
+  void removeImage({required bool isAadhar}) {
+    if (isAadhar) {
+      aadharImage = null;
+    } else {
+      voterIdImage = null;
+    }
     notifyListeners();
   }
 
@@ -71,6 +83,9 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
       if (response.data?.responseCode == 200) {
         profile = response.data?.data;
         companyDateFormat = profile?.dateOfBirth;
+        if (profile?.constituency != null) {
+          constituencyData = profile?.constituency;
+        }
         profile?.dateOfBirth = (profile?.dateOfBirth?.isNotEmpty ?? false)
             ? DateFormat(
                 'dd-MM-yyyy',
@@ -85,7 +100,11 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
     }
   }
 
-  Future<void> updateUserProfile() async {
+  Future<void> updateUserProfile({
+    AddressModel? addressModel,
+    String? genderValue,
+    String? constituencyID,
+  }) async {
     try {
       if (!userDetailsFormKey.currentState!.validate()) {
         autoValidateMode = AutovalidateMode.onUserInteraction;
@@ -94,30 +113,89 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
 
       isLoading = true;
 
-      final data = RequestRegisterModel(
-        name: nameController.text,
-        email: emailController.text,
-        dateOfBirth: companyDateFormat,
-        gender: genderController.value?.toLowerCase(),
-        document: [
-          Document(documentUrl: "", documentNumber: aadharController.text),
-        ],
-        address: "",
-        avatar: "",
-        location: Location(coordinates: []),
-      );
+      final data = RequestRegisterModel();
+      bool needUpdate = false;
+      if (nameController.text != profile?.name) {
+        data.name = nameController.text;
+        needUpdate = true;
+      }
+
+      if (emailController.text != profile?.email) {
+        needUpdate = true;
+        data.email = emailController.text;
+      }
+      if (dobController.text != profile?.dateOfBirth) {
+        needUpdate = true;
+        data.dateOfBirth = companyDateFormat;
+      }
+
+      if (genderValue?.toLowerCase() != profile?.gender?.toLowerCase()) {
+        needUpdate = true;
+        data.gender = genderValue?.toLowerCase();
+      }
+
+      if (constituencyID != profile?.constituency?.sId) {
+        needUpdate = true;
+        data.constituencyId = constituencyID;
+      }
+
+      if (profile?.document?.isEmpty == true ||
+          aadharController.text != getInitialDocumentNumber('aadhaar')) {
+        needUpdate = true;
+        data.document = [
+          Document(
+            documentType: 'aadhaar',
+            documentNumber: aadharController.text,
+            documentUrl: "",
+          ),
+        ];
+      }
+
+      if (profile?.document?.isEmpty == true ||
+          voterIdController.text != getInitialDocumentNumber('voterid')) {
+        needUpdate = true;
+        data.document = [
+          ...data.document ?? [],
+          Document(
+            documentType: 'voterId',
+            documentNumber: voterIdController.text,
+            documentUrl: "",
+          ),
+        ];
+      }
+
+      if (addressModel != null) {
+        needUpdate = true;
+
+        if (addressModel.formattedAddress != profile?.address) {
+          data.address = addressModel.formattedAddress;
+        }
+        if (addressModel.city != profile?.city) {
+          data.city = addressModel.city;
+        }
+        if (addressModel.district != profile?.district) {
+          data.district = addressModel.district;
+        }
+        if (addressModel.state != profile?.state) {
+          data.state = addressModel.state;
+        }
+        if (addressModel.pincode != profile?.pincode) {
+          data.pincode = addressModel.pincode;
+        }
+        data.location = Location(
+          coordinates: [addressModel.latitude, addressModel.longitude],
+        );
+      }
+      if (needUpdate == false) {
+        CommonSnackbar(text: "Please edit profile to update").showToast();
+        return;
+      }
       final response = await ProfileRepository().updateUserProfile(
         token: token!,
         data: data,
       );
       if (response.data?.responseCode == 200) {
-        profile = response.data?.data;
-        companyDateFormat = profile?.dateOfBirth;
-        profile?.dateOfBirth = (profile?.dateOfBirth?.isNotEmpty ?? false)
-            ? DateFormat(
-                'dd-MM-yyyy',
-              ).format(DateTime.parse(profile?.dateOfBirth ?? ""))
-            : null;
+        await getUserProfile();
         CommonSnackbar(text: "Profile updated successfully").showToast();
       }
     } catch (err, stackTrace) {
@@ -128,23 +206,42 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
     }
   }
 
-  loadProfile() {
-    nameController.text = profile?.name ?? "";
-    emailController.text = profile?.email ?? "";
-    phoneNumberController.text = profile?.phone ?? "";
-    dobController.text = profile?.dateOfBirth ?? "";
-    aadharController.text = profile?.document?.first.documentNumber ?? "";
-    genderController.value = _safeFindMatch(genderList, profile?.gender);
-    address = Predictions(description: profile?.address);
-  }
+  loadProfile() async {
+    try {
+      nameController.text = profile?.name ?? "";
+      if (profile?.gender != "" &&
+          profile?.gender != null &&
+          profile?.gender?.isNotEmpty == true) {
+        gender = profile?.gender?.capitalize().trim();
+      }
+      emailController.text = profile?.email ?? "";
+      phoneNumberController.text = profile?.phone ?? "";
+      dobController.text = profile?.dateOfBirth ?? "";
 
-  removeProfile() {
-    nameController.text = profile?.name ?? "";
-    emailController.text = profile?.email ?? "";
-    phoneNumberController.text = profile?.phone ?? "";
-    dobController.text = profile?.dateOfBirth ?? "";
-    aadharController.text = profile?.address ?? "";
-    genderController.value = _safeFindMatch(genderList, profile?.gender?.capitalize());
+      if (profile?.document != null && profile?.document?.isNotEmpty == true) {
+        profile?.document?.forEach((document) {
+          if (document.documentType?.toLowerCase() == "aadhaar") {
+            aadharController.text = document.documentNumber.toString();
+          }
+          if (document.documentType?.toLowerCase() == "voterid") {
+            voterIdController.text = document.documentNumber.toString();
+          }
+        });
+      }
+      address = AddressModel(
+        formattedAddress: profile?.address ?? "",
+        city: profile?.city ?? "",
+        district: profile?.district ?? "",
+        state: profile?.state ?? "",
+        pincode: profile?.pincode ?? "",
+        latitude: profile?.location?.coordinates?.first ?? 0.0,
+        longitude: profile?.location?.coordinates?.last ?? 0.0,
+      );
+    } catch (err) {
+      CommonSnackbar(text: "Unable to load Profile").showToast();
+    } finally {
+      await Future.delayed(Duration(seconds: 2));
+    }
   }
 
   @override
@@ -154,9 +251,29 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
     phoneNumberController.dispose();
     dobController.dispose();
     aadharController.dispose();
-    genderController.dispose();
     emailFocus.dispose();
     super.dispose();
+  }
+
+  void generateVoter(String? value) {
+    voterIdController.value = TextEditingValue(text: value!.toUpperCase());
+  }
+
+  void generateAadhar(String? value) {
+    // Remove all spaces first
+    String digitsOnly = value!.replaceAll(RegExp(r'\s+'), '');
+
+    // Add spaces after every 4 characters
+    String formattedValue = digitsOnly
+        .replaceAllMapped(RegExp(r".{1,4}"), (match) => "${match.group(0)} ")
+        .trim();
+    aadharController.value = TextEditingValue(text: formattedValue);
+  }
+
+  String? getInitialDocumentNumber(String? docType) {
+    return profile?.document
+        ?.firstWhere((doc) => doc.documentType?.toLowerCase() == docType)
+        .documentNumber;
   }
 }
 

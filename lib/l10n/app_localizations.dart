@@ -196,6 +196,18 @@ abstract class AppLocalizations {
   /// **'Please enter your name'**
   String get name_validator;
 
+  /// No description provided for @father_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Father Name'**
+  String get father_name;
+
+  /// No description provided for @father_name_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter yout father name'**
+  String get father_name_validator;
+
   /// No description provided for @email.
   ///
   /// In en, this message translates to:
@@ -247,7 +259,7 @@ abstract class AppLocalizations {
   /// No description provided for @gender_validator.
   ///
   /// In en, this message translates to:
-  /// **'     Select your Gender'**
+  /// **'Select your Gender'**
   String get gender_validator;
 
   /// No description provided for @aadhaar_no.
@@ -256,23 +268,83 @@ abstract class AppLocalizations {
   /// **'Aadhar No'**
   String get aadhaar_no;
 
+  /// No description provided for @aadhar_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your aadhar number'**
+  String get aadhar_validator;
+
   /// No description provided for @voter_id.
   ///
   /// In en, this message translates to:
   /// **'Voter Id'**
   String get voter_id;
 
-  /// No description provided for @aadhar_validator.
+  /// No description provided for @voter_id_validator.
   ///
   /// In en, this message translates to:
-  /// **'Please enter Id proof'**
-  String get aadhar_validator;
+  /// **'Please enter your voter id number'**
+  String get voter_id_validator;
 
   /// No description provided for @register.
   ///
   /// In en, this message translates to:
   /// **'Register'**
   String get register;
+
+  /// No description provided for @city_village.
+  ///
+  /// In en, this message translates to:
+  /// **'City / Village'**
+  String get city_village;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @district.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get district;
+
+  /// No description provided for @state.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get state;
+
+  /// No description provided for @pincode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pincode'**
+  String get pincode;
+
+  /// No description provided for @pincode_6_digits.
+  ///
+  /// In en, this message translates to:
+  /// **'6 digits'**
+  String get pincode_6_digits;
+
+  /// No description provided for @upload_aadhar.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Aadhar'**
+  String get upload_aadhar;
+
+  /// No description provided for @upload_voter_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Voter Id'**
+  String get upload_voter_id;
+
+  /// No description provided for @whatapp_no.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp No'**
+  String get whatapp_no;
 
   /// No description provided for @contribute_with_love.
   ///
@@ -364,11 +436,11 @@ abstract class AppLocalizations {
   /// **'Enter your full name'**
   String get enter_your_full_name;
 
-  /// No description provided for @father_name.
+  /// No description provided for @parents_name.
   ///
   /// In en, this message translates to:
   /// **'Father\'s / Mother\'s Name'**
-  String get father_name;
+  String get parents_name;
 
   /// No description provided for @enter_parent_name.
   ///

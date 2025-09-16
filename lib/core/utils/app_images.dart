@@ -34,6 +34,8 @@ class AppImages {
   static const navProfileIcon = '$_navIconsURL/profile_icon.svg';
   static const navIdCardIcon = '$_navIconsURL/id_card_icon.svg';
   static const navSurveyIconIcon = '$_navIconsURL/survey_icon.svg';
+  static const navLokVartaIconIcon = '$_navIconsURL/lok_varta_icon.svg';
+  
 
   static const downnloadIcon = '$_navIconsURL/download_icon.svg';
   static const shareIcon = '$_navIconsURL/share_icon.svg';
@@ -87,4 +89,13 @@ class AppImages {
   static const cardsIcon = '$_donations/cardsicon.svg';
   static const rupeeIcon = '$_donations/rupeeicon.svg';
   static const clipboardicon = '$_donations/clipboardicon.svg';
+
+
+
+
+
+  //IMP
+  static const partySign = 'assets/logo/party_sign.svg';
+
+  
 }

@@ -17,7 +17,8 @@ import 'package:inldsevak/features/party_member/services/party_member_repository
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
     as constituency;
-import 'package:inldsevak/features/party_member/model/response/parties_model.dart'as parties;
+import 'package:inldsevak/features/party_member/model/response/parties_model.dart'
+    as parties;
 
 class BecomePartyMemViewModel extends BaseViewModel
     with CupertinoDialogMixin, TransparentCircular {
@@ -43,9 +44,7 @@ class BecomePartyMemViewModel extends BaseViewModel
   final constituencyController = SingleSelectController<constituency.Data>(
     null,
   );
-    final partiesController = SingleSelectController<parties.Data>(
-    null,
-  );
+  final partiesController = SingleSelectController<parties.Data>(null);
   File? photographyPicture;
   final reasonController = TextEditingController();
   final roleController = SingleSelectController<String>(null);
@@ -105,7 +104,7 @@ class BecomePartyMemViewModel extends BaseViewModel
         partyId: partiesController.value?.sId,
         reason: reasonController.text,
         preferredRole: roleController.value,
-        documents: []
+        documents: [],
       );
 
       final response = await PartyMemberRepository().createPartyMember(
@@ -116,6 +115,7 @@ class BecomePartyMemViewModel extends BaseViewModel
         await CommonSnackbar(
           text: response.data?.message ?? "Request sended successfully",
         ).showAnimatedDialog(type: QuickAlertType.success);
+        RouteManager.pop();
         isEnable = false;
       } else {
         CommonSnackbar(
@@ -151,7 +151,7 @@ class BecomePartyMemViewModel extends BaseViewModel
     }
   }
 
-    Future<void> getParties() async {
+  Future<void> getParties() async {
     try {
       final response = await PartyMemberRepository().getParties(token);
       if (response.data?.responseCode == 200) {

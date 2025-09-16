@@ -24,13 +24,13 @@ class NavigationViewModel extends ChangeNotifier {
   List<NavigationModel> userTabIconData = [
     NavigationModel(imagePath: AppImages.navINLDIcon, text: "INLD"),
     NavigationModel(imagePath: AppImages.navDonateIcon, text: "Donate"),
-    NavigationModel(imagePath: AppImages.complaintAccess, text: "Complaint"),
-    NavigationModel(imagePath: AppImages.aadharIcon, text: "Lok Varta"),
+    NavigationModel(imagePath: AppImages.navComplaintIcon, text: "Complaint"),
+    NavigationModel(imagePath: AppImages.navLokVartaIconIcon, text: "Lok Varta"),
     NavigationModel(imagePath: AppImages.navProfileIcon, text: "Profile"),
   ];
 
   List<NavigationModel> partyTabIconData = [
-    NavigationModel(imagePath: AppImages.navINLDIcon, text: "INLD"),
+    NavigationModel(imagePath: AppImages.partySign, text: "INLD"),
     NavigationModel(imagePath: AppImages.navSurveyIconIcon, text: "Survey"),
     NavigationModel(imagePath: AppImages.navIdCardIcon, text: "ID card"),
     NavigationModel(imagePath: AppImages.navMediaIcon, text: "Lok Varta"),

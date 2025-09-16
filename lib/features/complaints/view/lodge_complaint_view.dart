@@ -55,7 +55,7 @@ class LodgeComplaintView extends StatelessWidget {
                         argument: localization.please_enter_a_title,
                       ),
                     ),
-                    FormCommonDropDown<constituency.Data>(
+                    FormCommonDropDown<constituency.Data?>(
                       isRequired: true,
                       heading: localization.constituency,
                       hintText: localization.select_your_constituency,
@@ -63,16 +63,19 @@ class LodgeComplaintView extends StatelessWidget {
                       controller: value.constituenciesController,
                       listItemBuilder: (p0, constituency, p2, p3) {
                         return Text(
-                          "${constituency.name}",
+                          "${constituency?.name}",
                           style: context.textTheme.bodySmall,
                         );
                       },
                       headerBuilder: (p0, constituency, p2) {
                         return Text(
-                          "${constituency.name}",
+                          "${constituency?.name}",
                           style: context.textTheme.bodySmall,
                         );
                       },
+                      validator: (value) => value.toString().validateDropDown(
+                        argument: "Please select a constituency",
+                      ),
                     ),
                     FormCommonDropDown<departments.Data>(
                       isRequired: true,
@@ -95,6 +98,9 @@ class LodgeComplaintView extends StatelessWidget {
                           style: context.textTheme.bodySmall,
                         );
                       },
+                      validator: (value) => value.toString().validateDropDown(
+                        argument: "Please select one department",
+                      ),
                     ),
                     FormCommonDropDown<authorities.Data>(
                       isRequired: true,
@@ -114,6 +120,9 @@ class LodgeComplaintView extends StatelessWidget {
                           style: context.textTheme.bodySmall,
                         );
                       },
+                       validator: (value) => value.toString().validateDropDown(
+                        argument: "Please select one authority",
+                      ),
                     ),
                     FormTextFormField(
                       isRequired: true,

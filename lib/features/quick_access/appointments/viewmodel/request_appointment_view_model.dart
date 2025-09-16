@@ -113,6 +113,7 @@ class RequestAppointmentViewModel extends BaseViewModel
         await CommonSnackbar(
           text: "Appointment has been scheduled successfully.",
         ).showAnimatedDialog(type: QuickAlertType.success);
+        RouteManager.pop();
       } else {
         CommonSnackbar(
           text: response.error?.message ?? "Some thing went wrong",

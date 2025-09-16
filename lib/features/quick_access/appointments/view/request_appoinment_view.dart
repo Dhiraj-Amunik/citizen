@@ -86,6 +86,10 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                       hintText: localization.select_time_slot,
                       controller: provider.timeSlotController,
                       items: provider.timeSlotLists,
+                      validator: (text) => text.toString().validateDropDown(
+                        argument:
+                            "Please select time slot for your appointment",
+                      ),
                     ),
                     FormCommonDropDown<String>(
                       isRequired: true,
@@ -93,6 +97,9 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                       hintText: localization.select_purpose,
                       controller: provider.purposeOfAppointmentController,
                       items: provider.purposeLists,
+                      validator: (text) => text.toString().validateDropDown(
+                        argument: "Please select your appointment purpose",
+                      ),
                     ),
                     FormTextFormField(
                       isRequired: true,

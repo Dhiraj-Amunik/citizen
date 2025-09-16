@@ -1,9 +1,14 @@
 class RequestRegisterModel {
   String? name;
   String? email;
+  String? whatsappNo;
   String? dateOfBirth;
   String? gender;
   String? address;
+  String? city;
+  String? state;
+  String? district;
+  String? pincode;
   String? avatar;
   String? constituencyId;
   Location? location;
@@ -19,6 +24,11 @@ class RequestRegisterModel {
     this.constituencyId,
     this.location,
     this.document,
+    this.whatsappNo,
+    this.state,
+    this.city,
+    this.district,
+    this.pincode,
   });
 
   Map<String, dynamic> toJson() {
@@ -30,6 +40,11 @@ class RequestRegisterModel {
       'address': address,
       'avatar': avatar,
       'constituencyId': constituencyId,
+      "city": city,
+      "state": state,
+      "district": district,
+      "pincode": pincode,
+      "whatsapp": whatsappNo,
       'location': location?.toJson(),
       'document': document?.map((doc) => doc.toJson()).toList(),
     };
@@ -48,11 +63,11 @@ class Location {
 }
 
 class Document {
-  final String documentType = 'aadhaar'; // Static document type
+  String documentType; // Static document type
   String documentUrl;
   String documentNumber;
 
-  Document({required this.documentUrl, required this.documentNumber});
+  Document({required this.documentUrl, required this.documentNumber,required this.documentType});
 
   Map<String, dynamic> toJson() {
     return {

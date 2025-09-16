@@ -45,6 +45,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                               spacing: Dimens.textFromSpacing,
                               children: [
                                 FormCommonDropDown<parties.Data>(
+                                  isRequired: true,
                                   heading: localization.party,
                                   controller: provider.partiesController,
                                   items: provider.partiesLists,
@@ -64,24 +65,26 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   validator: (text) =>
                                       text.toString().validateDropDown(
                                         argument:
-                                            "      Please select a Party to join as  a member",
+                                            "Please select a Party to join as  a member",
                                       ),
                                 ),
                                 FormTextFormField(
+                                  isRequired: true,
                                   headingText: localization.full_name,
                                   hintText: localization.enter_your_full_name,
                                   controller: provider.fullNameController,
                                   keyboardType: TextInputType.name,
-                                  validator: (text) => text?.validate(
+                                  validator: (text) => text?.validateName(
                                     argument: "Please enter your name",
                                   ),
                                 ),
                                 FormTextFormField(
+                                  isRequired: true,
                                   headingText: localization.father_name,
                                   hintText: localization.enter_parent_name,
                                   controller: provider.parentNameController,
                                   keyboardType: TextInputType.name,
-                                  validator: (text) => text?.validate(
+                                  validator: (text) => text?.validateName(
                                     argument: "Please enter parent name",
                                   ),
                                 ),
@@ -91,6 +94,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                           if (provider.visibility)
                             SizedBox(height: Dimens.textFromSpacing),
                           FormTextFormField(
+                            isRequired: true,
                             // enabled: !provider.visibility,
                             headingText: localization.mobile_number,
                             hintText: localization.enter_mobile_number,
@@ -110,6 +114,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                               spacing: Dimens.textFromSpacing,
                               children: [
                                 FormTextFormField(
+                                  isRequired: true,
                                   headingText: localization.date_of_birth,
                                   hintText: localization.dd_mm_yyyy,
                                   controller: provider.dobController,
@@ -130,27 +135,29 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   ),
                                 ),
                                 FormCommonDropDown<String>(
+                                  isRequired: true,
                                   heading: localization.gender,
                                   controller: provider.genderController,
                                   items: provider.gendersList,
                                   hintText: localization.select_gender,
                                   validator: (text) =>
                                       text.toString().validateDropDown(
-                                        argument: "     Select your Gender",
+                                        argument: "Select your Gender",
                                       ),
                                 ),
                                 FormCommonDropDown<String>(
+                                  isRequired: true,
                                   heading: localization.marital_status,
                                   controller: provider.maritalStatusController,
                                   items: provider.maritalStatusList,
                                   hintText: localization.select_status,
                                   validator: (text) =>
                                       text.toString().validateDropDown(
-                                        argument:
-                                            "     Select your marital status",
+                                        argument: "Select your marital status",
                                       ),
                                 ),
                                 FormCommonDropDown<constituency.Data>(
+                                  isRequired: true,
                                   heading: localization.constituency,
                                   controller: provider.constituencyController,
                                   items: provider.constituencyLists,
@@ -170,8 +177,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   },
                                   validator: (text) =>
                                       text.toString().validateDropDown(
-                                        argument:
-                                            "     Select your constituency",
+                                        argument: "Select your constituency",
                                       ),
                                 ),
 
@@ -196,6 +202,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   ],
                                 ),
                                 FormTextFormField(
+                                  isRequired: true,
                                   showCounterText: true,
                                   headingText:
                                       localization.reason_for_joining_party,

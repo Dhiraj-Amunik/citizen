@@ -61,6 +61,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get name_validator => 'Please enter your name';
 
   @override
+  String get father_name => 'Father Name';
+
+  @override
+  String get father_name_validator => 'Please enter yout father name';
+
+  @override
   String get email => 'Email';
 
   @override
@@ -85,19 +91,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get select_gender => 'Select Gender';
 
   @override
-  String get gender_validator => '     Select your Gender';
+  String get gender_validator => 'Select your Gender';
 
   @override
   String get aadhaar_no => 'Aadhar No';
 
   @override
+  String get aadhar_validator => 'Please enter your aadhar number';
+
+  @override
   String get voter_id => 'Voter Id';
 
   @override
-  String get aadhar_validator => 'Please enter Id proof';
+  String get voter_id_validator => 'Please enter your voter id number';
 
   @override
   String get register => 'Register';
+
+  @override
+  String get city_village => 'City / Village';
+
+  @override
+  String get city => 'City';
+
+  @override
+  String get district => 'District';
+
+  @override
+  String get state => 'State';
+
+  @override
+  String get pincode => 'Pincode';
+
+  @override
+  String get pincode_6_digits => '6 digits';
+
+  @override
+  String get upload_aadhar => 'Upload Aadhar';
+
+  @override
+  String get upload_voter_id => 'Upload Voter Id';
+
+  @override
+  String get whatapp_no => 'WhatsApp No';
 
   @override
   String get contribute_with_love => 'Contribute with love';
@@ -145,7 +181,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enter_your_full_name => 'Enter your full name';
 
   @override
-  String get father_name => 'Father\'s / Mother\'s Name';
+  String get parents_name => 'Father\'s / Mother\'s Name';
 
   @override
   String get enter_parent_name => 'Enter parent name';

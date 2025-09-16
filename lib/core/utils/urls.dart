@@ -45,12 +45,14 @@ class URLs {
   static const getConstituencies =
       "/api/user/list-of-constituencies-dropdown"; /*Get*/
 
+  static const getPincodeConstituencies =
+      "/api/user/get-constituency-by-pincode"; /*Get*/
+
   // wall of help
   static const getUserWallOFHelpData =
       "/api/user/listOfFinancialHelpRequests"; /*Get*/
   static const requestFinancialHelp =
       "/api/user/createFinancialHelpRequest"; /*Post*/
-static const donateToHelpRequest =
+  static const donateToHelpRequest =
       "/api/user/donateToFinancialHelpRequest"; /*Post*/
-
 }

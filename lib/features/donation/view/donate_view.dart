@@ -183,6 +183,7 @@ Widget donationWidget({
     child:
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: Dimens.gapX2,
           children: [
             CommonHelpers.buildIcons(
               path: AppImages.clipboardicon,
@@ -190,31 +191,39 @@ Widget donationWidget({
               iconSize: Dimens.scaleX2,
               color: AppPalettes.liteGreenTextFieldColor,
             ),
-            SizeBox.sizeWX3,
-            Center(
+
+            Expanded(
               child: Column(
+                spacing: Dimens.gapX,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("₹ $amount", style: textTheme.bodyMedium),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("₹ $amount", style: textTheme.bodyMedium),
+                      SizeBox.sizeWX3,
+                      const Spacer(),
+                      Text(
+                        date?.toDdMmmYyyy() ?? "",
+                        style: textTheme.bodySmall?.copyWith(
+                          color: AppPalettes.lightTextColor,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      SizeBox.sizeWX1,
+                    ],
+                  ),
                   Text(
                     reason ?? "Purpose",
                     style: textTheme.labelMedium?.copyWith(
                       color: AppPalettes.lightTextColor,
                     ),
-                    maxLines: 1,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const Spacer(),
-            Text(
-              date?.toDdMmmYyyy() ?? "",
-              style: textTheme.bodySmall?.copyWith(
-                color: AppPalettes.lightTextColor,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            SizeBox.sizeWX1,
           ],
         ).symmetricPadding(
           horizontal: Dimens.paddingX2,

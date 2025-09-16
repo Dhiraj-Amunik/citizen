@@ -32,7 +32,7 @@ class IndlView extends StatelessWidget {
               color: AppPalettes.liteGreyColor,
               child: Consumer<ProfileViewModel>(
                 builder: (context, profile, _) {
-                  return CommonHelpers.getNetworkImage(
+                  return CommonHelpers.getCacheNetworkImage(
                     profile.profile?.avatar,
                     placeholder: CommonHelpers.showInitials(
                       profile.profile?.name ?? '',
@@ -44,31 +44,38 @@ class IndlView extends StatelessWidget {
             ),
           ),
         ],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Consumer<ProfileViewModel>(
-              builder: (context, profile, _) {
-                return Text(
-                  "Hi, ${profile.profile?.name ?? '...'}",
-                  style: textTheme.headlineMedium,
-                );
-              },
-            ),
-            Row(
+        child: Consumer<ProfileViewModel>(
+          builder: (context, profile, _) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
               spacing: Dimens.gapX1,
               children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  size: Dimens.scaleX2,
-                  color: AppPalettes.primaryColor,
+                Text(
+                  "Hi, ${profile.profile?.name ?? '...'}",
+                  style: textTheme.headlineMedium,
                 ),
-                Text("Gurgaon Constituency", style: textTheme.labelMedium),
+                Row(
+                  spacing: Dimens.gapX1,
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: Dimens.scaleX2,
+                      color: AppPalettes.primaryColor,
+                    ),
+                    Flexible(
+                      child: Text(
+                        profile.profile?.constituency?.name ?? "Not Found",
+                        style: textTheme.labelMedium,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ],
-            ),
-          ],
+            );
+          },
         ),
       ),
       body: SingleChildScrollView(
@@ -90,7 +97,6 @@ class IndlView extends StatelessWidget {
               ),
             ),
             QuickAccessWidget(showParty: roleProvider.isPartyMember),
-
             UpComingHomeEventsWidget(),
             Consumer<ComplaintsViewModel>(
               builder: (_, value, _) {

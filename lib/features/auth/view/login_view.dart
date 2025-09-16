@@ -41,6 +41,7 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              SizeBox.sizeHX4,
               Image.asset(
                 "assets/logo/login_image.png",
                 width: 200.spMax,
@@ -59,15 +60,15 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
                 ),
               ),
               SizeBox.sizeHX4,
-              Form(
-                key: loginFormKey,
-                autovalidateMode: provider.autoValidateMode,
-                child: Column(
-                  spacing: Dimens.widgetSpacing,
-                  children: [
-                    Consumer<LoginViewModel>(
-                      builder: (context, value, _) {
-                        return Column(
+              Consumer<LoginViewModel>(
+                builder: (context, value, _) {
+                  return Form(
+                    key: loginFormKey,
+                    autovalidateMode: provider.autoValidateMode,
+                    child: Column(
+                      spacing: Dimens.widgetSpacing,
+                      children: [
+                        Column(
                           spacing: Dimens.widgetSpacing,
                           children: [
                             CommonTextFormField(
@@ -91,11 +92,11 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
                               },
                             ),
                           ],
-                        );
-                      },
-                    ),
-                  ],
-                ).symmetricPadding(horizontal: Dimens.horizontalspacing),
+                        ),
+                      ],
+                    ).symmetricPadding(horizontal: Dimens.horizontalspacing),
+                  );
+                },
               ),
             ],
           ),

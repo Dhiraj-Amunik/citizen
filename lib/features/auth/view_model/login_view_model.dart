@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
@@ -6,7 +7,7 @@ import 'package:inldsevak/features/auth/models/request/validate_otp_request_mode
 import 'package:inldsevak/features/auth/services/auth_repository.dart';
 import 'package:quickalert/quickalert.dart';
 
-class LoginViewModel extends BaseViewModel {
+class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
 
   final numberController = TextEditingController();
@@ -37,6 +38,25 @@ class LoginViewModel extends BaseViewModel {
       debugPrint("Stack Trace: $stackTrace");
     } finally {
       isLoading = false;
+    }
+  }
+
+  Future<void> resendOTP() async {
+    try {
+      RouteManager.pop();
+      final data = OtpRequestModel(phoneNo: numberController.text);
+      final response = await AuthRepository().generateOTP(data);
+
+      if (response.data?.responseCode == 200) {
+        CommonSnackbar(
+          text: "${response.data?.data?.otp} is valid for 5 min",
+        ).showSnackbar();
+      } else {
+        CommonSnackbar(text: response.error?.message).showSnackbar();
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
     }
   }
 

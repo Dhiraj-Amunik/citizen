@@ -112,4 +112,5 @@ class ComplaintsRepository {
         ? RepoResponse(error: response)
         : RepoResponse(data: ConstituencyModel.fromJson(response));
   }
+
 }

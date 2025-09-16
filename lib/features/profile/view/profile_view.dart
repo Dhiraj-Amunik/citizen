@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/profile_helper.dart';
+import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/secure/secure_storage.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
@@ -14,7 +15,7 @@ import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:provider/provider.dart';
 
-class ProfileView extends StatelessWidget {
+class ProfileView extends StatelessWidget with CupertinoDialogMixin {
   const ProfileView({super.key});
 
   @override
@@ -92,8 +93,15 @@ class ProfileView extends StatelessWidget {
             ),
             ProfileHelper.getLogout(
               'Logout',
-              onTap: () async {
-                await SessionController.instance.clearSession();
+              onTap: () {
+                customLeftCupertinoDialog(
+                  content:
+                      "Are you sure you want to sign out from your account?",
+                  leftButton: "Logout",
+                  onTap: () async {
+                    await SessionController.instance.clearSession();
+                  },
+                );
               },
             ),
             Row(
@@ -120,9 +128,8 @@ class ProfileView extends StatelessWidget {
                 ),
               ],
             ),
-            SizeBox.size
+            SizeBox.size,
           ],
-          
         ),
       ),
       bottomNavigationBar: DummyNav(),

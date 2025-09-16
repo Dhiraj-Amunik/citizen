@@ -53,6 +53,8 @@ class ComplaintThreadWidget extends StatelessWidget {
                     child: Text(
                       thread.messages?.first.subject ?? "No Subject found !",
                       style: textTheme.bodyMedium,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Align(
@@ -85,6 +87,8 @@ class ComplaintThreadWidget extends StatelessWidget {
             ConstrainedBox(
               constraints: BoxConstraints(minHeight: 40.height()),
               child: RichText(
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
                 text: TextSpan(
                   style: textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w500,

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 extension ExtendedString on String {
   bool get isValidEmail {
     const emailRegex =
@@ -14,7 +16,8 @@ extension ExtendedString on String {
   }
 
   bool isValidAadharNumber() {
-    return RegExp(r'^[2-9][0-9]{3}\s[0-9]{4}\s[0-9]{4}$').hasMatch(this);
+    String? value = (this).replaceAll(" ", '');
+    return RegExp(r'^[2-9]{1}[0-9]{3}[0-9]{4}[0-9]{4}$').hasMatch(value);
   }
 
   bool isStrongPassword1(String password) {
@@ -54,9 +57,19 @@ extension ExtendedString on String {
     return null;
   }
 
+  String? validateName({String? argument}) {
+    if ((this).isEmpty) {
+      return argument;
+    }
+    if ((this).length <= 2 || RegExp(r'\d').hasMatch(this)) {
+      return argument;
+    }
+    return null;
+  }
+
   String? validateDropDown({String? argument}) {
     if (this == 'null') {
-      return argument;
+      return "        $argument";
     }
     return null;
   }
@@ -78,7 +91,7 @@ extension ExtendedString on String {
   }
 
   String? validateNumber({String? argument}) {
-    if ((this).length != 10) {
+    if ((this).length != 10 || RegExp(r'^[6-9][0-9]{9}$').hasMatch(this) == false) {
       return argument ?? 'Please check you contact number';
     }
     return null;
@@ -129,5 +142,39 @@ extension ExtendedString on String {
     } catch (err) {
       return argument;
     }
+  }
+
+  //voter id validator
+
+  bool get isValidVoterID {
+    // Voter ID format: 3 letters followed by 7 digits (e.g., ABC1234567)
+    final voterIdRegex = r'^[A-Z]{3}[0-9]{7}$';
+    return RegExp(voterIdRegex, caseSensitive: true).hasMatch(this);
+  }
+
+  // Additional validation method with detailed error feedback
+  String? validateVoterID({String? argument}) {
+    if (isEmpty) {
+      return argument ?? 'Voter ID cannot be empty';
+    }
+
+    if (!isValidVoterID) {
+      return argument ?? 'Invalid Voter ID.';
+    }
+
+    return null;
+  }
+
+  // Additional validation method with detailed error feedback
+  String? validateAadhar({String? argument}) {
+    if (isEmpty) {
+      return argument ?? 'Aadhar No cannot be empty';
+    }
+
+    if (!isValidAadharNumber()) {
+      return 'Invalid Aadhar ID.';
+    }
+
+    return null;
   }
 }

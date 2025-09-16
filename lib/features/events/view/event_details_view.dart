@@ -121,7 +121,7 @@ class EventDetailsView extends StatelessWidget {
                               padding: Dimens.paddingX2B,
                             ),
                             children: [
-                              CommonHelpers.getNetworkImage(
+                              CommonHelpers.getCacheNetworkImage(
                                 "https://www.postergully.com/cdn/shop/products/Coffee_Keeps_Me_Busy_Vintage-NGPS2104_Copy.jpg?v=1578633364",
                               ),
                             ],

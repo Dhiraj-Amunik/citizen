@@ -38,7 +38,7 @@ class ProfileHelper {
                 height: Dimens.scaleX7,
                 width: Dimens.scaleX7,
                 color: AppPalettes.whiteColor,
-                child: CommonHelpers.getNetworkImage(
+                child: CommonHelpers.getCacheNetworkImage(
                   image,
                   placeholder: CommonHelpers.showInitials(
                     name ?? '',

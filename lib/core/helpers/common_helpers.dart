@@ -29,53 +29,25 @@ class CommonHelpers {
     return Center(child: Text(getInitials(initials), style: style));
   }
 
-  static Widget getNetworkImage(String? image, {Widget? placeholder}) {
-    return Image.network(
-      image ?? '',
+  static Widget getCacheNetworkImage(String? image, {Widget? placeholder}) {
+    return CachedNetworkImage(
+      imageUrl: image ?? "",
       fit: BoxFit.cover,
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) {
-          return child;
-        }
+      progressIndicatorBuilder: (context, child, progress) {
         return shimmer();
       },
-      errorBuilder: (context, error, stackTrace) {
-        return placeholder ?? shimmer();
+      errorWidget: (context, error, stackTrace) {
+        return placeholder ??
+            Container(
+              color: AppPalettes.backGroundColor,
+              child: Icon(
+                Icons.warning_amber_rounded,
+                color: AppPalettes.redColor,
+                size: Dimens.scaleX2,
+              ),
+            );
       },
     );
-  }
-
-  static Widget getCacheNetworkImage(String? image, {Widget? placeholder}) {
-    return image == "" ||
-            image?.isEmpty == true ||
-            image == null ||
-            image == 'null'
-        ? Container(
-            color: AppPalettes.backGroundColor,
-            child: Icon(
-              Icons.warning_amber_rounded,
-              color: AppPalettes.redColor,
-              size: Dimens.scaleX2,
-            ),
-          )
-        : CachedNetworkImage(
-            imageUrl: image,
-            fit: BoxFit.cover,
-            progressIndicatorBuilder: (context, child, progress) {
-              return shimmer();
-            },
-            errorWidget: (context, error, stackTrace) {
-              return placeholder ??
-                  Container(
-                    color: AppPalettes.backGroundColor,
-                    child: Icon(
-                      Icons.warning_amber_rounded,
-                      color: AppPalettes.redColor,
-                      size: Dimens.scaleX2,
-                    ),
-                  );
-            },
-          );
   }
 
   static Widget buildIcons({
@@ -119,7 +91,11 @@ class CommonHelpers {
     );
   }
 
-  static Widget buildStatus(String text, {required Color statusColor,Color? textColor}) {
+  static Widget buildStatus(
+    String text, {
+    required Color statusColor,
+    Color? textColor,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: Dimens.paddingX3,

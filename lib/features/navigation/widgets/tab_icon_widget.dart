@@ -65,7 +65,9 @@ class _TabIconWidgetState extends State<TabIconWidget>
       onTap: widget.onTap,
       child: Container(
         alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX3B),
+        padding: EdgeInsets.symmetric(
+          horizontal: Dimens.paddingX3,
+        ),
         decoration: widget.isSelected
             ? boxDecorationRoundedWithShadow(
                 Dimens.radius100,
@@ -84,6 +86,7 @@ class _TabIconWidgetState extends State<TabIconWidget>
               SvgPicture.asset(
                 widget.data.imagePath!,
                 height: Dimens.scaleX2B,
+                width: Dimens.scaleX2B,
                 colorFilter: ColorFilter.mode(
                   widget.isSelected
                       ? AppPalettes.whiteColor
@@ -96,7 +99,7 @@ class _TabIconWidgetState extends State<TabIconWidget>
                 fit: BoxFit.scaleDown,
                 child: Text(
                   widget.data.text!,
-                  style: textTheme.bodySmall?.copyWith(
+                  style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                     color: widget.isSelected
                         ? AppPalettes.whiteColor

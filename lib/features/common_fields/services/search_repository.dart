@@ -6,6 +6,7 @@ import 'package:inldsevak/core/dio/repo_reponse.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_seach_place_id_modal.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:inldsevak/features/common_fields/model/pincode_model.dart';
 
 class SearchRepository extends NetworkRequester {
   final NetworkRequester _network = NetworkRequester();
@@ -38,5 +39,18 @@ class SearchRepository extends NetworkRequester {
     return response is APIException
         ? RepoResponse(error: response)
         : RepoResponse(data: GeocodingSeachPlaceIdModal.fromJson(response));
+  }
+
+  Future<RepoResponse<PinCodeModel>> getPinCode({
+    required double? lat,
+    required double? lng,
+  }) async {
+    final url =
+        "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$key";
+    final response = await _network.get(path: url);
+
+    return response is APIException
+        ? RepoResponse(error: response)
+        : RepoResponse(data: PinCodeModel.fromJson(response));
   }
 }

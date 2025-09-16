@@ -12,7 +12,7 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 
 class CommonSearchDropDown<T> extends StatelessWidget {
   final String? Function(T?)? validator;
-  final String heading;
+  final String? heading;
   final String hintText;
   final bool isEnable;
   final bool labelText;
@@ -27,6 +27,7 @@ class CommonSearchDropDown<T> extends StatelessWidget {
   final Widget Function(BuildContext, T, bool)? headerBuilder;
   final Future<List<T>> Function(String)? future;
   final bool? isRequired;
+  final Function(bool value)? visibility;
 
   static const border = Border.fromBorderSide(
     BorderSide(color: AppPalettes.transparentColor, width: 0.0),
@@ -37,7 +38,7 @@ class CommonSearchDropDown<T> extends StatelessWidget {
 
   const CommonSearchDropDown({
     super.key,
-    required this.heading,
+     this.heading,
     required this.hintText,
     this.isEnable = true,
     this.items,
@@ -52,6 +53,7 @@ class CommonSearchDropDown<T> extends StatelessWidget {
     this.future,
     this.prefixIcon,
     this.isRequired,
+    this.visibility,
   });
 
   @override
@@ -59,11 +61,13 @@ class CommonSearchDropDown<T> extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "$heading ${isRequired == true ? '*' : ''}",
-          style: context.textTheme.bodySmall,
-        ).onlyPadding(bottom: Dimens.gapX1B),
+        if (heading?.isNotEmpty == true)
+          Text(
+            "$heading ${isRequired == true ? '*' : ''}",
+            style: context.textTheme.bodySmall,
+          ).onlyPadding(bottom: Dimens.gapX1B),
         CustomDropdown<T>.searchRequest(
+          visibility: visibility,
           futureRequest: future,
           enabled: isEnable,
           overlayHeight: 0.4.screenHeight,
@@ -91,7 +95,7 @@ class CommonSearchDropDown<T> extends StatelessWidget {
           ),
           closedHeaderPadding: EdgeInsets.symmetric(
             horizontal: Dimens.paddingX5,
-            vertical: Dimens.paddingX3B,
+            vertical: Dimens.paddingX3,
           ),
           listItemPadding: EdgeInsets.only(bottom: Dimens.paddingX3),
           hideSelectedFieldWhenExpanded: true,

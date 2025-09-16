@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:inldsevak/features/offline/view_model/connectivty_provider.dart';
 import 'package:inldsevak/features/auth/view_model/login_view_model.dart';
 import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
 import 'package:inldsevak/features/common_fields/view_model/mla_view_model.dart';
-import 'package:inldsevak/features/common_fields/view_model/search_view_model.dart';
+import 'package:inldsevak/features/common_fields/view_model/map_search_view_model.dart';
 import 'package:inldsevak/features/auth/view_model/user_register_view_model.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:inldsevak/features/events/view_model/events_view_model.dart';
@@ -28,10 +29,10 @@ class AppProviders {
       value: GeneralStream.languageStream.stream,
       catchError: (_, __) => const Locale("en"),
     ),
-
+    ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
     ChangeNotifierProvider(create: (_) => LoginViewModel()),
     ChangeNotifierProvider(create: (_) => ProfileViewModel()),
-    ChangeNotifierProvider(create: (_) => SearchViewModel()),
+    ChangeNotifierProvider(create: (_) => MapSearchViewModel()),
     ChangeNotifierProvider(create: (_) => AvatarViewModel()),
     ChangeNotifierProvider(create: (_) => UserRegisterViewModel()),
     ChangeNotifierProvider(create: (_) => NavigationViewModel()),

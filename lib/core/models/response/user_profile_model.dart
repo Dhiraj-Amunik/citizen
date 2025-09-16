@@ -32,21 +32,25 @@ class Data {
   String? deviceToken;
   String? dateOfBirth;
   String? gender;
+  String? address;
   String? avatar;
   bool? isRegistered;
   bool? isPartyMember;
+  String? role;
+  Constituency? constituency;
+  bool? isAdminCreated;
   bool? isActive;
   List<Document>? document;
   String? createdAt;
   String? updatedAt;
   int? iV;
-  String? address;
-  Constituency? constituency;
-  String? maritalStatus;
-  String? parentName;
-  String? preferredRole;
-  bool? isAdminCreated;
-  String? role;
+  String? city;
+  String? district;
+  String? pincode;
+  String? state;
+  String? whatsapp;
+  String? fatherName;
+  bool? isDeleted;
 
   Data(
       {this.location,
@@ -58,21 +62,25 @@ class Data {
       this.deviceToken,
       this.dateOfBirth,
       this.gender,
+      this.address,
       this.avatar,
       this.isRegistered,
       this.isPartyMember,
+      this.role,
+      this.constituency,
+      this.isAdminCreated,
       this.isActive,
       this.document,
       this.createdAt,
       this.updatedAt,
       this.iV,
-      this.address,
-      this.constituency,
-      this.maritalStatus,
-      this.parentName,
-      this.preferredRole,
-      this.isAdminCreated,
-      this.role});
+      this.city,
+      this.district,
+      this.pincode,
+      this.state,
+      this.whatsapp,
+      this.fatherName,
+      this.isDeleted});
 
   Data.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
@@ -86,9 +94,15 @@ class Data {
     deviceToken = json['deviceToken'];
     dateOfBirth = json['dateOfBirth'];
     gender = json['gender'];
+    address = json['address'];
     avatar = json['avatar'];
     isRegistered = json['isRegistered'];
     isPartyMember = json['isPartyMember'];
+    role = json['role'];
+    constituency = json['constituency'] != null
+        ? new Constituency.fromJson(json['constituency'])
+        : null;
+    isAdminCreated = json['isAdminCreated'];
     isActive = json['isActive'];
     if (json['document'] != null) {
       document = <Document>[];
@@ -99,15 +113,13 @@ class Data {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
-    address = json['address'];
-    constituency = json['constituency'] != null
-        ? new Constituency.fromJson(json['constituency'])
-        : null;
-    maritalStatus = json['maritalStatus'];
-    parentName = json['parentName'];
-    preferredRole = json['preferredRole'];
-    isAdminCreated = json['isAdminCreated'];
-    role = json['role'];
+    city = json['city'];
+    district = json['district'];
+    pincode = json['pincode'];
+    state = json['state'];
+    whatsapp = json['whatsapp'];
+    fatherName = json['fatherName'];
+    isDeleted = json['isDeleted'];
   }
 
   Map<String, dynamic> toJson() {
@@ -123,9 +135,15 @@ class Data {
     data['deviceToken'] = this.deviceToken;
     data['dateOfBirth'] = this.dateOfBirth;
     data['gender'] = this.gender;
+    data['address'] = this.address;
     data['avatar'] = this.avatar;
     data['isRegistered'] = this.isRegistered;
     data['isPartyMember'] = this.isPartyMember;
+    data['role'] = this.role;
+    if (this.constituency != null) {
+      data['constituency'] = this.constituency!.toJson();
+    }
+    data['isAdminCreated'] = this.isAdminCreated;
     data['isActive'] = this.isActive;
     if (this.document != null) {
       data['document'] = this.document!.map((v) => v.toJson()).toList();
@@ -133,34 +151,54 @@ class Data {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
-    data['address'] = this.address;
-    if (this.constituency != null) {
-      data['constituency'] = this.constituency!.toJson();
-    }
-    data['maritalStatus'] = this.maritalStatus;
-    data['parentName'] = this.parentName;
-    data['preferredRole'] = this.preferredRole;
-    data['isAdminCreated'] = this.isAdminCreated;
-    data['role'] = this.role;
+    data['city'] = this.city;
+    data['district'] = this.district;
+    data['pincode'] = this.pincode;
+    data['state'] = this.state;
+    data['whatsapp'] = this.whatsapp;
+    data['fatherName'] = this.fatherName;
+    data['isDeleted'] = this.isDeleted;
     return data;
   }
 }
 
 class Location {
   String? type;
-  List<int>? coordinates;
+  List<double>? coordinates;
 
   Location({this.type, this.coordinates});
 
   Location.fromJson(Map<String, dynamic> json) {
     type = json['type'];
-    coordinates = json['coordinates'].cast<int>();
+    coordinates = json['coordinates'].cast<double>();
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['type'] = this.type;
     data['coordinates'] = this.coordinates;
+    return data;
+  }
+}
+
+class Constituency {
+  String? sId;
+  String? name;
+  String? area;
+
+  Constituency({this.sId, this.name, this.area});
+
+  Constituency.fromJson(Map<String, dynamic> json) {
+    sId = json['_id'];
+    name = json['name'];
+    area = json['area'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['_id'] = this.sId;
+    data['name'] = this.name;
+    data['area'] = this.area;
     return data;
   }
 }
@@ -187,28 +225,6 @@ class Document {
     data['documentUrl'] = this.documentUrl;
     data['documentNumber'] = this.documentNumber;
     data['_id'] = this.sId;
-    return data;
-  }
-}
-
-class Constituency {
-  String? sId;
-  String? name;
-  String? area;
-
-  Constituency({this.sId, this.name, this.area});
-
-  Constituency.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    name = json['name'];
-    area = json['area'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['name'] = this.name;
-    data['area'] = this.area;
     return data;
   }
 }
