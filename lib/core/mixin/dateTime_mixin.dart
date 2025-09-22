@@ -3,15 +3,16 @@ import 'package:inldsevak/core/routes/routes.dart';
 import 'package:intl/intl.dart';
 
 mixin DateAndTimePicker {
-  Future<DateTime?> customDatePicker({String? initialDate}) async {
+  Future<DateTime?> customDatePicker({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     DateTime? finalDate;
     finalDate = await showDatePicker(
-      initialDate: initialDate != null
-          ? DateTime.parse(initialDate)
-          : DateTime.now(),
+      initialDate: DateTime.now(),
       context: RouteManager.navigatorKey.currentState!.context,
-      firstDate: DateTime(1940),
-      lastDate: DateTime.now(),
+      firstDate: startDate ?? DateTime(1940),
+      lastDate: endDate ?? DateTime.now(),
     );
     return finalDate;
   }
@@ -20,7 +21,7 @@ mixin DateAndTimePicker {
     return DateFormat('dd-MM-yyyy').format(date);
   }
 
-   String companyDateFormat(DateTime date) {
+  String companyDateFormat(DateTime date) {
     return DateFormat('yyyy-MM-dd').format(date);
   }
 

@@ -12,49 +12,54 @@ class NavigationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: Dimens.paddingX3,
-        vertical: Dimens.paddingX4,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: Dimens.paddingX4,
-        vertical: Dimens.paddingX4B,
-      ),
-      decoration: boxDecorationRoundedWithShadow(
-        Dimens.radius100,
-        backgroundColor: AppPalettes.liteGreenTextFieldColor,
-      ),
-      height: Dimens.scaleX9,
-      child: Consumer2<NavigationViewModel, RoleViewModel>(
-        builder: (_, value, role, _) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children:
-                (role.isPartyMember
-                        ? value.partyTabIconData
-                        : value.userTabIconData)
-                    .map(
-                      (item) => TabIconWidget(
-                        key: UniqueKey(),
-                        data: item,
-                        onTap: () => value.selectedTab =
-                            (role.isPartyMember
-                                    ? value.partyTabIconData
-                                    : value.userTabIconData)
-                                .indexOf(item),
-                        isSelected:
-                            (role.isPartyMember
-                                    ? value.partyTabIconData
-                                    : value.userTabIconData)
-                                .indexOf(item) ==
-                            value.selectedTab,
-                      ),
-                    )
-                    .toList(),
-          );
-        },
-      ),
+    return Stack(
+      alignment: AlignmentGeometry.bottomCenter,
+      children: [
+        Container(height: Dimens.scaleX7, color: AppPalettes.whiteColor),
+        Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: Dimens.paddingX3,
+          ).copyWith(bottom: Dimens.paddingX4),
+          padding: EdgeInsets.symmetric(
+            horizontal: Dimens.paddingX4,
+            vertical: Dimens.paddingX4B,
+          ),
+          decoration: boxDecorationRoundedWithShadow(
+            Dimens.radius100,
+            backgroundColor: AppPalettes.liteGreenColor,
+          ),
+          height: Dimens.scaleX9,
+          child: Consumer2<NavigationViewModel, RoleViewModel>(
+            builder: (_, value, role, _) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children:
+                    (role.isPartyMember
+                            ? value.partyTabIconData
+                            : value.userTabIconData)
+                        .map(
+                          (item) => TabIconWidget(
+                            key: UniqueKey(),
+                            data: item,
+                            onTap: () => value.selectedTab =
+                                (role.isPartyMember
+                                        ? value.partyTabIconData
+                                        : value.userTabIconData)
+                                    .indexOf(item),
+                            isSelected:
+                                (role.isPartyMember
+                                        ? value.partyTabIconData
+                                        : value.userTabIconData)
+                                    .indexOf(item) ==
+                                value.selectedTab,
+                          ),
+                        )
+                        .toList(),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

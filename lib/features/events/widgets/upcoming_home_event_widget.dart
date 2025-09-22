@@ -7,7 +7,6 @@ import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
-import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/features/events/model/events_model.dart' as model;
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/features/events/model/request_details_event_model.dart';
@@ -25,13 +24,13 @@ class UpcomingEventWidget extends StatelessWidget {
         arguments: RequestEventDetailsModel(eventId: event.sId!),
       ),
       child: Container(
-        width: 240.height(),
+        width: 200.height(),
         padding: EdgeInsets.symmetric(
           horizontal: Dimens.paddingX2,
           vertical: Dimens.paddingX2,
         ),
         decoration: boxDecorationRoundedWithShadow(
-          Dimens.radiusX3,
+          Dimens.radiusX4,
           border: Border.all(color: AppPalettes.primaryColor),
         ),
         child: Column(
@@ -46,54 +45,70 @@ class UpcomingEventWidget extends StatelessWidget {
                 child: CommonHelpers.getCacheNetworkImage(event.poster),
               ),
             ),
-            Row(
-              spacing: Dimens.gapX2,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            Column(
+              spacing: Dimens.gapX,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  spacing: Dimens.gapX,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Text(
+                  event.title ?? "Unknown title",
+                  style: textTheme.bodyMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Row(
+                  spacing: Dimens.gapX1,
                   children: [
+                    Icon(Icons.location_on_outlined, size: Dimens.scaleX1B),
                     Text(
-                      event.title ?? "Unknown title",
-                      style: textTheme.bodyMedium,
+                      event.location ?? "Unknown Location",
+                      style: textTheme.labelMedium?.copyWith(
+                        color: AppPalettes.lightTextColor,
+                      ),
                     ),
-                    Row(
-                      spacing: Dimens.gapX1,
-                      children: [
-                        Icon(Icons.location_on_outlined, size: Dimens.scaleX1B),
-                        Text(
-                          event.location ?? "Unknown Location",
-                          style: textTheme.labelMedium?.copyWith(
-                            color: AppPalettes.lightTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
+                  ],
+                ),
 
-                    Row(
-                      spacing: Dimens.gapX1,
-                      children: [
-                        Icon(
-                          Icons.calendar_month_outlined,
-                          size: Dimens.scaleX1B,
-                        ),
-                        Text(
-                          event.createdAt?.toDdMmmYyyy() ?? "0-00-0000",
-                          style: textTheme.labelMedium?.copyWith(
-                            color: AppPalettes.lightTextColor,
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Expanded(
+                      child: Wrap(
+                        runSpacing: Dimens.gapX,
+                        spacing: Dimens.gapX2,
+                        alignment: WrapAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: Dimens.gapX1,
+                            children: [
+                              Icon(
+                                Icons.calendar_month_outlined,
+                                size: Dimens.scaleX1B,
+                              ),
+                              Text(
+                                event.createdAt?.toDdMmmYyyy() ?? "0-00-0000",
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: AppPalettes.lightTextColor,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-
-                        SizeBox.sizeWX2,
-                        Icon(Icons.access_time, size: Dimens.scaleX1B),
-                        Text(
-                          event.createdAt?.to12HourTime() ?? "00:00  ",
-                          style: textTheme.labelMedium?.copyWith(
-                            color: AppPalettes.lightTextColor,
+                      
+                          Row(
+                            spacing: Dimens.gapX1,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.access_time, size: Dimens.scaleX1B),
+                              Text(
+                                event.createdAt?.to12HourTime() ?? "00:00  ",
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: AppPalettes.lightTextColor,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

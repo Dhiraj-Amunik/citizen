@@ -37,25 +37,31 @@ class _MyAppState extends State<MyApp> {
       ensureScreenSize: true,
       splitScreenMode: true,
       builder: (_, _) {
-        return RestartApp(
-          child: MultiProvider(
-            providers: AppProviders.provider,
-            child: MaterialApp(
-              debugShowCheckedModeBanner: false,
-              supportedLocales: L10n.locals,
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.lightTheme,
-              initialRoute: Routes.wrapperPage.path,
-              navigatorKey: RouteManager.navigatorKey,
-              onGenerateRoute: RouteManager.onGenerateRoute,
-            ),
-          ),
+        return StreamBuilder<Locale>(
+          stream: GeneralStream.instance.language,
+          builder: (context, snapshot) {
+            return RestartApp(
+              child: MultiProvider(
+                providers: AppProviders.provider,
+                child: MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  supportedLocales: L10n.locals,
+                  locale: snapshot.data,
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  theme: AppTheme.lightTheme,
+                  darkTheme: AppTheme.lightTheme,
+                  initialRoute: Routes.wrapperPage.path,
+                  navigatorKey: RouteManager.navigatorKey,
+                  onGenerateRoute: RouteManager.onGenerateRoute,
+                ),
+              ),
+            );
+          },
         );
       },
     );

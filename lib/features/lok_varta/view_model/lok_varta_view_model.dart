@@ -4,10 +4,13 @@ import 'package:inldsevak/features/lok_varta/model/lok_varta_model.dart'
     as model;
 import 'package:inldsevak/features/lok_varta/model/request_lok_varta_model.dart';
 import 'package:inldsevak/features/lok_varta/services/lok_varta_repository.dart';
+import 'package:inldsevak/features/lok_varta/model/mla_details_model.dart'
+    as mladetails;
 
 class LokVartaViewModel extends BaseViewModel {
   @override
   Future<void> onInit() async {
+    await getMlaDetails();
     await getAllLokVarta();
     return super.onInit();
   }
@@ -17,6 +20,8 @@ class LokVartaViewModel extends BaseViewModel {
   List<model.Media> articlesList = [];
   List<model.Media> videosList = [];
   List<model.Media> photoLists = [];
+
+  mladetails.Mla? mlaModel;
 
   Future<void> getAllLokVarta() async {
     isLoading = true;
@@ -61,6 +66,20 @@ class LokVartaViewModel extends BaseViewModel {
               break;
           }
         }
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    }
+  }
+
+  Future<void> getMlaDetails() async {
+    try {
+      final response = await LokVartaRepository().getUserMlaDetails(token);
+
+      if (response.data?.responseCode == 200) {
+        mlaModel = response.data?.data?.mla;
+        notifyListeners();
       }
     } catch (err, stackTrace) {
       debugPrint("Error: $err");

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/routes/routes.dart';
+import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
@@ -24,24 +26,22 @@ class IndlView extends StatelessWidget {
     return Scaffold(
       appBar: commonAppBar(
         action: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: Container(
-              height: Dimens.scaleX6,
-              width: Dimens.scaleX6,
-              color: AppPalettes.liteGreyColor,
-              child: Consumer<ProfileViewModel>(
-                builder: (context, profile, _) {
-                  return CommonHelpers.getCacheNetworkImage(
-                    profile.profile?.avatar,
-                    placeholder: CommonHelpers.showInitials(
-                      profile.profile?.name ?? '',
-                      style: textTheme.titleMedium,
-                    ),
-                  );
-                },
-              ),
-            ),
+          CommonHelpers.buildIcons(
+            path: AppImages.notificationIcon,
+            color: AppPalettes.liteGreenColor,
+            iconColor: AppPalettes.blackColor,
+            padding: Dimens.paddingX3B,
+            iconSize: Dimens.scaleX3,
+            onTap: () => RouteManager.pushNamed(Routes.notificationsPage),
+          ),
+          SizeBox.sizeWX2,
+          CommonHelpers.buildIcons(
+            path: AppImages.navDonateIcon,
+            color: AppPalettes.primaryColor,
+            iconColor: AppPalettes.whiteColor,
+            padding: Dimens.paddingX3B,
+            iconSize: Dimens.scaleX2B,
+            onTap: () => RouteManager.pushNamed(Routes.donatePage),
           ),
         ],
         child: Consumer<ProfileViewModel>(
@@ -49,7 +49,7 @@ class IndlView extends StatelessWidget {
             return Column(
               mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: Dimens.gapX1,
               children: [
                 Text(
@@ -66,7 +66,8 @@ class IndlView extends StatelessWidget {
                     ),
                     Flexible(
                       child: Text(
-                        profile.profile?.constituency?.name ?? "Not Found",
+                        profile.profile?.assemblyConstituency?.name ??
+                            "Loading...",
                         style: textTheme.labelMedium,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -110,7 +111,7 @@ class IndlView extends StatelessWidget {
               },
             ),
 
-            SizeBox.sizeHX11,
+            SizeBox.sizeHX20,
           ],
         ),
       ),

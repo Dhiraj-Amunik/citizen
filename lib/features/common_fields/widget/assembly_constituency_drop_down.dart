@@ -2,38 +2,42 @@ import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
-import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
-    as constituency;
+import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
+
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
 import 'package:provider/provider.dart';
 
-class ConstituencyDropDownWidget extends StatefulWidget {
-  final constituency.Data? initialData;
-  final SingleSelectController<constituency.Data> constituencyController;
-  const ConstituencyDropDownWidget({
+class AssemblyConstituencyDropDownWidget extends StatefulWidget {
+  final Constituency? initialData;
+  final SingleSelectController<Constituency> constituencyController;
+  const AssemblyConstituencyDropDownWidget({
     super.key,
     required this.constituencyController,
     this.initialData,
   });
 
   @override
-  State<ConstituencyDropDownWidget> createState() =>
-      _ConstituencyDropDownWidgetState();
+  State<AssemblyConstituencyDropDownWidget> createState() =>
+      _AssemblyConstituencyDropDownWidgetState();
 }
 
-class _ConstituencyDropDownWidgetState
-    extends State<ConstituencyDropDownWidget> {
+class _AssemblyConstituencyDropDownWidgetState
+    extends State<AssemblyConstituencyDropDownWidget> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ConstituencyViewModel>().constituencyLists.add(
-        widget.initialData!,
-      );
+      widget.constituencyController.clear();
+      if (widget.initialData == null) {
+        return;
+      }
+
       widget.constituencyController.value = context
           .read<ConstituencyViewModel>()
-          .constituencyLists
-          .first;
+          .assemblyConstituencyLists
+          .firstWhere(
+            (constituency) => constituency?.sId == widget.initialData?.sId,
+          );
     });
     super.initState();
   }
@@ -45,25 +49,24 @@ class _ConstituencyDropDownWidgetState
     return PopScope(
       onPopInvokedWithResult: (_, _) {
         widget.constituencyController.clear();
-        context.read<ConstituencyViewModel>().constituencyLists.clear();
       },
       child: Consumer<ConstituencyViewModel>(
         builder: (context, value, child) {
-          return FormCommonDropDown<constituency.Data>(
+          return FormCommonDropDown<Constituency?>(
             isRequired: true,
-            heading: localization.constituency,
+            heading: localization.assembly_constituency,
             controller: widget.constituencyController,
-            items: value.constituencyLists,
+            items: value.assemblyConstituencyLists,
             hintText: localization.select_your_constituency,
             listItemBuilder: (p0, constituency, p2, p3) {
               return Text(
-                "${constituency.name}",
+                "${constituency?.name}",
                 style: context.textTheme.bodySmall,
               );
             },
             headerBuilder: (p0, constituency, p2) {
               return Text(
-                "${constituency.name}",
+                "${constituency?.name}",
                 style: context.textTheme.bodySmall,
               );
             },

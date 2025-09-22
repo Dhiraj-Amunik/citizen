@@ -17,11 +17,11 @@ class UpComingHomeEventsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<EventsViewModel>();
+    final localization = context.localizations;
     final textTheme = context.textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: Dimens.gapX4,
+      spacing: Dimens.gapX2B,
       children: [
         GestureDetector(
           onTap: () => RouteManager.pushNamed(Routes.eventsPage),
@@ -30,13 +30,14 @@ class UpComingHomeEventsWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Upcoming Events",
+                localization.upcoming_events,
                 style: textTheme.headlineSmall?.copyWith(
                   color: AppPalettes.primaryColor,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
-                "see all",
+                localization.see_all,
                 style: textTheme.titleMedium?.copyWith(
                   color: AppPalettes.lightTextColor,
                 ),
@@ -45,27 +46,39 @@ class UpComingHomeEventsWidget extends StatelessWidget {
           ).horizontalPadding(Dimens.horizontalspacing),
         ),
         //
-        if (provider.isLoading)
-          SizedBox(
-            height: 60,
-            child: CommonHelpers.shimmer(radius: Dimens.radiusX2),
-          ),
+
         //
-        if (provider.homeEventList.isEmpty && !provider.isLoading)
-          EventsHelpers.upComingPlaceholder(onRefresh: () async {}),
-        //
-        SizedBox(
-          height: 160.height(),
-          child: ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: Dimens.horizontalspacing),
-            physics: AlwaysScrollableScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (_, index) {
-              return UpcomingEventWidget(event: provider.homeEventList[index]);
-            },
-            separatorBuilder: (_, _) => SizeBox.sizeWX3,
-            itemCount: provider.homeEventList.length,
-          ),
+        Consumer<EventsViewModel>(
+          builder: (context, value, _) {
+            if (value.isLoading) {
+              return Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Dimens.horizontalspacing,
+                ),
+                height: 160.height(),
+                child: CommonHelpers.shimmer(radius: Dimens.radiusX2),
+              );
+            }
+
+            if (value.homeEventList.isEmpty) {
+              return EventsHelpers.upComingPlaceholder(onRefresh: () async {});
+            }
+            return SizedBox(
+              height: 160.height(),
+              child: ListView.separated(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Dimens.horizontalspacing,
+                ),
+                physics: AlwaysScrollableScrollPhysics(),
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (_, index) {
+                  return UpcomingEventWidget(event: value.homeEventList[index]);
+                },
+                separatorBuilder: (_, _) => SizeBox.sizeWX3,
+                itemCount: value.homeEventList.length,
+              ),
+            );
+          },
         ),
       ],
     );

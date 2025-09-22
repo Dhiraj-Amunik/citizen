@@ -26,11 +26,15 @@ class DonateView extends StatelessWidget {
     final textTheme = context.textTheme;
 
     return Scaffold(
+      extendBody: false,
       appBar: commonAppBar(
         title: localization.contribute_with_love,
         action: [Icon(Icons.info_outline_rounded)],
       ),
       body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          horizontal: Dimens.horizontalspacing,
+        ).copyWith(bottom: Dimens.paddingX8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: Dimens.paddingX3,
@@ -55,21 +59,20 @@ class DonateView extends StatelessWidget {
                                 CommonTextFormField(
                                   hintText: localization.enter_amount,
                                   controller: provider.amount,
-                                  nextFocus: provider.purposeFocus,
                                   validator: (value) => value!.validateAmount(
                                     argument: "Please enter minimum of 10rs",
                                   ),
                                   keyboardType: TextInputType.number,
                                 ),
-                                CommonTextFormField(
-                                  hintText:
-                                      localization.enter_purpose_of_donation,
-                                  controller: provider.purpose,
-                                  focus: provider.purposeFocus,
-                                  validator: (value) => value!.validate(
-                                    argument: "Please provide a reason",
-                                  ),
-                                ),
+                                // CommonTextFormField(
+                                //   hintText:
+                                //       localization.enter_purpose_of_donation,
+                                //   controller: provider.purpose,
+                                //   focus: provider.purposeFocus,
+                                //   validator: (value) => value!.validate(
+                                //     argument: "Please provide a reason",
+                                //   ),
+                                // ),
                               ],
                             ),
 
@@ -143,9 +146,9 @@ class DonateView extends StatelessWidget {
                 );
               },
             ),
-            SizeBox.sizeHX12,
+            SizeBox.sizeHX14,
           ],
-        ).symmetricPadding(horizontal: Dimens.horizontalspacing),
+        ),
       ),
     );
   }
@@ -161,7 +164,7 @@ Widget iconBuilder({
     children: [
       CircleAvatar(
         minRadius: Dimens.scaleX2B,
-        backgroundColor: AppPalettes.liteGreenTextFieldColor,
+        backgroundColor: AppPalettes.liteGreenColor,
         child: SvgPicture.asset(icon),
       ),
       Text(text, style: textTheme.bodyMedium),
@@ -186,10 +189,10 @@ Widget donationWidget({
           spacing: Dimens.gapX2,
           children: [
             CommonHelpers.buildIcons(
-              path: AppImages.clipboardicon,
+              path: AppImages.clipboardIcon,
               padding: Dimens.paddingX2B,
               iconSize: Dimens.scaleX2,
-              color: AppPalettes.liteGreenTextFieldColor,
+              color: AppPalettes.liteGreenColor,
             ),
 
             Expanded(
@@ -200,27 +203,33 @@ Widget donationWidget({
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("₹ $amount", style: textTheme.bodyMedium),
-                      SizeBox.sizeWX3,
-                      const Spacer(),
                       Text(
-                        date?.toDdMmmYyyy() ?? "",
-                        style: textTheme.bodySmall?.copyWith(
-                          color: AppPalettes.lightTextColor,
-                          overflow: TextOverflow.ellipsis,
+                        "₹ $amount",
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizeBox.sizeWX1,
+                      // SizeBox.sizeWX3,
+                      // const Spacer(),
+
+                      // SizeBox.sizeWX1,
                     ],
                   ),
                   Text(
-                    reason ?? "Purpose",
+                    date?.toDdMmmYyyy() ?? "",
                     style: textTheme.labelMedium?.copyWith(
                       color: AppPalettes.lightTextColor,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
                   ),
+                  // Text(
+                  //   reason ?? "Purpose",
+                  //   style: textTheme.labelMedium?.copyWith(
+                  //     color: AppPalettes.lightTextColor,
+                  //   ),
+                  //   maxLines: 3,
+                  //   overflow: TextOverflow.ellipsis,
+                  // ),
                 ],
               ),
             ),

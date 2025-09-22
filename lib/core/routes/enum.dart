@@ -20,12 +20,16 @@ enum Routes {
   aboutPage(path: "/AboutPage"),
   requestMembershipPage(path: "/RequestMembershipPage"),
   requestAppointmentPage(path: "/RequestAppointmentPage"),
+  appointmentPage(path: "/AppointmentPage"),
   userWallOfHelpPage(path: "/UserWallOfHelpPage"),
   partyWallOfHelpPage(path: "/PartyWallOfHelpPage"),
   contributePage(path: "/contributePage"),
   requestWallOfHelpPage(path: "/RequestWallOfHelpPage"),
   beVolunteerPage(path: "/BeVolunteerPage"),
-  idCardPage(path: "/IdCardPage");
+  idCardPage(path: "/IdCardPage"),
+  donatePage(path: "/DonatePage"),
+  pressReleasesDetailedPage(path: "/PressReleasesDetailedPage"),
+  notificationsPage(path: "/NotificationsPage");
 
   final String path;
   final AxisDirection direction;
@@ -73,18 +77,26 @@ Widget getPage(Routes route, {dynamic arguments}) {
       return RequestMembershipView();
     case Routes.requestAppointmentPage:
       return RequestAppointmentView();
+    case Routes.appointmentPage:
+      return AppointmentsView();
     case Routes.userWallOfHelpPage:
       return WallOfHelpUserView();
     case Routes.partyWallOfHelpPage:
       return WallOfHelpPartyView();
     case Routes.contributePage:
-      return ContributeView(helpRequest: arguments,);
+      return ContributeView(helpRequest: arguments);
     case Routes.requestWallOfHelpPage:
       return RequestWallOfHelpView();
     case Routes.beVolunteerPage:
       return BeAVolunteerView();
     case Routes.idCardPage:
       return IdCardView();
+    case Routes.donatePage:
+      return DonateView();
+    case Routes.pressReleasesDetailedPage:
+      return PressReleasesDetailedView();
+    case Routes.notificationsPage:
+      return NotificationsView();
     default:
       return WrapperView();
   }

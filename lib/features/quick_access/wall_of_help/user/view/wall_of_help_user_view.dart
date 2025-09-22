@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
+import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/routes/routes.dart';
+import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/user/widgets/user_card_help_widget.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_view_model.dart';
 import 'package:provider/provider.dart';
@@ -84,20 +87,53 @@ class WallOfHelpUserView extends StatelessWidget {
                 'View how members Benefited ',
                 style: textTheme.headlineSmall,
               ),
+              Row(
+                spacing: Dimens.gapX2,
+                children: [
+                  Expanded(
+                    child: FormTextFormField(
+                      hintText: 'Search...',
+                      suffixIcon: AppImages.searchIcon,
+                      controller: provider.searchController,
+                      borderColor: AppPalettes.primaryColor,
+                      fillColor: AppPalettes.whiteColor,
+                      onChanged: (text) {
+                        provider.filterList();
+                      },
+                    ),
+                  ),
+                  CommonHelpers.buildIcons(
+                    path: AppImages.filterIcon,
+                    color: AppPalettes.primaryColor,
+                    iconSize: Dimens.scaleX2B,
+                    padding: Dimens.paddingX3,
+                    radius: Dimens.radiusX3,
+                  ),
+                ],
+              ),
               Expanded(
                 child: Consumer<WallOfHelpViewModel>(
                   builder: (context, value, _) {
                     if (provider.isLoading) {
                       return Center(child: CustomAnimatedLoading());
                     }
+
+                    if (value.filteredWallOFHelpLists.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No Helps found",
+                          style: textTheme.bodyMedium,
+                        ),
+                      );
+                    }
                     return ListView.separated(
                       itemBuilder: (_, index) {
                         return UserCardHelpWidget(
-                          help: provider.wallOFHelpLists[index],
+                          help: provider.filteredWallOFHelpLists[index],
                         );
                       },
                       separatorBuilder: (_, _) => SizeBox.widgetSpacing,
-                      itemCount: provider.wallOFHelpLists.length,
+                      itemCount: provider.filteredWallOFHelpLists.length,
                     );
                   },
                 ),

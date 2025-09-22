@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:inldsevak/features/auth/models/request/validate_otp_request_model.dart';
+import 'package:inldsevak/features/auth/view/user_register_view.dart';
 import 'package:inldsevak/features/offline/view/offline_view.dart';
 import 'package:inldsevak/features/offline/view_model/connectivty_provider.dart';
 import 'package:inldsevak/core/secure/secure_storage.dart';
@@ -7,14 +9,9 @@ import 'package:inldsevak/features/home/view/home_view.dart';
 import 'package:inldsevak/splash_view.dart';
 import 'package:provider/provider.dart';
 
-class WrapperView extends StatefulWidget {
+class WrapperView extends StatelessWidget {
   const WrapperView({super.key});
 
-  @override
-  State<WrapperView> createState() => _WrapperViewState();
-}
-
-class _WrapperViewState extends State<WrapperView> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -27,10 +24,22 @@ class _WrapperViewState extends State<WrapperView> {
           }
           return Consumer<ConnectivityProvider>(
             builder: (context, value, _) {
+
+              
               if (!value.isOnline) {
                 return OfflineView();
               }
-              if (snapshot.data != null) {
+
+              if (snapshot.data?.isRegistered == false) {
+                if (snapshot.data?.number == null) {
+                  return LoginView();
+                }
+                return UserRegisterView(
+                  data: OtpRequestModel(phoneNo: snapshot.data!.number),
+                );
+              }
+              if (snapshot.data?.isRegistered == true &&
+                  snapshot.data?.token != null) {
                 return HomeView();
               }
               return LoginView();

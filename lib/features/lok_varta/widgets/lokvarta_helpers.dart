@@ -15,12 +15,12 @@ class LokvartaHelpers {
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: AlwaysScrollableScrollPhysics(parent: NeverScrollableScrollPhysics()),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 0.2.screenHeight),
+            SizedBox(height: 0.1.screenHeight),
             CommonHelpers.buildIcons(
               path: AppImages.placeholderEmpty,
               iconSize: 0.5.screenWidth,

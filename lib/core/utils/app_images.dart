@@ -26,6 +26,8 @@ class AppImages {
   static const cameraIcon = '$_iconsURL/camera_icon.svg';
   static const clockIcon = '$_iconsURL/clock_icon.svg';
   static const searchIcon = '$_iconsURL/search_icon.svg';
+  static const notificationIcon = "$_iconsURL/notification_icon.svg";
+  static const filterIcon = "$_iconsURL/filter_icon.svg";
 
   static const navComplaintIcon = '$_navIconsURL/complaint_icon.svg';
   static const navDonateIcon = '$_navIconsURL/donate_icon.svg';
@@ -35,10 +37,8 @@ class AppImages {
   static const navIdCardIcon = '$_navIconsURL/id_card_icon.svg';
   static const navSurveyIconIcon = '$_navIconsURL/survey_icon.svg';
   static const navLokVartaIconIcon = '$_navIconsURL/lok_varta_icon.svg';
-  
 
   static const downnloadIcon = '$_navIconsURL/download_icon.svg';
-  static const shareIcon = '$_navIconsURL/share_icon.svg';
 
   static const partyImage = "assets/logo/login_image.png";
 
@@ -62,6 +62,8 @@ class AppImages {
   static const instIcon = "$_profile/insta.svg";
   static const facebookIcon = "$_profile/facebook.svg";
   static const twitterIcon = "$_profile/twitter.svg";
+  static const shareIcon = "$_profile/share.svg";
+  static const translationIcon = "$_profile/translation.svg";
 
   //emergency
   static const ambulanceIcon = "$_emergencyIcons/ambulance_icon.svg";
@@ -73,29 +75,29 @@ class AppImages {
   static const phoneEmgIcon = "$_emergencyIcons/phone_emg_icon.svg";
 
   //quick access
-  static const appointmentAccess = "$_quickAccess/appointment_access.svg";
-  static const memberShipAccess = "$_quickAccess/membership_access.svg";
-  static const wallOFHelpAccess = "$_quickAccess/wall_of_help_access.svg";
-  static const volunteerAccess = "$_quickAccess/be_a_volunteer_access.svg";
   static const complaintAccess = "$_quickAccess/complaint_access.svg";
-  static const partyAccess = "$_quickAccess/party_access.png";
+  static const partyAccess = "$_quickAccess/party_access.svg";
+  static const appointmentAccess = "$_quickAccess/appointment_access.svg";
+  static const helpAccess = "$_quickAccess/help_access.svg";
+  static const notifyAccess = "$_quickAccess/notify_access.svg";
+  static const volunteerAccess = "$_quickAccess/volunteer_access.svg";
+  static const surveyAccess = "$_quickAccess/survey_access.svg";
+  static const nearestAccess = "$_quickAccess/nearest_access.svg";
 
   //placeholders
   static const placeholderEmpty = "$_placeholders/empty.svg";
+  static const imagePlaceholder = "$_placeholders/image_holders.jpg";
 
   //donations Icon
 
   static const bankIcon = '$_donations/bankicon.svg';
   static const cardsIcon = '$_donations/cardsicon.svg';
   static const rupeeIcon = '$_donations/rupeeicon.svg';
-  static const clipboardicon = '$_donations/clipboardicon.svg';
-
-
-
-
+  static const clipboardIcon = '$_donations/clipboardicon.svg';
 
   //IMP
   static const partySign = 'assets/logo/party_sign.svg';
-
-  
+  static const logo = 'assets/logo/logo.png';
 }
+
+

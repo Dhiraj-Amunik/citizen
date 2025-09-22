@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
@@ -31,19 +32,19 @@ class CommonHelpers {
 
   static Widget getCacheNetworkImage(String? image, {Widget? placeholder}) {
     return CachedNetworkImage(
-      imageUrl: image ?? "",
-      fit: BoxFit.cover,
+      imageUrl:
+          image??"",
+      fit: BoxFit.contain,
       progressIndicatorBuilder: (context, child, progress) {
         return shimmer();
       },
       errorWidget: (context, error, stackTrace) {
         return placeholder ??
             Container(
-              color: AppPalettes.backGroundColor,
-              child: Icon(
-                Icons.warning_amber_rounded,
-                color: AppPalettes.redColor,
-                size: Dimens.scaleX2,
+              color: AppPalettes.imageholderColor,
+              child: Image.asset(
+                AppImages.imagePlaceholder,
+                fit: BoxFit.contain,
               ),
             );
       },
@@ -58,11 +59,12 @@ class CommonHelpers {
     Color? color,
     Color? borderColor,
     double? padding,
+    double? radius,
   }) {
     return Container(
       padding: EdgeInsets.all(padding ?? 0),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(radius ?? Dimens.radius100),
         color: color,
         border: Border.all(
           width: 1,

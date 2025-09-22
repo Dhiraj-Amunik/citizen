@@ -1,5 +1,7 @@
 {
-     "language": "English",
+     "english": "English",
+     "login_or_signup":"Login Or Signup",
+     "hello_welcome_to_your_account":"Hello, welcome to your account",
      "mobile_number":"Mobile Number",
      "enter_mobile_number":"Enter mobile number",
      "send_otp":"Send Otp",
@@ -64,6 +66,8 @@
      "marital_status":"Marital Status",
      "select_status":"Select Status",
      "constituency":"Constituency",
+     "assembly_constituency":"Assembly Constituency",
+     "parliamentary_constituency":"Parliamentary Constituency",
      "select_your_constituency":"Select your constituency",
      "photography":"Photography",
      "click_to_upload_images":"Click to upload photography",
@@ -74,6 +78,8 @@
      "enter_your_role":"Enter your role",
      "submit_application":"Submit Application",
      "events":"Events",
+     "upcoming_events":"Upcoming Events",
+     "see_all":"see all",
      "event_details":"Event Details",
      "edit_details":"Edit Details",
      "update_profile":"Update profile",
@@ -136,12 +142,18 @@
     "eg_address":"E.g. Floor, House no, Street",
     "select_address":"Select address",
     "upload_photo":"Upload Photo",
+    "upload_photos":"Upload Photos (Optional)",
     "please_provide_valid_10_digit_number":"Please provide valid 10 digits number",
+    "click_to_upload_doc_and_photo":"Click to Upload Documents or Photos",
+    "maximum_5_are_allowed":"Maximum 5 are allowed",
     "enter_address":"Enter Address",
     "address_validator":"Please enter your home address",
 
+    "appointments":"Appointments",
     "request_appointment":"Request Appointment",
+    "appointment_list":"Appointment List",
     "select_mla":"Select MLA",
+    "book_for":"Book for",
     "date":"Date",
     "please_select_your_appointment_date":"Please select your appointment date",
     "mla_validator":"Please select one MLA",
@@ -151,14 +163,16 @@
     "enter_phone_number":"Enter phone number",
     "select_date":"Select Date",
     "time_slot":"Time Slot",
+    "preferred_date":"Preferred Date",
     "select_time_slot":"Select Preferred Time Slot",
     "purpose_of_appointment":"Purpose of Appointment",
-    "select_purpose":"Select Purpose",
+    "enter_your_appointment_reason":"Enter your appointment reason",
     "upload_documents":"Upload Documents",
     "description_info":"Enter detail description for an appointment",
+    "clear":"Clear",
 
     "wall_of_help":"Wall of Help",
-    "quick_access":"Quick Access",
+    "quick_links":"Quick Links",
     "request_help":"Request Help",
     "contribute":"Contribute",
     "view_details":"View Details",
@@ -249,5 +263,23 @@
 
     "lok_varta":"Lok Varta",
 
-    "profile":"Profile"
+    "profile":"Profile",
+
+
+    "language": "Languages",
+    "language_subtext": "Choose Your Language, Your Way.",
+    "terms_and_conditions": "Terms and Conditions",
+    "terms_and_conditions_subtext": "App usage rules",
+    "privacy_policy": "Privacy Policy",
+    "privacy_policy_subtext": "Your data safety",
+    "help_and_support": "Help & Support",
+    "help_and_support_subtext": "Get help and contact support",
+    "emergency_contacts": "Emergency Contacts",
+    "emergency_contacts_subtext": "quick access to emergency services",
+    "share_app": "Share App",
+    "share_app_subtext": "You can Share this app to your friends and family members",
+    "logout": "Logout",
+    "logout_confirmation": "Are you sure you want to sign out from your account?"
+
+
 }

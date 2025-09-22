@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
@@ -13,23 +12,28 @@ import 'package:inldsevak/features/quick_access/appointments/model/mla_dropdown_
 import 'package:inldsevak/features/quick_access/appointments/model/request_appointment_model.dart';
 import 'package:inldsevak/features/quick_access/appointments/services/appointments_repository.dart';
 import 'package:quickalert/models/quickalert_type.dart';
+import 'package:inldsevak/features/profile/models/response/user_profile_model.dart'
+    as profile;
 
 class RequestAppointmentViewModel extends BaseViewModel
     with CupertinoDialogMixin, TransparentCircular {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
-  final mlaController = SingleSelectController<mla.Data>(null);
   final nameController = TextEditingController();
   final phoneNumberController = TextEditingController();
   final dateController = TextEditingController();
-  final timeSlotController = SingleSelectController<String>(null);
-  final purposeOfAppointmentController = SingleSelectController<String>(null);
+  final mlaController = SingleSelectController<mla.Data?>(null);
+  // final timeSlotController = SingleSelectController<String>(null);
+  final purposeOfAppointmentController = TextEditingController();
+  final bookForController = SingleSelectController<BookFor?>(null);
   final descriptionController = TextEditingController();
   String? companyDateFormat;
   File? image;
-  List<mla.Data> mlaLists = [];
-  List<String> timeSlotLists = ["12:00", "02:00", "03:00"];
-  List<String> purposeLists = ["Testing"];
+  List<String> timeSlotLists = ["12:00", "01:00", "02:00", "03:00"];
+  List<BookFor> bookForList = [
+    BookFor(key: 'self', value: 'My Self'),
+    BookFor(key: 'others', value: 'Others'),
+  ];
 
   Future<void> selectImage() async {
     customRightCupertinoDialog(
@@ -55,34 +59,11 @@ class RequestAppointmentViewModel extends BaseViewModel
 
   @override
   Future<void> onInit() {
-    getMLALists();
+    bookForController.value = bookForList.first;
     return super.onInit();
   }
 
-  Future<void> getMLALists() async {
-    try {
-      showCustomDialogTransperent(isShowing: true);
-      final response = await AppointmentsRepository().getMLAsData(token);
-
-      if (response.data?.responseCode == 200) {
-        final data = response.data?.data;
-        if (data?.isEmpty == true) {
-          CommonSnackbar(
-            text: "No MLA's Found !",
-          ).showAnimatedDialog(type: QuickAlertType.info);
-        } else {
-          mlaLists.addAll(List.from(data as List));
-        }
-      }
-    } catch (err, stackTrace) {
-      debugPrint("Error: $err");
-      debugPrint("Stack Trace: $stackTrace");
-    } finally {
-      showCustomDialogTransperent(isShowing: false);
-    }
-  }
-
-  Future<void> requestNewAppointments() async {
+  Future<void> requestNewAppointments({required Function onCompleted}) async {
     try {
       if (formKey.currentState!.validate()) {
         autoValidateMode = AutovalidateMode.disabled;
@@ -96,12 +77,14 @@ class RequestAppointmentViewModel extends BaseViewModel
         name: nameController.text,
         phone: phoneNumberController.text,
         date: companyDateFormat ?? "",
-        timeSlot: timeSlotController.value ?? "",
-        purpose: purposeOfAppointmentController.value ?? "",
+        // timeSlot: timeSlotController.value ?? "",
+        purpose: purposeOfAppointmentController.text,
         reason: descriptionController.text,
         documents: [],
         mlaId: mlaController.value!.sId!,
         priority: Priority.high,
+        bookFor: bookForController.value?.key,
+        memberShipID: "ABCDEF",
       );
 
       final response = await AppointmentsRepository().newAppointment(
@@ -110,8 +93,9 @@ class RequestAppointmentViewModel extends BaseViewModel
       );
 
       if (response.data?.responseCode == 200) {
+        onCompleted();
         await CommonSnackbar(
-          text: "Appointment has been scheduled successfully.",
+          text: "Appointment has been requested sucessfully",
         ).showAnimatedDialog(type: QuickAlertType.success);
         RouteManager.pop();
       } else {
@@ -126,4 +110,46 @@ class RequestAppointmentViewModel extends BaseViewModel
       isLoading = false;
     }
   }
+
+  autoFillData(profile.Data? profile) {
+    nameController.text = profile?.name ?? "";
+    phoneNumberController.text = profile?.phone ?? "";
+  }
+
+  clearAutoFill() {
+    nameController.clear();
+    phoneNumberController.clear();
+  }
+
+  void clear() {
+    mlaController.clear();
+    bookForController.clear();
+    nameController.clear();
+    phoneNumberController.clear();
+    dateController.clear();
+    companyDateFormat = null;
+    // timeSlotController.clear();
+    purposeOfAppointmentController.clear();
+    descriptionController.clear();
+  }
+
+  @override
+  void dispose() {
+    mlaController.dispose();
+    bookForController.dispose();
+    nameController.dispose();
+    phoneNumberController.dispose();
+    dateController.dispose();
+    // timeSlotController.dispose();
+    purposeOfAppointmentController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+}
+
+class BookFor {
+  final String key;
+  final String value;
+
+  const BookFor({required this.key, required this.value});
 }

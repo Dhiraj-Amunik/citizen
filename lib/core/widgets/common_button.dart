@@ -148,7 +148,7 @@ class _CommonButtonState extends State<CommonButton>
                 color:
                     widget.borderColor ??
                     AppPalettes.whiteColor.withOpacityExt(0.2),
-                width: 2,
+                width: 1.4,
               ),
               gradient: widget.color == null
                   ? LinearGradient(

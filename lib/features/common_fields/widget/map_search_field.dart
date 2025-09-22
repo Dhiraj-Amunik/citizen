@@ -17,13 +17,13 @@ import 'package:provider/provider.dart';
 class MapSearchField extends StatefulWidget {
   final String? text;
   final String hintText;
-  final SingleSelectController<Predictions?> searchController;
+  // final SingleSelectController<Predictions?> searchController;
   final Function(bool)? visibility;
   final bool? showTextFields;
   final AddressModel? addressModel;
   const MapSearchField({
     super.key,
-    required this.searchController,
+    // required this.searchController,
     this.text,
     required this.hintText,
     this.visibility,
@@ -38,14 +38,16 @@ class MapSearchField extends StatefulWidget {
 class _MapSearchFieldState extends State<MapSearchField> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.searchController.value = Predictions(
-          description: widget.addressModel?.formattedAddress,
-        );
-        context.read<MapSearchViewModel>().loadAddress(
-          model: widget.addressModel,
-        );
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (widget.addressModel != null) {
+    //     widget.searchController.value = Predictions(
+    //       description: widget.addressModel?.formattedAddress,
+    //     );
+    //     context.read<MapSearchViewModel>().loadAddress(
+    //       model: widget.addressModel,
+    //     );
+    //   }
+    // });
     super.initState();
   }
 
@@ -55,14 +57,73 @@ class _MapSearchFieldState extends State<MapSearchField> {
     final textTheme = context.textTheme;
     return PopScope(
       onPopInvokedWithResult: (_, _) {
-        widget.searchController.clear();
+        // widget.searchController.clear();
         context.read<MapSearchViewModel>().clear();
       },
       child: Consumer<MapSearchViewModel>(
         builder: (context, value, _) {
           return Column(
             children: [
-              CommonSearchDropDown<Predictions?>(
+              Column(
+                spacing: Dimens.textFromSpacing,
+                children: [
+                  const SizedBox(),
+                  Row(
+                    spacing: Dimens.gapX4,
+                    children: [
+                      Expanded(
+                        child: FormTextFormField(
+                          enabled: false,
+                          headingText: localization.city_village,
+                          hintText: localization.city,
+                          controller: value.cityController,
+                        ),
+                      ),
+                      Expanded(
+                        child: FormTextFormField(
+                          enabled: false,
+                          headingText: localization.district,
+                          hintText: localization.district,
+                          controller: value.districtController,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    spacing: Dimens.gapX4,
+                    children: [
+                      Expanded(
+                        child: FormTextFormField(
+                          enabled: false,
+                          headingText: localization.state,
+                          hintText: localization.state,
+                          controller: value.stateController,
+                        ),
+                      ),
+                      Expanded(
+                        child: FormTextFormField(
+                          enabled: false,
+                          headingText: localization.pincode,
+                          hintText: localization.pincode_6_digits,
+                          controller: value.pincodeController,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+/*
+
+   CommonSearchDropDown<Predictions?>(
                 visibility: widget.visibility,
                 onChanged: (place) {
                   if (widget.searchController.value?.placeId != null) {
@@ -143,61 +204,4 @@ class _MapSearchFieldState extends State<MapSearchField> {
                   );
                 },
               ),
-              Visibility(
-                visible: widget.showTextFields ?? true,
-                child: Column(
-                  spacing: Dimens.textFromSpacing,
-                  children: [
-                    const SizedBox(),
-                    Row(
-                      spacing: Dimens.gapX4,
-                      children: [
-                        Expanded(
-                          child: FormTextFormField(
-                            enabled: false,
-                            headingText: localization.city_village,
-                            hintText: localization.city,
-                            controller: value.cityController,
-                          ),
-                        ),
-                        Expanded(
-                          child: FormTextFormField(
-                            enabled: false,
-                            headingText: localization.district,
-                            hintText: localization.district,
-                            controller: value.districtController,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      spacing: Dimens.gapX4,
-                      children: [
-                        Expanded(
-                          child: FormTextFormField(
-                            enabled: false,
-                            headingText: localization.state,
-                            hintText: localization.state,
-                            controller: value.stateController,
-                          ),
-                        ),
-                        Expanded(
-                          child: FormTextFormField(
-                            enabled: false,
-                            headingText: localization.pincode,
-                            hintText: localization.pincode_6_digits,
-                            controller: value.pincodeController,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
+          */

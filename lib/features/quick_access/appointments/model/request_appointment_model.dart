@@ -4,23 +4,27 @@ class RequestAppointmentModel {
   String name;
   String phone;
   String date;
-  String timeSlot;
+  String? timeSlot;
   String purpose;
   String reason;
   List<String> documents;
   String mlaId;
   Priority priority;
+  String? bookFor;
+  String? memberShipID;
 
   RequestAppointmentModel({
     required this.name,
     required this.phone,
     required this.date,
-    required this.timeSlot,
+    this.timeSlot = "00:00",
     required this.purpose,
     required this.reason,
     required this.documents,
     required this.mlaId,
     required this.priority,
+    required this.bookFor,
+    required this.memberShipID,
   });
 
   Map<String, dynamic> toJson() {
@@ -34,6 +38,8 @@ class RequestAppointmentModel {
       'documents': documents,
       'mlaId': mlaId,
       'priority': priority.name.capitalize(),
+      'bookFor': bookFor,
+      'memberShipId': memberShipID,
     };
   }
 }

@@ -7,16 +7,11 @@ import 'package:inldsevak/features/quick_access/appointments/model/mla_dropdown_
     as mla;
 import 'package:provider/provider.dart';
 
-class MlaDropDownWidget extends StatefulWidget {
-  final SingleSelectController<mla.Data> mlaController;
+class MlaDropDownWidget extends StatelessWidget {
+  final SingleSelectController<mla.Data?> mlaController;
 
   const MlaDropDownWidget({super.key, required this.mlaController});
 
-  @override
-  State<MlaDropDownWidget> createState() => _MlaDropDownWidgetState();
-}
-
-class _MlaDropDownWidgetState extends State<MlaDropDownWidget> {
   @override
   Widget build(BuildContext context) {
     final localization = context.localizations;
@@ -24,17 +19,17 @@ class _MlaDropDownWidgetState extends State<MlaDropDownWidget> {
 
     return Consumer<MlaViewModel>(
       builder: (context, value, _) {
-        return FormCommonDropDown<mla.Data>(
+        return FormCommonDropDown<mla.Data?>(
           isRequired: true,
           heading: localization.select_mla,
           hintText: localization.choose_your_mla,
-          controller: widget.mlaController,
+          controller: mlaController,
           items: value.mlaLists,
           listItemBuilder: (p0, mla, p2, p3) {
-            return Text(mla.user?.name ?? "", style: textTheme.bodySmall);
+            return Text(mla?.user?.name ?? "", style: textTheme.bodySmall);
           },
           headerBuilder: (p0, mla, p2) {
-            return Text(mla.user?.name ?? "", style: textTheme.bodySmall);
+            return Text(mla?.user?.name ?? "", style: textTheme.bodySmall);
           },
           validator: (data) {
             if (data == null) {
@@ -44,11 +39,5 @@ class _MlaDropDownWidgetState extends State<MlaDropDownWidget> {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    widget.mlaController.dispose();
-    super.dispose();
   }
 }

@@ -16,6 +16,11 @@ class SizeBox {
   static final sizeHX10 = 40.verticalSpace;
   static final sizeHX11 = 44.verticalSpace;
   static final sizeHX12 = 48.verticalSpace;
+  static final sizeHX13 = 52.verticalSpace;
+  static final sizeHX14 = 56.verticalSpace;
+  static final sizeHX16 = 64.verticalSpace;
+  static final sizeHX18 = 72.verticalSpace;
+  static final sizeHX20 = 80.verticalSpace;
 
   static final sizeWX1 = 4.horizontalSpace;
   static final sizeWX2 = 8.horizontalSpace;

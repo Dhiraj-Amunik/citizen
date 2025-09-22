@@ -31,7 +31,7 @@ class FormTextFormField extends StatelessWidget {
   final VoidCallback? onComplete;
   final String? headingText;
   final String? labelText;
-  final Color borderColor;
+  final Color? borderColor;
   final double borderWidth;
   final double? radius;
   final Color? cursorColor;
@@ -58,7 +58,7 @@ class FormTextFormField extends StatelessWidget {
     this.headingText,
     this.radius,
     this.cursorColor = AppPalettes.blackColor,
-    this.borderColor = AppPalettes.primaryColor,
+    this.borderColor,
     this.borderWidth = 1,
     this.maxLines = 1,
     this.prefixIcon,
@@ -92,7 +92,9 @@ class FormTextFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     final respRadius = radius ?? Dimens.radiusX4;
     final border = OutlineInputBorder(
-      borderSide: BorderSide.none,
+      borderSide: borderColor == null
+          ? BorderSide.none
+          : BorderSide(color: borderColor ?? AppPalettes.transparentColor),
       borderRadius: BorderRadius.circular(respRadius),
     );
     final iconColor = ColorFilter.mode(context.iconsColor, BlendMode.srcIn);
@@ -101,7 +103,7 @@ class FormTextFormField extends StatelessWidget {
       children: [
         if (headingText != null)
           Text(
-            "${headingText!} ${isRequired ==true?'*':''}",
+            "${headingText!} ${isRequired == true ? '*' : ''}",
             style: headingStyle ?? context.textTheme.bodySmall,
           ).onlyPadding(bottom: Dimens.gapX1B),
         TextFormField(
@@ -120,6 +122,7 @@ class FormTextFormField extends StatelessWidget {
           decoration: InputDecoration(
             isDense: true,
             filled: true,
+            fillColor: fillColor,
             alignLabelWithHint: alignLabel,
             counterText: showCounterText == true ? null : "",
             counterStyle: context.textTheme.labelMedium?.copyWith(

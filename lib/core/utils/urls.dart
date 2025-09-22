@@ -1,7 +1,7 @@
 class URLs {
   URLs._privateConstructor();
 
-  static const baseURL = "http://143.110.246.44:8000";
+  static const baseURL = "https://citi.cortexaics.info";
 
   //auth
   static const generateOTP = "/api/user/generateOtp"; /*Post*/
@@ -11,9 +11,10 @@ class URLs {
   static const userRegister = "/api/user/Register"; /*Post*/
   static const getUserProfile = "/api/user/getUserProfile"; /*Get*/
   static const editUser = "/api/user/editUser"; /*Put*/
-  static const uploadImage = "/uploadImage"; /*Post*/
 
-  //Donation
+  //Image
+  static const uploadImage = "/api/image/uploadImage"; /*Post*/
+  static const uploadMultipleImage = "/api/image/multipleUpload"; /*Post*/
 
   //Party Member
 
@@ -24,13 +25,15 @@ class URLs {
 
   //User
   static const userMLAs = "/api/user/list-of-mlas-dropdown"; /*Get*/
-  static const userAppointment = "/api/user/create-appointment"; /*Get*/
+  static const createAppointment = "/api/user/create-appointment"; /*POST*/
+  static const userAppointment = "/api/user/list-Of-appointment"; /*POST*/
 
   static const userEvents = "/api/user/list-of-events"; /*Post*/
   static const userEventsDetails = "/api/user/get-single-event"; /*Post*/
   static const userLokVarta = "/api/user/lok-varta"; /*Post*/
   static const postDonation = "/api/user/create-donation"; /*Post*/
   static const pastDonation = "/api/user/list-of-donations-by-user"; /*Post*/
+  static const userMlaDetails = "/api/user/mla-details-by-user"; /*Get*/
 
   //complaints
 
@@ -47,12 +50,19 @@ class URLs {
 
   static const getPincodeConstituencies =
       "/api/user/get-constituency-by-pincode"; /*Get*/
+  static const getParliamentaryConstituency =
+      "/api/user/get-parliamentary-constituency-by-pincode"; /*Post*/
+  static const getAssemblyConstituency =
+      "/api/user/get-assembly-constituency"; /*Post*/
 
   // wall of help
   static const getUserWallOFHelpData =
-      "/api/user/listOfFinancialHelpRequests"; /*Get*/
+      "/api/user/list-of-financial-help-requests"; /*Get*/
   static const requestFinancialHelp =
       "/api/user/createFinancialHelpRequest"; /*Post*/
   static const donateToHelpRequest =
       "/api/user/donateToFinancialHelpRequest"; /*Post*/
+
+  //notifications
+  static const notifications = "/api/user/notificationList"; /*Get*/
 }

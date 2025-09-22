@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
+import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
@@ -9,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/features/auth/models/request/user_register_request_model.dart';
 import 'package:inldsevak/features/auth/services/user_profile_repository.dart';
 import 'package:inldsevak/features/common_fields/model/address_model.dart';
-import 'package:inldsevak/restart_app.dart';
 
-class UserRegisterViewModel extends BaseViewModel with CupertinoDialogMixin {
+class UserRegisterViewModel extends BaseViewModel
+    with CupertinoDialogMixin, UploadFilesMixin {
   GlobalKey<FormState> userDetailsFormKey = GlobalKey<FormState>();
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
 
@@ -67,7 +68,8 @@ class UserRegisterViewModel extends BaseViewModel with CupertinoDialogMixin {
 
   Future<void> registerUserDetails({
     AddressModel? addressModel,
-    String? constituenciesID,
+    String? assemblyConstituenciesID,
+    String? parliamentaryConstituenciesID,
   }) async {
     try {
       if (userDetailsFormKey.currentState!.validate()) {
@@ -82,22 +84,38 @@ class UserRegisterViewModel extends BaseViewModel with CupertinoDialogMixin {
         return;
       }
       isLoading = true;
+     
 
       final data = RequestRegisterModel(
         name: nameController.text,
+        fatherName: "",
         email: emailController.text,
         dateOfBirth: companyDateFormat!,
         gender: genderController.value!.toLowerCase(),
-        constituencyId: constituenciesID,
+        parliamentaryId: parliamentaryConstituenciesID,
+        assemblyId: assemblyConstituenciesID,
         document: [
           Document(
             documentType: "aadhaar",
-            documentUrl: "",
+            documentUrl: aadharImage == null
+                ? ""
+                : await uploadImage(
+                  filename: aadharImage?.path,
+                    aadharImage!.path,
+                    token: token ?? "",
+                    name: "Aadhar",
+                  ),
             documentNumber: aadharController.text.replaceAll(" ", ''),
           ),
           Document(
             documentType: "voterId",
-            documentUrl: "",
+             documentUrl: voterIdImage == null
+                ? ""
+                : await uploadImage(
+                    voterIdImage!.path,
+                    token: token ?? "",
+                    name: "Voter ID",
+                  ),
             documentNumber: voterIdController.text,
           ),
         ],
@@ -118,7 +136,7 @@ class UserRegisterViewModel extends BaseViewModel with CupertinoDialogMixin {
       );
       if (response.data?.responseCode == 200) {
         if (response.data?.data?.isRegistered == true) {
-          RestartApp.restartApp();
+          await isRegistered(isRegistered: true);
           CommonSnackbar(
             text: response.data?.message ?? 'User registered successfully.',
           ).showToast();
@@ -147,35 +165,6 @@ class UserRegisterViewModel extends BaseViewModel with CupertinoDialogMixin {
       isLoading = false;
     }
   }
-
-  // Future<void> uploadProfilePic() async {
-  //   try {
-  //     if (profilePicture != null) {
-  //       final FormData data = FormData.fromMap({
-  //         'file': await MultipartFile.fromFile(profilePicture!.path),
-  //       });
-
-  //       // final response = await UserProfileRepository().uploadUserPicture(
-  //       //   data: data,
-  //       //   token: token ?? '',
-  //       // );
-  //       // if (response.data?.responseCode == 200) {
-  //       //   CommonSnackbar(
-  //       //     text: "Profile Pic updated successfully",
-  //       //   ).showSnackbar();
-  //       // } else {
-  //       //   CommonSnackbar(text: "Something went wrong.").showSnackbar();
-  //       // }
-  //     } else {
-  //       CommonSnackbar(
-  //         text: "Please select one image to upload.",
-  //       ).showSnackbar();
-  //     }
-  //   } catch (err, stackTrace) {
-  //     debugPrint("Error: $err");
-  //     debugPrint("Stack Trace: $stackTrace");
-  //   }
-  // }
 
   void generateAadhar(String? value) {
     // Remove all spaces first

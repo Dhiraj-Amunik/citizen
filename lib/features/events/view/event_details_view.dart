@@ -114,7 +114,7 @@ class EventDetailsView extends StatelessWidget {
                             ),
                             radius: Dimens.radiusX3,
                             svg: CommonHelpers.buildIcons(
-                              color: AppPalettes.liteGreenTextFieldColor,
+                              color: AppPalettes.liteGreenColor,
                               path: AppImages.cameraIcon,
                               iconColor: AppPalettes.primaryColor,
                               iconSize: Dimens.scaleX2,

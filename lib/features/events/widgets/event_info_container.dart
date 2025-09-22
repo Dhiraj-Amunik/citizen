@@ -23,7 +23,7 @@ class EventInfoContainer extends StatelessWidget {
           Row(
             children: [
               CommonHelpers.buildIcons(
-                color: AppPalettes.liteGreenTextFieldColor,
+                color: AppPalettes.liteGreenColor,
                 path: icon,
                 iconColor: AppPalettes.primaryColor,
                 iconSize: Dimens.scaleX2B,

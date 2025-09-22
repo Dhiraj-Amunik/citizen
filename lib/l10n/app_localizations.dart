@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_hi.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,13 +93,28 @@ abstract class AppLocalizations {
       ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('hi'),
+  ];
 
-  /// No description provided for @language.
+  /// No description provided for @english.
   ///
   /// In en, this message translates to:
   /// **'English'**
-  String get language;
+  String get english;
+
+  /// No description provided for @login_or_signup.
+  ///
+  /// In en, this message translates to:
+  /// **'Login Or Signup'**
+  String get login_or_signup;
+
+  /// No description provided for @hello_welcome_to_your_account.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, welcome to your account'**
+  String get hello_welcome_to_your_account;
 
   /// No description provided for @mobile_number.
   ///
@@ -205,7 +221,7 @@ abstract class AppLocalizations {
   /// No description provided for @father_name_validator.
   ///
   /// In en, this message translates to:
-  /// **'Please enter yout father name'**
+  /// **'Please enter your father name'**
   String get father_name_validator;
 
   /// No description provided for @email.
@@ -466,6 +482,18 @@ abstract class AppLocalizations {
   /// **'Constituency'**
   String get constituency;
 
+  /// No description provided for @assembly_constituency.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly Constituency'**
+  String get assembly_constituency;
+
+  /// No description provided for @parliamentary_constituency.
+  ///
+  /// In en, this message translates to:
+  /// **'Parliamentary Constituency'**
+  String get parliamentary_constituency;
+
   /// No description provided for @select_your_constituency.
   ///
   /// In en, this message translates to:
@@ -525,6 +553,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Events'**
   String get events;
+
+  /// No description provided for @upcoming_events.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Events'**
+  String get upcoming_events;
+
+  /// No description provided for @see_all.
+  ///
+  /// In en, this message translates to:
+  /// **'see all'**
+  String get see_all;
 
   /// No description provided for @event_details.
   ///
@@ -655,7 +695,7 @@ abstract class AppLocalizations {
   /// No description provided for @help_and_support.
   ///
   /// In en, this message translates to:
-  /// **'Help and Support'**
+  /// **'Help & Support'**
   String get help_and_support;
 
   /// No description provided for @search_for_help.
@@ -850,11 +890,29 @@ abstract class AppLocalizations {
   /// **'Upload Photo'**
   String get upload_photo;
 
+  /// No description provided for @upload_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Photos (Optional)'**
+  String get upload_photos;
+
   /// No description provided for @please_provide_valid_10_digit_number.
   ///
   /// In en, this message translates to:
   /// **'Please provide valid 10 digits number'**
   String get please_provide_valid_10_digit_number;
+
+  /// No description provided for @click_to_upload_doc_and_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to Upload Documents or Photos'**
+  String get click_to_upload_doc_and_photo;
+
+  /// No description provided for @maximum_5_are_allowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum 5 are allowed'**
+  String get maximum_5_are_allowed;
 
   /// No description provided for @enter_address.
   ///
@@ -868,17 +926,35 @@ abstract class AppLocalizations {
   /// **'Please enter your home address'**
   String get address_validator;
 
+  /// No description provided for @appointments.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get appointments;
+
   /// No description provided for @request_appointment.
   ///
   /// In en, this message translates to:
   /// **'Request Appointment'**
   String get request_appointment;
 
+  /// No description provided for @appointment_list.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment List'**
+  String get appointment_list;
+
   /// No description provided for @select_mla.
   ///
   /// In en, this message translates to:
   /// **'Select MLA'**
   String get select_mla;
+
+  /// No description provided for @book_for.
+  ///
+  /// In en, this message translates to:
+  /// **'Book for'**
+  String get book_for;
 
   /// No description provided for @date.
   ///
@@ -934,6 +1010,12 @@ abstract class AppLocalizations {
   /// **'Time Slot'**
   String get time_slot;
 
+  /// No description provided for @preferred_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred Date'**
+  String get preferred_date;
+
   /// No description provided for @select_time_slot.
   ///
   /// In en, this message translates to:
@@ -946,11 +1028,11 @@ abstract class AppLocalizations {
   /// **'Purpose of Appointment'**
   String get purpose_of_appointment;
 
-  /// No description provided for @select_purpose.
+  /// No description provided for @enter_your_appointment_reason.
   ///
   /// In en, this message translates to:
-  /// **'Select Purpose'**
-  String get select_purpose;
+  /// **'Enter your appointment reason'**
+  String get enter_your_appointment_reason;
 
   /// No description provided for @upload_documents.
   ///
@@ -964,17 +1046,23 @@ abstract class AppLocalizations {
   /// **'Enter detail description for an appointment'**
   String get description_info;
 
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
   /// No description provided for @wall_of_help.
   ///
   /// In en, this message translates to:
   /// **'Wall of Help'**
   String get wall_of_help;
 
-  /// No description provided for @quick_access.
+  /// No description provided for @quick_links.
   ///
   /// In en, this message translates to:
-  /// **'Quick Access'**
-  String get quick_access;
+  /// **'Quick Links'**
+  String get quick_links;
 
   /// No description provided for @request_help.
   ///
@@ -1359,6 +1447,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile'**
   String get profile;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get language;
+
+  /// No description provided for @language_subtext.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Language, Your Way.'**
+  String get language_subtext;
+
+  /// No description provided for @terms_and_conditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms and Conditions'**
+  String get terms_and_conditions;
+
+  /// No description provided for @terms_and_conditions_subtext.
+  ///
+  /// In en, this message translates to:
+  /// **'App usage rules'**
+  String get terms_and_conditions_subtext;
+
+  /// No description provided for @privacy_policy_subtext.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data safety'**
+  String get privacy_policy_subtext;
+
+  /// No description provided for @help_and_support_subtext.
+  ///
+  /// In en, this message translates to:
+  /// **'Get help and contact support'**
+  String get help_and_support_subtext;
+
+  /// No description provided for @emergency_contacts_subtext.
+  ///
+  /// In en, this message translates to:
+  /// **'quick access to emergency services'**
+  String get emergency_contacts_subtext;
+
+  /// No description provided for @share_app.
+  ///
+  /// In en, this message translates to:
+  /// **'Share App'**
+  String get share_app;
+
+  /// No description provided for @share_app_subtext.
+  ///
+  /// In en, this message translates to:
+  /// **'You can Share this app to your friends and family members'**
+  String get share_app_subtext;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @logout_confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to sign out from your account?'**
+  String get logout_confirmation;
 }
 
 class _AppLocalizationsDelegate
@@ -1372,7 +1526,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en'].contains(locale.languageCode);
+      <String>['en', 'hi'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1383,6 +1537,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'hi':
+      return AppLocalizationsHi();
   }
 
   throw FlutterError(

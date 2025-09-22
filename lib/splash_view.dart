@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
 
+
 class SplashView extends StatelessWidget {
   const SplashView({super.key});
 

@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
-import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/profile_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/secure/secure_storage.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
+import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/features/navigation/view/navigation_view.dart';
 import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileView extends StatelessWidget with CupertinoDialogMixin {
   const ProfileView({super.key});
@@ -70,69 +73,136 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
                 ],
               ),
             ProfileHelper.getCommonBox(
-              'Terms and Conditions',
-              subtext: "App usage rules",
+              localization.language,
+              subtext: localization.language_subtext,
+              icon: AppImages.translationIcon,
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return Dialog(
+                      child: Container(
+                        padding: EdgeInsets.all(Dimens.paddingX4),
+                        decoration: BoxDecoration(
+                          color: AppPalettes.whiteColor,
+                          borderRadius: BorderRadius.circular(Dimens.paddingX4),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            SizeBox.sizeHX5,
+                            CommonButton(
+                              color: AppPalettes.whiteColor,
+                              textColor: AppPalettes.blackColor,
+                              text: "English",
+                              borderColor: AppPalettes.primaryColor,
+                              onTap: () {
+                                GeneralStream.instance.setLocale("en");
+                                RouteManager.pop();
+                              },
+                            ),
+                            SizeBox.sizeHX3,
+                            CommonButton(
+                              color: AppPalettes.whiteColor,
+                              textColor: AppPalettes.blackColor,
+                              text: "हिन्दी (Hindi)",
+                              borderColor: AppPalettes.primaryColor,
+                              onTap: () {
+                                GeneralStream.instance.setLocale("hi");
+
+                                RouteManager.pop();
+                              },
+                            ),
+                            SizeBox.sizeHX5,
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+            ProfileHelper.getCommonBox(
+              localization.terms_and_conditions,
+              subtext: localization.terms_and_conditions_subtext,
               icon: AppImages.termsServices,
+              onTap: () =>
+                  _launchURL("https://sites.google.com/view/inldsevak/home"),
             ),
             ProfileHelper.getCommonBox(
-              'Privacy Policy',
-              subtext: "Your data safety",
+              localization.privacy_policy,
+              subtext: localization.privacy_policy_subtext,
               icon: AppImages.privacyPolicy,
+              onTap: () =>
+                  _launchURL("https://sites.google.com/view/inldsevak/home"),
             ),
             ProfileHelper.getCommonBox(
-              'Help & Support',
-              subtext: "Get help and contact support",
+              localization.help_and_support,
+              subtext: localization.help_and_support_subtext,
               icon: AppImages.help,
               onTap: () => RouteManager.pushNamed(Routes.helpAndSupportPage),
             ),
             ProfileHelper.getCommonBox(
-              'Emergency Contacts',
-              subtext: "quick access to emergency services",
+              localization.emergency_contacts,
+              subtext: localization.emergency_contacts_subtext,
               icon: AppImages.phoneIcon,
               onTap: () => RouteManager.pushNamed(Routes.emergencyContactsPage),
             ),
+            ProfileHelper.getCommonBox(
+              localization.share_app,
+              subtext: localization.share_app_subtext,
+              icon: AppImages.shareIcon,
+              backgroundColor: AppPalettes.liteGreenColor,
+            ),
             ProfileHelper.getLogout(
-              'Logout',
+              localization.logout,
               onTap: () {
                 customLeftCupertinoDialog(
-                  content:
-                      "Are you sure you want to sign out from your account?",
-                  leftButton: "Logout",
+                  content: localization.logout_confirmation,
+                  leftButton: localization.logout,
                   onTap: () async {
                     await SessionController.instance.clearSession();
                   },
                 );
               },
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: Dimens.gapX2,
-              children: [
-                CommonHelpers.buildIcons(
-                  path: AppImages.instIcon,
-                  color: AppPalettes.liteGreyColor,
-                  padding: Dimens.paddingX3,
-                  iconSize: Dimens.scaleX3,
-                ),
-                CommonHelpers.buildIcons(
-                  path: AppImages.facebookIcon,
-                  color: AppPalettes.liteGreyColor,
-                  padding: Dimens.paddingX3,
-                  iconSize: Dimens.scaleX3,
-                ),
-                CommonHelpers.buildIcons(
-                  path: AppImages.twitterIcon,
-                  color: AppPalettes.liteGreyColor,
-                  padding: Dimens.paddingX3,
-                  iconSize: Dimens.scaleX3,
-                ),
-              ],
-            ),
-            SizeBox.size,
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   spacing: Dimens.gapX2,
+            //   children: [
+            //     CommonHelpers.buildIcons(
+            //       path: AppImages.instIcon,
+            //       color: AppPalettes.liteGreyColor,
+            //       padding: Dimens.paddingX3,
+            //       iconSize: Dimens.scaleX3,
+            //     ),
+            //     CommonHelpers.buildIcons(
+            //       path: AppImages.facebookIcon,
+            //       color: AppPalettes.liteGreyColor,
+            //       padding: Dimens.paddingX3,
+            //       iconSize: Dimens.scaleX3,
+            //     ),
+            //     CommonHelpers.buildIcons(
+            //       path: AppImages.twitterIcon,
+            //       color: AppPalettes.liteGreyColor,
+            //       padding: Dimens.paddingX3,
+            //       iconSize: Dimens.scaleX3,
+            //     ),
+            //   ],
+            // ),
+            SizeBox.sizeHX9,
           ],
         ),
       ),
       bottomNavigationBar: DummyNav(),
     );
+  }
+
+  _launchURL(url) async {
+    try {
+      await launchUrl(Uri.parse(url));
+    } catch (err) {
+      return CommonSnackbar(text: 'Could not launch $url').showToast();
+    }
   }
 }

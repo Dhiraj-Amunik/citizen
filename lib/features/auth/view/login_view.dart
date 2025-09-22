@@ -2,7 +2,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
-import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
@@ -14,15 +13,55 @@ import 'package:inldsevak/features/auth/utils/auth_appbar.dart';
 import 'package:inldsevak/features/auth/utils/launch_url.dart';
 import 'package:inldsevak/features/auth/view_model/login_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:inldsevak/core/routes/routes.dart';
+import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
+import 'package:inldsevak/disclaimer_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginView extends StatelessWidget with CupertinoDialogMixin {
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
+
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
 
-  LoginView({super.key});
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      bool isVisible = false;
+      final prefs = await SharedPreferences.getInstance();
+      isVisible = prefs.getBool('disclaimer_dismissed') ?? true;
+
+      Future<void> dismissNotice() async {
+        RouteManager.pop();
+        isVisible = await prefs.setBool('disclaimer_dismissed', false);
+      }
+
+      if (isVisible) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (context) {
+            return DraggableSheetWidget(
+              onCompleted: dismissNotice,
+              radius: Dimens.radiusX4,
+              backgroundColor: Colors.amber[50],
+              size: 0.24,
+              child: DisclaimerNotice(onDismiss: dismissNotice),
+            );
+          },
+        );
+      }
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final localizations = context.localizations;
+    final localization = context.localizations;
     final textTheme = context.textTheme;
     final provider = context.read<LoginViewModel>();
     onTap() {
@@ -49,11 +88,11 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
               ),
               SizeBox.sizeHX6,
               Text(
-                "Login Or Signup",
+                localization.login_or_signup,
                 style: textTheme.headlineSmall?.copyWith(height: 0),
               ),
               Text(
-                "Hello, welcome to your account",
+                localization.hello_welcome_to_your_account,
                 style: textTheme.bodyMedium?.copyWith(
                   color: AppPalettes.lightTextColor,
                   height: 0,
@@ -72,21 +111,20 @@ class LoginView extends StatelessWidget with CupertinoDialogMixin {
                           spacing: Dimens.widgetSpacing,
                           children: [
                             CommonTextFormField(
-                              backgroundColor:
-                                  AppPalettes.liteGreenTextFieldColor,
+                              backgroundColor: AppPalettes.liteGreenColor,
                               prefixIcon: AppImages.phoneIcon,
                               controller: provider.numberController,
-                              hintText: localizations.mobile_number,
+                              hintText: localization.mobile_number,
                               keyboardType: TextInputType.number,
                               maxLength: 10,
                               validator: (value) => value?.validateNumber(
-                                argument: localizations.phone_validator,
+                                argument: localization.phone_validator,
                               ),
                             ),
                             CommonButton(
                               isEnable: !provider.isLoading,
                               isLoading: provider.isLoading,
-                              text: localizations.send_otp,
+                              text: localization.send_otp,
                               onTap: () {
                                 provider.generateOTP(loginFormKey);
                               },

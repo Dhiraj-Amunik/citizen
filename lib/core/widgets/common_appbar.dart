@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
-import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
@@ -24,7 +23,6 @@ PreferredSize commonAppBar({
 }) => PreferredSize(
   preferredSize: Size.fromHeight(appBarHeight.r),
   child: AppBar(
-    leadingWidth: 60.height(),
     toolbarHeight: appBarHeight.r,
     surfaceTintColor: AppPalettes.transparentColor,
     systemOverlayStyle: SystemUiOverlayStyle(
@@ -37,17 +35,15 @@ PreferredSize commonAppBar({
     backgroundColor: AppPalettes.whiteColor,
     centerTitle: center,
     bottom: bottom,
+    titleSpacing: 0,
     title:
-        (child ??
-                Text(
-                  title ?? "",
-                  style:
-                      style ??
-                      AppStyles.headlineMedium.copyWith(
-                        color: AppPalettes.blackColor,
-                      ),
-                ))
-            .horizontalPadding(Dimens.horizontalspacing),
+        (child?.horizontalPadding(Dimens.horizontalspacing) ??
+        Text(
+          title ?? "",
+          style:
+              style ??
+              AppStyles.headlineMedium.copyWith(color: AppPalettes.blackColor),
+        )),
     actions: action,
     actionsPadding: EdgeInsets.only(right: Dimens.horizontalspacing),
   ),

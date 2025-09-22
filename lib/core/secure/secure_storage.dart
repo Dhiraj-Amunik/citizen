@@ -24,12 +24,14 @@ class SessionController {
     final token = await _storage.read(key: "token");
     final number = await _storage.read(key: "number");
     final isParty = await _storage.read(key: "isParty");
+    final isRegistered = await _storage.read(key: "isRegistered");
 
     if (token != null && number != null) {
       _model = SecureModel(
         token: token,
         number: number,
         isPartyMemeber: isParty?.toLowerCase() == 'true' ? true : false,
+        isRegistered: isRegistered?.toLowerCase() == 'true' ? true : false,
       );
     }
     await Future.delayed(Duration(seconds: 3));
@@ -45,8 +47,28 @@ class SessionController {
           key: "isParty",
           value: data.isPartyMemeber.toString().toLowerCase(),
         ),
+        _storage.write(
+          key: "isRegistered",
+          value: data.isRegistered.toString().toLowerCase(),
+        ),
       ]);
       _model = data;
+      _authController.add(_model);
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    }
+  }
+
+  Future<void> setRegistered({required bool isRegistered}) async {
+    try {
+      await Future.wait([
+        _storage.write(
+          key: "isRegistered",
+          value: isRegistered.toString().toLowerCase(),
+        ),
+      ]);
+      _model?.isRegistered = isRegistered;
       _authController.add(_model);
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
@@ -60,6 +82,7 @@ class SessionController {
       _storage.delete(key: "token"),
       _storage.delete(key: "number"),
       _storage.delete(key: "isParty"),
+      _storage.delete(key: "isRegistered"),
     ]);
     _authController.add(_model);
     if (RouteManager.navigatorKey.currentState!.canPop()) {
@@ -88,5 +111,11 @@ class SecureModel {
   String token;
   String number;
   bool? isPartyMemeber;
-  SecureModel({required this.token, required this.number, this.isPartyMemeber});
+  bool? isRegistered;
+  SecureModel({
+    required this.token,
+    required this.number,
+    this.isPartyMemeber,
+    this.isRegistered,
+  });
 }

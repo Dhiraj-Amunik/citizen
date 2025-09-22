@@ -9,7 +9,13 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get language => 'English';
+  String get english => 'English';
+
+  @override
+  String get login_or_signup => 'Login Or Signup';
+
+  @override
+  String get hello_welcome_to_your_account => 'Hello, welcome to your account';
 
   @override
   String get mobile_number => 'Mobile Number';
@@ -64,7 +70,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get father_name => 'Father Name';
 
   @override
-  String get father_name_validator => 'Please enter yout father name';
+  String get father_name_validator => 'Please enter your father name';
 
   @override
   String get email => 'Email';
@@ -196,6 +202,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get constituency => 'Constituency';
 
   @override
+  String get assembly_constituency => 'Assembly Constituency';
+
+  @override
+  String get parliamentary_constituency => 'Parliamentary Constituency';
+
+  @override
   String get select_your_constituency => 'Select your constituency';
 
   @override
@@ -225,6 +237,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get events => 'Events';
+
+  @override
+  String get upcoming_events => 'Upcoming Events';
+
+  @override
+  String get see_all => 'see all';
 
   @override
   String get event_details => 'Event Details';
@@ -293,7 +311,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get response_within_24_hours => 'Response within 24 hours';
 
   @override
-  String get help_and_support => 'Help and Support';
+  String get help_and_support => 'Help & Support';
 
   @override
   String get search_for_help => 'search for help';
@@ -400,8 +418,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upload_photo => 'Upload Photo';
 
   @override
+  String get upload_photos => 'Upload Photos (Optional)';
+
+  @override
   String get please_provide_valid_10_digit_number =>
       'Please provide valid 10 digits number';
+
+  @override
+  String get click_to_upload_doc_and_photo =>
+      'Click to Upload Documents or Photos';
+
+  @override
+  String get maximum_5_are_allowed => 'Maximum 5 are allowed';
 
   @override
   String get enter_address => 'Enter Address';
@@ -410,10 +438,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get address_validator => 'Please enter your home address';
 
   @override
+  String get appointments => 'Appointments';
+
+  @override
   String get request_appointment => 'Request Appointment';
 
   @override
+  String get appointment_list => 'Appointment List';
+
+  @override
   String get select_mla => 'Select MLA';
+
+  @override
+  String get book_for => 'Book for';
 
   @override
   String get date => 'Date';
@@ -444,13 +481,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get time_slot => 'Time Slot';
 
   @override
+  String get preferred_date => 'Preferred Date';
+
+  @override
   String get select_time_slot => 'Select Preferred Time Slot';
 
   @override
   String get purpose_of_appointment => 'Purpose of Appointment';
 
   @override
-  String get select_purpose => 'Select Purpose';
+  String get enter_your_appointment_reason => 'Enter your appointment reason';
 
   @override
   String get upload_documents => 'Upload Documents';
@@ -459,10 +499,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get description_info => 'Enter detail description for an appointment';
 
   @override
+  String get clear => 'Clear';
+
+  @override
   String get wall_of_help => 'Wall of Help';
 
   @override
-  String get quick_access => 'Quick Access';
+  String get quick_links => 'Quick Links';
 
   @override
   String get request_help => 'Request Help';
@@ -657,4 +700,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profile => 'Profile';
+
+  @override
+  String get language => 'Languages';
+
+  @override
+  String get language_subtext => 'Choose Your Language, Your Way.';
+
+  @override
+  String get terms_and_conditions => 'Terms and Conditions';
+
+  @override
+  String get terms_and_conditions_subtext => 'App usage rules';
+
+  @override
+  String get privacy_policy_subtext => 'Your data safety';
+
+  @override
+  String get help_and_support_subtext => 'Get help and contact support';
+
+  @override
+  String get emergency_contacts_subtext => 'quick access to emergency services';
+
+  @override
+  String get share_app => 'Share App';
+
+  @override
+  String get share_app_subtext =>
+      'You can Share this app to your friends and family members';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get logout_confirmation =>
+      'Are you sure you want to sign out from your account?';
 }

@@ -22,6 +22,8 @@ class WallOfHelpViewModel extends BaseViewModel {
   final descriptionController = TextEditingController();
   final amountController = TextEditingController();
 
+  final searchController = TextEditingController();
+
   @override
   Future<void> onInit() {
     getWallOfHelpList();
@@ -29,17 +31,20 @@ class WallOfHelpViewModel extends BaseViewModel {
   }
 
   List<model.Data> wallOFHelpLists = [];
+  List<model.Data> filteredWallOFHelpLists = [];
 
   Future<void> getWallOfHelpList() async {
     try {
       isLoading = true;
+      wallOFHelpLists.clear();
+      filteredWallOFHelpLists.clear();
       final response = await WallOfHelpRepository().getWallOFHelp(token);
 
       if (response.data?.responseCode == 200) {
-        wallOFHelpLists.clear();
         final data = response.data?.data;
         if (data?.isNotEmpty == true) {
-          wallOFHelpLists.addAll(List.from(data as List));
+          wallOFHelpLists = List<model.Data>.from(data as List);
+          filteredWallOFHelpLists.addAll(wallOFHelpLists);
         }
       }
     } catch (err, stackTrace) {
@@ -90,5 +95,19 @@ class WallOfHelpViewModel extends BaseViewModel {
     }
   }
 
+  filterList() {
+    filteredWallOFHelpLists.clear();
+    filteredWallOFHelpLists.addAll(
+      wallOFHelpLists.where((help) {
+        return _matchesSearch(help);
+      }),
+    );
+    notifyListeners();
+  }
 
+  bool _matchesSearch(model.Data help) {
+    final searchQuery = searchController.text.trim().toLowerCase();
+    return help.title?.toLowerCase().contains(searchQuery) == true ||
+        help.description?.toLowerCase().contains(searchQuery) == true;
+  }
 }
