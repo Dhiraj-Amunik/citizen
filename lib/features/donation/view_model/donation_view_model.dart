@@ -7,10 +7,10 @@ import 'package:inldsevak/features/donation/models/request/donation_request_mode
 
 class DonationViewModel extends BaseViewModel {
   final amount = TextEditingController();
-  final purpose = TextEditingController();
+  // final purpose = TextEditingController();
 
   final amountFocus = FocusNode();
-  final purposeFocus = FocusNode();
+  // final purposeFocus = FocusNode();
 
   final GlobalKey<FormState> donationFormKey = GlobalKey<FormState>();
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
@@ -37,7 +37,7 @@ class DonationViewModel extends BaseViewModel {
       isLoading = true;
       final data = DonationRequestModel(
         amount: amount.text,
-        purpose: purpose.text,
+        // purpose: purpose.text,
       );
 
       final response = await DonationRepository().postDonation(
@@ -83,7 +83,7 @@ class DonationViewModel extends BaseViewModel {
 
   clear() {
     amount.clear();
-    purpose.clear();
+    // purpose.clear();
     autoValidateMode = AutovalidateMode.disabled;
   }
 }

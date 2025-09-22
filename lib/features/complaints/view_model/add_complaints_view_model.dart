@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/mixin/transparent_mixin.dart';
+import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
@@ -13,36 +14,33 @@ import 'package:inldsevak/features/complaints/model/response/authorites_model.da
     as authorities;
 import 'package:inldsevak/features/complaints/model/response/complaint_departments_model.dart'
     as departments;
-import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
-    as constituency;
+import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
+
 import 'package:inldsevak/features/complaints/repository/complaints_repository.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/quickalert.dart';
 
 class AddComplaintsViewModel extends BaseViewModel
-    with CupertinoDialogMixin, TransparentCircular {
+    with CupertinoDialogMixin, TransparentCircular, UploadFilesMixin {
   @override
   Future<void> onInit() {
-    getConstituencies();
     getDepartments();
     return super.onInit();
   }
 
   final formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
-  final constituenciesController = SingleSelectController<constituency.Data>(
-    null,
-  );
+  final constituencyController = SingleSelectController<Constituency>(null);
   final descriptionController = TextEditingController();
   final departmentController = SingleSelectController<departments.Data>(null);
-  final authortiyController = SingleSelectController<authorities.Data>(null);
+  // final authortiyController = SingleSelectController<authorities.Data>(null);
 
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
 
   List<departments.Data> departmentLists = [];
   List<authorities.Data> authoritiesLists = [];
-  List<constituency.Data> constituencyLists = [];
- update() {
+  update() {
     notifyListeners();
   }
 
@@ -59,10 +57,15 @@ class AddComplaintsViewModel extends BaseViewModel
 
       final FormData form = FormData.fromMap({
         "department": departmentController.value?.sId,
-        "authorityId": authortiyController.value?.sId,
-        "constituency": constituenciesController.value?.sId,
+        // "authorityId": authortiyController.value?.sId,
+        "constituency": constituencyController.value?.sId,
         "subject": titleController.text,
         "message": descriptionController.text,
+        "attachments": FormData.fromMap({
+          'files': multipleFiles.isEmpty
+              ? []
+              : await uploadMultipleImage(multipleFiles),
+        }),
       });
 
       final response = await ComplaintsRepository().addComplaints(
@@ -70,7 +73,9 @@ class AddComplaintsViewModel extends BaseViewModel
         token: token ?? '',
       );
       if (response.data?.success == true) {
-        CommonSnackbar(text: 'Complaints has been Lodge').showToast();
+        await CommonSnackbar(
+          text: 'Complaints has been Lodged',
+        ).showAnimatedDialog(type: QuickAlertType.success);
         final BuildContext context =
             RouteManager.navigatorKey.currentState!.context;
         if (context.mounted) {
@@ -110,24 +115,6 @@ class AddComplaintsViewModel extends BaseViewModel
     }
   }
 
-  Future<void> getConstituencies() async {
-    try {
-      final response = await ComplaintsRepository().getConstituencies(token);
-      if (response.data?.responseCode == 200) {
-        final data = response.data?.data;
-        if (data?.isEmpty == true) {
-          CommonSnackbar(text: "No constituencies found").showToast();
-        } else {
-          constituencyLists = List<constituency.Data>.from(data as List);
-          notifyListeners();
-        }
-      }
-    } catch (err, stackTrace) {
-      debugPrint("Error: $err");
-      debugPrint("Stack Trace: $stackTrace");
-    }
-  }
-
   Future<void> getAuthorities({required String? id}) async {
     try {
       showCustomDialogTransperent(isShowing: true);
@@ -156,28 +143,26 @@ class AddComplaintsViewModel extends BaseViewModel
   }
 
   //image
+  List<File> multipleFiles = [];
 
-  File? image;
-
-  Future<void> selectImage() async {
+  Future<void> selectMultipleImages() async {
     customRightCupertinoDialog(
-      content: "Choose Image",
+      content: "Choose Files",
       rightButton: "Sure",
       onTap: () async {
         try {
-          image = await pickGalleryImage();
+          multipleFiles.addAll(await pickMultipleImages() ?? []);
           notifyListeners();
-        } catch (err, stackTrace) {
-          debugPrint("Error: $err");
-          debugPrint("Stack Trace: $stackTrace");
+        } catch (err) {
+          debugPrint("-------->$err");
         }
         RouteManager.pop();
       },
     );
   }
 
-  void removeImage() {
-    image = null;
+  void removeImage(int index) {
+    multipleFiles.removeAt(index);
     notifyListeners();
   }
 }

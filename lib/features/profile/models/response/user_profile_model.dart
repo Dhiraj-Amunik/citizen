@@ -1,3 +1,6 @@
+import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
+
+
 class UserProfileModel {
   int? responseCode;
   String? message;
@@ -28,29 +31,30 @@ class Data {
   String? name;
   String? email;
   String? phone;
+  String? whatsapp;
   String? otp;
   String? deviceToken;
   String? dateOfBirth;
+  String? fatherName;
   String? gender;
+  String? city;
+  String? district;
+  String? state;
+  String? pincode;
   String? address;
   String? avatar;
   bool? isRegistered;
   bool? isPartyMember;
   String? role;
-  Constituency? constituency;
+  Constituency? parliamentryConstituency;
+  Constituency? assemblyConstituency;
   bool? isAdminCreated;
   bool? isActive;
+  bool? isDeleted;
   List<Document>? document;
   String? createdAt;
   String? updatedAt;
   int? iV;
-  String? city;
-  String? district;
-  String? pincode;
-  String? state;
-  String? whatsapp;
-  String? fatherName;
-  bool? isDeleted;
 
   Data(
       {this.location,
@@ -58,29 +62,30 @@ class Data {
       this.name,
       this.email,
       this.phone,
+      this.whatsapp,
       this.otp,
       this.deviceToken,
       this.dateOfBirth,
+      this.fatherName,
       this.gender,
+      this.city,
+      this.district,
+      this.state,
+      this.pincode,
       this.address,
       this.avatar,
       this.isRegistered,
       this.isPartyMember,
       this.role,
-      this.constituency,
+      this.parliamentryConstituency,
+      this.assemblyConstituency,
       this.isAdminCreated,
       this.isActive,
+      this.isDeleted,
       this.document,
       this.createdAt,
       this.updatedAt,
-      this.iV,
-      this.city,
-      this.district,
-      this.pincode,
-      this.state,
-      this.whatsapp,
-      this.fatherName,
-      this.isDeleted});
+      this.iV});
 
   Data.fromJson(Map<String, dynamic> json) {
     location = json['location'] != null
@@ -90,20 +95,31 @@ class Data {
     name = json['name'];
     email = json['email'];
     phone = json['phone'];
+    whatsapp = json['whatsapp'];
     otp = json['otp'];
     deviceToken = json['deviceToken'];
     dateOfBirth = json['dateOfBirth'];
+    fatherName = json['fatherName'];
     gender = json['gender'];
+    city = json['city'];
+    district = json['district'];
+    state = json['state'];
+    pincode = json['pincode'];
     address = json['address'];
     avatar = json['avatar'];
     isRegistered = json['isRegistered'];
     isPartyMember = json['isPartyMember'];
     role = json['role'];
-    constituency = json['constituency'] != null
-        ? new Constituency.fromJson(json['constituency'])
+    parliamentryConstituency = json['parliamentryConstituency'] != null
+        ? new Constituency.fromJson(
+            json['parliamentryConstituency'])
+        : null;
+    assemblyConstituency = json['assemblyConstituency'] != null
+        ? new Constituency.fromJson(json['assemblyConstituency'])
         : null;
     isAdminCreated = json['isAdminCreated'];
     isActive = json['isActive'];
+    isDeleted = json['isDeleted'];
     if (json['document'] != null) {
       document = <Document>[];
       json['document'].forEach((v) {
@@ -113,13 +129,6 @@ class Data {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
-    city = json['city'];
-    district = json['district'];
-    pincode = json['pincode'];
-    state = json['state'];
-    whatsapp = json['whatsapp'];
-    fatherName = json['fatherName'];
-    isDeleted = json['isDeleted'];
   }
 
   Map<String, dynamic> toJson() {
@@ -131,33 +140,37 @@ class Data {
     data['name'] = this.name;
     data['email'] = this.email;
     data['phone'] = this.phone;
+    data['whatsapp'] = this.whatsapp;
     data['otp'] = this.otp;
     data['deviceToken'] = this.deviceToken;
     data['dateOfBirth'] = this.dateOfBirth;
+    data['fatherName'] = this.fatherName;
     data['gender'] = this.gender;
+    data['city'] = this.city;
+    data['district'] = this.district;
+    data['state'] = this.state;
+    data['pincode'] = this.pincode;
     data['address'] = this.address;
     data['avatar'] = this.avatar;
     data['isRegistered'] = this.isRegistered;
     data['isPartyMember'] = this.isPartyMember;
     data['role'] = this.role;
-    if (this.constituency != null) {
-      data['constituency'] = this.constituency!.toJson();
+    if (this.parliamentryConstituency != null) {
+      data['parliamentryConstituency'] =
+          this.parliamentryConstituency!.toJson();
+    }
+    if (this.assemblyConstituency != null) {
+      data['assemblyConstituency'] = this.assemblyConstituency!.toJson();
     }
     data['isAdminCreated'] = this.isAdminCreated;
     data['isActive'] = this.isActive;
+    data['isDeleted'] = this.isDeleted;
     if (this.document != null) {
       data['document'] = this.document!.map((v) => v.toJson()).toList();
     }
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
-    data['city'] = this.city;
-    data['district'] = this.district;
-    data['pincode'] = this.pincode;
-    data['state'] = this.state;
-    data['whatsapp'] = this.whatsapp;
-    data['fatherName'] = this.fatherName;
-    data['isDeleted'] = this.isDeleted;
     return data;
   }
 }
@@ -181,27 +194,7 @@ class Location {
   }
 }
 
-class Constituency {
-  String? sId;
-  String? name;
-  String? area;
 
-  Constituency({this.sId, this.name, this.area});
-
-  Constituency.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    name = json['name'];
-    area = json['area'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['name'] = this.name;
-    data['area'] = this.area;
-    return data;
-  }
-}
 
 class Document {
   String? documentType;

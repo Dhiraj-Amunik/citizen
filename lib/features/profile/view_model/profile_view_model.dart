@@ -1,11 +1,11 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
-import 'package:inldsevak/core/extensions/list_extension.dart';
+import 'package:inldsevak/core/extensions/date_formatter.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
-import 'package:inldsevak/core/models/response/user_profile_model.dart'
+import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
+import 'package:inldsevak/features/profile/models/response/user_profile_model.dart'
     as model;
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
@@ -13,9 +13,8 @@ import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/auth/models/request/user_register_request_model.dart';
 import 'package:inldsevak/features/common_fields/model/address_model.dart';
 import 'package:inldsevak/features/profile/services/profile_repository.dart';
-import 'package:intl/intl.dart';
-import 'package:inldsevak/core/models/response/user_profile_model.dart'
-    as userProfileModel;
+import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
+import 'package:provider/provider.dart';
 
 class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
   GlobalKey<FormState> userDetailsFormKey = GlobalKey<FormState>();
@@ -30,7 +29,8 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
   String? companyDateFormat;
   final aadharController = TextEditingController();
   final voterIdController = TextEditingController();
-  userProfileModel.Constituency? constituencyData;
+  Constituency? parlimentaryConstituencyData;
+  Constituency? assemblyConstituencyData;
 
   List<String> genderList = ['Male', 'Female', 'others'];
   String? gender;
@@ -41,6 +41,14 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
   @override
   Future<void> onInit() async {
     await getUserProfile();
+    if (RouteManager.context.mounted) {
+      await RouteManager.context
+          .read<ConstituencyViewModel>()
+          .getAssemblyConstituencies(
+            id: parlimentaryConstituencyData?.sId,
+            oldToken: token,
+          );
+    }
   }
 
   File? aadharImage;
@@ -79,18 +87,19 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
   Future<void> getUserProfile() async {
     try {
       isLoading = true;
-      final response = await ProfileRepository().getUserProfile(token: token!);
+      final response = await ProfileRepository().getUserProfile(
+        token: token ?? "",
+      );
       if (response.data?.responseCode == 200) {
         profile = response.data?.data;
         companyDateFormat = profile?.dateOfBirth;
-        if (profile?.constituency != null) {
-          constituencyData = profile?.constituency;
+        if (profile?.parliamentryConstituency != null) {
+          parlimentaryConstituencyData = profile?.parliamentryConstituency;
         }
-        profile?.dateOfBirth = (profile?.dateOfBirth?.isNotEmpty ?? false)
-            ? DateFormat(
-                'dd-MM-yyyy',
-              ).format(DateTime.parse(profile?.dateOfBirth ?? ""))
-            : null;
+        if (profile?.assemblyConstituency != null) {
+          assemblyConstituencyData = profile?.assemblyConstituency;
+        }
+        notifyListeners();
       }
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
@@ -103,7 +112,8 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
   Future<void> updateUserProfile({
     AddressModel? addressModel,
     String? genderValue,
-    String? constituencyID,
+    String? assemblyConstituenciesID,
+    String? parliamentaryConstituenciesID,
   }) async {
     try {
       if (!userDetailsFormKey.currentState!.validate()) {
@@ -134,9 +144,13 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
         data.gender = genderValue?.toLowerCase();
       }
 
-      if (constituencyID != profile?.constituency?.sId) {
+      if (assemblyConstituenciesID != profile?.assemblyConstituency?.sId ||
+          parliamentaryConstituenciesID !=
+              profile?.parliamentryConstituency?.sId) {
         needUpdate = true;
-        data.constituencyId = constituencyID;
+        data.parliamentaryId = parliamentaryConstituenciesID;
+
+        data.assemblyId = assemblyConstituenciesID;
       }
 
       if (profile?.document?.isEmpty == true ||
@@ -216,7 +230,7 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
       }
       emailController.text = profile?.email ?? "";
       phoneNumberController.text = profile?.phone ?? "";
-      dobController.text = profile?.dateOfBirth ?? "";
+      dobController.text = companyDateFormat?.toDdMmYyyy() ?? "";
 
       if (profile?.document != null && profile?.document?.isNotEmpty == true) {
         profile?.document?.forEach((document) {
@@ -275,11 +289,4 @@ class ProfileViewModel extends BaseViewModel with CupertinoDialogMixin {
         ?.firstWhere((doc) => doc.documentType?.toLowerCase() == docType)
         .documentNumber;
   }
-}
-
-String? _safeFindMatch(List<String> options, String? value) {
-  if (value == null) return null;
-  return options.firstWhereOrNull(
-    (option) => option.toLowerCase() == value.toLowerCase(),
-  );
 }

@@ -51,7 +51,7 @@ class CommonPinput extends StatelessWidget {
             decoration ??
             boxDecorationRoundedWithShadow(
               radius ?? Dimens.radiusX2,
-              backgroundColor: color ?? AppPalettes.liteGreenTextFieldColor,
+              backgroundColor: color ?? AppPalettes.liteGreenColor,
             ),
         padding: padding,
         margin: margin,

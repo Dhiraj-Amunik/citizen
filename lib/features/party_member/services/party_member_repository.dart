@@ -4,7 +4,6 @@ import 'package:inldsevak/core/dio/repo_reponse.dart';
 import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/features/party_member/model/request/party_member_request_model.dart';
 import 'package:inldsevak/features/party_member/model/request/request_member_details.dart';
-import 'package:inldsevak/features/party_member/model/response/parties_model.dart';
 import 'package:inldsevak/features/party_member/model/response/party_member_details_model.dart';
 import 'package:inldsevak/features/party_member/model/response/party_member_reponse_model.dart';
 
@@ -41,11 +40,5 @@ class PartyMemberRepository {
         : RepoResponse(data: PartyMemberResponseModel.fromJson(response));
   }
 
-  Future<RepoResponse<PartiesModel>> getParties(String? token) async {
-    final response = await _network.get(path: URLs.getParties, token: token);
-
-    return response is APIException
-        ? RepoResponse(error: response)
-        : RepoResponse(data: PartiesModel.fromJson(response));
-  }
+ 
 }

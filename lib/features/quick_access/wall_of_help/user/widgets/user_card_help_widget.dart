@@ -42,7 +42,7 @@ class UserCardHelpWidget extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    help.subject ?? "Unknow subject",
+                    help.title ?? "Unknow subject",
                     style: textTheme.bodySmall,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -63,7 +63,7 @@ class UserCardHelpWidget extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      "Solved",
+                      help.createdAt?.toDdMmmYyyy()??"Pending",
                       style: textTheme.labelMedium?.copyWith(
                         color: AppPalettes.lightTextColor,
                       ),
@@ -81,7 +81,7 @@ class UserCardHelpWidget extends StatelessWidget {
                 children: [
                   TextSpan(text: 'Reason : '),
                   TextSpan(
-                    text: help.reason ?? "Unknown Reason",
+                    text: help.description ?? "Unknown Reason",
                     style: textTheme.labelMedium?.copyWith(
                       color: AppPalettes.lightTextColor,
                       fontWeight: FontWeight.w500,
@@ -92,12 +92,12 @@ class UserCardHelpWidget extends StatelessWidget {
             ),
           ),
           Row(
-            spacing: Dimens.gapX2,
+            spacing: Dimens.gapX1B,
             children: [
               CommonHelpers.buildIcons(
                 path: AppImages.calenderIcon,
                 iconColor: context.iconsColor,
-                iconSize: Dimens.scaleX2,
+                iconSize: Dimens.scaleX1B,
               ),
               Text(
                 "Submitted : ${help.createdAt?.toDdMmmYyyy()}",

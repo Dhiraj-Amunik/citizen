@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
+import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
@@ -15,6 +16,7 @@ class ThreadComplaintView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = context.textTheme;
     return SafeArea(
       top: false,
       bottom: true,
@@ -59,8 +61,8 @@ class ThreadComplaintView extends StatelessWidget {
                                 color:
                                     threadData.from ==
                                         "anusha.flyferry@gmail.com"
-                                    ? AppPalettes.primaryColor
-                                    : AppPalettes.lightTextColor,
+                                    ? AppPalettes.liteGreenColor
+                                    : AppPalettes.backGroundColor,
                                 alignment:
                                     threadData.from ==
                                         "anusha.flyferry@gmail.com"
@@ -84,11 +86,22 @@ class ThreadComplaintView extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      threadData.snippet ?? "",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
+                                      threadData.from ==
+                                              "anusha.flyferry@gmail.com"
+                                          ? threadData.snippet ?? ""
+                                          : threadData.snippet
+                                                    ?.split('On')
+                                                    .sublist(
+                                                      0,
+                                                      threadData.snippet!
+                                                              .split('On')
+                                                              .length -
+                                                          1,
+                                                    )
+                                                    .join('On') ??
+                                                "",
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: AppPalettes.lightTextColor,
                                       ),
                                     ),
                                   ],

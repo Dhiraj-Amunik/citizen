@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "471198039195",
+    "project_id": "inldsevak",
+    "storage_bucket": "inldsevak.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471198039195:android:d9dd06470ae505811a9a3e",
+        "android_client_info": {
+          "package_name": "org.amunik.sevak"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHxdW7FSOe79qVm7LdU-Dygx6i6a7lx-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

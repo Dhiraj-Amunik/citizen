@@ -11,14 +11,16 @@ import 'package:inldsevak/core/widgets/upload_image_widget.dart';
 import 'package:inldsevak/features/auth/models/request/validate_otp_request_model.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
 import 'package:inldsevak/features/auth/utils/auth_appbar.dart';
+import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
 import 'package:inldsevak/features/common_fields/view_model/map_search_view_model.dart';
 import 'package:inldsevak/features/auth/view_model/user_register_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:inldsevak/features/common_fields/widget/constituency_drop_down.dart';
+import 'package:inldsevak/features/common_fields/widget/assembly_constituency_drop_down.dart';
 import 'package:inldsevak/features/common_fields/widget/map_search_field.dart';
+import 'package:inldsevak/features/common_fields/widget/map_search_location.dart';
+import 'package:inldsevak/features/common_fields/widget/parliamentary_constituency_drop_down.dart';
 import 'package:provider/provider.dart';
-import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
-    as constituency;
+import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 
 class UserRegisterView extends StatefulWidget {
   final OtpRequestModel data;
@@ -31,16 +33,19 @@ class UserRegisterView extends StatefulWidget {
 class _UserRegisterViewState extends State<UserRegisterView>
     with DateAndTimePicker {
   final searchController = SingleSelectController<Predictions?>(null);
-  final constituencyController = SingleSelectController<constituency.Data>(
+  final assemblyconstituencyController = SingleSelectController<Constituency>(
     null,
   );
+  final parliamentaryconstituencyController =
+      SingleSelectController<Constituency>(null);
   final ScrollController _scrollController = ScrollController();
 
   @override
   void dispose() {
     _scrollController.dispose();
     searchController.dispose();
-    constituencyController.dispose();
+    parliamentaryconstituencyController.dispose();
+    assemblyconstituencyController.dispose();
     super.dispose();
   }
 
@@ -48,12 +53,11 @@ class _UserRegisterViewState extends State<UserRegisterView>
   Widget build(BuildContext context) {
     final localization = context.localizations;
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: ChangeNotifierProvider(
         create: (context) => UserRegisterViewModel(),
         builder: (context, child) {
           final provider = context.read<UserRegisterViewModel>();
-          provider.whathsappNoController.text = widget.data.phoneNo;
           return Scaffold(
             appBar: AuthUtils.appbar(title: localization.complete_your_profile),
             backgroundColor: context.cardColor,
@@ -76,7 +80,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           headingText: localization.name,
                           hintText: localization.name,
                           focus: provider.nameFocus,
-                          nextFocus: provider.fatherNameFocus,
+                          nextFocus: provider.emailFocus,
                           prefixIcon: AppImages.userIcon,
                           controller: provider.nameController,
                           keyboardType: TextInputType.name,
@@ -84,44 +88,44 @@ class _UserRegisterViewState extends State<UserRegisterView>
                             argument: localization.name_validator,
                           ),
                         ),
-                        FormTextFormField(
-                          isRequired: true,
-                          headingText: localization.father_name,
-                          hintText: localization.father_name,
-                          focus: provider.fatherNameFocus,
-                          nextFocus: provider.emailFocus,
-                          prefixIcon: AppImages.userIcon,
-                          controller: provider.fatherNameController,
-                          keyboardType: TextInputType.name,
-                          validator: (text) => text?.validateName(
-                            argument: localization.father_name_validator,
-                          ),
-                        ),
+                        // FormTextFormField(
+                        //   isRequired: true,
+                        //   headingText: localization.father_name,
+                        //   hintText: localization.father_name,
+                        //   focus: provider.fatherNameFocus,
+                        //   nextFocus: provider.emailFocus,
+                        //   prefixIcon: AppImages.userIcon,
+                        //   controller: provider.fatherNameController,
+                        //   keyboardType: TextInputType.name,
+                        //   validator: (text) => text?.validateName(
+                        //     argument: localization.father_name_validator,
+                        //   ),
+                        // ),
                         FormTextFormField(
                           isRequired: true,
                           headingText: localization.email,
                           hintText: "abc@gmail.com",
                           focus: provider.emailFocus,
-                          nextFocus: provider.wathsappFocus,
+                          // nextFocus: provider.wathsappFocus,
                           controller: provider.emailController,
                           prefixIcon: AppImages.emailIcon,
                           validator: (text) => text?.validateEmail(
                             argument: localization.email_validator,
                           ),
                         ),
-                        FormTextFormField(
-                          isRequired: true,
-                          headingText: localization.whatapp_no,
-                          hintText: localization.enter_phone_number,
-                          keyboardType: TextInputType.phone,
-                          maxLength: 10,
-                          focus: provider.wathsappFocus,
-                          controller: provider.whathsappNoController,
-                          prefixIcon: AppImages.phoneIcon,
-                          validator: (text) => text?.validateNumber(
-                            argument: localization.phone_validator,
-                          ),
-                        ),
+                        // FormTextFormField(
+                        //   isRequired: true,
+                        //   headingText: localization.whatapp_no,
+                        //   hintText: localization.enter_phone_number,
+                        //   keyboardType: TextInputType.phone,
+                        //   maxLength: 10,
+                        //   focus: provider.wathsappFocus,
+                        //   controller: provider.whathsappNoController,
+                        //   prefixIcon: AppImages.phoneIcon,
+                        //   validator: (text) => text?.validateNumber(
+                        //     argument: localization.phone_validator,
+                        //   ),
+                        // ),
                         FormTextFormField(
                           isRequired: true,
                           headingText: localization.date_of_birth,
@@ -156,24 +160,38 @@ class _UserRegisterViewState extends State<UserRegisterView>
                             argument: localization.gender_validator,
                           ),
                         ),
-                        MapSearchField(
-                          visibility: (boolean) {
-                            if (boolean) {
-                              _scrollController.animateTo(
-                                _scrollController.position.maxScrollExtent /
-                                    1.5,
-                                duration: Duration(milliseconds: 300),
-                                curve: Curves.easeIn,
-                              );
-                              constituencyController.clear();
-                            }
+                        MapSearchLocation(hintText: "hintText"),
+                        // MapSearchField(
+                        //   visibility: (boolean) {
+                        //     if (boolean) {
+                        //       _scrollController.animateTo(
+                        //         _scrollController.position.maxScrollExtent /
+                        //             1.8,
+                        //         duration: Duration(milliseconds: 300),
+                        //         curve: Curves.easeIn,
+                        //       );
+                        //       parliamentaryconstituencyController.clear();
+                        //       assemblyconstituencyController.clear();
+                        //     }
+                        //   },
+                        //   // searchController: searchController,
+                        //   text: localization.address_details,
+                        //   hintText: localization.eg_address,
+                        // ),
+                        ParliamentaryConstituencyDropDownWidget(
+                          constituencyController:
+                              parliamentaryconstituencyController,
+                          onChange: (constituency) {
+                            context
+                                .read<ConstituencyViewModel>()
+                                .getAssemblyConstituencies(
+                                  id: constituency?.sId,
+                                );
                           },
-                          searchController: searchController,
-                          text: localization.address_details,
-                          hintText: localization.eg_address,
                         ),
-                        ConstituencyDropDownWidget(
-                          constituencyController: constituencyController,
+                        AssemblyConstituencyDropDownWidget(
+                          constituencyController:
+                              assemblyconstituencyController,
                         ),
                         FormTextFormField(
                           isRequired: true,
@@ -232,13 +250,15 @@ class _UserRegisterViewState extends State<UserRegisterView>
                       child: CommonButton(
                         isEnable: !value.isLoading,
                         isLoading: value.isLoading,
-                        text: "Register",
+                        text: localization.register,
                         onTap: () async {
                           await provider.registerUserDetails(
                             addressModel: search.addressModel,
-                            constituenciesID: constituencyController.value?.sId,
+                            assemblyConstituenciesID:
+                                assemblyconstituencyController.value?.sId,
+                            parliamentaryConstituenciesID:
+                                parliamentaryconstituencyController.value?.sId,
                           );
-                          constituencyController.clear();
                         },
                       ),
                     );

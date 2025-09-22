@@ -74,14 +74,11 @@ class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
           setToken: response.data?.data?.token ?? '',
           phonenumber: data.phoneNo,
           isPartyMember: response.data?.data?.isPartyMember ?? false,
+          isRegistered: response.data?.data?.isRegistered ?? false,
         );
-        if (response.data?.data?.isRegistered == false) {
-          RouteManager.pushNamed(Routes.userRegisterPage, arguments: data);
-          return;
-        } else {
-          if (RouteManager.navigatorKey.currentState!.canPop()) {
-            RouteManager.popUntilHome();
-          }
+
+        if (RouteManager.navigatorKey.currentState!.canPop()) {
+          RouteManager.popUntilHome();
         }
 
         CommonSnackbar(

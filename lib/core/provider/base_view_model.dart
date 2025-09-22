@@ -41,6 +41,7 @@ class BaseViewModel extends ChangeNotifier {
     required String setToken,
     required String phonenumber,
     required bool isPartyMember,
+    required bool isRegistered,
   }) async {
     log(setToken);
     await controller.setSession(
@@ -48,8 +49,13 @@ class BaseViewModel extends ChangeNotifier {
         token: setToken,
         number: phonenumber,
         isPartyMemeber: isPartyMember,
+        isRegistered: isRegistered,
       ),
     );
+  }
+
+  Future<void> isRegistered({required bool isRegistered}) async {
+    await controller.setRegistered(isRegistered: isRegistered);
   }
 
   Future<void> getToken() async {

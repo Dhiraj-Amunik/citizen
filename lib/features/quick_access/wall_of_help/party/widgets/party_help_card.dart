@@ -59,7 +59,7 @@ class PartyHelpCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          helpRequest.user?.name ?? "Unknown name",
+                          helpRequest.name ?? "Unknown name",
                           style: textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -118,7 +118,7 @@ class PartyHelpCard extends StatelessWidget {
                 TextSpan(text: localization.description),
                 TextSpan(text: " : "),
                 TextSpan(
-                  text: helpRequest.reason,
+                  text: helpRequest.description,
                   style: textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w400,
                   ),
@@ -193,15 +193,15 @@ class PartyHelpCard extends StatelessWidget {
                               getRow(
                                 textTheme,
                                 text: localization.detailed_desc,
-                                desc: helpRequest.reason,
+                                desc: helpRequest.description,
                               ),
-                              getRow(
-                                textTheme,
-                                text: localization.previous_contributions,
-                                desc: helpRequest.transactions?.isEmpty == true
-                                    ? ''
-                                    : "Total ${helpRequest.transactions?.length} users have contributed",
-                              ),
+                              // getRow(
+                              //   textTheme,
+                              //   text: localization.previous_contributions,
+                              //   desc: helpRequest.transactions?.isEmpty == true
+                              //       ? ''
+                              //       : "Total ${helpRequest.transactions?.length} users have contributed",
+                              // ),
                             ],
                           ),
                         ),

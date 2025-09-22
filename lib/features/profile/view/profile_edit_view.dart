@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
@@ -15,14 +17,14 @@ import 'package:inldsevak/core/widgets/upload_image_widget.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
 import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
 import 'package:inldsevak/features/common_fields/view_model/map_search_view_model.dart';
-import 'package:inldsevak/features/common_fields/widget/constituency_drop_down.dart';
+import 'package:inldsevak/features/common_fields/widget/assembly_constituency_drop_down.dart';
 import 'package:inldsevak/features/common_fields/widget/map_search_field.dart';
+import 'package:inldsevak/features/common_fields/widget/parliamentary_constituency_drop_down.dart';
 import 'package:inldsevak/features/profile/view_model/avatar_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/features/profile/widget/profile_avatar.dart';
 import 'package:provider/provider.dart';
-import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
-    as constituency;
+import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 
 class ProfileEditView extends StatefulWidget {
   const ProfileEditView({super.key});
@@ -35,9 +37,11 @@ class _ProfileEditViewState extends State<ProfileEditView>
     with DateAndTimePicker {
   final searchController = SingleSelectController<Predictions?>(null);
   final genderController = SingleSelectController<String?>(null);
-  final constituencyController = SingleSelectController<constituency.Data>(
+  final assemblyconstituencyController = SingleSelectController<Constituency>(
     null,
   );
+  final parliamentaryconstituencyController =
+      SingleSelectController<Constituency>(null);
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -45,7 +49,8 @@ class _ProfileEditViewState extends State<ProfileEditView>
     _scrollController.dispose();
     searchController.dispose();
     genderController.dispose();
-    constituencyController.dispose();
+    assemblyconstituencyController.dispose();
+    parliamentaryconstituencyController.dispose();
     super.dispose();
   }
 
@@ -59,14 +64,6 @@ class _ProfileEditViewState extends State<ProfileEditView>
         future: provider.loadProfile(),
         builder: (_, snapshot) {
           genderController.value = provider.gender;
-          final constituencyData = provider.constituencyData == null
-              ? null
-              : constituency.Data(
-                  sId: provider.constituencyData?.sId,
-                  name: provider.constituencyData?.name,
-                  area: provider.constituencyData?.area,
-                );
-
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CustomAnimatedLoading());
           }
@@ -122,25 +119,47 @@ class _ProfileEditViewState extends State<ProfileEditView>
                         maxLength: 10,
                         enabled: false,
                       ),
-                      MapSearchField(
-                        addressModel: provider.address,
-                        text: localization.address,
-                        searchController: searchController,
-                        hintText: localization.select_address,
-                        visibility: (boolean) {
-                          if (boolean) {
-                            _scrollController.animateTo(
-                              _scrollController.position.maxScrollExtent / 1.8,
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeIn,
-                            );
+                      // MapSearchField(
+                      //   addressModel: provider.address,
+                      //   text: localization.address,
+                      //   searchController: searchController,
+                      //   hintText: localization.select_address,
+                      //   visibility: (boolean) {
+                      //     if (boolean) {
+                      //       _scrollController.animateTo(
+                      //         _scrollController.position.maxScrollExtent / 1.8,
+                      //         duration: Duration(milliseconds: 300),
+                      //         curve: Curves.easeIn,
+                      //       );
+                      //     }
+                      //     parliamentaryconstituencyController.clear();
+                      //     assemblyconstituencyController.clear();
+                      //   },
+                      // ),
+
+                      ParliamentaryConstituencyDropDownWidget(
+                        initialData: provider.parlimentaryConstituencyData,
+                        constituencyController:
+                            parliamentaryconstituencyController,
+                        onChange: (constituency) {
+                          final cPovider = context
+                              .read<ConstituencyViewModel>();
+                          if (constituency?.sId.toString().trim() !=
+                                  provider.parlimentaryConstituencyData?.sId
+                                      .toString()
+                                      .trim() ||
+                              cPovider.assemblyConstituencyLists.isEmpty) {
+                            context
+                                .read<ConstituencyViewModel>()
+                                .getAssemblyConstituencies(
+                                  id: constituency?.sId,
+                                );
                           }
-                          constituencyController.clear();
                         },
                       ),
-                      ConstituencyDropDownWidget(
-                        initialData: constituencyData,
-                        constituencyController: constituencyController,
+                      AssemblyConstituencyDropDownWidget(
+                        initialData: provider.assemblyConstituencyData,
+                        constituencyController: assemblyconstituencyController,
                       ),
                       FormTextFormField(
                         isRequired: true,
@@ -247,7 +266,10 @@ class _ProfileEditViewState extends State<ProfileEditView>
                   onTap: () => value.updateUserProfile(
                     genderValue: genderController.value,
                     addressModel: search.addressModel,
-                    constituencyID: constituencyController.value?.sId,
+                    assemblyConstituenciesID:
+                        assemblyconstituencyController.value?.sId,
+                    parliamentaryConstituenciesID:
+                        parliamentaryconstituencyController.value?.sId,
                   ),
                   isLoading: value.isLoading,
                   isEnable: !value.isLoading,

@@ -23,18 +23,5 @@ class UserProfileRepository {
         : RepoResponse(data: UserProfileResponseModel.fromJson(response));
   }
 
-  // Future<RepoResponse<UploadProfilePicModel>> uploadUserPicture({
-  //   required FormData data,
-  //   required String token,
-  // }) async {
-  //   final response = await network.post(
-  //     token: token,
-  //     path: URLs.uploadProfilePic,
-  //     data: data,
-  //   );
-
-  //   return response is APIException
-  //       ? RepoResponse(error: response)
-  //       : RepoResponse(data: UploadProfilePicModel.fromJson(response));
-  // }
+ 
 }

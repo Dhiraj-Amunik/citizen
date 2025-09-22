@@ -1,5 +1,6 @@
 class RequestRegisterModel {
   String? name;
+  String? fatherName;
   String? email;
   String? whatsappNo;
   String? dateOfBirth;
@@ -10,18 +11,21 @@ class RequestRegisterModel {
   String? district;
   String? pincode;
   String? avatar;
-  String? constituencyId;
+  String? parliamentaryId;
+  String? assemblyId;
   Location? location;
   List<Document>? document;
 
   RequestRegisterModel({
     this.name,
+    this.fatherName,
     this.email,
     this.dateOfBirth,
     this.gender,
     this.address,
     this.avatar,
-    this.constituencyId,
+    this.parliamentaryId,
+    this.assemblyId,
     this.location,
     this.document,
     this.whatsappNo,
@@ -34,12 +38,14 @@ class RequestRegisterModel {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'fatherName': fatherName,
       'email': email,
       'dateOfBirth': dateOfBirth,
-      'gender': gender,
+      'gender': gender?.toLowerCase(),
       'address': address,
       'avatar': avatar,
-      'constituencyId': constituencyId,
+      'parliamentryConstituencyId': parliamentaryId,
+      'assemblyConstituencyId': assemblyId,
       "city": city,
       "state": state,
       "district": district,

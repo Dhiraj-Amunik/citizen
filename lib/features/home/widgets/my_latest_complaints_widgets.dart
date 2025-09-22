@@ -19,12 +19,13 @@ class MyLatestComplaintsWidgets extends StatelessWidget {
     final textTheme = context.textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: Dimens.gapX4,
+      spacing: Dimens.gapX2B,
       children: [
         Text(
           localization.my_complaints,
           style: textTheme.headlineSmall?.copyWith(
             color: AppPalettes.primaryColor,
+            fontWeight: FontWeight.w500,
           ),
         ).horizontalPadding(Dimens.horizontalspacing),
         ListView.separated(

@@ -79,7 +79,7 @@ class EventWidget extends StatelessWidget {
                         ),
                         decoration: boxDecorationRoundedWithShadow(
                           Dimens.radius100,
-                          backgroundColor: AppPalettes.liteGreenTextFieldColor,
+                          backgroundColor: AppPalettes.liteGreenColor,
                         ),
                         child: Row(
                           children: [

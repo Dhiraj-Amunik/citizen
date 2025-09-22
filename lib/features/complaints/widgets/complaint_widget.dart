@@ -40,19 +40,17 @@ class ComplaintThreadWidget extends StatelessWidget {
                 spacing: Dimens.gapX3,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    child: CommonHelpers.buildIcons(
-                      color: AppPalettes.liteGreenTextFieldColor,
-                      path: AppImages.emailIcon,
-                      iconColor: AppPalettes.primaryColor,
-                      iconSize: Dimens.scaleX1B,
-                      padding: Dimens.paddingX2B,
-                    ),
+                  CommonHelpers.buildIcons(
+                    color: AppPalettes.liteGreenColor,
+                    path: AppImages.emailIcon,
+                    iconColor: AppPalettes.primaryColor,
+                    iconSize: Dimens.scaleX2,
+                    padding: Dimens.paddingX2B,
                   ),
                   Expanded(
                     child: Text(
                       thread.messages?.first.subject ?? "No Subject found !",
-                      style: textTheme.bodyMedium,
+                      style: textTheme.bodyLarge,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -85,12 +83,12 @@ class ComplaintThreadWidget extends StatelessWidget {
             ),
 
             ConstrainedBox(
-              constraints: BoxConstraints(minHeight: 40.height()),
+              constraints: BoxConstraints(minHeight: 30.height()),
               child: RichText(
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 text: TextSpan(
-                  style: textTheme.labelMedium?.copyWith(
+                  style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                   children: [
@@ -119,7 +117,7 @@ class ComplaintThreadWidget extends StatelessWidget {
                     CommonHelpers.buildIcons(
                       path: AppImages.calenderIcon,
                       iconColor: context.iconsColor,
-                      iconSize: Dimens.scaleX2,
+                      iconSize: Dimens.scaleX1B,
                     ),
                     Text(
                       thread.messages?.first.date?.toDdMmmYyyy() ?? "",

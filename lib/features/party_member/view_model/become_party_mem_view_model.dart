@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:inldsevak/core/extensions/capitalise_string.dart';
+import 'package:inldsevak/core/extensions/date_formatter.dart';
 import 'package:inldsevak/core/extensions/list_extension.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
@@ -11,55 +13,42 @@ import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/services/upload_image_repo.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
-import 'package:inldsevak/features/complaints/repository/complaints_repository.dart';
 import 'package:inldsevak/features/party_member/model/request/party_member_request_model.dart';
 import 'package:inldsevak/features/party_member/services/party_member_repository.dart';
 import 'package:quickalert/models/quickalert_type.dart';
-import 'package:inldsevak/features/complaints/model/response/constituency_model.dart'
-    as constituency;
-import 'package:inldsevak/features/party_member/model/response/parties_model.dart'
-    as parties;
+import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
+import 'package:inldsevak/features/profile/models/response/user_profile_model.dart'
+    as profile;
 
 class BecomePartyMemViewModel extends BaseViewModel
     with CupertinoDialogMixin, TransparentCircular {
-  @override
-  Future<void> onInit() {
-    getConstituencies();
-    getParties();
-    return super.onInit();
-  }
-
   bool visibility = true;
   bool isEnable = true;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
 
   final fullNameController = TextEditingController();
+  final fullNameFocus = FocusNode();
   final parentNameController = TextEditingController();
+  final parentNameFocus = FocusNode();
   final mobileNumberController = TextEditingController();
+  final mobileFocus = FocusNode();
   final dobController = TextEditingController();
   String? companyDateFormat;
   final genderController = SingleSelectController<String>(null);
   final maritalStatusController = SingleSelectController<String>(null);
-  final constituencyController = SingleSelectController<constituency.Data>(
-    null,
-  );
-  final partiesController = SingleSelectController<parties.Data>(null);
+  final constituencyController = SingleSelectController<Constituency>(null);
   File? photographyPicture;
   final reasonController = TextEditingController();
-  final roleController = SingleSelectController<String>(null);
 
-  List<String> gendersList = ["male", "female", "others"];
+  List<String> gendersList = ["Male", "Female", "Others"];
   List<String> maritalStatusList = [
-    "married",
-    "un-married",
-    "divorced",
-    "widow",
-    "seperated",
+    "Married",
+    "Un-married",
+    "Divorced",
+    "Widow",
+    "Seperated",
   ];
-  List<constituency.Data> constituencyLists = [];
-  List<parties.Data> partiesLists = [];
-  List<String> rolesList = ["MLA"];
 
   Future<void> selectImage() async {
     customRightCupertinoDialog(
@@ -83,8 +72,13 @@ class BecomePartyMemViewModel extends BaseViewModel
     notifyListeners();
   }
 
-  Future<void> submitApplication() async {
+  Future<void> submitApplication({String? parlimentConstituencyID}) async {
     try {
+      if (parlimentConstituencyID == null) {
+        return CommonSnackbar(
+          text: "Please add Parliment in My Profile",
+        ).showAnimatedDialog(type: QuickAlertType.warning);
+      }
       if (formKey.currentState!.validate()) {
         autoValidateMode = AutovalidateMode.disabled;
       } else {
@@ -95,15 +89,14 @@ class BecomePartyMemViewModel extends BaseViewModel
       isLoading = true;
       final data = PartyMemberRequestModel(
         phone: mobileNumberController.text,
+        assemblyConstituenciesID: constituencyController.value!.sId!,
+        parliamentaryConstituencyId: parlimentConstituencyID,
         userName: fullNameController.text,
         parentName: parentNameController.text,
         dateOfBirth: companyDateFormat,
         gender: genderController.value,
         maritalStatus: maritalStatusController.value,
-        constituencyId: constituencyController.value?.sId,
-        partyId: partiesController.value?.sId,
         reason: reasonController.text,
-        preferredRole: roleController.value,
         documents: [],
       );
 
@@ -130,42 +123,6 @@ class BecomePartyMemViewModel extends BaseViewModel
       debugPrint("Stack Trace: $stackTrace");
     } finally {
       isLoading = false;
-    }
-  }
-
-  Future<void> getConstituencies() async {
-    try {
-      final response = await ComplaintsRepository().getConstituencies(token);
-      if (response.data?.responseCode == 200) {
-        final data = response.data?.data;
-        if (data?.isEmpty == true) {
-          CommonSnackbar(text: "No constituencies found").showToast();
-        } else {
-          constituencyLists = List<constituency.Data>.from(data as List);
-          notifyListeners();
-        }
-      }
-    } catch (err, stackTrace) {
-      debugPrint("Error: $err");
-      debugPrint("Stack Trace: $stackTrace");
-    }
-  }
-
-  Future<void> getParties() async {
-    try {
-      final response = await PartyMemberRepository().getParties(token);
-      if (response.data?.responseCode == 200) {
-        final data = response.data?.data;
-        if (data?.isEmpty == true) {
-          CommonSnackbar(text: "No parties found").showToast();
-        } else {
-          partiesLists = List<parties.Data>.from(data as List);
-          notifyListeners();
-        }
-      }
-    } catch (err, stackTrace) {
-      debugPrint("Error: $err");
-      debugPrint("Stack Trace: $stackTrace");
     }
   }
 
@@ -200,6 +157,26 @@ class BecomePartyMemViewModel extends BaseViewModel
     );
   }
 
+  autoFillData(profile.Data? profile) {
+    fullNameController.text = profile?.name ?? "";
+    mobileNumberController.text = profile?.phone ?? "";
+    dobController.text = profile?.dateOfBirth?.toDdMmYyyy() ?? "";
+    companyDateFormat = profile?.dateOfBirth ?? "";
+    genderController.value = profile?.gender?.capitalize();
+  }
+
+  void clear() {
+    fullNameController.clear();
+    parentNameController.clear();
+    mobileNumberController.clear();
+    dobController.clear();
+    companyDateFormat = null;
+    genderController.clear();
+    maritalStatusController.clear();
+    reasonController.clear();
+    photographyPicture = null;
+  }
+
   @override
   void dispose() {
     fullNameController.dispose();
@@ -210,7 +187,6 @@ class BecomePartyMemViewModel extends BaseViewModel
     maritalStatusController.dispose();
     constituencyController.dispose();
     reasonController.dispose();
-    roleController.dispose();
     super.dispose();
   }
 }

@@ -20,7 +20,7 @@ class LaunchURL extends StatelessWidget {
           TextSpan(
             style: context.textTheme.labelMedium,
             recognizer: TapGestureRecognizer()
-              ..onTap = () => _launchURL("https://www.clokam.com/terms"),
+              ..onTap = () => _launchURL("https://sites.google.com/view/inldsevak/home"),
             text: localization.terms_of_services,
           ),
           TextSpan(text: " ${localization.and} "),
@@ -28,7 +28,7 @@ class LaunchURL extends StatelessWidget {
           TextSpan(
             style: context.textTheme.labelMedium,
             recognizer: TapGestureRecognizer()
-              ..onTap = () => _launchURL("https://www.clokam.com/privacy"),
+              ..onTap = () => _launchURL("https://sites.google.com/view/inldsevak/home"),
             text: localization.privacy_policy,
           ),
         ],

@@ -18,6 +18,9 @@ class ComplaintsViewModel extends BaseViewModel {
   }
 
   List<complaint.Data> complaintsList = [];
+  List<complaint.Data> filteredComplaintsList = [];
+
+  final searchController = TextEditingController();
 
   Future<void> getComplaints() async {
     try {
@@ -29,7 +32,9 @@ class ComplaintsViewModel extends BaseViewModel {
 
       if (response.data?.responseCode == 200) {
         final data = response.data?.data;
+        filteredComplaintsList.clear();
         complaintsList = List<complaint.Data>.from(data as List);
+        filteredComplaintsList.addAll(complaintsList);
       } else {
         CommonSnackbar(text: "Unable to fetch Complaints").showSnackbar();
       }
@@ -39,5 +44,26 @@ class ComplaintsViewModel extends BaseViewModel {
     } finally {
       isLoading = false;
     }
+  }
+
+  filterList() {
+    filteredComplaintsList.clear();
+    filteredComplaintsList.addAll(
+      complaintsList.where((complaint) {
+        return _matchesSearch(complaint);
+      }),
+    );
+
+    notifyListeners();
+  }
+
+  bool _matchesSearch(complaint.Data complaint) {
+    final searchQuery = searchController.text.trim().toLowerCase();
+    return complaint.messages?.first.subject?.toLowerCase().contains(
+              searchQuery,
+            ) ==
+            true ||
+        complaint.messages?.first.body?.toLowerCase().contains(searchQuery) ==
+            true;
   }
 }

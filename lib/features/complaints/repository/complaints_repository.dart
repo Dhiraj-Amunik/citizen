@@ -11,7 +11,6 @@ import 'package:inldsevak/features/complaints/model/response/authorites_model.da
 import 'package:inldsevak/features/complaints/model/response/complaint_by_thread.dart';
 import 'package:inldsevak/features/complaints/model/response/complaint_departments_model.dart';
 import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
-import 'package:inldsevak/features/complaints/model/response/constituency_model.dart';
 import 'package:inldsevak/features/complaints/model/response/reply_thread_model.dart';
 
 class ComplaintsRepository {
@@ -35,7 +34,7 @@ class ComplaintsRepository {
   Future<RepoResponse<ComplaintsModel>> getAllComplaints({
     required String token,
   }) async {
-    final response = await network.get(
+    final response = await network.post(
       token: token,
       path: URLs.getComplaintByUserID,
     );
@@ -99,18 +98,4 @@ class ComplaintsRepository {
         ? RepoResponse(error: response)
         : RepoResponse(data: AuthoritiesModel.fromJson(response));
   }
-
-  Future<RepoResponse<ConstituencyModel>> getConstituencies(
-    String? token,
-  ) async {
-    final response = await network.get(
-      token: token,
-      path: URLs.getConstituencies,
-    );
-
-    return response is APIException
-        ? RepoResponse(error: response)
-        : RepoResponse(data: ConstituencyModel.fromJson(response));
-  }
-
 }

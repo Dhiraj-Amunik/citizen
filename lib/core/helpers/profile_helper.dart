@@ -85,6 +85,7 @@ class ProfileHelper {
     VoidCallback? onTap,
     required String icon,
     Color? iconColor = AppPalettes.primaryColor,
+    Color backgroundColor = AppPalettes.liteGreyColor,
     bool showArrow = true,
   }) {
     return InkWell(
@@ -98,7 +99,7 @@ class ProfileHelper {
         ),
         decoration: boxDecorationRoundedWithShadow(
           Dimens.radiusX4,
-          backgroundColor: AppPalettes.liteGreyColor,
+          backgroundColor: backgroundColor,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,

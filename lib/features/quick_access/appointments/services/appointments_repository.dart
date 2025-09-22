@@ -22,7 +22,7 @@ class AppointmentsRepository {
     required RequestAppointmentModel model,
   }) async {
     final response = await _network.post(
-      path: URLs.userAppointment,
+      path: URLs.createAppointment,
       token: token,
       data: model.toJson(),
     );
@@ -30,5 +30,16 @@ class AppointmentsRepository {
     return response is APIException
         ? RepoResponse(error: response)
         : RepoResponse(data: AppointmentModel.fromJson(response));
+  }
+
+  Future<RepoResponse<AppointmentModel>> appointments(String? token) async {
+    final response = await _network.post(
+      path: URLs.userAppointment,
+      token: token,
+    );
+
+    return response is APIException
+        ? RepoResponse(error: response)
+        : RepoResponse(data:  AppointmentModel.fromJson(response));
   }
 }

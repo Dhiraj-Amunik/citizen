@@ -11,6 +11,8 @@ class DraggableSheetWidget extends StatefulWidget {
   final Color? backgroundColor;
   final Color? indicatorcolor;
   final double size;
+  final double radius;
+  final Function()? onCompleted;
   const DraggableSheetWidget({
     super.key,
     required this.child,
@@ -18,6 +20,8 @@ class DraggableSheetWidget extends StatefulWidget {
     this.backgroundColor,
     this.indicatorcolor,
     required this.size,
+    this.radius = Dimens.radius100,
+    this.onCompleted,
   });
 
   @override
@@ -29,6 +33,7 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
   void initState() {
     super.initState();
     controller.addListener(onChange);
+    controller.addListener(collapse);
   }
 
   void onChange() {
@@ -36,7 +41,7 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
     if (currentSize <= 0.05) collapse();
   }
 
-  void collapse() => animateSheet(getSheet.snapSizes!.first);
+  void collapse() => animateCompleteSheet(getSheet.snapSizes!.first);
   void anchor() => animateSheet(getSheet.snapSizes!.last);
   void expand() => animateSheet(getSheet.maxChildSize);
   void hide() => animateSheet(getSheet.minChildSize);
@@ -49,6 +54,15 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
     );
   }
 
+  void animateCompleteSheet(double size) {
+    controller.animateTo(
+      size,
+      duration: const Duration(microseconds: 50),
+      curve: Curves.easeInOut,
+    );
+    widget.onCompleted;
+  }
+
   DraggableScrollableSheet get getSheet =>
       (sheet.currentWidget as DraggableScrollableSheet);
   final sheet = GlobalKey();
@@ -58,6 +72,7 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
     return LayoutBuilder(
       builder: (builder, constraints) {
         return DraggableScrollableSheet(
+          controller: controller,
           key: sheet,
           initialChildSize: widget.size,
           maxChildSize: 0.8,
@@ -68,7 +83,7 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
           builder: (context, scrollController) {
             return DecoratedBox(
               decoration: boxDecorationRoundedWithShadow(
-                Dimens.radius100,
+                widget.radius,
                 disableBottomRadius: true,
                 backgroundColor:
                     widget.backgroundColor ?? AppPalettes.whiteColor,
@@ -107,7 +122,7 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
           height: Dimens.scaleX,
           width: Dimens.scaleX7,
           decoration: boxDecorationRoundedWithShadow(
-            Dimens.radius100,
+            widget.radius,
             backgroundColor: color ?? AppPalettes.iconColor,
           ),
         ),

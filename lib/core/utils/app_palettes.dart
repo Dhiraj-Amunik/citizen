@@ -33,11 +33,14 @@ class AppPalettes {
   static const gradientSecondColor = Color(0xFF4DC855);
 
   static const blueColor = Color(0xFF1E3A8A);
-  static const liteBlueColor = Color(0xFFDBEAFE);
   static const yellowColor = Color(0xFFFFB700);
 
   static const ratingColor = Color(0xFFFCC21B);
 
-  static const liteGreenTextFieldColor = Color(0xFFC9FACC);
+  static const liteBlueColor = Color(0xFFDBEAFE);
+  static const liteGreenColor = Color(0xFFC9FACC);
+  static const liteRedColor = Color(0xFFFF8B83);
+  static const imageholderColor = Color(0xFF005747);
 
+  
 }

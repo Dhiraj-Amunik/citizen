@@ -122,109 +122,113 @@ class _HelpAndSupportViewState extends State<HelpAndSupportView> {
                     ).verticalPadding(Dimens.paddingX4),
                   ),
 
-                  CommonExpandedWidget(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: Dimens.paddingX4,
-                      vertical: Dimens.paddingX1,
-                    ),
-                    iconColor: AppPalettes.blackColor,
-                    title: localization.contact_information,
-                    subtTitle: localization.get_in_touch_with_our_support_team,
-                    textStyle: textTheme.bodySmall,
-                    subTitleTextStyle: textTheme.labelMedium,
-                    radius: Dimens.radiusX2,
-                    alignment: Alignment.centerLeft,
-                    splashColor: AppPalettes.transparentColor,
-                    children: [
-                      const Divider(color: AppPalettes.dividerColor, height: 1),
-                      SizeBox.sizeHX4,
-                      GestureDetector(
-                        onTap: () => UrlLauncher().launchURl(),
-                        onLongPress: () =>
-                            UrlLauncher().launchTel("+91 8765397865"),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: Dimens.gapX2,
-                          children: [
-                            CommonHelpers.buildIcons(
-                              color: AppPalettes.primaryColor.withOpacityExt(
-                                0.2,
-                              ),
-                              path: AppImages.phoneIcon,
-                              iconColor: AppPalettes.primaryColor,
-                              iconSize: Dimens.scaleX2,
-                              padding: Dimens.paddingX2B,
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: Dimens.gapX,
-                              children: [
-                                Text(
-                                  localization.phone,
-                                  style: textTheme.bodySmall,
-                                ),
-                                Text(
-                                  "+91 8765397865",
-                                  style: textTheme.bodySmall,
-                                ),
-                                Text(
-                                  localization.support_24_7,
-                                  style: textTheme.labelMedium?.copyWith(
-                                    color: AppPalettes.lightTextColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ).symmetricPadding(horizontal: Dimens.paddingX4),
+                  Container(
+                    decoration: boxDecorationRoundedWithShadow(Dimens.radiusX4,spreadRadius: 2,blurRadius: 2),
+                    child: CommonExpandedWidget(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Dimens.paddingX4,
+                        vertical: Dimens.paddingX1,
                       ),
-                      SizeBox.sizeHX4,
-                      GestureDetector(
-                        onTap: () => UrlLauncher().launchURl(),
-                        onLongPress: () => UrlLauncher().launchEmail(
-                          "support@citizen.gov",
-                          subject: "Enter-your-complaint-issue",
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: Dimens.gapX2,
-                          children: [
-                            Container(
-                              child: CommonHelpers.buildIcons(
+                      
+                      iconColor: AppPalettes.blackColor,
+                      title: localization.contact_information,
+                      subtTitle: localization.get_in_touch_with_our_support_team,
+                      textStyle: textTheme.bodySmall,
+                      subTitleTextStyle: textTheme.labelMedium,
+                      radius: Dimens.radiusX4,
+                      alignment: Alignment.centerLeft,
+                      splashColor: AppPalettes.transparentColor,
+                      children: [
+                        const Divider(color: AppPalettes.dividerColor, height: 1),
+                        SizeBox.sizeHX4,
+                        GestureDetector(
+                          onTap: () => UrlLauncher().launchURl(),
+                          onLongPress: () =>
+                              UrlLauncher().launchTel("+91 8765397865"),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: Dimens.gapX4,
+                            children: [
+                              CommonHelpers.buildIcons(
                                 color: AppPalettes.primaryColor.withOpacityExt(
                                   0.2,
                                 ),
-                                path: AppImages.emailIcon,
+                                path: AppImages.phoneIcon,
                                 iconColor: AppPalettes.primaryColor,
                                 iconSize: Dimens.scaleX2,
                                 padding: Dimens.paddingX2B,
                               ),
-                            ),
-                            Column(
-                              spacing: Dimens.gapX,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  localization.email,
-                                  style: textTheme.bodySmall,
-                                ),
-                                Text(
-                                  "support@citizen.gov",
-                                  style: textTheme.bodySmall,
-                                ),
-                                Text(
-                                  localization.response_within_24_hours,
-                                  style: textTheme.labelMedium?.copyWith(
-                                    color: AppPalettes.lightTextColor,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: Dimens.gapX,
+                                children: [
+                                  Text(
+                                    localization.phone,
+                                    style: textTheme.bodySmall,
                                   ),
+                                  Text(
+                                    "+91 8765397865",
+                                    style: textTheme.bodySmall,
+                                  ),
+                                  Text(
+                                    localization.support_24_7,
+                                    style: textTheme.labelMedium?.copyWith(
+                                      color: AppPalettes.lightTextColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ).symmetricPadding(horizontal: Dimens.paddingX4),
+                        ),
+                        SizeBox.sizeHX4,
+                        GestureDetector(
+                          onTap: () => UrlLauncher().launchURl(),
+                          onLongPress: () => UrlLauncher().launchEmail(
+                            "support@citizen.in",
+                            subject: "Enter-your-complaint-issue",
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: Dimens.gapX4,
+                            children: [
+                              Container(
+                                child: CommonHelpers.buildIcons(
+                                  color: AppPalettes.primaryColor.withOpacityExt(
+                                    0.2,
+                                  ),
+                                  path: AppImages.emailIcon,
+                                  iconColor: AppPalettes.primaryColor,
+                                  iconSize: Dimens.scaleX1B,
+                                  padding: Dimens.paddingX2,
                                 ),
-                              ],
-                            ),
-                          ],
-                        ).symmetricPadding(horizontal: Dimens.paddingX4),
-                      ),
-                      SizeBox.sizeHX4,
-                    ],
+                              ),
+                              Column(
+                                spacing: Dimens.gapX,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    localization.email,
+                                    style: textTheme.bodySmall,
+                                  ),
+                                  Text(
+                                    "support@citizen.in",
+                                    style: textTheme.bodySmall,
+                                  ),
+                                  Text(
+                                    localization.response_within_24_hours,
+                                    style: textTheme.labelMedium?.copyWith(
+                                      color: AppPalettes.lightTextColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ).symmetricPadding(horizontal: Dimens.paddingX4),
+                        ),
+                        SizeBox.sizeHX4,
+                      ],
+                    ),
                   ),
 
                   SizeBox.sizeHX7,

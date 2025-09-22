@@ -40,10 +40,10 @@ class DefaultTabBar extends StatelessWidget {
         labelStyle: context.textTheme.bodySmall,
         isScrollable: isScrollable,
         tabAlignment: isScrollable ? TabAlignment.start : null,
-        padding: EdgeInsetsGeometry.zero,
+        padding: EdgeInsetsGeometry.symmetric(horizontal: Dimens.paddingX2),
         labelPadding: EdgeInsetsGeometry.zero,
         unselectedLabelStyle: context.textTheme.bodySmall,
-        dividerColor: AppPalettes.transparentColor,
+        dividerColor: AppPalettes.liteGreenColor,
         indicatorSize: tabBarSize,
         indicatorColor: AppPalettes.primaryColor,
         indicatorPadding: EdgeInsetsGeometry.zero,
@@ -56,7 +56,7 @@ class DefaultTabBar extends StatelessWidget {
               entry.value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.textTheme.bodySmall?.copyWith(
+              style: context.textTheme.bodyMedium?.copyWith(
                 color: AppPalettes.blackColor,
               ),
             ),

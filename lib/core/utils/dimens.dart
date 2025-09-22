@@ -22,6 +22,10 @@ class Dimens {
   static final paddingX8 = 32.0.r;
   static final paddingX9 = 36.0.r;
   static final paddingX10 = 40.0.r;
+  static final paddingX20 = 80.0.r;
+  static final paddingX22 = 88.0.r;
+  static final paddingX23 = 92.0.r;
+  static final paddingX25 = 100.0.r;
 
   //margin
   static const margin = 0.0;
@@ -71,6 +75,7 @@ class Dimens {
   static final gapX1 = 4.0.r;
   static final gapX1B = 6.0.r;
   static final gapX2 = 8.0.r;
+  static final gapX2B = 10.0.r;
   static final gapX3 = 12.0.r;
   static final gapX4 = 16.0.r;
   static final gapX5 = 20.0.r;
