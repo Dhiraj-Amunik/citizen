@@ -64,7 +64,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get father_name => 'Father Name';
 
   @override
-  String get father_name_validator => 'Please enter yout father name';
+  String get father_name_validator => 'Please enter your father name';
 
   @override
   String get email => 'Email';

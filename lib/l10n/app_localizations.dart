@@ -205,7 +205,7 @@ abstract class AppLocalizations {
   /// No description provided for @father_name_validator.
   ///
   /// In en, this message translates to:
-  /// **'Please enter yout father name'**
+  /// **'Please enter your father name'**
   String get father_name_validator;
 
   /// No description provided for @email.
