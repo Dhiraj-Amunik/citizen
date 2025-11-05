@@ -8,36 +8,10 @@ environment:
   sdk: ^3.8.1
 
 dependencies:
-  animated_custom_dropdown: ^3.1.1
-  cached_network_image: ^3.4.1
   connectivity_plus: ^7.0.0
-  cupertino_icons: ^1.0.8
-  dio: ^5.9.0
   flutter:
     sdk: flutter
-  flutter_dotenv: ^6.0.0
-  flutter_keyboard_visibility: ^6.0.0
-  flutter_localizations:
-    sdk: flutter
-  flutter_native_splash: ^2.4.6
-  flutter_rating_stars: ^1.1.0
-  flutter_screenutil: ^5.9.3
-  flutter_secure_storage: ^9.2.4
-  flutter_staggered_grid_view: ^0.7.0
-  flutter_svg: ^2.2.0
-  fluttertoast: ^8.2.12
-  image_picker: ^1.1.2
-  intl: ^0.20.2
-  path_provider: ^2.1.5
-  pinput: ^5.0.1
-  provider: ^6.1.5
-  qr_flutter: ^4.1.0
-  quickalert: ^1.1.0
-  readmore: ^3.0.0
-  share_plus: ^11.1.0
-  shimmer: ^3.0.0
-  url_launcher: ^6.3.2
-  uuid: ^4.5.1
+
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
@@ -45,28 +19,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-flutter:
-  generate: true
-  uses-material-design: true
-  assets:
-    - .env
-    - assets/images/
-    - assets/icons/
-    - assets/navigation_icons/
-    - assets/banners/
-    - assets/logo/
-    - assets/profile_icons/
-    - assets/emergency_icons/
-    - assets/quick_access/
-    - assets/placeholders/
-    - assets/donations/
-  fonts:
-    - family: Afacad
-      fonts:
-        - asset: assets/fonts/Afacad-Bold.ttf
-        - asset: assets/fonts/Afacad-Medium.ttf
-        - asset: assets/fonts/Afacad-Regular.ttf
-        - asset: assets/fonts/Afacad-SemiBold.ttf
+
 
 flutter_launcher_icons:
   android: "launcher_icon"
