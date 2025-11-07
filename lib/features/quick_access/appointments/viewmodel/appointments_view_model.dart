@@ -10,19 +10,43 @@ class AppointmentsViewModel extends BaseViewModel {
     return super.onInit();
   }
 
-  List<String> filterItems = ["pending", "approved", "rejected", "completed"];
+  String? statusKey;
+  String? dateKey;
+
+  List<String> statusItems = ["Pending", "Approved", "Rejected", "Completed"];
+  List<String> dateItems = ["Recent", "One Month", "Six Months"];
 
   List<Appointments> appointmentsList = [];
   List<Appointments> filteredAppointmentsList = [];
 
   final searchController = TextEditingController();
 
+  setStatus(String status) {
+    statusKey = status;
+    notifyListeners();
+  }
+
+  setDate(String status) {
+    dateKey = status;
+    notifyListeners();
+  }
+
   Future<void> getAppointmentsList() async {
     try {
       isLoading = true;
       appointmentsList.clear();
       filteredAppointmentsList.clear();
-      final response = await AppointmentsRepository().appointments(token);
+      final response = await AppointmentsRepository().appointments(
+        token,
+        status: statusKey?.toLowerCase(),
+        date: dateKey == "Recent"
+            ? 7
+            : dateKey == "One Month"
+            ? 30
+            : dateKey == "Six Months"
+            ? 180
+            : 0,
+      );
 
       if (response.data?.responseCode == 200) {
         appointmentsList.clear();

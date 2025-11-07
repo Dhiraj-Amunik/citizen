@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
-import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
+import 'package:inldsevak/features/complaints/widgets/complaint_helpers.dart';
 
 class ComplaintThreadWidget extends StatelessWidget {
   final Data thread;
   final VoidCallback onTap;
+  final bool showCompaint;
+  final bool showAuthority;
 
   const ComplaintThreadWidget({
     super.key,
     required this.thread,
     required this.onTap,
+    this.showCompaint = false,
+    this.showAuthority = false,
   });
 
   @override
@@ -24,116 +30,119 @@ class ComplaintThreadWidget extends StatelessWidget {
     final textTheme = context.textTheme;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(Dimens.radiusX2),
+      borderRadius: BorderRadius.circular(Dimens.radiusX6),
       child: Container(
-        padding: EdgeInsetsGeometry.all(Dimens.paddingX4),
+        padding: EdgeInsetsGeometry.all(Dimens.paddingX3),
         decoration: boxDecorationRoundedWithShadow(
-          Dimens.radiusX4,
+          Dimens.radiusX6,
           border: Border.all(color: AppPalettes.primaryColor),
         ),
         child: Column(
+          spacing: Dimens.gapX1B,
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: Dimens.gapX2,
           children: [
-            IntrinsicHeight(
-              child: Row(
-                spacing: Dimens.gapX3,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CommonHelpers.buildIcons(
-                    color: AppPalettes.liteGreenColor,
-                    path: AppImages.emailIcon,
-                    iconColor: AppPalettes.primaryColor,
-                    iconSize: Dimens.scaleX2,
-                    padding: Dimens.paddingX2B,
-                  ),
-                  Expanded(
-                    child: Text(
-                      thread.messages?.first.subject ?? "No Subject found !",
-                      style: textTheme.bodyLarge,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: Dimens.paddingX3,
-                        vertical: Dimens.paddingX,
-                      ),
-                      decoration: boxDecorationRoundedWithShadow(
-                        Dimens.radius100,
-                        backgroundColor:
-                            (thread.isActive == true
-                                    ? AppPalettes.yellowColor
-                                    : AppPalettes.blueColor)
-                                .withOpacityExt(0.2),
-                      ),
-                      child: Text(
-                        thread.isActive == true ? "Pending" : "Resolved",
-                        style: textTheme.labelMedium?.copyWith(
-                          color: AppPalettes.lightTextColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            ConstrainedBox(
-              constraints: BoxConstraints(minHeight: 30.height()),
-              child: RichText(
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                text: TextSpan(
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                  children: [
-                    TextSpan(text: "Message : "),
-                    TextSpan(
-                      text:
-                          thread.messages?.first.snippet ??
-                          "Unknown Description",
-                      style: textTheme.labelMedium?.copyWith(
-                        color: AppPalettes.lightTextColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              spacing: Dimens.gapX3,
+              children: [
+                CommonHelpers.buildIcons(
+                  color: AppPalettes.liteGreenColor,
+                  path: AppImages.emailIcon,
+                  iconColor: AppPalettes.primaryColor,
+                  iconSize: Dimens.scaleX2,
+                  padding: Dimens.paddingX2B,
                 ),
-              ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: Dimens.gapX1,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        spacing: Dimens.gapX2,
+                        children: [
+                          CommonHelpers.buildStatus(
+                            thread.messages?.first.date?.toDdMmmYyyy() ?? "",
+                            statusColor: AppPalettes.liteGreenColor,
+                          ),
+                          CommonHelpers.buildStatus(
+                            thread.status?.capitalize() ?? "",
+                            statusColor: ComplaintHelper.getStatusColor(
+                              thread.status,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        thread.messages?.first.subject?.capitalize() ??
+                            "No Subject found !",
+                        style: textTheme.bodyMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizeBox.size,
+                    ],
+                  ),
+                ),
+              ],
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  spacing: Dimens.gapX2,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CommonHelpers.buildIcons(
-                      path: AppImages.calenderIcon,
-                      iconColor: context.iconsColor,
-                      iconSize: Dimens.scaleX1B,
-                    ),
-                    Text(
-                      thread.messages?.first.date?.toDdMmmYyyy() ?? "",
-                      style: textTheme.labelMedium,
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.email, size: 14, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(
-                      '0 messages',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
+                SizeBox.sizeWX2,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: Dimens.gapX1,
+                    children: [
+                      Text(
+                        thread.messages?.first.snippet ?? "Unknown Description",
+                        maxLines: 2,
+                        style: textTheme.labelMedium?.copyWith(
+                          color: AppPalettes.lightTextColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (showCompaint)
+                        Row(
+                          children: [
+                            Text(
+                              "Complaint ID : ",
+                              maxLines: 2,
+                              style: textTheme.labelMedium?.copyWith(
+                                color: AppPalettes.lightTextColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              thread.threadId ?? "",
+                              maxLines: 2,
+                              style: textTheme.labelMedium,
+                            ),
+                          ],
+                        ),
+                      if (showAuthority)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Submitted To : ",
+                              maxLines: 2,
+                              style: textTheme.labelMedium,
+                            ),
+                            Expanded(
+                              child: Text(
+                                '${thread.department?.name ?? "Department"} - ${thread.authorityName ?? "Authority"}',
+                                maxLines: 2,
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: AppPalettes.lightTextColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
               ],
             ),

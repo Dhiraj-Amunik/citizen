@@ -6,6 +6,14 @@ import 'package:inldsevak/features/events/model/request_details_event_model.dart
 import 'package:inldsevak/features/events/services/events_repository.dart';
 
 class EventDetailsViewModel extends BaseViewModel {
+  bool _showShareIcon = false;
+  bool get showShareIcon => _showShareIcon;
+
+  set showShareIcon(bool canShow) {
+    _showShareIcon = canShow;
+    notifyListeners();
+  }
+
   Future<model.Data?> getEvents({
     required RequestEventDetailsModel eventModel,
   }) async {

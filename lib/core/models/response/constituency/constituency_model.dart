@@ -3,13 +3,15 @@ part "./constituency.dart";
 class ConstituencyModel {
   int? responseCode;
   String? message;
+  String? district;
   List<Constituency>? data;
 
-  ConstituencyModel({this.responseCode, this.message, this.data});
+  ConstituencyModel({this.responseCode, this.message, this.data, this.district});
 
   ConstituencyModel.fromJson(Map<String, dynamic> json) {
     responseCode = json['responseCode'];
     message = json['message'];
+    district = json['district'];
     if (json['data'] != null) {
       data = <Constituency>[];
       json['data'].forEach((v) {

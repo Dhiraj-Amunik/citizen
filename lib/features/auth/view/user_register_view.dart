@@ -9,14 +9,12 @@ import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/core/widgets/upload_image_widget.dart';
 import 'package:inldsevak/features/auth/models/request/validate_otp_request_model.dart';
-import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
 import 'package:inldsevak/features/auth/utils/auth_appbar.dart';
 import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
 import 'package:inldsevak/features/common_fields/view_model/map_search_view_model.dart';
 import 'package:inldsevak/features/auth/view_model/user_register_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/features/common_fields/widget/assembly_constituency_drop_down.dart';
-import 'package:inldsevak/features/common_fields/widget/map_search_field.dart';
 import 'package:inldsevak/features/common_fields/widget/map_search_location.dart';
 import 'package:inldsevak/features/common_fields/widget/parliamentary_constituency_drop_down.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +30,6 @@ class UserRegisterView extends StatefulWidget {
 
 class _UserRegisterViewState extends State<UserRegisterView>
     with DateAndTimePicker {
-  final searchController = SingleSelectController<Predictions?>(null);
   final assemblyconstituencyController = SingleSelectController<Constituency>(
     null,
   );
@@ -43,7 +40,6 @@ class _UserRegisterViewState extends State<UserRegisterView>
   @override
   void dispose() {
     _scrollController.dispose();
-    searchController.dispose();
     parliamentaryconstituencyController.dispose();
     assemblyconstituencyController.dispose();
     super.dispose();
@@ -52,6 +48,9 @@ class _UserRegisterViewState extends State<UserRegisterView>
   @override
   Widget build(BuildContext context) {
     final localization = context.localizations;
+    final constituencyProvider = context.read<ConstituencyViewModel>();
+    final mapsProvider = context.read<MapSearchViewModel>();
+
     return PopScope(
       canPop: true,
       child: ChangeNotifierProvider(
@@ -160,28 +159,23 @@ class _UserRegisterViewState extends State<UserRegisterView>
                             argument: localization.gender_validator,
                           ),
                         ),
-                        MapSearchLocation(hintText: "hintText"),
-                        // MapSearchField(
-                        //   visibility: (boolean) {
-                        //     if (boolean) {
-                        //       _scrollController.animateTo(
-                        //         _scrollController.position.maxScrollExtent /
-                        //             1.8,
-                        //         duration: Duration(milliseconds: 300),
-                        //         curve: Curves.easeIn,
-                        //       );
-                        //       parliamentaryconstituencyController.clear();
-                        //       assemblyconstituencyController.clear();
-                        //     }
-                        //   },
-                        //   // searchController: searchController,
-                        //   text: localization.address_details,
-                        //   hintText: localization.eg_address,
-                        // ),
+                        MapSearchLocation(
+                          findPincode: (text) async {
+                            mapsProvider.districtController.text =
+                                await constituencyProvider
+                                    .getParliamentaryConstituencies(
+                                      pincode: text,
+                                      parlimentController:
+                                          parliamentaryconstituencyController,
+                                    ) ??
+                                "";
+                          },
+                        ),
                         ParliamentaryConstituencyDropDownWidget(
                           constituencyController:
                               parliamentaryconstituencyController,
                           onChange: (constituency) {
+                            assemblyconstituencyController.clear();
                             context
                                 .read<ConstituencyViewModel>()
                                 .getAssemblyConstituencies(
@@ -241,7 +235,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
             ),
             bottomNavigationBar:
                 Consumer2<UserRegisterViewModel, MapSearchViewModel>(
-                  builder: (context, value, search, _) {
+                  builder: (context, value, searchProvider, _) {
                     return Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: Dimens.horizontalspacing,
@@ -253,7 +247,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                         text: localization.register,
                         onTap: () async {
                           await provider.registerUserDetails(
-                            addressModel: search.addressModel,
+                            searchProvider: searchProvider,
                             assemblyConstituenciesID:
                                 assemblyconstituencyController.value?.sId,
                             parliamentaryConstituenciesID:

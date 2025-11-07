@@ -30,6 +30,7 @@ class CommonButton extends StatefulWidget {
   final bool isEnable;
   final Color? splashColor;
   final Color? borderColor;
+  final Color? indicatorColor;
   final Color? textColor;
   final BorderSide? side;
   final double? fontSize;
@@ -60,6 +61,7 @@ class CommonButton extends StatefulWidget {
     this.side,
     super.key,
     this.fontSize,
+    this.indicatorColor,
   });
 
   @override
@@ -126,9 +128,7 @@ class _CommonButtonState extends State<CommonButton>
       animation: _gradientController,
       builder: (context, _) {
         return InkWell(
-          onTap: widget.isAnimationEnable || widget.isEnable
-              ? widget.onTap as void Function()?
-              : null,
+          onTap: widget.isEnable ? widget.onTap as void Function()? : null,
           overlayColor: WidgetStatePropertyAll(AppPalettes.transparentColor),
           child: Container(
             width: widget.fullWidth ? widget.width ?? double.infinity : null,
@@ -140,7 +140,7 @@ class _CommonButtonState extends State<CommonButton>
                   vertical: Dimens.paddingX2B,
                 ),
             decoration: BoxDecoration(
-              color: widget.color,
+              color: widget.isEnable ? widget.color : widget.disabledColor,
               borderRadius:
                   widget.onlyRadius ??
                   BorderRadius.circular(widget.radius ?? Dimens.radiusX4),
@@ -186,7 +186,7 @@ class _CommonButtonState extends State<CommonButton>
               fit: BoxFit.contain,
               child: widget.isLoading
                   ? CircularProgressIndicator(
-                      color: AppPalettes.whiteColor,
+                      color: widget.indicatorColor ?? AppPalettes.whiteColor,
                       strokeWidth: 2.height(),
                     )
                   : widget.child ??

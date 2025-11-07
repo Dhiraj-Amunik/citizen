@@ -60,9 +60,7 @@ class _HomeViewState extends State<HomeView> {
           child: Scaffold(
             body: Consumer<NavigationViewModel>(
               builder: (_, navigation, _) {
-                return role.isPartyMember
-                    ? navigation.partyWidgets[navigation.selectedTab]
-                    : navigation.userWidgets[navigation.selectedTab];
+                return navigation.userWidgets[navigation.selectedTab];
               },
             ),
             extendBody: true,

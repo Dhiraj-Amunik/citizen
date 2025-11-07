@@ -21,15 +21,30 @@ enum Routes {
   requestMembershipPage(path: "/RequestMembershipPage"),
   requestAppointmentPage(path: "/RequestAppointmentPage"),
   appointmentPage(path: "/AppointmentPage"),
+  appointmentDetailsPage(path: "/AppointmentDetailsPage"),
   userWallOfHelpPage(path: "/UserWallOfHelpPage"),
   partyWallOfHelpPage(path: "/PartyWallOfHelpPage"),
+  myRequestsPage(path: "/MyRequestsPage"),
+  myHelpRequestEditPage(path: "/MyHelpRequestEditPage"),
+  myHelpMessagesListPage(path: "/myHelpMessagesListPage"),
+  wallOfHelpDetailsPage(path: "/WallOfHelpDetailsPage"),
   contributePage(path: "/contributePage"),
+  chatContributePage(path: "/chatContributePage"),
   requestWallOfHelpPage(path: "/RequestWallOfHelpPage"),
   beVolunteerPage(path: "/BeVolunteerPage"),
   idCardPage(path: "/IdCardPage"),
   donatePage(path: "/DonatePage"),
   pressReleasesDetailedPage(path: "/PressReleasesDetailedPage"),
-  notificationsPage(path: "/NotificationsPage");
+  notificationsPage(path: "/NotificationsPage"),
+  surveyPage(path: "/SurveyPage"),
+  nearestMemberPage(path: "/NearestMemberPage"),
+  chatMemberPage(path: "/ChatMemberPage"),
+  myMembersMessagesListPage(path: "/MyMembersMessagesListPage"),
+  photoDetailsPage(path: "/PhotoDetailsPage"),
+  notifyRepresentativePage(path: "/NotifyRepresentativePage"),
+  createNotifyRepresentativePage(path: "/CreateNotifyRepresentativePage"),
+  updateNotifyRepresentativePage(path: "/UpdateNotifyRepresentativePage"),
+  interviewDetailedPage(path: "/InterviewDetailedWidget");
 
   final String path;
   final AxisDirection direction;
@@ -79,12 +94,28 @@ Widget getPage(Routes route, {dynamic arguments}) {
       return RequestAppointmentView();
     case Routes.appointmentPage:
       return AppointmentsView();
+    case Routes.appointmentDetailsPage:
+      return AppointmentDetailsView(appointment: arguments);
     case Routes.userWallOfHelpPage:
       return WallOfHelpUserView();
+    case Routes.wallOfHelpDetailsPage:
+      return WallOfHelpDetailsView(
+        helpRequest: arguments["model"],
+        isEditable: arguments["isEditable"],
+      );
+    case Routes.myRequestsPage:
+      return MyHelpRequestsView();
+    case Routes.myHelpRequestEditPage:
+      return MyHelpRequestEditView(editableData: arguments);
+    case Routes.myHelpMessagesListPage:
+      return MyHelpMessagesListView(helpRequests: arguments);
+
     case Routes.partyWallOfHelpPage:
       return WallOfHelpPartyView();
     case Routes.contributePage:
       return ContributeView(helpRequest: arguments);
+    case Routes.chatContributePage:
+      return ChatContributeView(helpRequest: arguments);
     case Routes.requestWallOfHelpPage:
       return RequestWallOfHelpView();
     case Routes.beVolunteerPage:
@@ -94,10 +125,22 @@ Widget getPage(Routes route, {dynamic arguments}) {
     case Routes.donatePage:
       return DonateView();
     case Routes.pressReleasesDetailedPage:
-      return PressReleasesDetailedView();
+      return PressReleasesDetailedView(media: arguments);
     case Routes.notificationsPage:
       return NotificationsView();
+    case Routes.surveyPage:
+      return SurveyView();
+    case Routes.photoDetailsPage:
+      return PhotoDetailsView(media: arguments);
+    case Routes.notifyRepresentativePage:
+      return NotifyRepresentativeView();
+    case Routes.createNotifyRepresentativePage:
+      return CreateNotifyRepresentativeView();
+    case Routes.updateNotifyRepresentativePage:
+      return UpdateNotifyRepresentativeView(model: arguments);
+    case Routes.interviewDetailedPage:
+      return InterviewDetailedWidget(media: arguments);
     default:
-      return WrapperView();
+      return LoginView();
   }
 }

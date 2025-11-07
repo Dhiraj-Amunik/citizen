@@ -1,81 +1,110 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
-import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/utils/url_launcher.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
+import 'package:inldsevak/core/extensions/responsive_extension.dart';
+import 'package:inldsevak/core/helpers/common_helpers.dart';
+import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/widgets/responisve_image_widget.dart';
+import 'package:inldsevak/features/lok_varta/model/lok_varta_model.dart'
+    as model;
 
 class PressReleasesDetailedView extends StatelessWidget {
-  const PressReleasesDetailedView({super.key});
+  final model.Media media;
+  const PressReleasesDetailedView({super.key, required this.media});
 
   @override
   Widget build(BuildContext context) {
+    final localization = context.localizations;
+    final textTheme = context.textTheme;
     return Scaffold(
       backgroundColor: AppPalettes.whiteColor,
-      appBar: commonAppBar(title: 'New App Features', center: true),
-      body:
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+      appBar: commonAppBar(
+        title: localization.lok_varta,
+
+        action: [
+          if (media.url != null)
+            CommonHelpers.buildIcons(
+              path: AppImages.shareIcon,
+              color: AppPalettes.primaryColor,
+              iconColor: AppPalettes.whiteColor,
+              padding: Dimens.paddingX3,
+              iconSize: Dimens.scaleX2B,
+              onTap: () => CommonHelpers.shareURL(media.url ?? ""),
+            ),
+        ],
+      ),
+      body: Padding(
+        padding: EdgeInsetsGeometry.symmetric(
+          horizontal: Dimens.horizontalspacing,
+          vertical: Dimens.paddingX2,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
             children: [
-              CircleAvatar(
-                radius: 60.h,
-                backgroundImage: AssetImage(AppImages.partyImage),
-              ),
-              SizedBox(height: Dimens.widgetSpacing),
-              Text('New App Features', style: context.textTheme.titleMedium),
-              SizedBox(height: Dimens.radiusX1),
-              Text('15-10-2025', style: context.textTheme.bodySmall),
-              SizedBox(height: Dimens.gapX2),
-              Text(
-                'We\'ve added new features to make reporting issues even easier. Check out the latest updates! We\'ve added new features to make reporting issues even easier. Check out the latest updates! We\'ve added new features to make reporting issues even easier. Check out the latest updates!',
-                style: context.textTheme.bodySmall,
-              ),
-              SizedBox(height: Dimens.widgetSpacing),
-              Row(
-                children: [
-                  Text('Images', style: context.textTheme.titleMedium),
-                ],
-              ),
-              SizedBox(height: Dimens.widgetSpacing),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                spacing: Dimens.gapX3,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadiusGeometry.circular(
-                      Dimens.radiusX3,
-                    ),
-                    child: Image.asset(
-                      AppImages.imagePlaceholder,
-                      width: 120.w,
-                      height: 120.h,
-                      fit: BoxFit.cover,
-                    ),
+              SizedBox(
+                height: Dimens.scaleX15,
+                width: Dimens.scaleX15,
+                child: ClipRRect(
+                  borderRadius: BorderRadiusGeometry.circular(Dimens.radius100),
+                  child: CommonHelpers.getCacheNetworkImage(
+                    media.images?.isEmpty == true ? "" : media.images?.first,
+                    fit: BoxFit.cover,
                   ),
-                  ClipRRect(
-                    borderRadius: BorderRadiusGeometry.circular(
-                      Dimens.radiusX3,
-                    ),
-                    child: Image.asset(
-                      AppImages.imagePlaceholder,
-                      width: 120.w,
-                      height: 120.h,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ],
+                ),
               ),
-              Spacer(),
-              CommonButton(text: 'Share', onTap: () => RouteManager.pop()),
+              SizeBox.sizeHX2,
+              SizedBox(
+                width: 0.8.screenWidth,
+                child: Text(
+                  media.title ?? "Unknown title",
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              SizeBox.sizeHX2,
+              ReadMoreWidget(
+                maxLines: 4,
+                text: media.content ?? "Unknown description",
+              ),
+              SizeBox.sizeHX2,
+              if (media.images?.isNotEmpty == true)
+                Row(
+                  children: [
+                    Text(
+                      'Images',
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              SizeBox.sizeHX2,
+              if (media.images?.isNotEmpty == true)
+                ResponisveImageWidget(images: media.images ?? []),
             ],
-          ).symmetricPadding(
-            horizontal: Dimens.horizontalspacing,
-            vertical: Dimens.verticalspacing,
           ),
+        ),
+      ),
+      bottomNavigationBar: (media.url == null)
+          ? SizedBox()
+          : CommonButton(
+              text: 'View News',
+              onTap: () {
+                UrlLauncher().launchURL(media.url);
+              },
+            ).symmetricPadding(
+              horizontal: Dimens.horizontalspacing,
+              vertical: Dimens.verticalspacing,
+            ),
     );
   }
 }

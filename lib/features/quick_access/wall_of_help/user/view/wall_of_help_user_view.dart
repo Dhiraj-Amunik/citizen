@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
-import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
@@ -27,7 +26,9 @@ class WallOfHelpUserView extends StatelessWidget {
     return Scaffold(
       appBar: commonAppBar(title: localization.wall_of_help),
       body: RefreshIndicator(
-        onRefresh: () => provider.getWallOfHelpList(),
+        onRefresh: () async {
+          provider.onRefresh();
+        },
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: Dimens.horizontalspacing,
@@ -97,18 +98,16 @@ class WallOfHelpUserView extends StatelessWidget {
                       controller: provider.searchController,
                       borderColor: AppPalettes.primaryColor,
                       fillColor: AppPalettes.whiteColor,
-                      onChanged: (text) {
-                        provider.filterList();
-                      },
+                      onChanged: provider.onSearchChanged,
                     ),
                   ),
-                  CommonHelpers.buildIcons(
-                    path: AppImages.filterIcon,
-                    color: AppPalettes.primaryColor,
-                    iconSize: Dimens.scaleX2B,
-                    padding: Dimens.paddingX3,
-                    radius: Dimens.radiusX3,
-                  ),
+                  // CommonHelpers.buildIcons(
+                  //   path: AppImages.filterIcon,
+                  //   color: AppPalettes.primaryColor,
+                  //   iconSize: Dimens.scaleX2B,
+                  //   padding: Dimens.paddingX3,
+                  //   radius: Dimens.radiusX3,
+                  // ),
                 ],
               ),
               Expanded(
@@ -118,7 +117,7 @@ class WallOfHelpUserView extends StatelessWidget {
                       return Center(child: CustomAnimatedLoading());
                     }
 
-                    if (value.filteredWallOFHelpLists.isEmpty) {
+                    if (value.wallOFHelpLists.isEmpty) {
                       return Center(
                         child: Text(
                           "No Helps found",
@@ -127,13 +126,23 @@ class WallOfHelpUserView extends StatelessWidget {
                       );
                     }
                     return ListView.separated(
+                      controller: provider.scrollController,
                       itemBuilder: (_, index) {
-                        return UserCardHelpWidget(
-                          help: provider.filteredWallOFHelpLists[index],
+                        return Column(
+                          spacing: Dimens.gapX4,
+                          children: [
+                            UserCardHelpWidget(
+                              help: provider.wallOFHelpLists[index],
+                            ),
+                            if (value.isScrollLoading &&
+                                value.wallOFHelpLists.last ==
+                                    value.wallOFHelpLists[index])
+                              CustomAnimatedLoading(),
+                          ],
                         );
                       },
                       separatorBuilder: (_, _) => SizeBox.widgetSpacing,
-                      itemCount: provider.filteredWallOFHelpLists.length,
+                      itemCount: provider.wallOFHelpLists.length,
                     );
                   },
                 ),

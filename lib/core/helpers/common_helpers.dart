@@ -1,11 +1,18 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:inldsevak/core/dio/network_requester.dart';
+import 'package:inldsevak/core/extensions/string_extension.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/helpers/image_helper.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CommonHelpers {
@@ -30,11 +37,14 @@ class CommonHelpers {
     return Center(child: Text(getInitials(initials), style: style));
   }
 
-  static Widget getCacheNetworkImage(String? image, {Widget? placeholder}) {
+  static Widget getCacheNetworkImage(
+    String? image, {
+    Widget? placeholder,
+    BoxFit? fit,
+  }) {
     return CachedNetworkImage(
-      imageUrl:
-          image??"",
-      fit: BoxFit.contain,
+      imageUrl: image ?? "",
+      fit: fit ?? BoxFit.contain,
       progressIndicatorBuilder: (context, child, progress) {
         return shimmer();
       },
@@ -61,22 +71,22 @@ class CommonHelpers {
     double? padding,
     double? radius,
   }) {
-    return Container(
-      padding: EdgeInsets.all(padding ?? 0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius ?? Dimens.radius100),
-        color: color,
-        border: Border.all(
-          width: 1,
-          color: borderColor ?? AppPalettes.transparentColor,
-        ),
+    return InkWell(
+      customBorder: const CircleBorder(),
+      overlayColor: const WidgetStatePropertyAll(
+        AppPalettes.iconBackgroundColor,
       ),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        overlayColor: const WidgetStatePropertyAll(
-          AppPalettes.iconBackgroundColor,
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(padding ?? 0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(radius ?? Dimens.radius100),
+          color: color,
+          border: Border.all(
+            width: 1,
+            color: borderColor ?? AppPalettes.transparentColor,
+          ),
         ),
-        onTap: onTap,
         child: FittedBox(
           fit: BoxFit.scaleDown,
           child: path.endsWith('.svg')
@@ -96,7 +106,9 @@ class CommonHelpers {
   static Widget buildStatus(
     String text, {
     required Color statusColor,
+    double? opacity,
     Color? textColor,
+    TextStyle? textStyle,
   }) {
     return Container(
       padding: EdgeInsets.symmetric(
@@ -105,11 +117,13 @@ class CommonHelpers {
       ),
       decoration: boxDecorationRoundedWithShadow(
         Dimens.radius100,
-        backgroundColor: statusColor.withOpacityExt(0.2),
+        backgroundColor: statusColor.withOpacityExt(opacity ?? 0.2),
       ),
       child: Text(
         text,
-        style: AppStyles.labelMedium.copyWith(color: textColor),
+        style: (textStyle ?? AppStyles.labelMedium).copyWith(
+          color: textColor ?? AppPalettes.lightTextColor,
+        ),
       ),
     );
   }
@@ -144,5 +158,46 @@ class CommonHelpers {
         .map((word) => word[0])
         .join()
         .toUpperCase();
+  }
+
+  static Future shareURL(String url) async {
+    if (url == "") {
+      CommonSnackbar(text: "No link found").showToast();
+    }
+    return SharePlus.instance.share(ShareParams(uri: Uri.parse(url)));
+  }
+
+  static Future shareImageUsingLink({
+    required String url,
+    String? description,
+  }) async {
+    if (url.showDataNull) {
+      try {
+        final network = NetworkRequester();
+        final temp = "${await getTempPath() ?? ""}/image.png";
+        final link = url;
+        if (temp != "/image.png") {
+          final response = await network.download(url: link);
+          if (response != null) {
+            File file = File(temp);
+            var raf = file.openSync(mode: FileMode.write);
+            raf.writeFromSync(response);
+            await raf.close();
+            return SharePlus.instance.share(
+              ShareParams(
+                files: [XFile(temp)],
+                text: description,
+                subject: 'Lok Varta',
+              ),
+            );
+          }
+        }
+      } catch (err) {
+        CommonSnackbar(text: "Unable to Download Image").showToast();
+        return SharePlus.instance.share(ShareParams(uri: Uri.parse(url)));
+      }
+    } else {
+      return CommonSnackbar(text: "No link found").showToast();
+    }
   }
 }

@@ -55,17 +55,11 @@ class UpcomingEventWidget extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Row(
-                  spacing: Dimens.gapX1,
-                  children: [
-                    Icon(Icons.location_on_outlined, size: Dimens.scaleX1B),
-                    Text(
-                      event.location ?? "Unknown Location",
-                      style: textTheme.labelMedium?.copyWith(
-                        color: AppPalettes.lightTextColor,
-                      ),
-                    ),
-                  ],
+                Text(
+                  event.location ?? "Unknown Location",
+                  style: textTheme.labelMedium?.copyWith(
+                    color: AppPalettes.lightTextColor,
+                  ),
                 ),
 
                 Row(

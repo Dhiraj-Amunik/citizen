@@ -2,6 +2,7 @@ import 'package:inldsevak/core/dio/exception_handlers.dart';
 import 'package:inldsevak/core/dio/network_requester.dart';
 import 'package:inldsevak/core/dio/repo_reponse.dart';
 import 'package:inldsevak/core/utils/urls.dart';
+import 'package:inldsevak/features/lok_varta/model/lok_varta_details_model.dart';
 import 'package:inldsevak/features/lok_varta/model/lok_varta_model.dart';
 import 'package:inldsevak/features/lok_varta/model/mla_details_model.dart';
 import 'package:inldsevak/features/lok_varta/model/request_lok_varta_model.dart';
@@ -31,5 +32,19 @@ class LokVartaRepository {
     return response is APIException
         ? RepoResponse(error: response)
         : RepoResponse(data: MLADetailsModel.fromJson(response));
+  }
+
+  Future<RepoResponse<LokVartaDetailsModel>> getlokVartaDetails({
+    String? token,
+    String? id,
+  }) async {
+    final response = await _network.post(
+      path: URLs.lokVartaDetails,
+      token: token,
+      data: {"mediaId": id},
+    );
+    return response is APIException
+        ? RepoResponse(error: response)
+        : RepoResponse(data: LokVartaDetailsModel.fromJson(response));
   }
 }

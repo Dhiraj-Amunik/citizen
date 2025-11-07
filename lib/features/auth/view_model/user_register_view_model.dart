@@ -2,17 +2,18 @@ import 'dart:io';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
+import 'package:inldsevak/core/mixin/single_image_picker_mixin.dart';
 import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
-import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/auth/models/request/user_register_request_model.dart';
 import 'package:inldsevak/features/auth/services/user_profile_repository.dart';
-import 'package:inldsevak/features/common_fields/model/address_model.dart';
+import 'package:inldsevak/features/common_fields/view_model/map_search_view_model.dart';
 
 class UserRegisterViewModel extends BaseViewModel
-    with CupertinoDialogMixin, UploadFilesMixin {
+    with CupertinoDialogMixin, UploadFilesMixin, SingleImagePickerMixin {
   GlobalKey<FormState> userDetailsFormKey = GlobalKey<FormState>();
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
 
@@ -37,24 +38,17 @@ class UserRegisterViewModel extends BaseViewModel
   File? voterIdImage;
 
   Future<void> selectImage({required bool isAadhar}) async {
-    customRightCupertinoDialog(
-      content: "Choose Image",
-      rightButton: "Sure",
-      onTap: () async {
-        try {
-          if (isAadhar) {
-            aadharImage = await pickGalleryImage();
-          } else {
-            voterIdImage = await pickGalleryImage();
-          }
-          notifyListeners();
-        } catch (err, stackTrace) {
-          debugPrint("Error: $err");
-          debugPrint("Stack Trace: $stackTrace");
-        }
-        RouteManager.pop();
-      },
-    );
+    try {
+      if (isAadhar) {
+        aadharImage = await showSingleImageSheet(isImage: true);
+      } else {
+        voterIdImage = await showSingleImageSheet(isImage: true);
+      }
+      notifyListeners();
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    }
   }
 
   void removeImage({required bool isAadhar}) {
@@ -67,7 +61,7 @@ class UserRegisterViewModel extends BaseViewModel
   }
 
   Future<void> registerUserDetails({
-    AddressModel? addressModel,
+    MapSearchViewModel? searchProvider,
     String? assemblyConstituenciesID,
     String? parliamentaryConstituenciesID,
   }) async {
@@ -79,12 +73,8 @@ class UserRegisterViewModel extends BaseViewModel
         notifyListeners();
         return;
       }
-      if (addressModel == null) {
-        CommonSnackbar(text: "Please select your address again").showToast();
-        return;
-      }
+
       isLoading = true;
-     
 
       final data = RequestRegisterModel(
         name: nameController.text,
@@ -100,7 +90,7 @@ class UserRegisterViewModel extends BaseViewModel
             documentUrl: aadharImage == null
                 ? ""
                 : await uploadImage(
-                  filename: aadharImage?.path,
+                    filename: aadharImage?.path,
                     aadharImage!.path,
                     token: token ?? "",
                     name: "Aadhar",
@@ -109,7 +99,7 @@ class UserRegisterViewModel extends BaseViewModel
           ),
           Document(
             documentType: "voterId",
-             documentUrl: voterIdImage == null
+            documentUrl: voterIdImage == null
                 ? ""
                 : await uploadImage(
                     voterIdImage!.path,
@@ -119,17 +109,23 @@ class UserRegisterViewModel extends BaseViewModel
             documentNumber: voterIdController.text,
           ),
         ],
-        address: addressModel.formattedAddress,
-        city: addressModel.city,
-        state: addressModel.state,
-        district: addressModel.district,
-        pincode: addressModel.pincode,
+        city: searchProvider?.cityController.text,
+        state: searchProvider?.stateController.text,
+        district: searchProvider?.districtController.text,
+        pincode: searchProvider?.pincodeController.text,
+        area: searchProvider?.areaController.text,
+        flatNo: searchProvider?.flatNoController.text,
+        tehsil: searchProvider?.tehsilController.text,
         avatar: "",
         location: Location(
-          coordinates: [addressModel.latitude, addressModel.longitude],
+          coordinates: [
+            searchProvider?.currentPosition?.latitude ?? 0.0,
+            searchProvider?.currentPosition?.longitude ?? 0.0,
+          ],
         ),
         whatsappNo: whathsappNoController.text,
       );
+
       final response = await UserProfileRepository().userRegister(
         data: data,
         token: token!,
@@ -140,7 +136,6 @@ class UserRegisterViewModel extends BaseViewModel
           CommonSnackbar(
             text: response.data?.message ?? 'User registered successfully.',
           ).showToast();
-          // await uploadProfilePic();
         } else {
           CommonSnackbar(
             text: response.data?.message ?? 'Something went wrong',
@@ -152,10 +147,7 @@ class UserRegisterViewModel extends BaseViewModel
         }
       } else {
         CommonSnackbar(
-          text:
-              response.data?.message ??
-              'Something went wrong'
-                  "Unable to upload image, Please try again later",
+          text: response.data?.message ?? 'Something went wrong',
         ).showSnackbar();
       }
     } catch (err, stackTrace) {

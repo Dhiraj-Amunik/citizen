@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/helpers/profile_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/routes/routes.dart';
@@ -11,11 +12,14 @@ import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/features/id_card/widgets/id_card_widget.dart';
+import 'package:inldsevak/features/id_card/widgets/user_detail_widget.dart';
 import 'package:inldsevak/features/navigation/view/navigation_view.dart';
 import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfileView extends StatelessWidget with CupertinoDialogMixin {
@@ -50,6 +54,39 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
               Column(
                 spacing: Dimens.widgetSpacing,
                 children: [
+                  Consumer<ProfileViewModel>(
+                    builder: (context, value, _) {
+                      return GestureDetector(
+                        onTap: () => RouteManager.pushNamed(Routes.idCardPage),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: Dimens.paddingX3,
+                            vertical: Dimens.paddingX3,
+                          ),
+                          decoration: boxDecorationRoundedWithShadow(
+                            Dimens.radiusX5,
+                            backgroundColor: AppPalettes.liteGreyColor,
+                          ),
+                          child: Row(
+                            spacing: Dimens.gapX2,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              UserDetailWidget(
+                                heading: context.textTheme.bodyMedium,
+                                scale: Dimens.scaleX7,
+                                profile: value.profile,
+                              ),
+                              QrCodeWidget(
+                                height: 60,
+                                data: value.profile?.membershipId ?? "",
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   ProfileHelper.getCommonBox(
                     localization.party_information,
                     subtext: localization.know_our_identity_slogan,
@@ -153,6 +190,15 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
               subtext: localization.share_app_subtext,
               icon: AppImages.shareIcon,
               backgroundColor: AppPalettes.liteGreenColor,
+              onTap: () {
+                SharePlus.instance.share(
+                  ShareParams(
+                    title: "SEVAK",
+                    text:
+                        'SEVAK App is the simple way to raise issues and get them delivered.\nhttps://play.google.com/store/apps/details?id=org.amunik.sevak&pcampaignid=web_share},',
+                  ),
+                );
+              },
             ),
             ProfileHelper.getLogout(
               localization.logout,

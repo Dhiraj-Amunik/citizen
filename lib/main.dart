@@ -9,14 +9,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  
-  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await dotenv.load(fileName: ".env");
-  // await NotificationService.initializeNotification();
-  // FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   runApp(const MyApp());
+  await NotificationService.initializeNotification();
+  FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 }
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
-  print("on background notification: ${message.data}");
+  await NotificationService.initializeNotification();
 }

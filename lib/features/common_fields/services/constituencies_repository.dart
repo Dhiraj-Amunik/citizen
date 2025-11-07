@@ -6,7 +6,6 @@ import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/features/common_fields/model/request_parliment_id_model.dart';
 import 'package:inldsevak/features/common_fields/model/request_pincode_model.dart';
 
-
 class ConstituenciesRepository {
   final _network = NetworkRequester();
 

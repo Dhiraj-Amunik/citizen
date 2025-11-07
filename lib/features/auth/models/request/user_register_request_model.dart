@@ -15,6 +15,9 @@ class RequestRegisterModel {
   String? assemblyId;
   Location? location;
   List<Document>? document;
+  String? area;
+  String? flatNo;
+  String? tehsil;
 
   RequestRegisterModel({
     this.name,
@@ -33,6 +36,9 @@ class RequestRegisterModel {
     this.city,
     this.district,
     this.pincode,
+    this.area,
+    this.flatNo,
+    this.tehsil,
   });
 
   Map<String, dynamic> toJson() {
@@ -42,7 +48,7 @@ class RequestRegisterModel {
       'email': email,
       'dateOfBirth': dateOfBirth,
       'gender': gender?.toLowerCase(),
-      'address': address,
+      'address': "",
       'avatar': avatar,
       'parliamentryConstituencyId': parliamentaryId,
       'assemblyConstituencyId': assemblyId,
@@ -53,6 +59,9 @@ class RequestRegisterModel {
       "whatsapp": whatsappNo,
       'location': location?.toJson(),
       'document': document?.map((doc) => doc.toJson()).toList(),
+      "area": area,
+      "flatNumber": flatNo,
+      "teshil": tehsil,
     };
   }
 }
@@ -73,7 +82,11 @@ class Document {
   String documentUrl;
   String documentNumber;
 
-  Document({required this.documentUrl, required this.documentNumber,required this.documentType});
+  Document({
+    required this.documentUrl,
+    required this.documentNumber,
+    required this.documentType,
+  });
 
   Map<String, dynamic> toJson() {
     return {

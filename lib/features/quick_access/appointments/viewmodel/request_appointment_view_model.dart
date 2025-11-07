@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
-import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
-import 'package:inldsevak/core/mixin/transparent_mixin.dart';
+
+import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
@@ -15,45 +15,99 @@ import 'package:quickalert/models/quickalert_type.dart';
 import 'package:inldsevak/features/profile/models/response/user_profile_model.dart'
     as profile;
 
-class RequestAppointmentViewModel extends BaseViewModel
-    with CupertinoDialogMixin, TransparentCircular {
+class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
   final nameController = TextEditingController();
   final phoneNumberController = TextEditingController();
   final dateController = TextEditingController();
+  final membershipController = TextEditingController();
   final mlaController = SingleSelectController<mla.Data?>(null);
   // final timeSlotController = SingleSelectController<String>(null);
   final purposeOfAppointmentController = TextEditingController();
   final bookForController = SingleSelectController<BookFor?>(null);
   final descriptionController = TextEditingController();
   String? companyDateFormat;
-  File? image;
+  // File? image;
   List<String> timeSlotLists = ["12:00", "01:00", "02:00", "03:00"];
   List<BookFor> bookForList = [
     BookFor(key: 'self', value: 'My Self'),
     BookFor(key: 'others', value: 'Others'),
   ];
 
-  Future<void> selectImage() async {
-    customRightCupertinoDialog(
-      content: "Choose Image",
-      rightButton: "Sure",
-      onTap: () async {
-        try {
-          image = await pickGalleryImage();
-          notifyListeners();
-        } catch (err, stackTrace) {
-          debugPrint("Error: $err");
-          debugPrint("Stack Trace: $stackTrace");
-        }
-        RouteManager.pop();
-      },
+  // Future<void> selectImage() async {
+  //   customRightCupertinoDialog(
+  //     content: "Choose Image",
+  //     rightButton: "Sure",
+  //     onTap: () async {
+  //       try {
+  //         image = await pickGalleryImage();
+  //         notifyListeners();
+  //       } catch (err, stackTrace) {
+  //         debugPrint("Error: $err");
+  //         debugPrint("Stack Trace: $stackTrace");
+  //       }
+  //       RouteManager.pop();
+  //     },
+  //   );
+  // }
+
+  // void removeImage() {
+  //   image = null;
+  //   notifyListeners();
+  // }
+  //image
+  List<File> multipleFiles = [];
+
+  Widget selectMultipleImages() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          leading: Icon(Icons.camera),
+          title: Text('Take a Picture'),
+          onTap: () async {
+            RouteManager.pop();
+            try {
+              multipleFiles.add(await createCameraImage() ?? []);
+              notifyListeners();
+            } catch (err) {
+              debugPrint("-------->$err");
+            }
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.photo_library),
+          title: Text('Choose from Gallery'),
+          onTap: () async {
+            RouteManager.pop();
+            try {
+              multipleFiles.addAll(await pickMultipleImages() ?? []);
+              notifyListeners();
+            } catch (err) {
+              debugPrint("-------->$err");
+            }
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.file_open),
+          title: Text('Choose from Files'),
+          onTap: () async {
+            RouteManager.pop();
+            try {
+              multipleFiles.addAll(await pickFiles() ?? []);
+              notifyListeners();
+            } catch (err) {
+              debugPrint("-------->$err");
+            }
+          },
+        ),
+      ],
     );
   }
 
-  void removeImage() {
-    image = null;
+  void removeImage(int index) {
+    multipleFiles.removeAt(index);
     notifyListeners();
   }
 
@@ -80,11 +134,13 @@ class RequestAppointmentViewModel extends BaseViewModel
         // timeSlot: timeSlotController.value ?? "",
         purpose: purposeOfAppointmentController.text,
         reason: descriptionController.text,
-        documents: [],
+        documents: multipleFiles.isEmpty
+            ? []
+            : await uploadMultipleImage(multipleFiles),
         mlaId: mlaController.value!.sId!,
         priority: Priority.high,
         bookFor: bookForController.value?.key,
-        memberShipID: "ABCDEF",
+        memberShipID: membershipController.text,
       );
 
       final response = await AppointmentsRepository().newAppointment(
@@ -100,10 +156,13 @@ class RequestAppointmentViewModel extends BaseViewModel
         RouteManager.pop();
       } else {
         CommonSnackbar(
-          text: response.error?.message ?? "Some thing went wrong",
-        ).showAnimatedDialog(type: QuickAlertType.error);
+          text: response.data?.message ?? "Some thing went wrong",
+        ).showAnimatedDialog(type: QuickAlertType.warning);
       }
     } catch (err, stackTrace) {
+      CommonSnackbar(
+        text: "Some thing went wrong",
+      ).showAnimatedDialog(type: QuickAlertType.error);
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
@@ -114,6 +173,7 @@ class RequestAppointmentViewModel extends BaseViewModel
   autoFillData(profile.Data? profile) {
     nameController.text = profile?.name ?? "";
     phoneNumberController.text = profile?.phone ?? "";
+    membershipController.text = profile?.membershipId ?? "";
   }
 
   clearAutoFill() {

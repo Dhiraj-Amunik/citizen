@@ -31,11 +31,11 @@ class Data {
   String? sId;
   UserId? userId;
   Department? department;
-  Authority? authority;
-  Constituency? constituency;
+  String? authorityName;
   String? threadId;
   String? toMail;
   List<Messages>? messages;
+  String? status;
   bool? isActive;
   String? lastSyncedAt;
   String? createdAt;
@@ -46,11 +46,11 @@ class Data {
       {this.sId,
       this.userId,
       this.department,
-      this.authority,
-      this.constituency,
+      this.authorityName,
       this.threadId,
       this.toMail,
       this.messages,
+      this.status,
       this.isActive,
       this.lastSyncedAt,
       this.createdAt,
@@ -64,12 +64,7 @@ class Data {
     department = json['department'] != null
         ? new Department.fromJson(json['department'])
         : null;
-    authority = json['authority'] != null
-        ? new Authority.fromJson(json['authority'])
-        : null;
-    constituency = json['constituency'] != null
-        ? new Constituency.fromJson(json['constituency'])
-        : null;
+    authorityName = json['authorityName'];
     threadId = json['threadId'];
     toMail = json['toMail'];
     if (json['messages'] != null) {
@@ -78,6 +73,7 @@ class Data {
         messages!.add(new Messages.fromJson(v));
       });
     }
+    status = json['status'];
     isActive = json['isActive'];
     lastSyncedAt = json['lastSyncedAt'];
     createdAt = json['createdAt'];
@@ -94,17 +90,13 @@ class Data {
     if (this.department != null) {
       data['department'] = this.department!.toJson();
     }
-    if (this.authority != null) {
-      data['authority'] = this.authority!.toJson();
-    }
-    if (this.constituency != null) {
-      data['constituency'] = this.constituency!.toJson();
-    }
+    data['authorityName'] = this.authorityName;
     data['threadId'] = this.threadId;
     data['toMail'] = this.toMail;
     if (this.messages != null) {
       data['messages'] = this.messages!.map((v) => v.toJson()).toList();
     }
+    data['status'] = this.status;
     data['isActive'] = this.isActive;
     data['lastSyncedAt'] = this.lastSyncedAt;
     data['createdAt'] = this.createdAt;
@@ -164,56 +156,6 @@ class Department {
   }
 }
 
-class Authority {
-  String? sId;
-  String? authorityId;
-  String? name;
-  String? designation;
-
-  Authority({this.sId, this.authorityId, this.name, this.designation});
-
-  Authority.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    authorityId = json['authorityId'];
-    name = json['name'];
-    designation = json['designation'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['authorityId'] = this.authorityId;
-    data['name'] = this.name;
-    data['designation'] = this.designation;
-    return data;
-  }
-}
-
-class Constituency {
-  String? sId;
-  String? name;
-  String? area;
-  String? constituencyId;
-
-  Constituency({this.sId, this.name, this.area, this.constituencyId});
-
-  Constituency.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    name = json['name'];
-    area = json['area'];
-    constituencyId = json['constituencyId'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['name'] = this.name;
-    data['area'] = this.area;
-    data['constituencyId'] = this.constituencyId;
-    return data;
-  }
-}
-
 class Messages {
   String? from;
   String? to;
@@ -221,8 +163,8 @@ class Messages {
   String? snippet;
   String? date;
   String? body;
+  List<Attachments>? attachments;
   String? sId;
-  String? messageId;
 
   Messages(
       {this.from,
@@ -231,8 +173,8 @@ class Messages {
       this.snippet,
       this.date,
       this.body,
-      this.sId,
-      this.messageId});
+      this.attachments,
+      this.sId});
 
   Messages.fromJson(Map<String, dynamic> json) {
     from = json['from'];
@@ -241,8 +183,13 @@ class Messages {
     snippet = json['snippet'];
     date = json['date'];
     body = json['body'];
+    if (json['attachments'] != null) {
+      attachments = <Attachments>[];
+      json['attachments'].forEach((v) {
+        attachments!.add(new Attachments.fromJson(v));
+      });
+    }
     sId = json['_id'];
-    messageId = json['messageId'];
   }
 
   Map<String, dynamic> toJson() {
@@ -253,8 +200,35 @@ class Messages {
     data['snippet'] = this.snippet;
     data['date'] = this.date;
     data['body'] = this.body;
+    if (this.attachments != null) {
+      data['attachments'] = this.attachments!.map((v) => v.toJson()).toList();
+    }
     data['_id'] = this.sId;
-    data['messageId'] = this.messageId;
+    return data;
+  }
+}
+
+class Attachments {
+  String? filename;
+  String? mimeType;
+  int? size;
+  String? sId;
+
+  Attachments({this.filename, this.mimeType, this.size, this.sId});
+
+  Attachments.fromJson(Map<String, dynamic> json) {
+    filename = json['filename'];
+    mimeType = json['mimeType'];
+    size = json['size'];
+    sId = json['_id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['filename'] = this.filename;
+    data['mimeType'] = this.mimeType;
+    data['size'] = this.size;
+    data['_id'] = this.sId;
     return data;
   }
 }

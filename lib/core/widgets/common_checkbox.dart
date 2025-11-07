@@ -29,29 +29,34 @@ class CommonCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: Dimens.scaleX2.spMax,
-            height: Dimens.scaleX2.spMax,
-            child: CustomPaint(
-              painter: CheckboxPainter(
-                borderRadius: Dimens.radiusX1,
-                isSelected: isSelected,
-                tickColor: AppPalettes.blackColor,
-                tickWidth: 1.0,
-                showBorder: showBorder,
-                showBackground: showBackground,
-                borderColor: borderColor,
-                backgroundColor: backgroundColor,
+      child: Container(
+        color: AppPalettes.transparentColor,
+        padding: EdgeInsets.symmetric(vertical: Dimens.padding),
+
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: Dimens.scaleX2B,
+              height: Dimens.scaleX2B,
+              child: CustomPaint(
+                painter: CheckboxPainter(
+                  borderRadius: Dimens.radiusX1,
+                  isSelected: isSelected,
+                  tickColor: AppPalettes.blackColor,
+                  tickWidth: 1.0,
+                  showBorder: showBorder,
+                  showBackground: showBackground,
+                  borderColor: borderColor,
+                  backgroundColor: backgroundColor,
+                ),
               ),
             ),
-          ),
-          10.horizontalSpace,
-          Flexible(child: Text(title, style: context.textTheme.labelMedium)),
-        ],
+            10.horizontalSpace,
+            Flexible(child: Text(title, style: context.textTheme.labelLarge)),
+          ],
+        ),
       ),
     );
   }

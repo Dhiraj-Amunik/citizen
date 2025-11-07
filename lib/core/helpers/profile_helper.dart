@@ -54,7 +54,7 @@ class ProfileHelper {
                 children: [
                   Text(
                     name ?? "",
-                    style: AppStyles.bodyMedium,
+                    style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

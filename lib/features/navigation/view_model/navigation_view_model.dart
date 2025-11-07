@@ -29,13 +29,13 @@ class NavigationViewModel extends ChangeNotifier {
     NavigationModel(imagePath: AppImages.navProfileIcon, text: "Profile"),
   ];
 
-  List<NavigationModel> partyTabIconData = [
-    NavigationModel(imagePath: AppImages.partySign, text: "INLD"),
-    NavigationModel(imagePath: AppImages.navSurveyIconIcon, text: "Survey"),
-    NavigationModel(imagePath: AppImages.navIdCardIcon, text: "ID card"),
-    NavigationModel(imagePath: AppImages.navMediaIcon, text: "Lok Varta"),
-    NavigationModel(imagePath: AppImages.navProfileIcon, text: "Profile"),
-  ];
+  // List<NavigationModel> partyTabIconData = [
+  //   NavigationModel(imagePath: AppImages.partySign, text: "INLD"),
+  //   NavigationModel(imagePath: AppImages.navSurveyIconIcon, text: "Survey"),
+  //   NavigationModel(imagePath: AppImages.navIdCardIcon, text: "ID card"),
+  //   NavigationModel(imagePath: AppImages.navMediaIcon, text: "Lok Varta"),
+  //   NavigationModel(imagePath: AppImages.navProfileIcon, text: "Profile"),
+  // ];
 
   List<Widget> userWidgets = [
     IndlView(),
@@ -45,11 +45,11 @@ class NavigationViewModel extends ChangeNotifier {
     ProfileView(),
   ];
 
-  List<Widget> partyWidgets = [
-    IndlView(),
-    SurveyView(),
-    IdCardView(),
-    LokVartaView(),
-    ProfileView(),
-  ];
+  // List<Widget> partyWidgets = [
+  //   IndlView(),
+  //   SurveyView(),
+  //   IdCardView(),
+  //   LokVartaView(),
+  //   ProfileView(),
+  // ];
 }

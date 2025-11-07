@@ -20,6 +20,19 @@ extension ExtendedString on String {
     return RegExp(r'^[2-9]{1}[0-9]{3}[0-9]{4}[0-9]{4}$').hasMatch(value);
   }
 
+  bool isValidUpiIdFormat() {
+    // Basic format validation
+    final RegExp upiRegex = RegExp(r"^[a-zA-Z0-9.\-_]+@[a-zA-Z0-9.\-]+$");
+
+    // Common UPI provider patterns
+    final RegExp providerRegex = RegExp(
+      r"@(okicici|oksbi|okhdfc|okaxis|ybl|axl|paytm|ibl|ubi|idfcbank|indus|kotak|barodampay|rbl|yesbank|lvb|citi|freecharge|phonpe|upi)$",
+      caseSensitive: false,
+    );
+
+    return upiRegex.hasMatch(this) && providerRegex.hasMatch(this);
+  }
+
   bool isStrongPassword1(String password) {
     // Define the criteria for a strong password
     final RegExp hasUppercase = RegExp(r'[A-Z]');
@@ -91,7 +104,8 @@ extension ExtendedString on String {
   }
 
   String? validateNumber({String? argument}) {
-    if ((this).length != 10 || RegExp(r'^[6-9][0-9]{9}$').hasMatch(this) == false) {
+    if ((this).length != 10 ||
+        RegExp(r'^[6-9][0-9]{9}$').hasMatch(this) == false) {
       return argument ?? 'Please check you contact number';
     }
     return null;
@@ -111,15 +125,26 @@ extension ExtendedString on String {
     return null;
   }
 
-  String? validateAmount({String? argument}) {
-    if ((this).isEmpty) {
-      return argument;
-    }
-    final amount = int.parse(this);
-    if (amount < 10) {
+  String? validateUPI({String? argument}) {
+    if ((this).isEmpty || !isValidUpiIdFormat()) {
       return argument;
     }
     return null;
+  }
+
+  String? validateAmount({String? argument, String? argument2}) {
+    try {
+      if ((this).isEmpty) {
+        return argument;
+      }
+      final amount = int.parse(this);
+      if (amount < 10) {
+        return argument2 ?? argument;
+      }
+      return null;
+    } catch (err) {
+      return argument;
+    }
   }
 
   String? validateMaxAmount(
@@ -142,6 +167,17 @@ extension ExtendedString on String {
     } catch (err) {
       return argument;
     }
+  }
+
+  String? validatePincode({String? argument}) {
+    if ((this).isEmpty) {
+      return argument;
+    }
+    final pincode = int.parse(this);
+    if (pincode < 6) {
+      return argument;
+    }
+    return null;
   }
 
   //voter id validator

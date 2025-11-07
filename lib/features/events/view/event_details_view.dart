@@ -3,6 +3,7 @@ import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dar
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
+import 'package:inldsevak/core/extensions/string_extension.dart';
 import 'package:inldsevak/core/extensions/time_formatter.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
@@ -25,12 +26,33 @@ class EventDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final localization = context.localizations;
     final textTheme = context.textTheme;
+    String? url;
     return ChangeNotifierProvider(
       create: (context) => EventDetailsViewModel(),
       builder: (contextP, _) {
         final provider = contextP.read<EventDetailsViewModel>();
         return Scaffold(
-          appBar: commonAppBar(title: localization.event_details),
+          appBar: commonAppBar(
+            title: localization.event_details,
+
+            action: [
+              Consumer<EventDetailsViewModel>(
+                builder: (contextP, value, _) {
+                  if (value.showShareIcon) {
+                    return CommonHelpers.buildIcons(
+                      path: AppImages.shareIcon,
+                      color: AppPalettes.primaryColor,
+                      iconColor: AppPalettes.whiteColor,
+                      padding: Dimens.paddingX3,
+                      iconSize: Dimens.scaleX2B,
+                      onTap: () => CommonHelpers.shareURL(url ?? ""),
+                    );
+                  }
+                  return SizedBox();
+                },
+              ),
+            ],
+          ),
           body: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsetsGeometry.symmetric(
@@ -41,6 +63,8 @@ class EventDetailsView extends StatelessWidget {
                 future: provider.getEvents(eventModel: eventModel),
                 builder: (context, snapshot) {
                   final event = snapshot.data;
+                  url = event?.url;
+                  provider.showShareIcon = url?.showDataNull ?? false;
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -105,7 +129,7 @@ class EventDetailsView extends StatelessWidget {
                           ),
                           CommonExpandedWidget(
                             color: AppPalettes.liteGreyColor,
-                            
+
                             title: "View Poster",
                             childrenPadding: Dimens.paddingX3,
                             padding: EdgeInsets.symmetric(
@@ -121,8 +145,13 @@ class EventDetailsView extends StatelessWidget {
                               padding: Dimens.paddingX2B,
                             ),
                             children: [
-                              CommonHelpers.getCacheNetworkImage(
-                                "https://www.postergully.com/cdn/shop/products/Coffee_Keeps_Me_Busy_Vintage-NGPS2104_Copy.jpg?v=1578633364",
+                              ClipRRect(
+                                borderRadius: BorderRadiusGeometry.circular(
+                                  Dimens.radiusX2,
+                                ),
+                                child: CommonHelpers.getCacheNetworkImage(
+                                  event.poster,
+                                ),
                               ),
                             ],
                           ),

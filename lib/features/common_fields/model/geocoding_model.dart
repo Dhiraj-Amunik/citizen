@@ -1,11 +1,11 @@
-class PinCodeModel {
+class GeocodingModel {
   PlusCode? plusCode;
   List<Results>? results;
   String? status;
 
-  PinCodeModel({this.plusCode, this.results, this.status});
+  GeocodingModel({this.plusCode, this.results, this.status});
 
-  PinCodeModel.fromJson(Map<String, dynamic> json) {
+  GeocodingModel.fromJson(Map<String, dynamic> json) {
     plusCode = json['plus_code'] != null
         ? new PlusCode.fromJson(json['plus_code'])
         : null;
@@ -54,19 +54,17 @@ class Results {
   List<AddressComponents>? addressComponents;
   String? formattedAddress;
   Geometry? geometry;
-  List<NavigationPoints>? navigationPoints;
   String? placeId;
-  List<String>? types;
   PlusCode? plusCode;
+  List<String>? types;
 
   Results(
       {this.addressComponents,
       this.formattedAddress,
       this.geometry,
-      this.navigationPoints,
       this.placeId,
-      this.types,
-      this.plusCode});
+      this.plusCode,
+      this.types});
 
   Results.fromJson(Map<String, dynamic> json) {
     if (json['address_components'] != null) {
@@ -79,17 +77,11 @@ class Results {
     geometry = json['geometry'] != null
         ? new Geometry.fromJson(json['geometry'])
         : null;
-    if (json['navigation_points'] != null) {
-      navigationPoints = <NavigationPoints>[];
-      json['navigation_points'].forEach((v) {
-        navigationPoints!.add(new NavigationPoints.fromJson(v));
-      });
-    }
     placeId = json['place_id'];
-    types = json['types'].cast<String>();
     plusCode = json['plus_code'] != null
         ? new PlusCode.fromJson(json['plus_code'])
         : null;
+    types = json['types'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
@@ -102,15 +94,11 @@ class Results {
     if (this.geometry != null) {
       data['geometry'] = this.geometry!.toJson();
     }
-    if (this.navigationPoints != null) {
-      data['navigation_points'] =
-          this.navigationPoints!.map((v) => v.toJson()).toList();
-    }
     data['place_id'] = this.placeId;
-    data['types'] = this.types;
     if (this.plusCode != null) {
       data['plus_code'] = this.plusCode!.toJson();
     }
+    data['types'] = this.types;
     return data;
   }
 }
@@ -173,6 +161,25 @@ class Geometry {
   }
 }
 
+class Location {
+  double? lat;
+  double? lng;
+
+  Location({this.lat, this.lng});
+
+  Location.fromJson(Map<String, dynamic> json) {
+    lat = json['lat'];
+    lng = json['lng'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['lat'] = this.lat;
+    data['lng'] = this.lng;
+    return data;
+  }
+}
+
 class Viewport {
   Location? northeast;
   Location? southwest;
@@ -196,45 +203,6 @@ class Viewport {
     if (this.southwest != null) {
       data['southwest'] = this.southwest!.toJson();
     }
-    return data;
-  }
-}
-
-class NavigationPoints {
-  Location? location;
-
-  NavigationPoints({this.location});
-
-  NavigationPoints.fromJson(Map<String, dynamic> json) {
-    location = json['location'] != null
-        ? new Location.fromJson(json['location'])
-        : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.location != null) {
-      data['location'] = this.location!.toJson();
-    }
-    return data;
-  }
-}
-
-class Location {
-  double? latitude;
-  double? longitude;
-
-  Location({this.latitude, this.longitude});
-
-  Location.fromJson(Map<String, dynamic> json) {
-    latitude = json['latitude'];
-    longitude = json['longitude'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['latitude'] = this.latitude;
-    data['longitude'] = this.longitude;
     return data;
   }
 }

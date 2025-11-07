@@ -26,7 +26,7 @@ class FormCommonChild<T> extends StatelessWidget {
           Text(
             "${heading!} ${isRequired == true ? '*' : ''}",
             style: context.textTheme.bodySmall,
-          ).onlyPadding(bottom: Dimens.gapX1B),
+          ).onlyPadding(bottom: Dimens.gapX1),
         child,
       ],
     );

@@ -18,10 +18,12 @@ class Dimens {
   static final paddingX4B = 18.0.r;
   static final paddingX5 = 20.0.r;
   static final paddingX6 = 24.0.r;
+  static final paddingX6B = 26.0.r;
   static final paddingX7 = 28.0.r;
   static final paddingX8 = 32.0.r;
   static final paddingX9 = 36.0.r;
   static final paddingX10 = 40.0.r;
+  static final paddingX15 = 60.0.r;
   static final paddingX20 = 80.0.r;
   static final paddingX22 = 88.0.r;
   static final paddingX23 = 92.0.r;
@@ -68,6 +70,8 @@ class Dimens {
   static final scaleX10 = 80.0.r;
   static final scaleX15 = 120.0.r;
   static final scaleX20 = 160.0.r;
+  static final scaleX25 = 200.0.r;
+  static final scale50 = 50.0.r;
 
   //dividers
   static const gap = 0.0;

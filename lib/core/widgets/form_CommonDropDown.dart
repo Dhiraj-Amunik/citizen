@@ -24,6 +24,7 @@ class FormCommonDropDown<T> extends StatelessWidget {
   final double? radius;
   final Color? backgroundColor;
   final bool? isRequired;
+  final bool excludeSelected;
 
   const FormCommonDropDown({
     super.key,
@@ -40,6 +41,7 @@ class FormCommonDropDown<T> extends StatelessWidget {
     this.radius,
     this.backgroundColor = AppPalettes.whiteColor,
     this.isRequired,
+    this.excludeSelected=true,
   });
 
   @override
@@ -102,6 +104,7 @@ class FormCommonDropDown<T> extends StatelessWidget {
           ),
           hintText: hintText,
           items: items,
+          excludeSelected: excludeSelected,
           onChanged: onChanged,
           validator: validator,
         ),

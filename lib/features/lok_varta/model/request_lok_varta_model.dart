@@ -1,4 +1,4 @@
-enum LokVartaFilter { PressRelease, Interview, PhotoGallery, Article, Video }
+enum LokVartaFilter { PressRelease, Interview, PhotoGallery, Videos }
 
 enum SortOrder { Newest, Oldest }
 
@@ -44,10 +44,8 @@ class RequestLokVartaModel {
         return 'Interview';
       case LokVartaFilter.PhotoGallery:
         return 'PhotoGallery';
-      case LokVartaFilter.Article:
-        return 'Article';
-      case LokVartaFilter.Video:
-        return 'Video';
+      case LokVartaFilter.Videos:
+        return 'Videos';
     }
   }
 }

@@ -36,21 +36,24 @@ class Data {
   String? createdAt;
   String? updatedAt;
   int? iV;
+  String? url;
 
-  Data(
-      {this.sId,
-      this.title,
-      this.eventType,
-      this.description,
-      this.dateAndTime,
-      this.location,
-      this.poster,
-      this.mla,
-      this.isActive,
-      this.isDeleted,
-      this.createdAt,
-      this.updatedAt,
-      this.iV});
+  Data({
+    this.sId,
+    this.title,
+    this.eventType,
+    this.description,
+    this.dateAndTime,
+    this.location,
+    this.poster,
+    this.mla,
+    this.isActive,
+    this.isDeleted,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+    this.url,
+  });
 
   Data.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -66,6 +69,7 @@ class Data {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    url = json['url'];
   }
 
   Map<String, dynamic> toJson() {
@@ -83,6 +87,7 @@ class Data {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['url'] = url;
     return data;
   }
 }

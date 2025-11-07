@@ -148,16 +148,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get donate => 'Donate';
 
   @override
+  String get donate_for => 'Donation For';
+
+  @override
+  String get donate_for_description =>
+      'Your support, in any form, will help us create wonderful memories at this party. More importantly, your contribution goes beyond celebration - it becomes a source of hope for those in need. Every donation you make will be directed toward helping underprivileged citizens and supporting community welfare initiatives. Whether it is providing essential resources, medical assistance, or financial aid, your kindness will make a meaningful difference in someone’s life. By standing with us, you are not just donating - you are joining hands in building a stronger, more caring society. Together, we can ensure that joy is shared with everyone, especially those who need it most.';
+
+  @override
   String get donation_history => 'Donate History';
 
   @override
   String get enter_amount => 'Enter Amount';
 
   @override
-  String get enter_purpose_of_donation => 'Enter purpose of donation';
-
-  @override
-  String get payment_options => 'Payment Options';
+  String get select_payment_options => 'Select Payment Options';
 
   @override
   String get razorpay => 'Razorpay';
@@ -166,7 +170,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upi => 'UPI';
 
   @override
-  String get net_banking => 'NetBanking';
+  String get net_banking => 'Net Banking';
 
   @override
   String get cards => 'Cards';
@@ -435,6 +439,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enter_address => 'Enter Address';
 
   @override
+  String get enter_your_address => 'Enter your Address';
+
+  @override
   String get address_validator => 'Please enter your home address';
 
   @override
@@ -444,13 +451,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get request_appointment => 'Request Appointment';
 
   @override
+  String get scheduled_date => 'Scheduled Date';
+
+  @override
+  String get rescheduled_date => 'Rescheduled Date';
+
+  @override
+  String get appointment_note =>
+      'Note: As per the availability of Associate can rescheduled ur preferred date in appointment';
+
+  @override
   String get appointment_list => 'Appointment List';
 
   @override
   String get select_mla => 'Select MLA';
 
   @override
+  String get select_associate => 'Select Associate';
+
+  @override
+  String get your_notified_events => 'Your Notified Events';
+
+  @override
   String get book_for => 'Book for';
+
+  @override
+  String get membership_id => 'Membership ID';
+
+  @override
+  String get membership_validator => 'Please enter Membership ID';
 
   @override
   String get date => 'Date';
@@ -463,10 +492,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mla_validator => 'Please select one MLA';
 
   @override
-  String get choose_your_mla => 'Choose your MLA';
-
-  @override
-  String get membership_id => 'Membership ID';
+  String get choose_your_associate => 'Choose your Associate';
 
   @override
   String get phone_number => 'Phone number';
@@ -505,6 +531,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wall_of_help => 'Wall of Help';
 
   @override
+  String get helping_hands_gains_love => 'Helping hands gains love';
+
+  @override
   String get quick_links => 'Quick Links';
 
   @override
@@ -529,6 +558,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requested_amount => 'Requested Amount';
 
   @override
+  String get requested => 'Requested';
+
+  @override
   String get description => 'Description';
 
   @override
@@ -549,6 +581,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get please_enter_few_words => 'Please enter few words';
+
+  @override
+  String get type_of_help_needed => 'Type of Help Needed';
+
+  @override
+  String get choose_the_options => 'Choose the options';
+
+  @override
+  String get dropdown_validator => 'Please select one option';
+
+  @override
+  String get enter_description_of_request => 'Enter description of request';
+
+  @override
+  String get urgency_level => 'Urgency Level';
+
+  @override
+  String get preferred_way_to_receive_help => 'Preferred Way to Receive Help';
+
+  @override
+  String get supporting_documents => 'Supporting Documents (If Any)';
+
+  @override
+  String get less_amount_validator => 'Minimun 10rs is allowed';
+
+  @override
+  String get chat => 'Chat';
+
+  @override
+  String get my_chat => 'My Chats';
+
+  @override
+  String get update => 'Update';
 
   @override
   String get enter_detail_description => 'Enter detail description';
@@ -593,7 +658,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previous_contributions => 'Previous Contributions';
 
   @override
+  String get my_requests => 'My Requests';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
   String get my_complaints => 'My Complaints';
+
+  @override
+  String get not_found => 'Not Found';
 
   @override
   String get id_card => 'ID Card';
@@ -735,4 +812,90 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get logout_confirmation =>
       'Are you sure you want to sign out from your account?';
+
+  @override
+  String get notify_representative => 'Notify Representative';
+
+  @override
+  String get notify => 'Notify';
+
+  @override
+  String get notify_mla => 'Notify Mla';
+
+  @override
+  String get notify_description =>
+      'Beyond politics, we build trust and support. With the Wall of Help, you’re never alone assistance is always near.';
+
+  @override
+  String get recent => 'Recent';
+
+  @override
+  String get past => 'Past';
+
+  @override
+  String get view_how_member_notified => 'View how members Notified';
+
+  @override
+  String get nearest_member => 'Nearest Member';
+
+  @override
+  String get list_of_nearest_member => 'List Of Nearest Member';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get phone_no => 'Phone No';
+
+  @override
+  String get notify_description_validatore =>
+      'Enter detail description to notify';
+
+  @override
+  String get event_title_validatore => 'Please enter event name';
+
+  @override
+  String get event_time_validatore => 'Please select event time';
+
+  @override
+  String get event_date_validatore => 'Please select your event date';
+
+  @override
+  String get event_date => 'Event Date';
+
+  @override
+  String get event_type => 'Event Type';
+
+  @override
+  String get event_time => 'Event Time';
+
+  @override
+  String get select_time => 'Select Time';
+
+  @override
+  String get enter_location => 'Enter Location';
+
+  @override
+  String get event_location_validator => 'Please enter event location';
+
+  @override
+  String get location_venue => 'Location / Venue';
+
+  @override
+  String get inbox => 'Inbox';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get search => 'Search...';
+
+  @override
+  String get message => 'Message';
+
+  @override
+  String get images => 'Images';
 }

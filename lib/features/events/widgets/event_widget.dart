@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
+import 'package:inldsevak/core/extensions/string_extension.dart';
 import 'package:inldsevak/core/extensions/time_formatter.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/routes/routes.dart';
+import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/features/events/model/events_model.dart' as model;
@@ -102,24 +104,43 @@ class EventWidget extends StatelessWidget {
                 ),
               ],
             ),
-            Column(
-              spacing: Dimens.gapX,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              spacing: Dimens.gapX2,
               children: [
-                Text(
-                  event.title ?? "Unknown title",
-                  style: textTheme.bodyMedium,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Column(
+                  spacing: Dimens.gapX,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title ?? "Unknown title",
+                      style: textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      event.location ?? "Unknown Location",
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppPalettes.lightTextColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                Text(
-                  event.location ?? "Unknown Location",
-                  style: textTheme.bodySmall?.copyWith(
-                    color: AppPalettes.lightTextColor,
+                if (event.url.showDataNull)
+                  Container(
+                    color: Colors.white,
+                    child: CommonHelpers.buildIcons(
+                      path: AppImages.shareIcon,
+                      color: AppPalettes.primaryColor,
+                      iconColor: AppPalettes.whiteColor,
+                      padding: Dimens.paddingX2,
+                      iconSize: Dimens.scaleX2,
+                      onTap: () => CommonHelpers.shareURL(event.url!),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
               ],
             ),
           ],

@@ -21,8 +21,8 @@ class MlaDropDownWidget extends StatelessWidget {
       builder: (context, value, _) {
         return FormCommonDropDown<mla.Data?>(
           isRequired: true,
-          heading: localization.select_mla,
-          hintText: localization.choose_your_mla,
+          heading: localization.select_associate,
+          hintText: localization.choose_your_associate,
           controller: mlaController,
           items: value.mlaLists,
           listItemBuilder: (p0, mla, p2, p3) {

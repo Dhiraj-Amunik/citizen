@@ -32,14 +32,19 @@ class AppointmentsRepository {
         : RepoResponse(data: AppointmentModel.fromJson(response));
   }
 
-  Future<RepoResponse<AppointmentModel>> appointments(String? token) async {
+  Future<RepoResponse<AppointmentModel>> appointments(
+    String? token, {
+    String? status,
+    int? date,
+  }) async {
     final response = await _network.post(
       path: URLs.userAppointment,
+      data: {"status": status, "date": date},
       token: token,
     );
 
     return response is APIException
         ? RepoResponse(error: response)
-        : RepoResponse(data:  AppointmentModel.fromJson(response));
+        : RepoResponse(data: AppointmentModel.fromJson(response));
   }
 }

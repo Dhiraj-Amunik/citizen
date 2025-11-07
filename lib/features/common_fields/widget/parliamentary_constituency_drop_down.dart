@@ -48,42 +48,33 @@ class _ParliamentaryConstituencyDropDownWidgetState
   Widget build(BuildContext context) {
     final localization = context.localizations;
 
-    return PopScope(
-      onPopInvokedWithResult: (_, _) {
-        widget.constituencyController.clear();
-        context
-            .read<ConstituencyViewModel>()
-            .parliamentaryConstituencyLists
-            .clear();
+    return Consumer<ConstituencyViewModel>(
+      builder: (context, value, child) {
+        return FormCommonDropDown<Constituency?>(
+          isRequired: true,
+    
+          heading: localization.parliamentary_constituency,
+          controller: widget.constituencyController,
+          items: value.parliamentaryConstituencyLists,
+          hintText: localization.select_your_constituency,
+          listItemBuilder: (p0, constituency, p2, p3) {
+            return Text(
+              "${constituency?.name}",
+              style: context.textTheme.bodySmall,
+            );
+          },
+          headerBuilder: (p0, constituency, p2) {
+            return Text(
+              "${constituency?.name}",
+              style: context.textTheme.bodySmall,
+            );
+          },
+          validator: (text) => text.toString().validateDropDown(
+            argument: "Select your constituency",
+          ),
+          onChanged: widget.onChange,
+        );
       },
-      child: Consumer<ConstituencyViewModel>(
-        builder: (context, value, child) {
-          return FormCommonDropDown<Constituency?>(
-            isRequired: true,
-
-            heading: localization.parliamentary_constituency,
-            controller: widget.constituencyController,
-            items: value.parliamentaryConstituencyLists,
-            hintText: localization.select_your_constituency,
-            listItemBuilder: (p0, constituency, p2, p3) {
-              return Text(
-                "${constituency?.name}",
-                style: context.textTheme.bodySmall,
-              );
-            },
-            headerBuilder: (p0, constituency, p2) {
-              return Text(
-                "${constituency?.name}",
-                style: context.textTheme.bodySmall,
-              );
-            },
-            validator: (text) => text.toString().validateDropDown(
-              argument: "Select your constituency",
-            ),
-            onChanged: widget.onChange,
-          );
-        },
-      ),
     );
   }
 }

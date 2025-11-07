@@ -21,12 +21,23 @@ class MyLatestComplaintsWidgets extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: Dimens.gapX2B,
       children: [
-        Text(
-          localization.my_complaints,
-          style: textTheme.headlineSmall?.copyWith(
-            color: AppPalettes.primaryColor,
-            fontWeight: FontWeight.w500,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              localization.my_complaints,
+              style: textTheme.headlineSmall?.copyWith(
+                color: AppPalettes.primaryColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              "${complaintList.length} total",
+              style: textTheme.titleMedium?.copyWith(
+                color: AppPalettes.lightTextColor,
+              ),
+            ),
+          ],
         ).horizontalPadding(Dimens.horizontalspacing),
         ListView.separated(
           physics: const NeverScrollableScrollPhysics(),
@@ -41,12 +52,7 @@ class MyLatestComplaintsWidgets extends StatelessWidget {
               onTap: () async {
                 await RouteManager.pushNamed(
                   Routes.threadComplaintPage,
-                  arguments: ThreadModel(
-                    threadID: thread.threadId,
-                    subject:
-                        thread.messages?.first.subject ?? "No Subject found !",
-                    complaintID: thread.sId,
-                  ),
+                  arguments: thread,
                 );
               },
             );

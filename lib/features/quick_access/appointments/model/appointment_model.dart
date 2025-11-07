@@ -67,11 +67,11 @@ class Appointments {
   String? reason;
   List<String>? documents;
   String? user;
-  Null? partyMember;
+  String? partyMember;
   String? priority;
   bool? isPartyMember;
   String? status;
-  Null? approvedBy;
+  String? approvedBy;
   bool? isActive;
   bool? isDeleted;
   String? createdAt;

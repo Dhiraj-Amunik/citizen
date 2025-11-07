@@ -29,32 +29,23 @@ class NavigationView extends StatelessWidget {
             backgroundColor: AppPalettes.liteGreenColor,
           ),
           height: Dimens.scaleX9,
-          child: Consumer2<NavigationViewModel, RoleViewModel>(
-            builder: (_, value, role, _) {
+          child: Consumer<NavigationViewModel>(
+            builder: (_, value, _) {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children:
-                    (role.isPartyMember
-                            ? value.partyTabIconData
-                            : value.userTabIconData)
-                        .map(
-                          (item) => TabIconWidget(
-                            key: UniqueKey(),
-                            data: item,
-                            onTap: () => value.selectedTab =
-                                (role.isPartyMember
-                                        ? value.partyTabIconData
-                                        : value.userTabIconData)
-                                    .indexOf(item),
-                            isSelected:
-                                (role.isPartyMember
-                                        ? value.partyTabIconData
-                                        : value.userTabIconData)
-                                    .indexOf(item) ==
-                                value.selectedTab,
-                          ),
-                        )
-                        .toList(),
+                children: value.userTabIconData
+                    .map(
+                      (item) => TabIconWidget(
+                        key: UniqueKey(),
+                        data: item,
+                        onTap: () => value.selectedTab = value.userTabIconData
+                            .indexOf(item),
+                        isSelected:
+                            value.userTabIconData.indexOf(item) ==
+                            value.selectedTab,
+                      ),
+                    )
+                    .toList(),
               );
             },
           ),

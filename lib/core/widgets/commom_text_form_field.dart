@@ -39,6 +39,7 @@ class CommonTextFormField extends StatelessWidget {
   final Color? shadowColor;
   final EdgeInsetsGeometry? contentPadding;
   final String? initialValue;
+  final Color? suffixColor;
 
   const CommonTextFormField({
     super.key,
@@ -69,6 +70,7 @@ class CommonTextFormField extends StatelessWidget {
     this.fillColor,
     this.fontSize,
     this.initialValue,
+    this.suffixColor,
 
     //Material
     this.backgroundColor,
@@ -83,7 +85,10 @@ class CommonTextFormField extends StatelessWidget {
       borderSide: BorderSide.none,
       borderRadius: BorderRadius.circular(respRadius),
     );
-    final iconColor = ColorFilter.mode(context.iconsColor, BlendMode.srcIn);
+    final iconColor = ColorFilter.mode(
+      suffixColor ?? context.iconsColor,
+      BlendMode.srcIn,
+    );
     return TextFormField(
       initialValue: initialValue,
       showCursor: showCursor,
@@ -160,6 +165,7 @@ class CommonTextFormField extends StatelessWidget {
               )
             : suffixWidget,
       ),
+      
       maxLines: maxLines,
       obscureText: isPassword,
       obscuringCharacter: '.',

@@ -21,7 +21,9 @@ class URLs {
   static const getUserDetails = "/api/user/get-user-details-by-phone"; /*Post*/
   static const becomePartyMember = "/api/user/become-party-member"; /*Post*/
   static const getParties = "/api/user/list-of-parties-dropdown";
-  static const createVolunter = "/api/partymember/create-volunteer"; /*Post*/
+  static const createVolunter = "/api/user/create-volunteer"; /*Post*/
+  static const surveys = "/api/user/list-of-survey"; /*Post*/
+  static const submitSurveys = "/api/user/create-survey-response"; /*Post*/
 
   //User
   static const userMLAs = "/api/user/list-of-mlas-dropdown"; /*Get*/
@@ -34,6 +36,7 @@ class URLs {
   static const postDonation = "/api/user/create-donation"; /*Post*/
   static const pastDonation = "/api/user/list-of-donations-by-user"; /*Post*/
   static const userMlaDetails = "/api/user/mla-details-by-user"; /*Get*/
+  static const lokVartaDetails = "/api/user/getSinglelokVarta"; /*Post*/
 
   //complaints
 
@@ -58,11 +61,41 @@ class URLs {
   // wall of help
   static const getUserWallOFHelpData =
       "/api/user/list-of-financial-help-requests"; /*Get*/
+  static const getMyWallOfHelpLists =
+      "/api/user/list-of-my-financial-help-requests"; /*Post*/
   static const requestFinancialHelp =
-      "/api/user/createFinancialHelpRequest"; /*Post*/
+      "/api/user/create-financial-help-request"; /*Post*/
+  static const updateFinancialHelp =
+      "/api/user/update-financial-help-request"; /*Post*/
   static const donateToHelpRequest =
       "/api/user/donateToFinancialHelpRequest"; /*Post*/
+  static const getTypesOfHelpsDD = "/api/user/type-of-help-dropdown"; /*Get*/
+  static const getPreferredWaysDD =
+      "/api/user/preferred-way-for-help-dropdown"; /*Get*/
+  static const getFinancialMessages =
+      "/api/user/get-financial-message-by-messageId"; /*Post*/
+  static const replyFinancialMessages =
+      "/api/user/reply-financial-help-request-message"; /*Post*/
+  static const completeMyFinancialHelp =
+      "/api/user/completeMyFinancialHelpRequests"; /*Post*/
+      
 
   //notifications
   static const notifications = "/api/user/notificationList"; /*Get*/
+
+  //Nearest Member
+  static const getNearestMembers = "/api/user/nearest-party-member"; /*Post*/
+  static const getNearestMemberMessages = "/api/user/get-messages"; /*Post*/
+  static const postNearestMemberMessage = "/api/user/send-mla-message"; /*Post*/
+  static const getMyMembersChats = "/api/user/get-All-Chats"; /*Get*/
+
+  // Notify representative
+
+  static const getNotifyEventTypes = "/api/user/list-of-event-type-dropdown";
+  static const postNotifyRepresentative =
+      "/api/user/create-update-notify-representative";
+  static const getListNotifyRepresentative =
+      "/api/user/list-of-notify-representative";
+  static const deleteNotifyRepresentative =
+      "/api/user/delete-notify-representative";
 }

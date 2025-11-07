@@ -15,7 +15,9 @@ class LokvartaHelpers {
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(parent: NeverScrollableScrollPhysics()),
+        physics: AlwaysScrollableScrollPhysics(
+          parent: NeverScrollableScrollPhysics(),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -26,7 +28,7 @@ class LokvartaHelpers {
               iconSize: 0.5.screenWidth,
             ),
             Text(
-              "No ${type.name}s found",
+              "No ${type.name.endsWith("s") ? type.name : '${type.name}s'} found",
               style: AppStyles.titleMedium,
               maxLines: 2,
               textAlign: TextAlign.center,

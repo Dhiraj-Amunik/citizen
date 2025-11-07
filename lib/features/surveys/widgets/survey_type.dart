@@ -4,40 +4,44 @@ import 'package:inldsevak/core/widgets/commom_text_form_field.dart';
 import 'package:inldsevak/features/surveys/model/survey_model.dart';
 import 'package:inldsevak/features/surveys/widgets/choice_widget.dart';
 import 'package:inldsevak/features/surveys/widgets/multi_choice_widget.dart';
-import 'package:inldsevak/features/surveys/widgets/rating_widget.dart';
+
+enum SurveyTypes {
+  multipleChoice('multiple-choice'),
+  feedback('feedback'),
+  description('description');
+
+  const SurveyTypes(this.displayName);
+  final String displayName;
+}
 
 abstract class SurveyType {
   Widget getWidget();
 
   factory SurveyType.fromSurveyData(
-    SurveyData data, {
+    Questions data, {
     bool? isEnabled,
-    ValueChanged<Map<String, bool>>? onSelectionChanged,
-    TextEditingController? textController,
-    int? rating,
-    Function(double? value)? onRatingChanged,
-    bool? isYesSelected,
-    bool? isNoSelected,
-    Function()? onYesSelected,
-    Function()? onNoSelected,
-    List<String>? answer,
+    // Function(String?)? feedbackOnTap,
+    // TextEditingController? textController,
+    List<String>? multiChoiceOptions,
+    List<String>? multiChoiceAnswers,
+    required List<String> multiChoiceSelected,
+    Function(List<String>)? onSelectionChanged,
   }) {
-    if (data.isMultipleChoiceSurvey) {
+    if (data.type == SurveyTypes.multipleChoice.displayName) {
       return MultiChoice(
-        isEnabled,
-        options: data.options ?? {},
-        onSelectionChanged: onSelectionChanged,
-        answer: answer,
+        multiChoiceSelected,
+        options: multiChoiceOptions ?? [],
+        answer: multiChoiceAnswers,
+         onSelectionChanged: onSelectionChanged, 
       );
-    } else if (data.isRatingSurvey) {
-      return Rating(rating: rating ?? 0, onRatingChanged: onRatingChanged);
-    } else if (data.isTextInputSurvey) {
-      return TextInput(
-        controller: textController ?? TextEditingController(),
-        isEnabled: isEnabled,
-      );
-    } else if (data.isYesOrNoSurvey) {
-      return None();
+      // } else
+      // if (data.type == SurveyTypes.description.displayName) {
+      //   return TextInput(
+      //     controller: textController ?? TextEditingController(),
+      //     isEnabled: isEnabled,
+      //   );
+      // } else if (data.type == SurveyTypes.feedback.displayName) {
+      //   return FeedBack(isEnabled, options: [], onOptionSelected: feedbackOnTap!);
     } else {
       return None();
     }
@@ -59,38 +63,36 @@ class Choice implements SurveyType {
   }
 }
 
-class TextInput implements SurveyType {
-  TextEditingController controller;
-  bool? isEnabled;
+// class TextInput implements SurveyType {
+//   TextEditingController controller;
+//   bool? isEnabled;
 
-  TextInput({required this.controller, this.isEnabled});
-  @override
-  Widget getWidget() {
-    return _customTextFormField(controller, isEnabled: isEnabled);
-  }
-}
+//   TextInput({required this.controller, this.isEnabled});
+//   @override
+//   Widget getWidget() {
+//     return _customTextFormField(controller, isEnabled: isEnabled);
+//   }
+// }
 
-class Rating implements SurveyType {
-  final int rating;
-  final Function(double? value)? onRatingChanged;
-  Rating({required this.rating, this.onRatingChanged});
-  @override
-  Widget getWidget() {
-    return RatingWidget(value: rating, onChanged: onRatingChanged);
-  }
-}
+// class Rating implements SurveyType {
+//   final int rating;
+//   final Function(double? value)? onRatingChanged;
+//   Rating({required this.rating, this.onRatingChanged});
+//   @override
+//   Widget getWidget() {
+//     return RatingWidget(value: rating, onChanged: onRatingChanged);
+//   }
+// }
 
 class MultiChoice implements SurveyType {
   final List<String>? answer;
-  final Map<String, String> options;
-  final ValueChanged<Map<String, bool>>? onSelectionChanged;
-  final bool? isEnabled;
-
+  final List<String> options;
+  final List<String> selected;
+final Function(List<String>)? onSelectionChanged;
   MultiChoice(
-    this.isEnabled, {
+    this.selected, {
     required this.options,
-    this.onSelectionChanged,
-    this.answer,
+    this.answer,  this.onSelectionChanged, 
   });
 
   @override
@@ -98,11 +100,33 @@ class MultiChoice implements SurveyType {
     return MultiChoiceWidget(
       answers: answer,
       options: options,
-      isEnabled: isEnabled,
-      onSelectionChanged: onSelectionChanged,
+      selectedOptions: selected, onSelectionChanged: onSelectionChanged, 
     );
   }
 }
+
+// class FeedBack implements SurveyType {
+//   final bool? isEnabled;
+//   final List<String> options;
+//   final String? initiallySelected;
+//   final ValueChanged<String?> onOptionSelected;
+
+//   FeedBack(
+//     this.isEnabled, {
+//     required this.options,
+//     this.initiallySelected,
+//     required this.onOptionSelected,
+//   });
+
+//   @override
+//   Widget getWidget() {
+//     return ChoiceWidget(
+//       options: options,
+//       onOptionSelected: onOptionSelected,
+//       initiallySelected: initiallySelected,
+//     );
+//   }
+// }
 
 class None implements SurveyType {
   @override
@@ -111,14 +135,14 @@ class None implements SurveyType {
   }
 }
 
-Widget _customTextFormField(
-  TextEditingController controller, {
-  bool? isEnabled,
-}) {
-  return CommonTextFormField(
-    enabled: isEnabled ?? false,
-    controller: controller,
-    radius: 10,
-    hintText: "Enter your answer",
-  );
-}
+// Widget _customTextFormField(
+//   TextEditingController controller, {
+//   bool? isEnabled,
+// }) {
+//   return CommonTextFormField(
+//     enabled: isEnabled ?? false,
+//     controller: controller,
+//     radius: 10,
+//     hintText: "Enter your answer",
+//   );
+// }

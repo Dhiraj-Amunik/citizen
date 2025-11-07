@@ -1,5 +1,5 @@
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
-import 'package:inldsevak/core/mixin/transparent_mixin.dart';
 import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
@@ -9,15 +9,23 @@ import 'package:inldsevak/features/common_fields/services/constituencies_reposit
 
 import 'package:quickalert/models/quickalert_type.dart';
 
-class ConstituencyViewModel extends BaseViewModel with TransparentCircular {
+class ConstituencyViewModel extends BaseViewModel {
   List<Constituency?> assemblyConstituencyLists = [];
   List<Constituency?> parliamentaryConstituencyLists = [];
 
-  Future<void> getParliamentaryConstituencies({required int? pincode}) async {
+  Future<String?> getParliamentaryConstituencies({
+    required String pincode,
+    required SingleSelectController<Constituency?> parlimentController,
+  }) async {
     try {
-      parliamentaryConstituencyLists.clear();
-      assemblyConstituencyLists.clear();
-      final model = RequestPincodeModel(pincode: pincode);
+      if (pincode.length != 6) {
+        CommonSnackbar(
+          text: "Please enter a valid Pincode !",
+        ).showAnimatedDialog(type: QuickAlertType.warning);
+        return null;
+      }
+      final intCode = int.tryParse(pincode);
+      final model = RequestPincodeModel(pincode: intCode);
       final response = await ConstituenciesRepository()
           .getParliamentaryConstituencies(token: token, model: model);
       if (response.data?.responseCode == 200) {
@@ -27,11 +35,20 @@ class ConstituencyViewModel extends BaseViewModel with TransparentCircular {
             text: "No Constituencies Found !",
           ).showAnimatedDialog(type: QuickAlertType.warning);
         } else {
+          parlimentController.clear();
           parliamentaryConstituencyLists = List<Constituency>.from(
             data as List,
           );
+          if (parliamentaryConstituencyLists.isNotEmpty) {
+            parlimentController.value = parliamentaryConstituencyLists.first;
+          }
           notifyListeners();
+          return response.data?.district;
         }
+      } else {
+        await CommonSnackbar(
+          text: response.data?.message ?? "No Constituencies Found !",
+        ).showAnimatedDialog(type: QuickAlertType.warning);
       }
     } catch (err, stackTrace) {
       await CommonSnackbar(
@@ -40,6 +57,7 @@ class ConstituencyViewModel extends BaseViewModel with TransparentCircular {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
     }
+    return null;
   }
 
   Future<void> getAssemblyConstituencies({
@@ -47,6 +65,7 @@ class ConstituencyViewModel extends BaseViewModel with TransparentCircular {
     String? oldToken,
   }) async {
     try {
+      assemblyConstituencyLists.clear();
       final model = RequestParlimentIdModel(id: id);
       final response = await ConstituenciesRepository()
           .getAssemblyConstituencies(token: oldToken ?? token, model: model);
@@ -54,11 +73,10 @@ class ConstituencyViewModel extends BaseViewModel with TransparentCircular {
       if (response.data?.responseCode == 200) {
         final data = response.data?.data;
         if (data?.isEmpty == true) {
-          CommonSnackbar(
+          await CommonSnackbar(
             text: "No Constituencies Found !",
           ).showAnimatedDialog(type: QuickAlertType.warning);
         } else {
-          assemblyConstituencyLists.clear();
           assemblyConstituencyLists = List<Constituency>.from(data as List);
           notifyListeners();
         }

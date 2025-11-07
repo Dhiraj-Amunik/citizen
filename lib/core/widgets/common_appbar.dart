@@ -20,6 +20,8 @@ PreferredSize commonAppBar({
   Brightness? statusBarMode = Brightness.dark,
   TextStyle? style,
   double? elevation,
+  double? scrollElevation,
+  Color? iconColor,
 }) => PreferredSize(
   preferredSize: Size.fromHeight(appBarHeight.r),
   child: AppBar(
@@ -30,12 +32,14 @@ PreferredSize commonAppBar({
       statusBarIconBrightness: statusBarMode,
     ),
     elevation: elevation,
+    scrolledUnderElevation: scrollElevation,
     shadowColor: AppPalettes.shadowColor,
     foregroundColor: AppPalettes.whiteColor,
-    backgroundColor: AppPalettes.whiteColor,
+    backgroundColor: bgColor ?? AppPalettes.whiteColor,
     centerTitle: center,
     bottom: bottom,
     titleSpacing: 0,
+    iconTheme: iconColor != null ? IconThemeData(color: iconColor) : null,
     title:
         (child?.horizontalPadding(Dimens.horizontalspacing) ??
         Text(

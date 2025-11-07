@@ -1,3 +1,6 @@
+import 'dart:ffi';
+
+import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
@@ -155,7 +158,6 @@ class FormTextFormField extends StatelessWidget {
             errorBorder: border.copyWith(
               borderSide: const BorderSide(color: AppPalettes.redColor),
             ),
-
             prefixIcon: prefixIcon != null
                 ? SvgPicture.asset(
                     prefixIcon!,
@@ -169,17 +171,21 @@ class FormTextFormField extends StatelessWidget {
                   )
                 : null,
 
-            suffixIcon: suffixIcon != null
-                ? SvgPicture.asset(
-                    suffixIcon!,
+            suffixIcon: Transform.translate(
+              offset: Offset(0, maxLines == 1 ? 0 : (-(maxLines! * 5) + 0.0)),
+              child:
+                  suffixWidget ??
+                  SvgPicture.asset(
+                    suffixIcon ?? AppImages.microphoneIcon,
                     colorFilter: iconColor,
+                    width: Dimens.scaleX2B,
                   ).onlyPadding(
                     left: Dimens.paddingX2,
                     right: Dimens.paddingX4,
                     top: Dimens.paddingX3B,
                     bottom: Dimens.paddingX3B,
-                  )
-                : suffixWidget,
+                  ),
+            ),
           ),
           maxLines: maxLines,
           obscureText: isPassword,

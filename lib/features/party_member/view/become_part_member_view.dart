@@ -8,11 +8,12 @@ import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/upload_multi_files.dart';
 import 'package:inldsevak/features/common_fields/widget/assembly_constituency_drop_down.dart';
 import 'package:inldsevak/features/party_member/view_model/become_party_mem_view_model.dart';
-import 'package:inldsevak/features/party_member/widgets/image_widget.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -149,39 +150,59 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   initialData: profile.assemblyConstituencyData,
                                 ),
 
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      localization.photography,
-                                      style: context.textTheme.bodySmall,
-                                    ).onlyPadding(bottom: Dimens.gapX1B),
-                                    Consumer<BecomePartyMemViewModel>(
-                                      builder: (context, value, _) {
-                                        return ImageWidget(
-                                          onTap: () => provider.selectImage(),
-                                          onRemoveTap: () =>
-                                              provider.removeImage(),
-                                          imageFile:
-                                              provider.photographyPicture,
+                                Consumer<BecomePartyMemViewModel>(
+                                  builder: (contextP, value, _) {
+                                    return UploadMultiFilesWidget(
+                                      onTap: () {
+                                        showModalBottomSheet(
+                                          context: context,
+                                          builder: (context) =>
+                                              DraggableSheetWidget(
+                                                size: 0.5,
+                                                child: value
+                                                    .selectMultipleImages(),
+                                              ),
                                         );
                                       },
-                                    ),
-                                  ],
+                                      onRemove: (int index) =>
+                                          value.removeImage(index),
+                                      multipleFiles: value.multipleFiles,
+                                    );
+                                  },
                                 ),
-                                FormTextFormField(
-                                  showCounterText: true,
-                                  headingText:
-                                      localization.reason_for_joining_party,
-                                  hintText: localization.explain_why_join_party,
-                                  controller: provider.reasonController,
-                                  maxLength: 150,
-                                  maxLines: 5,
-                                  // validator: (text) => text?.validate(
-                                  //   argument:
-                                  //       "Please enter reason for joining our party",
-                                  // ),
-                                ),
+                                // Column(
+                                //   crossAxisAlignment: CrossAxisAlignment.start,
+                                //   children: [
+                                //     Text(
+                                //       localization.photography,
+                                //       style: context.textTheme.bodySmall,
+                                //     ).onlyPadding(bottom: Dimens.gapX1B),
+                                //     Consumer<BecomePartyMemViewModel>(
+                                //       builder: (context, value, _) {
+                                //         return ImageWidget(
+                                //           onTap: () => provider.selectImage(),
+                                //           onRemoveTap: () =>
+                                //               provider.removeImage(),
+                                //           imageFile:
+                                //               provider.photographyPicture,
+                                //         );
+                                //       },
+                                //     ),
+                                //   ],
+                                // ),
+                                // FormTextFormField(
+                                //   showCounterText: true,
+                                //   headingText:
+                                //       localization.reason_for_joining_party,
+                                //   hintText: localization.explain_why_join_party,
+                                //   controller: provider.reasonController,
+                                //   maxLength: 150,
+                                //   maxLines: 5,
+                                //   // validator: (text) => text?.validate(
+                                //   //   argument:
+                                //   //       "Please enter reason for joining our party",
+                                //   // ),
+                                // ),
                               ],
                             ),
                           ),

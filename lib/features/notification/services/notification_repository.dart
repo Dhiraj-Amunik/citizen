@@ -7,7 +7,7 @@ import 'package:inldsevak/features/notification/models/notifications_model.dart'
 class NotificationRepository {
   final _network = NetworkRequester();
 
-  Future<RepoResponse<NotificationsModel>> getNotifications({
+  Future<RepoResponse<NotificationsModel>> getNotificationsApi({
     required String? token,
   }) async {
     final response = await _network.get(token: token, path: URLs.notifications);

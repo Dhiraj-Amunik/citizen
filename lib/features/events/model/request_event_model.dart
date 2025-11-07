@@ -4,11 +4,13 @@ class RequestEventModel {
   EventFilter filter;
   int page;
   int? pageSize;
+  String? search;
 
   RequestEventModel({
     required this.filter,
     required this.page,
-     this.pageSize,
+    this.pageSize,
+    this.search,
   });
 
   Map<String, dynamic> toJson() {
@@ -16,6 +18,7 @@ class RequestEventModel {
       'filter': _eventFilterToString(filter),
       'page': page,
       'pageSize': pageSize,
+      'search': search,
     };
   }
 

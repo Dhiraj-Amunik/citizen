@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
@@ -11,6 +12,7 @@ class DraggableSheetWidget extends StatefulWidget {
   final Color? backgroundColor;
   final Color? indicatorcolor;
   final double size;
+  final bool showClose;
   final double radius;
   final Function()? onCompleted;
   const DraggableSheetWidget({
@@ -22,6 +24,7 @@ class DraggableSheetWidget extends StatefulWidget {
     required this.size,
     this.radius = Dimens.radius100,
     this.onCompleted,
+    this.showClose = false,
   });
 
   @override
@@ -32,8 +35,7 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
   @override
   void initState() {
     super.initState();
-    controller.addListener(onChange);
-    controller.addListener(collapse);
+    // controller.addListener(collapse);
   }
 
   void onChange() {
@@ -41,7 +43,7 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
     if (currentSize <= 0.05) collapse();
   }
 
-  void collapse() => animateCompleteSheet(getSheet.snapSizes!.first);
+  void collapse() => animateSheet(getSheet.snapSizes!.first);
   void anchor() => animateSheet(getSheet.snapSizes!.last);
   void expand() => animateSheet(getSheet.maxChildSize);
   void hide() => animateSheet(getSheet.minChildSize);
@@ -75,7 +77,7 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
           controller: controller,
           key: sheet,
           initialChildSize: widget.size,
-          maxChildSize: 0.8,
+          maxChildSize: 0.7,
           minChildSize: 0,
           expand: false,
           snap: true,
@@ -91,9 +93,11 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
               child: CustomScrollView(
                 shrinkWrap: true,
                 controller: scrollController,
-
                 slivers: [
-                  topButtonIndicitor(widget.indicatorcolor),
+                  if (widget.showClose==false)
+                    topButtonIndicitor(widget.indicatorcolor),
+                  if (widget.showClose == true)
+                    topCloseIndicitor(widget.indicatorcolor),
                   SliverToBoxAdapter(child: widget.child),
                   SliverToBoxAdapter(child: SizeBox.sizeHX4),
                   SliverFillRemaining(
@@ -112,13 +116,38 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
     );
   }
 
+  SliverToBoxAdapter topCloseIndicitor(Color? color) {
+    return SliverToBoxAdapter(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          GestureDetector(
+            onTap: () => RouteManager.pop(),
+            child: Container(
+              padding: EdgeInsets.all(Dimens.paddingX2),
+              margin: EdgeInsets.only(
+                top: Dimens.marginX6,
+                right: Dimens.marginX6,
+              ),
+              decoration: boxDecorationRoundedWithShadow(
+                Dimens.radius100,
+                backgroundColor: AppPalettes.primaryColor,
+              ),
+              child: Icon(Icons.close_rounded, color: AppPalettes.whiteColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   SliverToBoxAdapter topButtonIndicitor(Color? color) {
     return SliverToBoxAdapter(
       child: Center(
         child: Container(
           clipBehavior: Clip.none,
           alignment: Alignment.center,
-          margin: EdgeInsets.symmetric(vertical: Dimens.marginX4),
+          margin: EdgeInsets.only(top: Dimens.marginX6,bottom: Dimens.marginX4),
           height: Dimens.scaleX,
           width: Dimens.scaleX7,
           decoration: boxDecorationRoundedWithShadow(

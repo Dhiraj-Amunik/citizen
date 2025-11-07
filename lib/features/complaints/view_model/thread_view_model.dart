@@ -1,25 +1,26 @@
-import 'dart:developer';
-
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
+import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
-import 'package:inldsevak/features/complaints/model/request/reply_request_model.dart';
 import 'package:inldsevak/features/complaints/model/request/thread_request_model.dart';
 import 'package:inldsevak/features/complaints/model/response/complaint_by_thread.dart'
     as threads;
-import 'package:inldsevak/features/complaints/model/thread_model.dart';
 import 'package:inldsevak/features/complaints/repository/complaints_repository.dart';
+import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
+import 'package:quickalert/quickalert.dart';
 
 class ThreadViewModel extends BaseViewModel {
-  final ThreadModel arguments;
+  final Data arguments;
 
   ThreadViewModel({required this.arguments}) {
-    onCreated(id: arguments.threadID!);
+    onCreated(id: arguments.threadId!);
   }
 
   onCreated({required String id}) async {
     await initialize();
-    await getThreads(threadID: id);
+    await getThreads();
   }
 
   final nextThreadController = TextEditingController();
@@ -33,11 +34,11 @@ class ThreadViewModel extends BaseViewModel {
 
   List<threads.Data> threadsList = [];
 
-  Future<void> getThreads({required String threadID}) async {
+  Future<void> getThreads() async {
     try {
       loadMessages = true;
 
-      final data = ThreadRequestModel(threadID: threadID);
+      final data = ThreadRequestModel(threadID: arguments.threadId!);
 
       final response = await ComplaintsRepository().getComplaintThread(
         data: data,
@@ -59,25 +60,32 @@ class ThreadViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> replyThread({required ThreadModel model}) async {
+  Future<void> replyThread({required String id}) async {
     try {
       if (nextThreadController.text.isEmpty) {
-        return;
+        return CommonSnackbar(text: "Message can't be empty").showToast();
       }
       isLoading = true;
 
-      final data = ReplyRequestModel(
-        message: nextThreadController.text,
-        complaintId: model.complaintID!,
-      );
-      log(data.toJson().toString());
+      List<MultipartFile> multipartFiles = [];
+      for (File imagePath in multipleFiles) {
+        MultipartFile file = await MultipartFile.fromFile(imagePath.path);
+        multipartFiles.add(file);
+      }
+
+      final FormData form = FormData.fromMap({
+        "message": nextThreadController.text.trim(),
+        "complaintId": id,
+        "attachments": multipartFiles,
+      });
 
       final response = await ComplaintsRepository().replyComplaints(
-        data: data,
+        data: form,
         token: token,
       );
       if (response.data?.responseCode == 200) {
-        getThreads(threadID: arguments.threadID!);
+        removefiles();
+        getThreads();
         nextThreadController.clear();
       } else {
         CommonSnackbar(
@@ -90,5 +98,35 @@ class ThreadViewModel extends BaseViewModel {
     } finally {
       isLoading = false;
     }
+  }
+
+  // Add Files
+
+  List<File> multipleFiles = [];
+
+  Future<void> addFiles(Future<dynamic> future) async {
+    RouteManager.pop();
+    try {
+      final data = await future;
+      if (data != null) {
+        List<File> tempFiles = [...multipleFiles];
+        tempFiles.addAll(data);
+        if (tempFiles.length >= 6) {
+          return CommonSnackbar(
+            text: "Max 5 Files are accepted",
+          ).showAnimatedDialog(type: QuickAlertType.warning);
+        } else {
+          multipleFiles.addAll(await future);
+          notifyListeners();
+        }
+      }
+    } catch (err) {
+      debugPrint("-------->$err");
+    }
+  }
+
+  void removefiles() {
+    multipleFiles.clear();
+    notifyListeners();
   }
 }

@@ -68,21 +68,24 @@ class Events {
   String? createdAt;
   String? updatedAt;
   int? iV;
+  String? url;
 
-  Events(
-      {this.sId,
-      this.title,
-      this.eventType,
-      this.description,
-      this.dateAndTime,
-      this.location,
-      this.poster,
-      this.mla,
-      this.isActive,
-      this.isDeleted,
-      this.createdAt,
-      this.updatedAt,
-      this.iV});
+  Events({
+    this.sId,
+    this.title,
+    this.eventType,
+    this.description,
+    this.dateAndTime,
+    this.location,
+    this.poster,
+    this.mla,
+    this.isActive,
+    this.isDeleted,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+    this.url,
+  });
 
   Events.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -98,6 +101,7 @@ class Events {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    url = json['url'];
   }
 
   Map<String, dynamic> toJson() {
@@ -117,6 +121,7 @@ class Events {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['url'] = url;
     return data;
   }
 }

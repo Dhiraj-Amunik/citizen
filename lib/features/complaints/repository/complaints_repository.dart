@@ -3,7 +3,7 @@ import 'package:inldsevak/core/dio/exception_handlers.dart';
 import 'package:inldsevak/core/dio/network_requester.dart';
 import 'package:inldsevak/core/dio/repo_reponse.dart';
 import 'package:inldsevak/core/utils/urls.dart';
-import 'package:inldsevak/features/complaints/model/request/reply_request_model.dart';
+import 'package:inldsevak/features/complaints/model/request/my_complaint_request_model.dart';
 import 'package:inldsevak/features/complaints/model/request/request_authorities_model.dart';
 import 'package:inldsevak/features/complaints/model/request/thread_request_model.dart';
 import 'package:inldsevak/features/complaints/model/response/add_complaints_model.dart';
@@ -33,10 +33,12 @@ class ComplaintsRepository {
 
   Future<RepoResponse<ComplaintsModel>> getAllComplaints({
     required String token,
+   required MyComplaintRequestModel filters,
   }) async {
     final response = await network.post(
       token: token,
       path: URLs.getComplaintByUserID,
+      data: filters.toJson(),
     );
 
     return response is APIException
@@ -60,13 +62,13 @@ class ComplaintsRepository {
   }
 
   Future<RepoResponse<ReplyThreadModel>> replyComplaints({
-    required ReplyRequestModel data,
+    required FormData data,
     required String? token,
   }) async {
     final response = await network.post(
       token: token,
       path: URLs.replyToComplaintByThreadID,
-      data: data.toJson(),
+      data: data,
     );
 
     return response is APIException

@@ -28,6 +28,10 @@ class AppImages {
   static const searchIcon = '$_iconsURL/search_icon.svg';
   static const notificationIcon = "$_iconsURL/notification_icon.svg";
   static const filterIcon = "$_iconsURL/filter_icon.svg";
+  static const downnloadIcon = '$_iconsURL/download_icon.svg';
+  static const copyIcon = '$_iconsURL/copy_icon.svg';
+  static const stackIcon = '$_iconsURL/stack_icon.svg';
+  static const microphoneIcon = '$_iconsURL/microphone_icon.svg';
 
   static const navComplaintIcon = '$_navIconsURL/complaint_icon.svg';
   static const navDonateIcon = '$_navIconsURL/donate_icon.svg';
@@ -37,8 +41,6 @@ class AppImages {
   static const navIdCardIcon = '$_navIconsURL/id_card_icon.svg';
   static const navSurveyIconIcon = '$_navIconsURL/survey_icon.svg';
   static const navLokVartaIconIcon = '$_navIconsURL/lok_varta_icon.svg';
-
-  static const downnloadIcon = '$_navIconsURL/download_icon.svg';
 
   static const partyImage = "assets/logo/login_image.png";
 
@@ -99,5 +101,3 @@ class AppImages {
   static const partySign = 'assets/logo/party_sign.svg';
   static const logo = 'assets/logo/logo.png';
 }
-
-

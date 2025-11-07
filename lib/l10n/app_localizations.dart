@@ -374,6 +374,18 @@ abstract class AppLocalizations {
   /// **'Donate'**
   String get donate;
 
+  /// No description provided for @donate_for.
+  ///
+  /// In en, this message translates to:
+  /// **'Donation For'**
+  String get donate_for;
+
+  /// No description provided for @donate_for_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Your support, in any form, will help us create wonderful memories at this party. More importantly, your contribution goes beyond celebration - it becomes a source of hope for those in need. Every donation you make will be directed toward helping underprivileged citizens and supporting community welfare initiatives. Whether it is providing essential resources, medical assistance, or financial aid, your kindness will make a meaningful difference in someone’s life. By standing with us, you are not just donating - you are joining hands in building a stronger, more caring society. Together, we can ensure that joy is shared with everyone, especially those who need it most.'**
+  String get donate_for_description;
+
   /// No description provided for @donation_history.
   ///
   /// In en, this message translates to:
@@ -386,17 +398,11 @@ abstract class AppLocalizations {
   /// **'Enter Amount'**
   String get enter_amount;
 
-  /// No description provided for @enter_purpose_of_donation.
+  /// No description provided for @select_payment_options.
   ///
   /// In en, this message translates to:
-  /// **'Enter purpose of donation'**
-  String get enter_purpose_of_donation;
-
-  /// No description provided for @payment_options.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment Options'**
-  String get payment_options;
+  /// **'Select Payment Options'**
+  String get select_payment_options;
 
   /// No description provided for @razorpay.
   ///
@@ -413,7 +419,7 @@ abstract class AppLocalizations {
   /// No description provided for @net_banking.
   ///
   /// In en, this message translates to:
-  /// **'NetBanking'**
+  /// **'Net Banking'**
   String get net_banking;
 
   /// No description provided for @cards.
@@ -920,6 +926,12 @@ abstract class AppLocalizations {
   /// **'Enter Address'**
   String get enter_address;
 
+  /// No description provided for @enter_your_address.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your Address'**
+  String get enter_your_address;
+
   /// No description provided for @address_validator.
   ///
   /// In en, this message translates to:
@@ -938,6 +950,24 @@ abstract class AppLocalizations {
   /// **'Request Appointment'**
   String get request_appointment;
 
+  /// No description provided for @scheduled_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled Date'**
+  String get scheduled_date;
+
+  /// No description provided for @rescheduled_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescheduled Date'**
+  String get rescheduled_date;
+
+  /// No description provided for @appointment_note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: As per the availability of Associate can rescheduled ur preferred date in appointment'**
+  String get appointment_note;
+
   /// No description provided for @appointment_list.
   ///
   /// In en, this message translates to:
@@ -950,11 +980,35 @@ abstract class AppLocalizations {
   /// **'Select MLA'**
   String get select_mla;
 
+  /// No description provided for @select_associate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Associate'**
+  String get select_associate;
+
+  /// No description provided for @your_notified_events.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Notified Events'**
+  String get your_notified_events;
+
   /// No description provided for @book_for.
   ///
   /// In en, this message translates to:
   /// **'Book for'**
   String get book_for;
+
+  /// No description provided for @membership_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership ID'**
+  String get membership_id;
+
+  /// No description provided for @membership_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Membership ID'**
+  String get membership_validator;
 
   /// No description provided for @date.
   ///
@@ -974,17 +1028,11 @@ abstract class AppLocalizations {
   /// **'Please select one MLA'**
   String get mla_validator;
 
-  /// No description provided for @choose_your_mla.
+  /// No description provided for @choose_your_associate.
   ///
   /// In en, this message translates to:
-  /// **'Choose your MLA'**
-  String get choose_your_mla;
-
-  /// No description provided for @membership_id.
-  ///
-  /// In en, this message translates to:
-  /// **'Membership ID'**
-  String get membership_id;
+  /// **'Choose your Associate'**
+  String get choose_your_associate;
 
   /// No description provided for @phone_number.
   ///
@@ -1058,6 +1106,12 @@ abstract class AppLocalizations {
   /// **'Wall of Help'**
   String get wall_of_help;
 
+  /// No description provided for @helping_hands_gains_love.
+  ///
+  /// In en, this message translates to:
+  /// **'Helping hands gains love'**
+  String get helping_hands_gains_love;
+
   /// No description provided for @quick_links.
   ///
   /// In en, this message translates to:
@@ -1106,6 +1160,12 @@ abstract class AppLocalizations {
   /// **'Requested Amount'**
   String get requested_amount;
 
+  /// No description provided for @requested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get requested;
+
   /// No description provided for @description.
   ///
   /// In en, this message translates to:
@@ -1147,6 +1207,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter few words'**
   String get please_enter_few_words;
+
+  /// No description provided for @type_of_help_needed.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of Help Needed'**
+  String get type_of_help_needed;
+
+  /// No description provided for @choose_the_options.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the options'**
+  String get choose_the_options;
+
+  /// No description provided for @dropdown_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select one option'**
+  String get dropdown_validator;
+
+  /// No description provided for @enter_description_of_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter description of request'**
+  String get enter_description_of_request;
+
+  /// No description provided for @urgency_level.
+  ///
+  /// In en, this message translates to:
+  /// **'Urgency Level'**
+  String get urgency_level;
+
+  /// No description provided for @preferred_way_to_receive_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred Way to Receive Help'**
+  String get preferred_way_to_receive_help;
+
+  /// No description provided for @supporting_documents.
+  ///
+  /// In en, this message translates to:
+  /// **'Supporting Documents (If Any)'**
+  String get supporting_documents;
+
+  /// No description provided for @less_amount_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimun 10rs is allowed'**
+  String get less_amount_validator;
+
+  /// No description provided for @chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get chat;
+
+  /// No description provided for @my_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'My Chats'**
+  String get my_chat;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
 
   /// No description provided for @enter_detail_description.
   ///
@@ -1232,11 +1358,35 @@ abstract class AppLocalizations {
   /// **'Previous Contributions'**
   String get previous_contributions;
 
+  /// No description provided for @my_requests.
+  ///
+  /// In en, this message translates to:
+  /// **'My Requests'**
+  String get my_requests;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
   /// No description provided for @my_complaints.
   ///
   /// In en, this message translates to:
   /// **'My Complaints'**
   String get my_complaints;
+
+  /// No description provided for @not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Found'**
+  String get not_found;
 
   /// No description provided for @id_card.
   ///
@@ -1513,6 +1663,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to sign out from your account?'**
   String get logout_confirmation;
+
+  /// No description provided for @notify_representative.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify Representative'**
+  String get notify_representative;
+
+  /// No description provided for @notify.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify'**
+  String get notify;
+
+  /// No description provided for @notify_mla.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify Mla'**
+  String get notify_mla;
+
+  /// No description provided for @notify_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Beyond politics, we build trust and support. With the Wall of Help, you’re never alone assistance is always near.'**
+  String get notify_description;
+
+  /// No description provided for @recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recent;
+
+  /// No description provided for @past.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get past;
+
+  /// No description provided for @view_how_member_notified.
+  ///
+  /// In en, this message translates to:
+  /// **'View how members Notified'**
+  String get view_how_member_notified;
+
+  /// No description provided for @nearest_member.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearest Member'**
+  String get nearest_member;
+
+  /// No description provided for @list_of_nearest_member.
+  ///
+  /// In en, this message translates to:
+  /// **'List Of Nearest Member'**
+  String get list_of_nearest_member;
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
+
+  /// No description provided for @phone_no.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone No'**
+  String get phone_no;
+
+  /// No description provided for @notify_description_validatore.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter detail description to notify'**
+  String get notify_description_validatore;
+
+  /// No description provided for @event_title_validatore.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter event name'**
+  String get event_title_validatore;
+
+  /// No description provided for @event_time_validatore.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select event time'**
+  String get event_time_validatore;
+
+  /// No description provided for @event_date_validatore.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your event date'**
+  String get event_date_validatore;
+
+  /// No description provided for @event_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Date'**
+  String get event_date;
+
+  /// No description provided for @event_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Type'**
+  String get event_type;
+
+  /// No description provided for @event_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Time'**
+  String get event_time;
+
+  /// No description provided for @select_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Time'**
+  String get select_time;
+
+  /// No description provided for @enter_location.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Location'**
+  String get enter_location;
+
+  /// No description provided for @event_location_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter event location'**
+  String get event_location_validator;
+
+  /// No description provided for @location_venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Location / Venue'**
+  String get location_venue;
+
+  /// No description provided for @inbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox'**
+  String get inbox;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get search;
+
+  /// No description provided for @message.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get message;
+
+  /// No description provided for @images.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get images;
 }
 
 class _AppLocalizationsDelegate

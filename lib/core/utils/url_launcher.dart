@@ -2,9 +2,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UrlLauncher {
-  dynamic launchURL(url) async {
+  Future launchURL(url) async {
     try {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      await launchUrl(Uri.parse(url));
+      await Future.delayed(Duration(seconds: 5));
     } catch (err) {
       Fluttertoast.showToast(
         msg: "Invalid URL",

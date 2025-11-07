@@ -48,13 +48,14 @@
 
      "contribute_with_love":"Contribute with love",
      "donate":"Donate",
+     "donate_for": "Donation For",
+     "donate_for_description": "Your support, in any form, will help us create wonderful memories at this party. More importantly, your contribution goes beyond celebration - it becomes a source of hope for those in need. Every donation you make will be directed toward helping underprivileged citizens and supporting community welfare initiatives. Whether it is providing essential resources, medical assistance, or financial aid, your kindness will make a meaningful difference in someone’s life. By standing with us, you are not just donating - you are joining hands in building a stronger, more caring society. Together, we can ensure that joy is shared with everyone, especially those who need it most.",
      "donation_history":"Donate History",
      "enter_amount":"Enter Amount",
-     "enter_purpose_of_donation":"Enter purpose of donation",
-     "payment_options":"Payment Options",
+     "select_payment_options":"Select Payment Options",
      "razorpay":"Razorpay",
      "upi":"UPI",
-     "net_banking":"NetBanking",
+     "net_banking":"Net Banking",
      "cards":"Cards",
      "become_part_mem":"Become a Party Member",
      "party":"Party",
@@ -147,17 +148,25 @@
     "click_to_upload_doc_and_photo":"Click to Upload Documents or Photos",
     "maximum_5_are_allowed":"Maximum 5 are allowed",
     "enter_address":"Enter Address",
+    "enter_your_address":"Enter your Address",
     "address_validator":"Please enter your home address",
 
     "appointments":"Appointments",
     "request_appointment":"Request Appointment",
+    "scheduled_date":"Scheduled Date",
+    "rescheduled_date":"Rescheduled Date",
+    "appointment_note":"Note: As per the availability of Associate can rescheduled ur preferred date in appointment",
     "appointment_list":"Appointment List",
     "select_mla":"Select MLA",
+    "select_associate":"Select Associate",
+    "your_notified_events":"Your Notified Events",
     "book_for":"Book for",
+    "membership_id":"Membership ID",
+    "membership_validator":"Please enter Membership ID",
     "date":"Date",
     "please_select_your_appointment_date":"Please select your appointment date",
     "mla_validator":"Please select one MLA",
-    "choose_your_mla":"Choose your MLA",
+    "choose_your_associate":"Choose your Associate",
     "membership_id":"Membership ID",
     "phone_number":"Phone number",
     "enter_phone_number":"Enter phone number",
@@ -172,6 +181,7 @@
     "clear":"Clear",
 
     "wall_of_help":"Wall of Help",
+    "helping_hands_gains_love":"Helping hands gains love",
     "quick_links":"Quick Links",
     "request_help":"Request Help",
     "contribute":"Contribute",
@@ -180,6 +190,7 @@
     "raised_amount":"Raised Amount",
     "raise_amount_validator":"Amount cannot be empty",
     "requested_amount":"Requested Amount",
+    "requested":"Requested",
     "description":"Description",
     "enter_your_issue":"Enter your issue",
     "enter_your_name":"Enter your name",
@@ -187,8 +198,17 @@
     "enter_your_title":"Enter your title",
     "please_enter_the_cause_for_raising_request":"Please enter cause for raising request",
     "please_enter_few_words":"Please enter few words", 
-
-
+    "type_of_help_needed":"Type of Help Needed",
+    "choose_the_options":"Choose the options",
+    "dropdown_validator":"Please select one option",
+    "enter_description_of_request":"Enter description of request",
+    "urgency_level":"Urgency Level",
+    "preferred_way_to_receive_help":"Preferred Way to Receive Help",
+    "supporting_documents":"Supporting Documents (If Any)",
+    "less_amount_validator":"Minimun 10rs is allowed",
+    "chat":"Chat",
+    "my_chat":"My Chats",
+    "update":"Update",
     "enter_detail_description":"Enter detail description",
     "date_of_submission":"Date of Submission",
     "contact_number":"Contact Number",
@@ -208,9 +228,14 @@
     "previous_contributions":"Previous Contributions",
 
 
+    "my_requests":"My Requests",
+    "edit":"Edit",
+    "delete":"Delete",
+
+
     "my_complaints":"My Complaints",
 
-
+    "not_found":"Not Found",
 
 
 
@@ -279,7 +304,38 @@
     "share_app": "Share App",
     "share_app_subtext": "You can Share this app to your friends and family members",
     "logout": "Logout",
-    "logout_confirmation": "Are you sure you want to sign out from your account?"
+    "logout_confirmation": "Are you sure you want to sign out from your account?",
+
+
+    "notify_representative":"Notify Representative",
+    "notify":"Notify",
+    "notify_mla":"Notify Mla",
+    "notify_description":"Beyond politics, we build trust and support. With the Wall of Help, you’re never alone assistance is always near.",
+    "recent":"Recent",
+    "past":"Past",
+    "view_how_member_notified":"View how members Notified",
+    "nearest_member":"Nearest Member",
+    "list_of_nearest_member":"List Of Nearest Member",
+    "apply":"Apply",
+    "phone_no":"Phone No",
+    "notify_description_validatore":"Enter detail description to notify",
+    "event_title_validatore":"Please enter event name",
+    "event_time_validatore":"Please select event time",
+    "event_date_validatore":"Please select your event date",
+    "event_date":"Event Date",
+    "event_type":"Event Type",
+    "event_time":"Event Time",
+    "select_time":"Select Time",
+    "enter_location":"Enter Location",
+    "event_location_validator":"Please enter event location",
+    "location_venue":"Location / Venue",
+    "inbox":"Inbox",
+
+    "filters":"Filters",
+    "status":"Status",
+    "search":"Search...",
+    "message":"Message",
+    "images":"Images"
 
 
 }

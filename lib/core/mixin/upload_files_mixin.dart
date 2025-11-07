@@ -24,7 +24,7 @@ mixin UploadFilesMixin {
       );
       if (response.data?.responseCode == 200) {
         CommonSnackbar(
-          text: "${name?.capitalize() ?? "Image"} updated successfully",
+          text: "${name?.capitalize() ?? "Image"} uploaded successfully",
         ).showSnackbar();
         return response.data?.imagePath1 ?? "";
       } else {
@@ -39,7 +39,7 @@ mixin UploadFilesMixin {
     return "";
   }
 
-  Future<String> uploadMultipleImage(List<File> files) async {
+  Future<List<String>> uploadMultipleImage(List<File> files) async {
     try {
       List<MultipartFile> multipartFiles = [];
 
@@ -53,8 +53,13 @@ mixin UploadFilesMixin {
         data: data,
       );
       if (response.data?.responseCode == 200) {
-        CommonSnackbar(text: "Images updated successfully").showSnackbar();
-        return response.data?.imagePath1 ?? "";
+        CommonSnackbar(text: "Images uploaded successfully").showSnackbar();
+
+        List<String> files = [];
+         response.data?.files?.forEach((file) {
+          files.add(file.imagePath1 ?? "");
+        });
+        return files;
       } else {
         CommonSnackbar(text: "Something went wrong.").showSnackbar();
       }
@@ -64,6 +69,6 @@ mixin UploadFilesMixin {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
     }
-    return "";
+    return [];
   }
 }

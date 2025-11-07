@@ -4,6 +4,8 @@ flutter_native_splash:
   web: false
     
   color: "#FFFFFF"
+  # image: "assets/launcher_icon/sevak.png"
 
   android_12: 
     color: "#FFFFFF"
+    # image: "assets/launcher_icon/sevak.png"

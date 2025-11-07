@@ -4,6 +4,7 @@ import 'package:inldsevak/core/dio/network_requester.dart';
 import 'package:inldsevak/core/dio/repo_reponse.dart';
 import 'package:inldsevak/core/models/response/upload_profile_pic_model.dart';
 import 'package:inldsevak/core/utils/urls.dart';
+import 'package:inldsevak/features/auth/services/upload_multiple_files.dart';
 
 class UploadFilesRepository {
   NetworkRequester network = NetworkRequester();
@@ -21,7 +22,7 @@ class UploadFilesRepository {
         ? RepoResponse(error: response)
         : RepoResponse(data: UploadProfilePicModel.fromJson(response));
   }
-   Future<RepoResponse<UploadProfilePicModel>> uploadMultipleImage({
+   Future<RepoResponse<UploadMultipleFilesModel>> uploadMultipleImage({
     required FormData data,
   }) async {
     final response = await network.post(
@@ -31,6 +32,6 @@ class UploadFilesRepository {
 
     return response is APIException
         ? RepoResponse(error: response)
-        : RepoResponse(data: UploadProfilePicModel.fromJson(response));
+        : RepoResponse(data: UploadMultipleFilesModel.fromJson(response));
   }
 }

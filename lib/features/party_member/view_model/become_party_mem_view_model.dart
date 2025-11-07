@@ -1,17 +1,14 @@
 import 'dart:io';
 
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
-import 'package:inldsevak/core/extensions/list_extension.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
-import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/mixin/transparent_mixin.dart';
+import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
-import 'package:inldsevak/core/services/upload_image_repo.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/party_member/model/request/party_member_request_model.dart';
 import 'package:inldsevak/features/party_member/services/party_member_repository.dart';
@@ -21,7 +18,7 @@ import 'package:inldsevak/features/profile/models/response/user_profile_model.da
     as profile;
 
 class BecomePartyMemViewModel extends BaseViewModel
-    with CupertinoDialogMixin, TransparentCircular {
+    with  TransparentCircular, UploadFilesMixin {
   bool visibility = true;
   bool isEnable = true;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -38,7 +35,7 @@ class BecomePartyMemViewModel extends BaseViewModel
   final genderController = SingleSelectController<String>(null);
   final maritalStatusController = SingleSelectController<String>(null);
   final constituencyController = SingleSelectController<Constituency>(null);
-  File? photographyPicture;
+  // File? photographyPicture;
   final reasonController = TextEditingController();
 
   List<String> gendersList = ["Male", "Female", "Others"];
@@ -50,25 +47,57 @@ class BecomePartyMemViewModel extends BaseViewModel
     "Seperated",
   ];
 
-  Future<void> selectImage() async {
-    customRightCupertinoDialog(
-      content: "Choose Image",
-      rightButton: "Sure",
-      onTap: () async {
-        try {
-          photographyPicture = await pickGalleryImage();
-          notifyListeners();
-        } catch (err, stackTrace) {
-          debugPrint("Error: $err");
-          debugPrint("Stack Trace: $stackTrace");
-        }
-        RouteManager.pop();
-      },
+  List<File> multipleFiles = [];
+
+  Widget selectMultipleImages() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          leading: Icon(Icons.camera),
+          title: Text('Take a Picture'),
+          onTap: () async {
+            RouteManager.pop();
+            try {
+              multipleFiles.add(await createCameraImage() ?? []);
+              notifyListeners();
+            } catch (err) {
+              debugPrint("-------->$err");
+            }
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.photo_library),
+          title: Text('Choose from Gallery'),
+          onTap: () async {
+            RouteManager.pop();
+            try {
+              multipleFiles.addAll(await pickMultipleImages() ?? []);
+              notifyListeners();
+            } catch (err) {
+              debugPrint("-------->$err");
+            }
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.file_open),
+          title: Text('Choose from Files'),
+          onTap: () async {
+            RouteManager.pop();
+            try {
+              multipleFiles.addAll(await pickFiles() ?? []);
+              notifyListeners();
+            } catch (err) {
+              debugPrint("-------->$err");
+            }
+          },
+        ),
+      ],
     );
   }
 
-  void removeImage() {
-    photographyPicture = null;
+  void removeImage(int index) {
+    multipleFiles.removeAt(index);
     notifyListeners();
   }
 
@@ -88,6 +117,7 @@ class BecomePartyMemViewModel extends BaseViewModel
       }
       isLoading = true;
       final data = PartyMemberRequestModel(
+        documents: [],
         phone: mobileNumberController.text,
         assemblyConstituenciesID: constituencyController.value!.sId!,
         parliamentaryConstituencyId: parlimentConstituencyID,
@@ -96,8 +126,10 @@ class BecomePartyMemViewModel extends BaseViewModel
         dateOfBirth: companyDateFormat,
         gender: genderController.value,
         maritalStatus: maritalStatusController.value,
-        reason: reasonController.text,
-        documents: [],
+        reason: "Request to Join Party",
+        images: multipleFiles.isEmpty
+            ? []
+            : await uploadMultipleImage(multipleFiles),
       );
 
       final response = await PartyMemberRepository().createPartyMember(
@@ -126,37 +158,6 @@ class BecomePartyMemViewModel extends BaseViewModel
     }
   }
 
-  Future<String?> uploadImage() async {
-    try {
-      if (photographyPicture != null) {
-        final FormData data = FormData.fromMap({
-          'file': await MultipartFile.fromFile(photographyPicture!.path),
-        });
-
-        final response = await UploadImageRepository().uploadPicture(
-          data: data,
-          token: token ?? '',
-        );
-        if (response.data?.responseCode == 200) {
-          return response.data?.imagePath1;
-        } else {
-          CommonSnackbar(text: "Unable to upload image").showSnackbar();
-        }
-      }
-    } catch (err, stackTrace) {
-      debugPrint("Error: $err");
-      debugPrint("Stack Trace: $stackTrace");
-    }
-    return "";
-  }
-
-  String? _safeFindMatch(List<String> options, String? value) {
-    if (value == null) return null;
-    return options.firstWhereOrNull(
-      (option) => option.toLowerCase() == value.toLowerCase(),
-    );
-  }
-
   autoFillData(profile.Data? profile) {
     fullNameController.text = profile?.name ?? "";
     mobileNumberController.text = profile?.phone ?? "";
@@ -173,8 +174,9 @@ class BecomePartyMemViewModel extends BaseViewModel
     companyDateFormat = null;
     genderController.clear();
     maritalStatusController.clear();
-    reasonController.clear();
-    photographyPicture = null;
+    // reasonController.clear();
+    multipleFiles.clear();
+    notifyListeners();
   }
 
   @override

@@ -46,12 +46,34 @@ class Data {
 class Mla {
   String? sId;
   User? user;
+  String? constituency;
+  String? party;
+  String? address;
+  String? avatar;
+  List<SocialMediaLinks>? socialMediaLinks;
 
-  Mla({this.sId, this.user});
+  Mla(
+      {this.sId,
+      this.user,
+      this.constituency,
+      this.party,
+      this.address,
+      this.avatar,
+      this.socialMediaLinks});
 
   Mla.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    constituency = json['constituency'];
+    party = json['party'];
+    address = json['address'];
+    avatar = json['avatar'];
+    if (json['socialMediaLinks'] != null) {
+      socialMediaLinks = <SocialMediaLinks>[];
+      json['socialMediaLinks'].forEach((v) {
+        socialMediaLinks!.add(new SocialMediaLinks.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -59,6 +81,14 @@ class Mla {
     data['_id'] = this.sId;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
+    }
+    data['constituency'] = this.constituency;
+    data['party'] = this.party;
+    data['address'] = this.address;
+    data['avatar'] = this.avatar;
+    if (this.socialMediaLinks != null) {
+      data['socialMediaLinks'] =
+          this.socialMediaLinks!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -88,6 +118,28 @@ class User {
     data['email'] = this.email;
     data['phone'] = this.phone;
     data['avatar'] = this.avatar;
+    return data;
+  }
+}
+
+class SocialMediaLinks {
+  String? platform;
+  String? url;
+  String? sId;
+
+  SocialMediaLinks({this.platform, this.url, this.sId});
+
+  SocialMediaLinks.fromJson(Map<String, dynamic> json) {
+    platform = json['platform'];
+    url = json['url'];
+    sId = json['_id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['platform'] = this.platform;
+    data['url'] = this.url;
+    data['_id'] = this.sId;
     return data;
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
+import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
@@ -9,6 +10,8 @@ import 'package:inldsevak/features/quick_access/be_volunteer/services/volunterr_
 import 'package:quickalert/quickalert.dart';
 import 'package:inldsevak/features/quick_access/appointments/model/mla_dropdown_model.dart'
     as mla;
+import 'package:inldsevak/features/profile/models/response/user_profile_model.dart'
+    as profile;
 
 class BeAVolunteerViewModel extends BaseViewModel {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -32,8 +35,13 @@ class BeAVolunteerViewModel extends BaseViewModel {
   final Map<String, bool> _selectedInterest = {};
   Map<String, bool> get selectedInterest => _selectedInterest;
   set selectedInterest(Map<String, bool> value) {
+    selectedInterestList.clear();
     _selectedInterest.addAll(value);
-    log(_selectedInterest.entries.toString());
+    _selectedInterest.forEach((key, value) {
+      if (value) {
+        selectedInterestList.add(key);
+      }
+    });
   }
 
   final preferredTimeSlotsController = SingleSelectController<String>(null);
@@ -41,7 +49,7 @@ class BeAVolunteerViewModel extends BaseViewModel {
 
   List<String> genderList = ['Male', 'Female', 'others'];
   List<String> occupationList = ['Teacher', 'Engineer', 'Social Worker'];
-  List<String> timeSlotsList = ['12 Am - 2 Pm', '2 Pm - 4 Pm'];
+  List<String> timeSlotsList = ['Morning', 'Afternoon', 'Evening'];
   List<String> hoursPerWeekList = ['1hrs', '2hrs', '3hrs'];
   List<String> interestsList = [
     'Community Events',
@@ -50,13 +58,13 @@ class BeAVolunteerViewModel extends BaseViewModel {
     'Education Support',
     'Environmental',
   ];
+  List<String> selectedInterestList = [];
 
   List<String> availability = ['Weekdays', 'Weekends', 'Anytime'];
   String? selectedAvailability;
 
   void selectAvailability(String? option) {
     selectedAvailability = option;
-    notifyListeners();
   }
 
   Future<void> creatNewVolunteer() async {
@@ -73,11 +81,11 @@ class BeAVolunteerViewModel extends BaseViewModel {
         name: fullNameController.text.trim(),
         email: emailController.text.trim(),
         phone: phoneNumberController.text.trim(),
-        age: addressController.text.trim(),
+        age: ageController.text.trim(),
         gender: genderController.value!,
         occupation: occupationController.value!,
         address: "",
-        areasOfInterest: interestsList,
+        areasOfInterest: selectedInterestList,
         availability: selectedAvailability!,
         preferredTimeSlot: preferredTimeSlotsController.value!,
         hoursPerWeek: hoursPerWeekController.value!,
@@ -86,18 +94,21 @@ class BeAVolunteerViewModel extends BaseViewModel {
 
       final response = await VolunterrRepository().createVolunteer(data, token);
       if (response.data?.responseCode == 200) {
-        await CommonSnackbar(
+        RouteManager.pop();
+        CommonSnackbar(
           text:
               response.data?.message ??
               "Volunteer request sended successfully !",
         ).showAnimatedDialog(type: QuickAlertType.success);
       } else {
-        await CommonSnackbar(
+        CommonSnackbar(
           text: response.data?.message ?? "Something went wrong",
         ).showAnimatedDialog(type: QuickAlertType.warning);
       }
-      RouteManager.pop();
     } catch (err, stackTrace) {
+      CommonSnackbar(
+        text: "Something went wrong",
+      ).showAnimatedDialog(type: QuickAlertType.error);
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
@@ -109,5 +120,24 @@ class BeAVolunteerViewModel extends BaseViewModel {
   void dispose() {
     mlaController.dispose();
     super.dispose();
+  }
+
+  autoFillData(profile.Data? profile) {
+    fullNameController.text = profile?.name ?? "";
+    emailController.text = profile?.email ?? "";
+    phoneNumberController.text = profile?.phone ?? "";
+    genderController.value = profile?.gender ?? "";
+  }
+
+  clear() {
+    mlaController.clear();
+    fullNameController.clear();
+    emailController.clear();
+    phoneNumberController.clear();
+    ageController.clear();
+    genderController.clear();
+    occupationController.clear();
+    preferredTimeSlotsController.clear();
+    hoursPerWeekController.clear();
   }
 }

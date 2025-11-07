@@ -46,4 +46,6 @@ app.*.map.json
 .env
 keystore.md
 native_splash.md
+native_splash.yaml
 l10n.md
+flutter_launcher_icons.yaml

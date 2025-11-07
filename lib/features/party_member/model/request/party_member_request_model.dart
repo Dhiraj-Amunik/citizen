@@ -8,6 +8,7 @@ class PartyMemberRequestModel {
   final String parliamentaryConstituencyId;
   final String assemblyConstituenciesID;
   final List<Document?>? documents;
+  final List<String?>? images;
   final String? reason;
 
   PartyMemberRequestModel({
@@ -21,6 +22,7 @@ class PartyMemberRequestModel {
     required this.assemblyConstituenciesID,
     this.documents,
     this.reason,
+    this.images,
   });
 
   Map<String, dynamic> toJson() {
@@ -36,6 +38,7 @@ class PartyMemberRequestModel {
       'assemblyConstituencyId': assemblyConstituenciesID,
       'document': documents?.map((doc) => doc?.toJson()).toList(),
       'reason': reason,
+      'images':images
     };
   }
 }

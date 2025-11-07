@@ -5,6 +5,7 @@ import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/utils/url_launcher.dart';
 import 'package:inldsevak/features/lok_varta/model/mla_details_model.dart'
     as mladetails;
 
@@ -62,21 +63,57 @@ class MlaDetailsSilverAppbar extends StatelessWidget {
                   Row(
                     spacing: Dimens.gapX1B,
                     children: [
-                      SvgPicture.asset(
-                        "assets/lok_varta/ii.svg",
-                        height: Dimens.scaleX2B,
+                      GestureDetector(
+                        onTap: () {
+                          if (mlaModel?.socialMediaLinks?.length ==4) {
+                            UrlLauncher().launchURL(
+                              mlaModel?.socialMediaLinks?[0].url ?? "",
+                            );
+                          }
+                        },
+                        child: SvgPicture.asset(
+                          "assets/lok_varta/ii.svg",
+                          height: Dimens.scaleX2B,
+                        ),
                       ),
-                      SvgPicture.asset(
-                        "assets/lok_varta/fi.svg",
-                        height: Dimens.scaleX2B,
+                      GestureDetector(
+                        onTap: () {
+                          if (mlaModel?.socialMediaLinks?.length == 4) {
+                            UrlLauncher().launchURL(
+                              mlaModel?.socialMediaLinks?[1].url ?? "",
+                            );
+                          }
+                        },
+                        child: SvgPicture.asset(
+                          "assets/lok_varta/fi.svg",
+                          height: Dimens.scaleX2B,
+                        ),
                       ),
-                      SvgPicture.asset(
-                        "assets/lok_varta/ti.svg",
-                        height: Dimens.scaleX2B,
+                      GestureDetector(
+                        onTap: () {
+                          if (mlaModel?.socialMediaLinks?.length == 4) {
+                            UrlLauncher().launchURL(
+                              mlaModel?.socialMediaLinks?[2].url ?? "",
+                            );
+                          }
+                        },
+                        child: SvgPicture.asset(
+                          "assets/lok_varta/ti.svg",
+                          height: Dimens.scaleX2B,
+                        ),
                       ),
-                      SvgPicture.asset(
-                        "assets/lok_varta/yi.svg",
-                        height: Dimens.scaleX2B,
+                      GestureDetector(
+                        onTap: () {
+                          if (mlaModel?.socialMediaLinks?.length == 4) {
+                            UrlLauncher().launchURL(
+                              mlaModel?.socialMediaLinks?[3].url ?? "",
+                            );
+                          }
+                        },
+                        child: SvgPicture.asset(
+                          "assets/lok_varta/yi.svg",
+                          height: Dimens.scaleX2B,
+                        ),
                       ),
                     ],
                   ),

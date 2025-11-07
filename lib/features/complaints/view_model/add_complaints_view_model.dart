@@ -14,7 +14,6 @@ import 'package:inldsevak/features/complaints/model/response/authorites_model.da
     as authorities;
 import 'package:inldsevak/features/complaints/model/response/complaint_departments_model.dart'
     as departments;
-import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 
 import 'package:inldsevak/features/complaints/repository/complaints_repository.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
@@ -31,7 +30,6 @@ class AddComplaintsViewModel extends BaseViewModel
 
   final formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
-  final constituencyController = SingleSelectController<Constituency>(null);
   final descriptionController = TextEditingController();
   final departmentController = SingleSelectController<departments.Data>(null);
   // final authortiyController = SingleSelectController<authorities.Data>(null);
@@ -44,7 +42,7 @@ class AddComplaintsViewModel extends BaseViewModel
     notifyListeners();
   }
 
-  Future<void> lodgeComplaints() async {
+  Future<void> lodgeComplaints({required String constituencyID}) async {
     try {
       if (formKey.currentState!.validate()) {
         autoValidateMode = AutovalidateMode.disabled;
@@ -54,18 +52,19 @@ class AddComplaintsViewModel extends BaseViewModel
         return;
       }
       isLoading = true;
+      List<MultipartFile> multipartFiles = [];
+      for (File imagePath in multipleFiles) {
+        MultipartFile file = await MultipartFile.fromFile(imagePath.path);
+        multipartFiles.add(file);
+      }
 
       final FormData form = FormData.fromMap({
         "department": departmentController.value?.sId,
         // "authorityId": authortiyController.value?.sId,
-        "constituency": constituencyController.value?.sId,
+        "constituency": constituencyID,
         "subject": titleController.text,
         "message": descriptionController.text,
-        "attachments": FormData.fromMap({
-          'files': multipleFiles.isEmpty
-              ? []
-              : await uploadMultipleImage(multipleFiles),
-        }),
+        "attachments": multipartFiles,
       });
 
       final response = await ComplaintsRepository().addComplaints(
@@ -79,7 +78,10 @@ class AddComplaintsViewModel extends BaseViewModel
         final BuildContext context =
             RouteManager.navigatorKey.currentState!.context;
         if (context.mounted) {
-          await context.read<ComplaintsViewModel>().getComplaints();
+          final provider = context.read<ComplaintsViewModel>();
+          provider.selectedStatusList = [];
+          provider.departmentKey = null;
+          await provider.getComplaints();
         }
         RouteManager.pop();
       } else {
@@ -145,19 +147,50 @@ class AddComplaintsViewModel extends BaseViewModel
   //image
   List<File> multipleFiles = [];
 
-  Future<void> selectMultipleImages() async {
-    customRightCupertinoDialog(
-      content: "Choose Files",
-      rightButton: "Sure",
-      onTap: () async {
-        try {
-          multipleFiles.addAll(await pickMultipleImages() ?? []);
-          notifyListeners();
-        } catch (err) {
-          debugPrint("-------->$err");
-        }
-        RouteManager.pop();
-      },
+  Widget selectMultipleImages() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          leading: Icon(Icons.camera),
+          title: Text('Take a Picture'),
+          onTap: () async {
+            RouteManager.pop();
+            try {
+              multipleFiles.add(await createCameraImage() ?? []);
+              notifyListeners();
+            } catch (err) {
+              debugPrint("-------->$err");
+            }
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.photo_library),
+          title: Text('Choose from Gallery'),
+          onTap: () async {
+            RouteManager.pop();
+            try {
+              multipleFiles.addAll(await pickMultipleImages() ?? []);
+              notifyListeners();
+            } catch (err) {
+              debugPrint("-------->$err");
+            }
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.file_open),
+          title: Text('Choose from Files'),
+          onTap: () async {
+            RouteManager.pop();
+            try {
+              multipleFiles.addAll(await pickFiles() ?? []);
+              notifyListeners();
+            } catch (err) {
+              debugPrint("-------->$err");
+            }
+          },
+        ),
+      ],
     );
   }
 

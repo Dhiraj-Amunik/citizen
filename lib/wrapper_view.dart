@@ -22,10 +22,12 @@ class WrapperView extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return SplashView();
           }
+          if (snapshot.hasError) {
+            return LoginView();
+          }
+
           return Consumer<ConnectivityProvider>(
             builder: (context, value, _) {
-
-              
               if (!value.isOnline) {
                 return OfflineView();
               }

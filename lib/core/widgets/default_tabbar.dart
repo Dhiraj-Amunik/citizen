@@ -7,7 +7,6 @@ import 'package:inldsevak/core/utils/dimens.dart';
 class DefaultTabBar extends StatelessWidget {
   final TabController controller;
   final double commonRadius;
-  final double? height;
   final double? fontSize;
   final List<String> tabLabels;
   final TabBarIndicatorSize? tabBarSize;
@@ -19,7 +18,6 @@ class DefaultTabBar extends StatelessWidget {
     required this.controller,
     required this.tabLabels,
     this.isScrollable = false,
-    this.height,
     this.fontSize,
     this.commonRadius = 28,
     super.key,

@@ -45,34 +45,44 @@ class QuickAccessWidget extends StatelessWidget {
 
     final List<QuickAccessModel> partyQuickAccess = [
       QuickAccessModel(
+        icon: AppImages.complaintAccess,
+        text: localization.raise_complaint,
+        route: Routes.complaintsPage,
+        fullWidth: true,
+        color: AppPalettes.liteRedColor,
+      ),
+      QuickAccessModel(
         icon: AppImages.notifyAccess,
-        text: "Notify Representative",
-        route: Routes.partyWallOfHelpPage,
+        text: localization.notify_representative,
+        route: Routes.notifyRepresentativePage,
+        fullWidth: true,
+        color: AppPalettes.liteGreenColor,
       ),
       QuickAccessModel(
         icon: AppImages.volunteerAccess,
-        text: "Be a volunteer",
+        text: localization.be_a_volunteer,
         route: Routes.beVolunteerPage,
+        fullWidth: true,
       ),
       QuickAccessModel(
         icon: AppImages.appointmentAccess,
-        text: "Appointment",
-        route: Routes.requestAppointmentPage,
+        text: localization.appointments,
+        route: Routes.appointmentPage,
       ),
       QuickAccessModel(
         icon: AppImages.helpAccess,
-        text: "Wall of Help",
+        text: localization.wall_of_help,
         route: Routes.partyWallOfHelpPage,
       ),
       QuickAccessModel(
-        icon: AppImages.helpAccess,
-        text: "Survey",
-        route: Routes.partyWallOfHelpPage,
+        icon: AppImages.surveyAccess,
+        text: localization.survey,
+        route: Routes.surveyPage,
       ),
       QuickAccessModel(
-        icon: AppImages.volunteerAccess,
-        text: "Nearest Member",
-        route: Routes.partyWallOfHelpPage,
+        icon: AppImages.nearestAccess,
+        text: localization.nearest_member,
+        route: Routes.nearestMemberPage,
       ),
     ];
     return Padding(

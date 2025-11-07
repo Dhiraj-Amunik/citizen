@@ -68,25 +68,29 @@ class Media {
   bool? isDeleted;
   String? createdAt;
   String? updatedAt;
+  String? url;
   int? iV;
 
-  Media(
-      {this.sId,
-      this.title,
-      this.mla,
-      this.mediaType,
-      this.publishDate,
-      this.status,
-      this.content,
-      this.images,
-      this.videoUrl,
-      this.isActive,
-      this.isDeleted,
-      this.createdAt,
-      this.updatedAt,
-      this.iV});
+  Media({
+    this.sId,
+    this.title,
+    this.mla,
+    this.mediaType,
+    this.publishDate,
+    this.status,
+    this.content,
+    this.images,
+    this.videoUrl,
+    this.url,
+    this.isActive,
+    this.isDeleted,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
 
   Media.fromJson(Map<String, dynamic> json) {
+    url = json['url'];
     sId = json['_id'];
     title = json['title'];
     mla = json['mla'] != null ? new Mla.fromJson(json['mla']) : null;
@@ -105,6 +109,7 @@ class Media {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['url'] = this.url;
     data['_id'] = this.sId;
     data['title'] = this.title;
     if (this.mla != null) {

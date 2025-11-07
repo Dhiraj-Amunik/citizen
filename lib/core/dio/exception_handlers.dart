@@ -1,7 +1,9 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:inldsevak/core/dio/error_model.dart';
+import 'package:inldsevak/core/secure/secure_storage.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
+import 'package:quickalert/models/quickalert_type.dart';
 
 class APIException implements Exception {
   String message;
@@ -76,6 +78,15 @@ class HandleError {
       case 400:
         return "Bad Request: The request was invalid.";
       case 401:
+        CommonSnackbar(
+          text: "You have been Logged Out!\nPlease Login again.",
+        ).showAnimatedDialog(
+          type: QuickAlertType.warning,
+          onTap: () {
+            SessionController.instance.clearSession();
+          },
+        );
+
         return "Unauthorized: Please login again.";
       case 403:
         return "Forbidden: You don’t have permission to access this resource.";

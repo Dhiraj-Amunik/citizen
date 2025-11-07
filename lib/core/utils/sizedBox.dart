@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class SizeBox {
   SizeBox._();
   static const size = SizedBox();
+  static final sizeHX = 2.verticalSpace;
   static final sizeHX1 = 4.verticalSpace;
+  static final sizeHX1B = 6.verticalSpace;
   static final sizeHX2 = 8.verticalSpace;
   static final sizeHX3 = 12.verticalSpace;
   static final sizeHX4 = 14.verticalSpace;
@@ -29,6 +31,7 @@ class SizeBox {
   static final sizeWX5 = 20.horizontalSpace;
   static final sizeWX6 = 24.horizontalSpace;
   static final sizeWX7 = 28.horizontalSpace;
+  static final sizeWX10 = 40.horizontalSpace;
 
   static final appBarSize = 18.r.verticalSpace;
   static final widgetSpacing = 12.r.verticalSpace;

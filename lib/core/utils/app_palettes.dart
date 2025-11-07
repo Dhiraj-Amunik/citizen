@@ -40,6 +40,9 @@ class AppPalettes {
   static const liteBlueColor = Color(0xFFDBEAFE);
   static const liteGreenColor = Color(0xFFC9FACC);
   static const liteRedColor = Color(0xFFFF8B83);
+  static const liteOrangeColor = Color(0xFFFFE0B7);
+
+  
   static const imageholderColor = Color(0xFF005747);
 
   

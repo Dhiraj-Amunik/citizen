@@ -13,6 +13,7 @@ import 'package:inldsevak/features/home/widgets/upcoming_home_events_widget.dart
 import 'package:inldsevak/features/home/widgets/my_latest_complaints_widgets.dart';
 import 'package:inldsevak/features/home/widgets/quick_access_widget.dart';
 import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
+import 'package:inldsevak/features/notification/view_model/notification_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -26,13 +27,34 @@ class IndlView extends StatelessWidget {
     return Scaffold(
       appBar: commonAppBar(
         action: [
-          CommonHelpers.buildIcons(
-            path: AppImages.notificationIcon,
-            color: AppPalettes.liteGreenColor,
-            iconColor: AppPalettes.blackColor,
-            padding: Dimens.paddingX3B,
-            iconSize: Dimens.scaleX3,
-            onTap: () => RouteManager.pushNamed(Routes.notificationsPage),
+          Consumer<UpdateNotificationViewModel>(
+            builder: (context, value, _) {
+              return Stack(
+                children: [
+                  CommonHelpers.buildIcons(
+                    path: AppImages.notificationIcon,
+                    color: AppPalettes.liteGreenColor,
+                    iconColor: AppPalettes.blackColor,
+                    padding: Dimens.paddingX3B,
+                    iconSize: Dimens.scaleX3,
+                    onTap: () =>
+                        RouteManager.pushNamed(Routes.notificationsPage),
+                  ),
+                  if (value.showNotification)
+                    Container(
+                      margin: EdgeInsets.all(
+                        Dimens.paddingX3B,
+                      ).copyWith(left: Dimens.paddingX6B),
+                      height: 10,
+                      width: 10,
+                      decoration: boxDecorationRoundedWithShadow(
+                        Dimens.radius100,
+                        backgroundColor: AppPalettes.primaryColor,
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
           SizeBox.sizeWX2,
           CommonHelpers.buildIcons(
@@ -101,8 +123,7 @@ class IndlView extends StatelessWidget {
             UpComingHomeEventsWidget(),
             Consumer<ComplaintsViewModel>(
               builder: (_, value, _) {
-                if (!roleProvider.isPartyMember &&
-                    value.complaintsList.isNotEmpty) {
+                if (value.complaintsList.isNotEmpty) {
                   return MyLatestComplaintsWidgets(
                     complaintList: value.complaintsList,
                   );

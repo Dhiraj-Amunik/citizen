@@ -1,10 +1,10 @@
-class GeoCodingSerachModal {
+class GeoCodingSearchModal {
   List<Predictions>? predictions;
   String? status;
 
-  GeoCodingSerachModal({this.predictions, this.status});
+  GeoCodingSearchModal({this.predictions, this.status});
 
-  GeoCodingSerachModal.fromJson(Map<String, dynamic> json) {
+  GeoCodingSearchModal.fromJson(Map<String, dynamic> json) {
     if (json['predictions'] != null) {
       predictions = <Predictions>[];
       json['predictions'].forEach((v) {

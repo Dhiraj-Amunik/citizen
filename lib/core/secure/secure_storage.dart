@@ -21,21 +21,27 @@ class SessionController {
   SecureModel? _model;
 
   Future<void> _init() async {
-    final token = await _storage.read(key: "token");
-    final number = await _storage.read(key: "number");
-    final isParty = await _storage.read(key: "isParty");
-    final isRegistered = await _storage.read(key: "isRegistered");
+    try {
+      await Future.delayed(Duration(seconds: 2));
+      final token = await _storage.read(key: "token");
+      final number = await _storage.read(key: "number");
+      final isParty = await _storage.read(key: "isParty");
+      final isRegistered = await _storage.read(key: "isRegistered");
 
-    if (token != null && number != null) {
-      _model = SecureModel(
-        token: token,
-        number: number,
-        isPartyMemeber: isParty?.toLowerCase() == 'true' ? true : false,
-        isRegistered: isRegistered?.toLowerCase() == 'true' ? true : false,
-      );
+      if (token != null && number != null) {
+        _model = SecureModel(
+          token: token,
+          number: number,
+          isPartyMemeber: isParty?.toLowerCase() == 'true' ? true : false,
+          isRegistered: isRegistered?.toLowerCase() == 'true' ? true : false,
+        );
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    } finally {
+      _authController.add(_model);
     }
-    await Future.delayed(Duration(seconds: 3));
-    _authController.add(_model);
   }
 
   Future<void> setSession({required SecureModel data}) async {

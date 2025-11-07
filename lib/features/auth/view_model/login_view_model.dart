@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
@@ -27,9 +30,7 @@ class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
 
       if (response.data?.responseCode == 200) {
         RouteManager.pushNamed(Routes.verifyOTPPage);
-        CommonSnackbar(
-          text: "${response.data?.data?.otp} is valid for 5 min",
-        ).showSnackbar();
+        CommonSnackbar(text: "OTP Requested Successfully").showToast();
       } else {
         CommonSnackbar(text: response.error?.message).showSnackbar();
       }
@@ -48,11 +49,9 @@ class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
       final response = await AuthRepository().generateOTP(data);
 
       if (response.data?.responseCode == 200) {
-        CommonSnackbar(
-          text: "${response.data?.data?.otp} is valid for 5 min",
-        ).showSnackbar();
+        CommonSnackbar(text: "OTP Resended successfully").showSnackbar();
       } else {
-        CommonSnackbar(text: response.error?.message).showSnackbar();
+        CommonSnackbar(text: response.error?.message).showToast();
       }
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
@@ -66,6 +65,12 @@ class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
       final data = OtpRequestModel(
         phoneNo: numberController.text,
         otp: otpController.text,
+        deviceType: Platform.isIOS
+            ? "ios"
+            : Platform.isAndroid
+            ? "android"
+            : null,
+        deviceToken: await FirebaseMessaging.instance.getToken(),
       );
       final response = await AuthRepository().validateOTP(data);
 
