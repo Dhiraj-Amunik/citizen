@@ -130,6 +130,12 @@ Widget getPage(Routes route, {dynamic arguments}) {
       return NotificationsView();
     case Routes.surveyPage:
       return SurveyView();
+    case Routes.nearestMemberPage:
+      return NearestMemberView();
+    case Routes.chatMemberPage:
+      return ChatMemberView(member: arguments);
+    case Routes.myMembersMessagesListPage:
+      return MyMembersMessagesListView();
     case Routes.photoDetailsPage:
       return PhotoDetailsView(media: arguments);
     case Routes.notifyRepresentativePage:
