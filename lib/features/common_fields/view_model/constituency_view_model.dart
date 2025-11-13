@@ -66,6 +66,10 @@ class ConstituencyViewModel extends BaseViewModel {
   }) async {
     try {
       assemblyConstituencyLists.clear();
+      if (id == null || id.trim().isEmpty) {
+        notifyListeners();
+        return;
+      }
       final model = RequestParlimentIdModel(id: id);
       final response = await ConstituenciesRepository()
           .getAssemblyConstituencies(token: oldToken ?? token, model: model);
@@ -78,8 +82,8 @@ class ConstituencyViewModel extends BaseViewModel {
           ).showAnimatedDialog(type: QuickAlertType.warning);
         } else {
           assemblyConstituencyLists = List<Constituency>.from(data as List);
-          notifyListeners();
         }
+        notifyListeners();
       }
     } catch (err, stackTrace) {
       await CommonSnackbar(

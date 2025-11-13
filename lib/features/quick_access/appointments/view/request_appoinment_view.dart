@@ -14,6 +14,7 @@ import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/core/widgets/upload_multi_files.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/common_fields/widget/mla_drop_down.dart';
 import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
@@ -83,6 +84,7 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                         ),
                         FormTextFormField(
                           isRequired: true,
+                            enableSpeechInput: true,
                           headingText: localization.name,
                           hintText: localization.enter_your_full_name,
                           controller: provider.nameController,
@@ -92,7 +94,8 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                           ),
                         ),
                         if (roleProvider.isPartyMember)
-                          FormTextFormField(
+                          FormTextFormField( 
+                             enableSpeechInput: true,
                             isRequired: true,
                             headingText: localization.membership_id,
                             hintText: localization.membership_id,
@@ -105,6 +108,7 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                         FormTextFormField(
                           maxLength: 10,
                           isRequired: true,
+                            enableSpeechInput: true,
                           headingText: localization.phone_number,
                           hintText: localization.enter_mobile_number,
                           controller: provider.phoneNumberController,
@@ -165,6 +169,14 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                                   localization.enter_your_appointment_reason,
                               controller:
                                   provider.purposeOfAppointmentController,
+                              enableSpeechInput: true,
+                              onMicAvailabilityDenied: (message) {
+                                CommonSnackbar(
+                                  text: message.isEmpty
+                                      ? "Voice input is currently unavailable."
+                                      : message,
+                                ).showSnackbar();
+                              },
                               validator: (text) => text?.validate(
                                 argument:
                                     "Please select your appointment purpose",
@@ -172,7 +184,6 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                             ),
                           ],
                         ),
-
                         // FormCommonDropDown<String>(
                         //   isRequired: true,
                         //   heading: localization.time_slot,
@@ -190,6 +201,15 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                           hintText: localization.description_info,
                           controller: provider.descriptionController,
                           maxLines: 5,
+                          enableSpeechInput: true,
+                          onMicAvailabilityDenied: (message) {
+                            CommonSnackbar(
+                              text: message.isEmpty
+                                  ? "Voice input is currently unavailable."
+                                  : message,
+                            ).showSnackbar();
+                          },
+                          
                           validator: (text) => text?.validate(
                             argument:
                                 "Please enter description for appointment",

@@ -1,7 +1,5 @@
-import 'dart:developer';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
-import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
@@ -47,7 +45,7 @@ class BeAVolunteerViewModel extends BaseViewModel {
   final preferredTimeSlotsController = SingleSelectController<String>(null);
   final hoursPerWeekController = SingleSelectController<String>(null);
 
-  List<String> genderList = ['Male', 'Female', 'others'];
+  List<String> genderList = ['Male', 'Female', 'Others'];
   List<String> occupationList = ['Teacher', 'Engineer', 'Social Worker'];
   List<String> timeSlotsList = ['Morning', 'Afternoon', 'Evening'];
   List<String> hoursPerWeekList = ['1hrs', '2hrs', '3hrs'];
@@ -94,12 +92,18 @@ class BeAVolunteerViewModel extends BaseViewModel {
 
       final response = await VolunterrRepository().createVolunteer(data, token);
       if (response.data?.responseCode == 200) {
-        RouteManager.pop();
-        CommonSnackbar(
+        await CommonSnackbar(
           text:
               response.data?.message ??
-              "Volunteer request sended successfully !",
-        ).showAnimatedDialog(type: QuickAlertType.success);
+              "Volunteer request sent successfully!",
+        ).showAnimatedDialog(
+          type: QuickAlertType.success,
+          onTap: () {
+            RouteManager.pushNamedAndRemoveAll(
+              Routes.topVolunteersPage,
+            );
+          },
+        );
       } else {
         CommonSnackbar(
           text: response.data?.message ?? "Something went wrong",
@@ -126,7 +130,11 @@ class BeAVolunteerViewModel extends BaseViewModel {
     fullNameController.text = profile?.name ?? "";
     emailController.text = profile?.email ?? "";
     phoneNumberController.text = profile?.phone ?? "";
-    genderController.value = profile?.gender ?? "";
+    _preFillDropdownValue(
+      controller: genderController,
+      availableItems: genderList,
+      value: profile?.gender,
+    );
   }
 
   clear() {
@@ -139,5 +147,31 @@ class BeAVolunteerViewModel extends BaseViewModel {
     occupationController.clear();
     preferredTimeSlotsController.clear();
     hoursPerWeekController.clear();
+  }
+  void _preFillDropdownValue<T>({
+    required SingleSelectController<T> controller,
+    required List<T> availableItems,
+    T? value,
+  }) {
+    if (value == null) {
+      controller.clear();
+      return;
+    }
+
+    final normalizedValue = value.toString().trim().toLowerCase();
+    T? matchedItem;
+
+    for (final item in availableItems) {
+      if (item.toString().trim().toLowerCase() == normalizedValue) {
+        matchedItem = item;
+        break;
+      }
+    }
+
+    if (matchedItem == null) {
+      controller.clear();
+    } else {
+      controller.value = matchedItem;
+    }
   }
 }

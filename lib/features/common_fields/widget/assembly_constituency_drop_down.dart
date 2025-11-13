@@ -29,11 +29,13 @@ class _AssemblyConstituencyDropDownWidgetState
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       widget.constituencyController.clear();
       if (widget.initialData == null) {
         return;
       }
 
+      if (!mounted) return;
       widget.constituencyController.value = context
           .read<ConstituencyViewModel>()
           .assemblyConstituencyLists

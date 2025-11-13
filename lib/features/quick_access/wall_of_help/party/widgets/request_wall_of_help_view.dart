@@ -58,6 +58,7 @@ class RequestWallOfHelpView extends StatelessWidget
                       controller: provider.nameController,
                       hintText: localization.enter_your_full_name,
                       headingText: localization.name,
+                        enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: localization.name_validator),
                     ),
@@ -69,6 +70,7 @@ class RequestWallOfHelpView extends StatelessWidget
                       controller: provider.phoneController,
                       hintText: localization.enter_mobile_number,
                       headingText: localization.mobile_number,
+                        enableSpeechInput: true,
                       maxLength: 10,
                       keyboardType: TextInputType.phone,
                       validator: (text) => text?.validate(
@@ -81,6 +83,7 @@ class RequestWallOfHelpView extends StatelessWidget
                       controller: provider.addressController,
                       hintText: localization.enter_your_address,
                       headingText: localization.address,
+                      enableSpeechInput: true,
                       validator: (text) => text?.validate(
                         argument: localization.address_validator,
                       ),
@@ -91,6 +94,7 @@ class RequestWallOfHelpView extends StatelessWidget
                       items: provider.typeOfHelpsList,
                       heading: localization.type_of_help_needed,
                       hintText: localization.choose_the_options,
+                    
                       headerBuilder: (_, text, _) {
                         return Text(
                           text?.name?.capitalize() ?? "",
@@ -117,6 +121,7 @@ class RequestWallOfHelpView extends StatelessWidget
                         controller: provider.otherTypeController,
                         hintText: "Enter your reason",
                         headingText: "Be more specific",
+                       
                         validator: (text) => text?.validate(
                           argument: "Others Help need to be specified",
                         ),
@@ -128,6 +133,7 @@ class RequestWallOfHelpView extends StatelessWidget
                       controller: provider.descriptionController,
                       hintText: localization.enter_description_of_request,
                       headingText: localization.description,
+                       enableSpeechInput: true,
                       validator: (text) => text?.validate(
                         argument: localization.please_enter_few_words,
                       ),

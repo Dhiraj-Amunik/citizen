@@ -15,8 +15,6 @@ import 'package:inldsevak/features/common_fields/widget/assembly_constituency_dr
 import 'package:inldsevak/features/complaints/view_model/add_complaints_view_model.dart';
 import 'package:inldsevak/features/complaints/model/response/complaint_departments_model.dart'
     as departments;
-import 'package:inldsevak/features/complaints/model/response/authorites_model.dart'
-    as authorities;
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 
@@ -33,15 +31,20 @@ class LodgeComplaintView extends StatelessWidget {
     final constituencyProvider = context.read<ConstituencyViewModel>();
     final localization = context.localizations;
 
-    constituencyProvider.getAssemblyConstituencies(id: "").then((_) {
-      constituencyController.clear();
-
-      constituencyController.value = constituencyProvider
-          .assemblyConstituencyLists
-          .firstWhere(
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final assemblyId = profile.parlimentaryConstituencyData?.sId;
+      if (assemblyId != null && assemblyId.isNotEmpty) {
+        constituencyProvider.getAssemblyConstituencies(id: assemblyId).then((_) {
+          final match = constituencyProvider.assemblyConstituencyLists.firstWhere(
             (constituency) =>
                 constituency?.sId == profile.assemblyConstituencyData?.sId,
+            orElse: () => null,
           );
+          if (match != null) {
+            constituencyController.value = match;
+          }
+        });
+      }
     });
 
     return PopScope(
@@ -57,6 +60,7 @@ class LodgeComplaintView extends StatelessWidget {
             title: localization.submit_new_complaint,
             elevation: Dimens.elevation,
           ),
+          
 
           body: Consumer<AddComplaintsViewModel>(
             builder: (context, value, _) {
@@ -77,6 +81,7 @@ class LodgeComplaintView extends StatelessWidget {
                         controller: value.titleController,
                         headingText: localization.complaint_title,
                         hintText: localization.enter_title,
+                        enableSpeechInput: true,
                         validator: (value) => value?.validate(
                           argument: localization.please_enter_a_title,
                         ),
@@ -137,6 +142,7 @@ class LodgeComplaintView extends StatelessWidget {
                         controller: value.descriptionController,
                         headingText: localization.description,
                         hintText: localization.provide_detailed_info,
+                        enableSpeechInput: true,
                         validator: (value) => value?.validate(
                           argument: localization.please_provide_a_detailed_desc,
                         ),

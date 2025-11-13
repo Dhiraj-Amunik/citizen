@@ -13,7 +13,13 @@ class AppointmentsViewModel extends BaseViewModel {
   String? statusKey;
   String? dateKey;
 
-  List<String> statusItems = ["Pending", "Approved", "Rejected", "Completed"];
+  List<String> statusItems = [
+    "Pending",
+    "Approved",
+    "Rejected",
+    "Completed",
+    "Cancelled",
+  ];
   List<String> dateItems = ["Recent", "One Month", "Six Months"];
 
   List<Appointments> appointmentsList = [];

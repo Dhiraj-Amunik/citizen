@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
@@ -15,6 +16,7 @@ import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
 
@@ -58,56 +60,71 @@ class PartyHelpCard extends StatelessWidget {
             spacing: Dimens.gapX1,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: Dimens.gapX2,
                 children: [
+                  _buildAvatar(textTheme),
                   Expanded(
-                    child: Text(
-                      helpRequest.name.isNull(localization.not_found),
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: Dimens.gapX1,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                helpRequest.name.isNull(localization.not_found),
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            SizeBox.sizeWX2,
+                            CommonHelpers.buildStatus(
+                              helpRequest.preferredWayForHelp?.name
+                                      ?.capitalize()
+                                      .isNull(localization.not_found) ??
+                                  localization.not_found,
+                              textColor: AppPalettes.blackColor,
+                              statusColor: AppPalettes.greenColor,
+                            ),
+                            if (isEditable) SizeBox.sizeWX2,
+                            if (isEditable)
+                              CommonHelpers.buildStatus(
+                                helpRequest.status
+                                    .isNull(localization.not_found)
+                                    .capitalize(),
+                                textColor: AppPalettes.blackColor,
+                                statusColor: helpRequest.status == "rejected"
+                                    ? AppPalettes.liteRedColor
+                                    : helpRequest.status == "pending"
+                                    ? AppPalettes.liteOrangeColor
+                                    : helpRequest.status == "closed"
+                                    ? AppPalettes.liteGreyColor
+                                    : AppPalettes.yellowColor,
+                              ),
+                          ],
+                        ),
+                        Row(
+                          spacing: Dimens.gapX1,
+                          children: [
+                            CommonHelpers.buildIcons(
+                              path: AppImages.calenderIcon,
+                              iconSize: Dimens.scaleX1B,
+                              iconColor: AppPalettes.blackColor,
+                            ),
+                            Text(
+                              helpRequest.createdAt?.toDdMmmYyyy() ?? "",
+                              style: textTheme.labelMedium?.copyWith(
+                                color: AppPalettes.lightTextColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                  SizeBox.sizeWX2,
-
-                  CommonHelpers.buildStatus(
-                    helpRequest.preferredWayForHelp?.name?.capitalize().isNull(
-                          localization.not_found,
-                        ) ??
-                        localization.not_found,
-                    textColor: AppPalettes.blackColor,
-                    statusColor: AppPalettes.greenColor,
-                  ),
-                  if (isEditable) SizeBox.sizeWX2,
-                  if (isEditable)
-                    CommonHelpers.buildStatus(
-                      helpRequest.status
-                          .isNull(localization.not_found)
-                          .capitalize(),
-                      textColor: AppPalettes.blackColor,
-                      statusColor: helpRequest.status == "rejected"
-                          ? AppPalettes.liteRedColor
-                          : helpRequest.status == "pending"
-                          ? AppPalettes.liteOrangeColor
-                          : helpRequest.status == "closed"
-                          ? AppPalettes.liteGreyColor
-                          : AppPalettes.yellowColor,
-                    ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                spacing: Dimens.gapX1,
-                children: [
-                  CommonHelpers.buildIcons(
-                    path: AppImages.calenderIcon,
-                    iconSize: Dimens.scaleX1B,
-                    iconColor: AppPalettes.blackColor,
-                  ),
-                  Text(
-                    helpRequest.createdAt?.toDdMmmYyyy() ?? "",
-                    style: textTheme.labelMedium,
                   ),
                 ],
               ),
@@ -117,18 +134,19 @@ class PartyHelpCard extends StatelessWidget {
             textAlign: TextAlign.start,
             text: TextSpan(
               style: textTheme.bodySmall?.copyWith(
-                color: AppPalettes.lightTextColor,
+                color: AppPalettes.blackColor,
+                fontWeight: FontWeight.w500,
               ),
               children: [
                 TextSpan(text: localization.requested),
-                TextSpan(text: " : "),
+                const TextSpan(text: " : "),
                 TextSpan(
                   text: isFinancialHelp
                       ? "₹ ${helpRequest.amountRequested}"
                       : helpRequest.typeOfHelp?.name,
                   style: textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: AppPalettes.blackColor,
+                    color: AppPalettes.lightTextColor,
                   ),
                 ),
               ],
@@ -140,7 +158,8 @@ class PartyHelpCard extends StatelessWidget {
               Text(
                 "${localization.description} : ",
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppPalettes.lightTextColor,
+                  color: AppPalettes.blackColor,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               Expanded(
@@ -148,6 +167,7 @@ class PartyHelpCard extends StatelessWidget {
                   text: helpRequest.description.isNull(localization.not_found),
                   style: AppStyles.bodySmall.copyWith(
                     fontWeight: FontWeight.w500,
+                    color: AppPalettes.lightTextColor,
                   ),
                 ),
               ),
@@ -309,5 +329,52 @@ class PartyHelpCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildAvatar(TextTheme textTheme) {
+    final avatarUrl = _resolveAvatarUrl();
+    final fallbackText = helpRequest.title?.trim().isNotEmpty == true
+        ? helpRequest.title!.trim()
+        : helpRequest.name ?? "";
+    final initials = fallbackText.isNotEmpty
+        ? CommonHelpers.getInitials(fallbackText)
+        : "A";
+    final double radius = Dimens.scaleX3;
+
+    if (avatarUrl != null) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundImage: CachedNetworkImageProvider(avatarUrl),
+        onBackgroundImageError: (_, __) {},
+      );
+    }
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: AppPalettes.primaryColor.withOpacityExt(0.1),
+      child: Text(
+        initials,
+        style: textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppPalettes.primaryColor,
+        ),
+      ),
+    );
+  }
+
+  String? _resolveAvatarUrl() {
+    String? candidate = helpRequest.partyMember?.user?.avatar;
+    if (!(candidate.showDataNull)) {
+      final docs = helpRequest.documents;
+      if (docs != null && docs.isNotEmpty && docs.first.showDataNull) {
+        candidate = docs.first;
+      }
+    }
+    if (!(candidate.showDataNull)) return null;
+
+    final trimmed = candidate!.trim();
+    if (trimmed.startsWith('http')) return trimmed;
+    if (trimmed.startsWith('/')) return "${URLs.baseURL}$trimmed";
+    return "${URLs.baseURL}/$trimmed";
   }
 }

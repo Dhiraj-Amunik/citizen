@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_unused_constructor_parameters
+
 part of 'routes.dart';
 
 enum Routes {
@@ -44,6 +46,15 @@ enum Routes {
   notifyRepresentativePage(path: "/NotifyRepresentativePage"),
   createNotifyRepresentativePage(path: "/CreateNotifyRepresentativePage"),
   updateNotifyRepresentativePage(path: "/UpdateNotifyRepresentativePage"),
+  topVolunteersPage(path: "/TopVolunteersView"),
+  volunteerAnalyticsPage(
+    path: "/VolunteerAnalyticsView",
+    direction: AxisDirection.left,
+  ),
+  leaderBoardPage(path: "/LeaderBoardView"),
+  coinsHistoryPage(path: "/CoinsHistoryView"),
+  coinsInfoPage(path: "/CoinsInfoView"),
+  chatPage(path: "/ChatView"),
   interviewDetailedPage(path: "/InterviewDetailedWidget");
 
   final String path;
@@ -140,6 +151,22 @@ Widget getPage(Routes route, {dynamic arguments}) {
       return UpdateNotifyRepresentativeView(model: arguments);
     case Routes.interviewDetailedPage:
       return InterviewDetailedWidget(media: arguments);
+    case Routes.topVolunteersPage:
+      final args = arguments as TopVolunteersViewArgs?;
+      return TopVolunteersView(
+        canApply: args?.canApply ?? true,
+        statusMessage: args?.statusMessage,
+      );
+    case Routes.volunteerAnalyticsPage:
+      return VolunteerAnalyticsView();
+    case Routes.leaderBoardPage:
+      return LeaderBoardView();
+    case Routes.coinsHistoryPage:
+      return CoinsHistoryView();
+    case Routes.coinsInfoPage:
+      return CoinsInfoView();
+    case Routes.chatPage:
+      return ChatView();
     default:
       return LoginView();
   }

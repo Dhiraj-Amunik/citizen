@@ -69,7 +69,23 @@ class _ProfileEditViewState extends State<ProfileEditView>
       child: Scaffold(
         appBar: commonAppBar(title: localization.edit_details),
         body: FutureBuilder(
-          future: provider.loadProfile(mapsProvider),
+          future: provider.loadProfile(mapsProvider).then((_) async {
+            final parliamentId = provider.parlimentaryConstituencyData?.sId;
+            if (parliamentId != null && parliamentId.isNotEmpty) {
+              await constituencyProvider.getAssemblyConstituencies(
+                id: parliamentId,
+              );
+              final match = constituencyProvider.assemblyConstituencyLists
+                  .firstWhere(
+                (constituency) =>
+                    constituency?.sId == provider.assemblyConstituencyData?.sId,
+                orElse: () => null,
+              );
+              if (match != null) {
+                assemblyconstituencyController.value = match;
+              }
+            }
+          }),
           builder: (_, snapshot) {
             genderController.value = provider.gender;
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -104,6 +120,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           headingText: localization.name,
                           nextFocus: provider.emailFocus,
                           keyboardType: TextInputType.name,
+                          enableSpeechInput: true,
                           validator: (text) => text?.validateName(
                             argument: localization.name_validator,
                           ),
@@ -114,6 +131,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           controller: provider.emailController,
                           prefixIcon: AppImages.emailIcon,
                           headingText: localization.email,
+                          enableSpeechInput: true,
                           validator: (text) => text?.validateEmail(
                             argument: localization.email_validator,
                           ),
@@ -123,6 +141,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           headingText: localization.mobile_number,
                           prefixIcon: AppImages.phoneIcon,
                           controller: provider.phoneNumberController,
+                         showDefaultSuffix: false,
                           keyboardType: TextInputType.none,
                           maxLength: 10,
                           enabled: false,
@@ -175,6 +194,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           controller: provider.dobController,
                           prefixIcon: AppImages.calenderIcon,
                           showCursor: false,
+                          showDefaultSuffix: false,
                           onTap: () async {
                             final date = await customDatePicker();
                             if (date != null) {
@@ -211,6 +231,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           controller: provider.aadharController,
                           prefixIcon: AppImages.aadharIcon,
                           keyboardType: TextInputType.number,
+                          enableSpeechInput: true,
                           validator: (text) => text?.validateAadhar(
                             argument: localization.aadhar_validator,
                           ),
@@ -236,6 +257,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           controller: provider.voterIdController,
                           prefixIcon: AppImages.aadharIcon,
                           keyboardType: TextInputType.text,
+                          enableSpeechInput: true,
                           validator: (text) => text?.validateVoterID(
                             argument: localization.voter_id_validator,
                           ),

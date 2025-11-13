@@ -1,7 +1,9 @@
 import 'dart:developer';
+import 'dart:io' show Platform;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/features/notification/view_model/notification_view_model.dart';
@@ -19,12 +21,19 @@ class NotificationService {
   static Future<void> firebaseMessagingBackgroundHandler(
     RemoteMessage message,
   ) async {
+    // Only handle background messages on supported platforms.
+    final bool messagingSupported = kIsWeb || Platform.isAndroid || Platform.isIOS;
+    if (!messagingSupported) return;
+
     await Firebase.initializeApp();
     await _initializeLocalNotification();
     await _showFlutterNotification(message);
   }
 
   static Future<void> initializeNotification() async {
+    final bool messagingSupported = kIsWeb || Platform.isAndroid || Platform.isIOS;
+    if (!messagingSupported) return;
+
     await requestNotificationPermission();
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -39,8 +48,13 @@ class NotificationService {
   }
 
   static Future<void> _getFcmToken() async {
-    String? token = await _firebaseMessaging.getToken();
-    print('FCM Token: $token');
+    try {
+      String? token = await _firebaseMessaging.getToken();
+      print('FCM Token: $token');
+    } catch (e) {
+      // Token retrieval failed or not supported on this platform
+      log('FCM getToken error: $e');
+    }
   }
 
   //display local notification

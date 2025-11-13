@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
@@ -6,7 +7,9 @@ import 'package:inldsevak/core/extensions/validation_extension.dart';
 import 'package:inldsevak/core/mixin/dateTime_mixin.dart';
 import 'package:inldsevak/core/mixin/handle_multiple_files_sheet.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
+import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
@@ -47,6 +50,7 @@ class UpdateNotifyRepresentativeView extends StatelessWidget
                         headingText: localization.event_type,
                         hintText: localization.title,
                         controller: provider.eventTypeController,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: localization.event_title_validatore,
                         ),
@@ -56,6 +60,7 @@ class UpdateNotifyRepresentativeView extends StatelessWidget
                         headingText: localization.location_venue,
                         hintText: localization.enter_location,
                         controller: provider.locationController,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: localization.event_location_validator,
                         ),
@@ -111,10 +116,16 @@ class UpdateNotifyRepresentativeView extends StatelessWidget
                         hintText: localization.description_info,
                         controller: provider.descriptionController,
                         maxLines: 5,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: localization.notify_description_validatore,
                         ),
                       ),
+                      if (value.existingDocuments.isNotEmpty)
+                        _ExistingDocumentsGrid(
+                          documents: value.existingDocuments,
+                          onRemove: value.removeExistingDocument,
+                        ),
                       Consumer<UpdateNotifyRepresentativeViewModel>(
                         builder: (contextP, value, _) {
                           return UploadMultiFilesWidget(
@@ -164,5 +175,107 @@ class UpdateNotifyRepresentativeView extends StatelessWidget
         );
       },
     );
+  }
+}
+
+class _ExistingDocumentsGrid extends StatelessWidget {
+  const _ExistingDocumentsGrid({
+    required this.documents,
+    required this.onRemove,
+  });
+
+  final List<String> documents;
+  final void Function(int index) onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    if (documents.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: Dimens.gapX,
+      children: [
+        Text(
+          "Uploaded Files",
+          style: context.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: AppPalettes.lightTextColor,
+          ),
+        ),
+        Wrap(
+          spacing: Dimens.gapX1,
+          runSpacing: Dimens.gapX1,
+          children: List.generate(documents.length, (index) {
+            final resolvedUrl = _resolveUrl(documents[index]);
+            if (resolvedUrl == null) {
+              return const SizedBox.shrink();
+            }
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(Dimens.radiusX2),
+                  child: CachedNetworkImage(
+                    imageUrl: resolvedUrl,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Container(
+                      width: 72,
+                      height: 72,
+                      alignment: Alignment.center,
+                      color: AppPalettes.liteGreyColor,
+                      child: const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 1.5),
+                      ),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
+                      width: 72,
+                      height: 72,
+                      alignment: Alignment.center,
+                      color: AppPalettes.liteGreyColor,
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        size: 20,
+                        color: AppPalettes.lightTextColor,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: -6,
+                  right: -6,
+                  child: GestureDetector(
+                    onTap: () => onRemove(index),
+                    child: CircleAvatar(
+                      radius: Dimens.scaleX1B,
+                      backgroundColor: AppPalettes.whiteColor,
+                      child: Icon(
+                        Icons.close,
+                        size: Dimens.scaleX1B,
+                        color: AppPalettes.redColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  String? _resolveUrl(String? value) {
+    if (value == null) return null;
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+    if (trimmed.startsWith('http')) return trimmed;
+    if (trimmed.startsWith('/')) return "${URLs.baseURL}$trimmed";
+    return "${URLs.baseURL}/$trimmed";
   }
 }

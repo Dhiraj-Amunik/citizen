@@ -15,27 +15,48 @@ class MlaViewModel extends BaseViewModel with TransparentCircular {
   }
 
   List<mla.Data> mlaLists = [];
+  bool isLoading = false;
+  bool hasLoaded = false;
+  String? errorMessage;
 
   Future<void> getMLALists() async {
+    if (isLoading) return;
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
     showCustomDialogTransperent(isShowing: true);
     try {
       final response = await AppointmentsRepository().getMLAsData(token);
 
       if (response.data?.responseCode == 200) {
-        final data = response.data?.data;
-        if (data?.isEmpty == true) {
+        final data = response.data?.data ?? <mla.Data>[];
+        mlaLists
+          ..clear()
+          ..addAll(List<mla.Data>.from(data));
+        if (mlaLists.isEmpty) {
+          errorMessage = "No MLA's Found !";
           CommonSnackbar(
-            text: "No MLA's Found !",
+            text: errorMessage,
           ).showAnimatedDialog(type: QuickAlertType.info);
-        } else {
-          mlaLists.addAll(List.from(data as List));
         }
+      } else {
+        errorMessage = response.data?.message ?? "Unable to fetch MLA list";
+        CommonSnackbar(text: errorMessage).showToast();
       }
     } catch (err, stackTrace) {
+      errorMessage = "Something went wrong, please try again.";
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
+      CommonSnackbar(text: errorMessage).showToast();
     } finally {
       showCustomDialogTransperent(isShowing: false);
+      isLoading = false;
+      hasLoaded = true;
+      notifyListeners();
     }
+  }
+
+  Future<void> retry() async {
+    await getMLALists();
   }
 }

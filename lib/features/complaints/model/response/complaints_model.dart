@@ -30,6 +30,7 @@ class ComplaintsModel {
 class Data {
   String? sId;
   UserId? userId;
+  ComplaintUser? user;
   Department? department;
   String? authorityName;
   String? threadId;
@@ -61,6 +62,7 @@ class Data {
     sId = json['_id'];
     userId =
         json['userId'] != null ? new UserId.fromJson(json['userId']) : null;
+    user = json['user'] != null ? ComplaintUser.fromJson(json['user']) : null;
     department = json['department'] != null
         ? new Department.fromJson(json['department'])
         : null;
@@ -86,6 +88,9 @@ class Data {
     data['_id'] = this.sId;
     if (this.userId != null) {
       data['userId'] = this.userId!.toJson();
+    }
+    if (user != null) {
+      data['user'] = user!.toJson();
     }
     if (this.department != null) {
       data['department'] = this.department!.toJson();
@@ -165,6 +170,9 @@ class Messages {
   String? body;
   List<Attachments>? attachments;
   String? sId;
+  String? profileImage;
+  String? senderName;
+  String? userImage;
 
   Messages(
       {this.from,
@@ -183,6 +191,9 @@ class Messages {
     snippet = json['snippet'];
     date = json['date'];
     body = json['body'];
+    profileImage = json['profileImage'] ?? json['profilePic'];
+    senderName = json['senderName'] ?? json['fromName'];
+    userImage = json['userImage'] ?? json['memberImage'];
     if (json['attachments'] != null) {
       attachments = <Attachments>[];
       json['attachments'].forEach((v) {
@@ -200,11 +211,52 @@ class Messages {
     data['snippet'] = this.snippet;
     data['date'] = this.date;
     data['body'] = this.body;
+    if (profileImage != null) {
+      data['profileImage'] = profileImage;
+    }
+    if (senderName != null) {
+      data['senderName'] = senderName;
+    }
+    if (userImage != null) {
+      data['userImage'] = userImage;
+    }
     if (this.attachments != null) {
       data['attachments'] = this.attachments!.map((v) => v.toJson()).toList();
     }
     data['_id'] = this.sId;
     return data;
+  }
+}
+
+class ComplaintUser {
+  ComplaintUser({
+    this.avatar,
+    this.name,
+    this.email,
+    this.phone,
+  });
+
+  factory ComplaintUser.fromJson(Map<String, dynamic> json) {
+    return ComplaintUser(
+      avatar: json['avatar'],
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
+    );
+  }
+
+  final String? avatar;
+  final String? name;
+  final String? email;
+  final String? phone;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'avatar': avatar,
+      'name': name,
+      'email': email,
+      'phone': phone,
+    };
   }
 }
 

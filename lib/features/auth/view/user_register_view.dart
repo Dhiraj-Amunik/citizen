@@ -81,6 +81,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           focus: provider.nameFocus,
                           nextFocus: provider.emailFocus,
                           prefixIcon: AppImages.userIcon,
+                          enableSpeechInput: true,
                           controller: provider.nameController,
                           keyboardType: TextInputType.name,
                           validator: (text) => text?.validateName(
@@ -108,6 +109,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           // nextFocus: provider.wathsappFocus,
                           controller: provider.emailController,
                           prefixIcon: AppImages.emailIcon,
+                          enableSpeechInput: true,
                           validator: (text) => text?.validateEmail(
                             argument: localization.email_validator,
                           ),
@@ -131,6 +133,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           hintText: "01-01-2000",
                           controller: provider.dobController,
                           prefixIcon: AppImages.calenderIcon,
+                          showDefaultSuffix: false,
                           showCursor: false,
                           onTap: () async {
                             final date = await customDatePicker();
@@ -195,6 +198,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           controller: provider.aadharController,
                           prefixIcon: AppImages.aadharIcon,
                           keyboardType: TextInputType.number,
+                          enableSpeechInput: true,
                           validator: (text) => text?.validateAadhar(
                             argument: localization.aadhar_validator,
                           ),
@@ -213,6 +217,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           hintText: "ABC1234567",
                           maxLength: 10,
                           controller: provider.voterIdController,
+                          enableSpeechInput: true,
                           prefixIcon: AppImages.aadharIcon,
                           keyboardType: TextInputType.text,
                           validator: (text) => text?.validateVoterID(

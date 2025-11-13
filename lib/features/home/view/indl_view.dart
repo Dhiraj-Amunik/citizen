@@ -23,11 +23,21 @@ class IndlView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
-    final roleProvider = context.read<RoleViewModel>();
+    final roleProvider = context.watch<RoleViewModel>();
     return Scaffold(
       appBar: commonAppBar(
+        
         action: [
-          Consumer<UpdateNotificationViewModel>(
+          CommonHelpers.buildIcons(
+            path: AppImages.navDonateIcon,
+            color: AppPalettes.primaryColor,
+            iconColor: AppPalettes.whiteColor,
+            padding: Dimens.paddingX3B,
+            iconSize: Dimens.scaleX2B,
+            onTap: () => RouteManager.pushNamed(Routes.donatePage),
+          ),
+            SizeBox.sizeWX2,
+           Consumer<UpdateNotificationViewModel>(
             builder: (context, value, _) {
               return Stack(
                 children: [
@@ -55,15 +65,6 @@ class IndlView extends StatelessWidget {
                 ],
               );
             },
-          ),
-          SizeBox.sizeWX2,
-          CommonHelpers.buildIcons(
-            path: AppImages.navDonateIcon,
-            color: AppPalettes.primaryColor,
-            iconColor: AppPalettes.whiteColor,
-            padding: Dimens.paddingX3B,
-            iconSize: Dimens.scaleX2B,
-            onTap: () => RouteManager.pushNamed(Routes.donatePage),
           ),
         ],
         child: Consumer<ProfileViewModel>(
@@ -131,7 +132,6 @@ class IndlView extends StatelessWidget {
                 return Container();
               },
             ),
-
             SizeBox.sizeHX20,
           ],
         ),

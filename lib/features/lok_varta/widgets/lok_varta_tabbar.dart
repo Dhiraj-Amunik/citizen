@@ -32,9 +32,10 @@ class LokVartaTabbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final localization = context.localizations;
 
+    const double toolbarHeight = 160;
     return SliverAppBar(
-      expandedHeight: showSearch ? 110.height() : 100.height(),
-      collapsedHeight: showSearch ? 110.height() : 100.height(),
+      expandedHeight: toolbarHeight.height(),
+      collapsedHeight: toolbarHeight.height(),
       backgroundColor: AppPalettes.liteGreenColor,
       flexibleSpace: Container(
         alignment: Alignment.center,
@@ -68,27 +69,37 @@ class LokVartaTabbar extends StatelessWidget {
                   ).onlyPadding(right: Dimens.horizontalspacing),
               ],
             ),
-            showSearch ? SizeBox.sizeHX3 : SizeBox.sizeHX2,
-            AnimatedSwitcher(
-              duration: Duration(milliseconds: 400),
-              child: showSearch
-                  ? AnimatedSearchBar(
-                      controller: searchController,
-                      onChanged: onSearchChanged,
-                      onClear: onClear,
-                    )
-                  : DefaultTabBar(
-                      isScrollable: true,
-                      controller: controller,
-                      tabLabels: const [
-                        "Upcoming Events",
-                        "Ongoing Events",
-                        "Press Releases",
-                        "Interviews & Articles",
-                        "Videos",
-                        "Photos",
-                      ],
-                    ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              height: showSearch ? 52.height() : 12.height(),
+              padding: EdgeInsets.symmetric(
+                horizontal: Dimens.horizontalspacing,
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: showSearch
+                    ? AnimatedSearchBar(
+                        key: const ValueKey('search_bar'),
+                        controller: searchController,
+                        onChanged: onSearchChanged,
+                        onClear: onClear,
+                      )
+                    : const SizedBox.shrink(key: ValueKey('empty_search')),
+              ),
+            ),
+            SizeBox.sizeHX2,
+            DefaultTabBar(
+              isScrollable: true,
+              controller: controller,
+              tabLabels: const [
+                "Upcoming Events",
+                "Ongoing Events",
+                "Press Releases",
+                "Interviews & Articles",
+                "Videos",
+                "Photos",
+              ],
             ),
           ],
         ),

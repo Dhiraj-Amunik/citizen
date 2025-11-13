@@ -32,6 +32,8 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
   String? companyDateFormat;
 
   List<File> multipleFiles = [];
+  final List<String> _existingDocuments = [];
+  List<String> get existingDocuments => List.unmodifiable(_existingDocuments);
 
   Future<void> addFiles(Future<dynamic> future) async {
     RouteManager.pop();
@@ -59,6 +61,12 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
     notifyListeners();
   }
 
+  void removeExistingDocument(int index) {
+    if (index < 0 || index >= _existingDocuments.length) return;
+    _existingDocuments.removeAt(index);
+    notifyListeners();
+  }
+
   Future<void> requestNotify({required Function onCompleted}) async {
     try {
       if (formKey.currentState!.validate()) {
@@ -75,9 +83,11 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
         eventDate: companyDateFormat ?? "",
         eventTime: eventTimeController.text,
         description: descriptionController.text,
-        documents: multipleFiles.isEmpty
-            ? []
-            : await uploadMultipleImage(multipleFiles),
+        documents: [
+          ..._existingDocuments,
+          if (multipleFiles.isNotEmpty)
+            ...await uploadMultipleImage(multipleFiles),
+        ],
         id: notify.sId,
       );
 
@@ -115,5 +125,8 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
     dateController.text = data.dateAndTime?.toDdMmYyyy() ?? "";
     eventTimeController.text = data.dateAndTime?.to24HourTime() ?? "";
     descriptionController.text = data.description ?? "";
+    _existingDocuments
+      ..clear()
+      ..addAll(data.documents ?? const []);
   }
 }

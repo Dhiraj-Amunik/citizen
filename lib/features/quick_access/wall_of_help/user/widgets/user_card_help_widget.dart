@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
@@ -11,6 +12,7 @@ import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/utils/urls.dart';
 
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
@@ -49,25 +51,7 @@ class UserCardHelpWidget extends StatelessWidget {
             spacing: Dimens.gapX3,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                height: 40,
-                width: 40,
-                child: ClipRRect(
-                  borderRadius: BorderRadiusGeometry.circular(Dimens.radius100),
-                  child: help.partyMember?.user?.avatar.showDataNull == true
-                      ? Container(
-                          alignment: Alignment.center,
-                          color: AppPalettes.greyColor,
-                          child: Text(
-                            CommonHelpers.getInitials(help.name ?? ""),
-                            textAlign: TextAlign.center,
-                          ),
-                        )
-                      : CommonHelpers.getCacheNetworkImage(
-                          help.partyMember?.user?.avatar,
-                        ),
-                ),
-              ),
+              _buildAvatar(textTheme),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +65,7 @@ class UserCardHelpWidget extends StatelessWidget {
                     SizeBox.sizeHX1,
                     ReadMoreWidget(
                       text: help.description.isNull(localization.not_found),
-                      style:AppStyles.labelMedium.copyWith(
+                      style: AppStyles.labelMedium.copyWith(
                         color: AppPalettes.lightTextColor,
                         fontWeight: FontWeight.w500,
                       ),
@@ -109,5 +93,52 @@ class UserCardHelpWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildAvatar(TextTheme textTheme) {
+    final avatarUrl = _resolveAvatarUrl();
+    final fallbackText = help.title?.trim().isNotEmpty == true
+        ? help.title!.trim()
+        : help.name ?? "";
+    final initials = fallbackText.isNotEmpty
+        ? CommonHelpers.getInitials(fallbackText)
+        : "A";
+    final double radius = Dimens.scaleX3;
+
+    if (avatarUrl != null) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundImage: CachedNetworkImageProvider(avatarUrl),
+        onBackgroundImageError: (_, __) {},
+      );
+    }
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: AppPalettes.primaryColor.withOpacityExt(0.1),
+      child: Text(
+        initials,
+        style: textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppPalettes.primaryColor,
+        ),
+      ),
+    );
+  }
+
+  String? _resolveAvatarUrl() {
+    String? candidate = help.partyMember?.user?.avatar;
+    if (!(candidate.showDataNull)) {
+      final docs = help.documents;
+      if (docs != null && docs.isNotEmpty && docs.first.showDataNull) {
+        candidate = docs.first;
+      }
+    }
+    if (!(candidate.showDataNull)) return null;
+
+    final trimmed = candidate!.trim();
+    if (trimmed.startsWith('http')) return trimmed;
+    if (trimmed.startsWith('/')) return "${URLs.baseURL}$trimmed";
+    return "${URLs.baseURL}/$trimmed";
   }
 }

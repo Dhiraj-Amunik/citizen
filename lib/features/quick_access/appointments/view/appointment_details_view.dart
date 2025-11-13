@@ -94,6 +94,25 @@ class AppointmentDetailsView extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
+                    if ((appointment.rescheduledDate ?? '').trim().isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizeBox.sizeHX1,
+                          Text(
+                            "Rescheduled Date",
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.lightTextColor,
+                            ),
+                          ),
+                          Text(
+                            appointment.rescheduledDate?.toDdMmmYyyy() ?? "",
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     SizeBox.sizeHX1,
                     SizeBox.sizeHX1,
                     Text(

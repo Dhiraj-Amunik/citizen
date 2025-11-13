@@ -67,10 +67,10 @@ class NotifyRepresentative {
   String? description;
   String? dateAndTime;
   List<String>? documents;
-  List<String>? specialInvites;
+  List<SpecialInvite>? specialInvites;
   bool? isActive;
   bool? isDeleted;
-  List<String>? responses;
+  List<ResponseItem>? responses;
   String? createdAt;
   String? updatedAt;
   int? iV;
@@ -100,11 +100,27 @@ class NotifyRepresentative {
     eventType = json['eventType'];
     description = json['description'];
     dateAndTime = json['dateAndTime'];
-    documents = json['documents'].cast<String>();
-    specialInvites = json['specialInvites'].cast<String>();
+    documents = json['documents'] != null
+        ? List<String>.from(json['documents'])
+        : <String>[];
+    if (json['specialInvites'] != null) {
+      specialInvites = <SpecialInvite>[];
+      json['specialInvites'].forEach((v) {
+        specialInvites!.add(SpecialInvite.fromJson(v));
+      });
+    } else {
+      specialInvites = <SpecialInvite>[];
+    }
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
-    responses = json['responses'].cast<String>();
+    if (json['responses'] != null) {
+      responses = <ResponseItem>[];
+      json['responses'].forEach((v) {
+        responses!.add(ResponseItem.fromJson(v));
+      });
+    } else {
+      responses = <ResponseItem>[];
+    }
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
@@ -122,10 +138,16 @@ class NotifyRepresentative {
     data['description'] = this.description;
     data['dateAndTime'] = this.dateAndTime;
     data['documents'] = this.documents;
-    data['specialInvites'] = this.specialInvites;
+    if (specialInvites != null) {
+      data['specialInvites'] =
+          specialInvites!.map((SpecialInvite v) => v.toJson()).toList();
+    }
     data['isActive'] = this.isActive;
     data['isDeleted'] = this.isDeleted;
-    data['responses'] = this.responses;
+    if (responses != null) {
+      data['responses'] =
+          responses!.map((ResponseItem v) => v.toJson()).toList();
+    }
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
@@ -182,5 +204,119 @@ class User {
     data['phone'] = this.phone;
     data['avatar'] = this.avatar;
     return data;
+  }
+}
+
+class SpecialInvite {
+  SpecialInvite({this.name, this.email, this.phone});
+
+  factory SpecialInvite.fromJson(Map<String, dynamic> json) {
+    return SpecialInvite(
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
+    );
+  }
+
+  final String? name;
+  final String? email;
+  final String? phone;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'email': email,
+      'phone': phone,
+    };
+  }
+}
+
+class ResponseItem {
+  ResponseItem({
+    this.mla,
+    this.status,
+    this.wishes,
+    this.respondedAt,
+    this.id,
+  });
+
+  factory ResponseItem.fromJson(Map<String, dynamic> json) {
+    return ResponseItem(
+      mla: json['mla'] != null ? Mla.fromJson(json['mla']) : null,
+      status: json['status'],
+      wishes:
+          json['wishes'] != null ? Wishes.fromJson(json['wishes']) : null,
+      respondedAt: json['respondedAt'],
+      id: json['_id'],
+    );
+  }
+
+  final Mla? mla;
+  final String? status;
+  final Wishes? wishes;
+  final String? respondedAt;
+  final String? id;
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (mla != null) 'mla': mla!.toJson(),
+      'status': status,
+      if (wishes != null) 'wishes': wishes!.toJson(),
+      'respondedAt': respondedAt,
+      '_id': id,
+    };
+  }
+}
+
+class Mla {
+  Mla({this.id, this.user});
+
+  factory Mla.fromJson(Map<String, dynamic> json) {
+    return Mla(
+      id: json['_id'],
+      user: json['user'] != null ? User.fromJson(json['user']) : null,
+    );
+  }
+
+  final String? id;
+  final User? user;
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      if (user != null) 'user': user!.toJson(),
+    };
+  }
+}
+
+class Wishes {
+  Wishes({
+    this.text,
+    this.photos,
+    this.voiceNotes,
+  });
+
+  factory Wishes.fromJson(Map<String, dynamic> json) {
+    return Wishes(
+      text: json['text'],
+      photos: json['photos'] != null
+          ? List<String>.from(json['photos'])
+          : <String>[],
+      voiceNotes: json['voiceNotes'] != null
+          ? List<String>.from(json['voiceNotes'])
+          : <String>[],  
+    );
+  }
+
+  final String? text;
+  final List<String>? photos;
+  final List<String>? voiceNotes;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'text': text,
+      'photos': photos,
+      'voiceNotes': voiceNotes,
+    };
   }
 }

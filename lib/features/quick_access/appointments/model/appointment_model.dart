@@ -59,9 +59,11 @@ class Appointments {
   String? mla;
   String? bookFor;
   String? name;
+  String? profileImage;
   String? memberShipId;
   String? phone;
   String? date;
+  String? rescheduledDate;
   String? timeSlot;
   String? purpose;
   String? reason;
@@ -78,42 +80,56 @@ class Appointments {
   String? updatedAt;
   int? iV;
 
-  Appointments(
-      {this.sId,
-      this.mla,
-      this.bookFor,
-      this.name,
-      this.memberShipId,
-      this.phone,
-      this.date,
-      this.timeSlot,
-      this.purpose,
-      this.reason,
-      this.documents,
-      this.user,
-      this.partyMember,
-      this.priority,
-      this.isPartyMember,
-      this.status,
-      this.approvedBy,
-      this.isActive,
-      this.isDeleted,
-      this.createdAt,
-      this.updatedAt,
-      this.iV});
+  Appointments({
+    this.sId,
+    this.mla,
+    this.bookFor,
+    this.name,
+    this.profileImage,
+    this.memberShipId,
+    this.phone,
+    this.date,
+    this.rescheduledDate,
+    this.timeSlot,
+    this.purpose,
+    this.reason,
+    this.documents,
+    this.user,
+    this.partyMember,
+    this.priority,
+    this.isPartyMember,
+    this.status,
+    this.approvedBy,
+    this.isActive,
+    this.isDeleted,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
 
   Appointments.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     mla = json['mla'];
     bookFor = json['bookFor'];
     name = json['name'];
+    profileImage =
+        json['profileImage'] ??
+        json['profilePic'] ??
+        json['profile'] ??
+        json['avatar'] ??
+        json['image'];
     memberShipId = json['memberShipId'];
     phone = json['phone'];
     date = json['date'];
+    rescheduledDate =
+        json['resheduledDate'] ?? json['rescheduledDate'] ?? json['reScheduledDate'];
     timeSlot = json['timeSlot'];
     purpose = json['purpose'];
     reason = json['reason'];
-    documents = json['documents'].cast<String>();
+    final docs = json['documents'];
+    if (docs is List) {
+      documents = docs.map((doc) => doc.toString()).toList();
+    }
     user = json['user'];
     partyMember = json['partyMember'];
     priority = json['priority'];
@@ -133,9 +149,11 @@ class Appointments {
     data['mla'] = this.mla;
     data['bookFor'] = this.bookFor;
     data['name'] = this.name;
+    data['profileImage'] = this.profileImage;
     data['memberShipId'] = this.memberShipId;
     data['phone'] = this.phone;
     data['date'] = this.date;
+    data['resheduledDate'] = this.rescheduledDate;
     data['timeSlot'] = this.timeSlot;
     data['purpose'] = this.purpose;
     data['reason'] = this.reason;

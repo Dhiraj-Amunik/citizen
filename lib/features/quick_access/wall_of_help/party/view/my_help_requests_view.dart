@@ -18,47 +18,129 @@ class MyHelpRequestsView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyHelpRequestsViewModel(),
       builder: (context, _) {
-        return Scaffold(
-          appBar: commonAppBar(title: localization.my_requests),
-          body: Consumer<MyHelpRequestsViewModel>(
-            builder: (context, value, _) {
-              if (value.isLoading) {
-                return Center(child: CustomAnimatedLoading());
-              }
-              if (value.myWallOFHelpLists.isEmpty) {
-                return WallOfHelpHelpers.emptyHelper(
-                  text: "No requests found",
-                  onRefresh: () => value.getMyWallOfHelpList(),
-                );
-              }
-              return ListView.separated(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Dimens.horizontalspacing,
-                ).copyWith(bottom: Dimens.verticalspacing),
-                controller: value.scrollController,
-                itemCount: value.myWallOFHelpLists.length,
-                itemBuilder: (context, index) {
-                  return Column(
-                    spacing: Dimens.gapX4,
-                    children: [
-                      PartyHelpCard(
-                        closeRequest: () => value.closeMyFinancialHelp(index),
-                        helpRequest: value.myWallOFHelpLists[index],
-                        isEditable: true,
+        return Consumer<MyHelpRequestsViewModel>(
+          builder: (context, value, _) {
+            if (value.filteredList.isEmpty && !value.isLoading) {
+              return Scaffold(
+                appBar: commonAppBar(
+                  title: localization.my_requests,
+                  action: [
+                    IconButton(
+                      icon: Icon(
+                        value.showSearchWidget ? Icons.close : Icons.search,
+                        color: context.cardColor.computeLuminance() > 0.5
+                            ? Colors.black
+                            : Colors.white,
                       ),
-                      if (value.isScrollLoading &&
-                          value.myWallOFHelpLists.last ==
-                              value.myWallOFHelpLists[index])
-                        CustomAnimatedLoading(),
-                    ],
-                  );
-                },
-                separatorBuilder: (context, index) => SizeBox.widgetSpacing,
+                      onPressed: value.toggleSearch,
+                    ),
+                  ],
+                ),
+                body: Column(
+                  children: [
+                    if (value.showSearchWidget) _buildSearchField(context, value),
+                    Expanded(
+                      child: WallOfHelpHelpers.emptyHelper(
+                        text: "No requests found",
+                        onRefresh: value.onRefresh,
+                      ),
+                    ),
+                  ],
+                ),
               );
-            },
-          ),
+            }
+            
+            return Scaffold(
+              appBar: commonAppBar(
+                title: localization.my_requests,
+                action: [
+                  IconButton(
+                    icon: Icon(
+                      value.showSearchWidget ? Icons.close : Icons.search,
+                      color: context.cardColor.computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white,
+                    ),
+                    onPressed: value.toggleSearch,
+                  ),
+                ],
+              ),
+              body: value.isLoading && value.filteredList.isEmpty
+                  ? Center(child: CustomAnimatedLoading())
+                  : Column(
+                      children: [
+                        if (value.showSearchWidget)
+                          _buildSearchField(context, value),
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: value.onRefresh,
+                            child: ListView.separated(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: Dimens.horizontalspacing,
+                              ).copyWith(bottom: Dimens.verticalspacing),
+                              controller: value.scrollController,
+                              itemCount: value.filteredList.length,
+                              itemBuilder: (context, index) {
+                                final request = value.filteredList[index];
+                                return Column(
+                                  spacing: Dimens.gapX4,
+                                  children: [
+                                    PartyHelpCard(
+                                      closeRequest: () =>
+                                          value.closeMyFinancialHelp(request),
+                                      helpRequest: request,
+                                      isEditable: true,
+                                    ),
+                                    if (value.isScrollLoading &&
+                                        value.filteredList.last == request)
+                                      CustomAnimatedLoading(),
+                                  ],
+                                );
+                              },
+                              separatorBuilder: (context, index) =>
+                                  SizeBox.widgetSpacing,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            );
+          },
         );
       },
+    );
+  }
+
+  Widget _buildSearchField(
+    BuildContext context,
+    MyHelpRequestsViewModel value,
+  ) {
+    final localization = context.localizations;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: Dimens.horizontalspacing,
+        vertical: Dimens.paddingX2,
+      ),
+      child: TextField(
+        controller: value.searchController,
+        decoration: InputDecoration(
+          hintText: localization.search,
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: value.searchController.text.isEmpty
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: value.clearSearch,
+                ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(Dimens.radiusX3),
+          ),
+        ),
+        onChanged: value.onSearchChanged,
+        textInputAction: TextInputAction.search,
+        onSubmitted: value.onSearchChanged,
+      ),
     );
   }
 }
