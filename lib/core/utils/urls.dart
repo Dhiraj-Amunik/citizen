@@ -12,6 +12,11 @@ class URLs {
   static const getUserProfile = "/api/user/getUserProfile"; /*Get*/
   static const editUser = "/api/user/editUser"; /*Put*/
 
+  //dashboard
+  static const getDashboard = "/api/user/getUserDashboard"; /*Get*/
+  static const getVolunteerAnalytics =
+      "/api/user/getVolunteerAnalytics"; /*Get*/
+
   //Image
   static const uploadImage = "/api/image/uploadImage"; /*Post*/
   static const uploadMultipleImage = "/api/image/multipleUpload"; /*Post*/
@@ -32,6 +37,7 @@ class URLs {
 
   static const userEvents = "/api/user/list-of-events"; /*Post*/
   static const userEventsDetails = "/api/user/get-single-event"; /*Post*/
+  static const attendEvent = "/api/user/attend-Event"; /*Post*/
   static const userLokVarta = "/api/user/lok-varta"; /*Post*/
   static const postDonation = "/api/user/create-donation"; /*Post*/
   static const pastDonation = "/api/user/list-of-donations-by-user"; /*Post*/
@@ -50,7 +56,7 @@ class URLs {
   static const getAuthority = "/api/user/list-of-authorities-dropdown"; /*Get*/
   static const getConstituencies =
       "/api/user/list-of-constituencies-dropdown"; /*Get*/
-
+ 
   static const getPincodeConstituencies =
       "/api/user/get-constituency-by-pincode"; /*Get*/
   static const getParliamentaryConstituency =

@@ -52,6 +52,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   hintText: localization.enter_your_full_name,
                                   nextFocus: provider.parentNameFocus,
                                   controller: provider.fullNameController,
+                                  enableSpeechInput: true,
                                   keyboardType: TextInputType.name,
                                   validator: (text) => text?.validateName(
                                     argument: "Please enter your name",
@@ -64,6 +65,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   nextFocus: provider.mobileFocus,
                                   hintText: localization.enter_parent_name,
                                   controller: provider.parentNameController,
+                                  enableSpeechInput: true,
                                   keyboardType: TextInputType.name,
                                   validator: (text) => text?.validateName(
                                     argument: "Please enter parent name",
@@ -82,6 +84,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                             hintText: localization.enter_mobile_number,
                             controller: provider.mobileNumberController,
                             maxLength: 10,
+                            enableSpeechInput: true,
                             keyboardType: TextInputType.phone,
                             validator: (value) => value?.validateNumber(
                               argument: "Enter valid 10 digits number",

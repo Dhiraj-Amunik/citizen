@@ -17,10 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      // NOTE: Placeholder web configuration has been added here so the
+      // application can initialize on web. Replace the values below with
+      // the real credentials from your Firebase Console (Project settings -> Web app).
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -33,10 +33,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -64,5 +61,29 @@ class DefaultFirebaseOptions {
     projectId: 'inldsevak',
     storageBucket: 'inldsevak.firebasestorage.app',
     iosBundleId: 'org.amunik.sevak',
+  );
+
+  // --- Web FirebaseOptions (REPLACE with real values) ---
+  // To get these values go to Firebase Console -> Project Settings -> Your apps (Web)
+  // and copy the config values for apiKey, appId (web), authDomain, measurementId (optional).
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'YOUR_WEB_API_KEY',
+    appId: '1:471198039195:web:REPLACE_WITH_ACTUAL_WEB_APP_ID',
+    messagingSenderId: '471198039195',
+    projectId: 'inldsevak',
+    authDomain: 'inldsevak.firebaseapp.com',
+    storageBucket: 'inldsevak.firebasestorage.app',
+    measurementId: 'G-REPLACE_WITH_MEASUREMENT_ID',
+  );
+
+  // --- Windows FirebaseOptions (REPLACE with real values) ---
+  // For Windows desktop apps, the FlutterFire CLI would normally populate
+  // these values. Add your Windows app credentials here if you have them.
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'YOUR_WINDOWS_API_KEY',
+    appId: '1:471198039195:windows:REPLACE_WITH_WINDOWS_APP_ID',
+    messagingSenderId: '471198039195',
+    projectId: 'inldsevak',
+    storageBucket: 'inldsevak.firebasestorage.app',
   );
 }

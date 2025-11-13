@@ -29,6 +29,8 @@ class AppPalettes {
 
   static const greenColor = Color(0xFF4DC855);
 
+    static const darkgreenColor = Color(0XFF89E88F);
+
   static const gradientFirstColor = Color(0xFF27AE60);
   static const gradientSecondColor = Color(0xFF4DC855);
 

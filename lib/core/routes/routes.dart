@@ -5,6 +5,7 @@ import 'package:inldsevak/core/routes/custom_page_route.dart';
 import 'package:inldsevak/features/auth/view/login_view.dart';
 import 'package:inldsevak/features/auth/view/user_register_view.dart';
 import 'package:inldsevak/features/auth/view/verify_otp_view.dart';
+import 'package:inldsevak/features/chat/view/chat_view.dart';
 import 'package:inldsevak/features/complaints/view/complaints_view.dart';
 import 'package:inldsevak/features/complaints/view/lodge_complaint_view.dart';
 import 'package:inldsevak/features/complaints/view/thread_complaint_view.dart';
@@ -12,6 +13,9 @@ import 'package:inldsevak/features/donation/view/donate_view.dart';
 import 'package:inldsevak/features/events/view/event_details_view.dart';
 import 'package:inldsevak/features/events/view/events_view.dart';
 import 'package:inldsevak/features/id_card/view/id_card_view.dart';
+import 'package:inldsevak/features/leaderboard/coins_history_view.dart';
+import 'package:inldsevak/features/leaderboard/coins_view.dart';
+import 'package:inldsevak/features/leaderboard/leader_board_view.dart';
 import 'package:inldsevak/features/lok_varta/widgets/interview_detailed_widget.dart';
 import 'package:inldsevak/features/lok_varta/widgets/photo_details_view.dart';
 import 'package:inldsevak/features/lok_varta/widgets/press_releases_detailed_view.dart';
@@ -45,6 +49,8 @@ import 'package:inldsevak/features/party_member/view/become_part_member_view.dar
 import 'package:inldsevak/features/profile/view/profile_edit_view.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/party/view/wall_of_help_party_view.dart';
 import 'package:inldsevak/features/surveys/view/survey_view.dart';
+import 'package:inldsevak/features/volunter/view/top_volunteers_view.dart';
+import 'package:inldsevak/features/volunter/view/volunteer_analytics_view.dart';
 import 'package:inldsevak/wrapper_view.dart';
 part "./enum.dart";
 

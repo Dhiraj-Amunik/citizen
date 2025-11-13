@@ -1,11 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/secure/secure_storage.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
+import 'package:inldsevak/features/home/models/response/dashboard_response_model.dart';
+import 'package:inldsevak/features/home/services/dashboard_repository.dart';
+import 'package:inldsevak/features/volunter/view/top_volunteers_view.dart';
 
 class QuickAccessWidget extends StatelessWidget {
   final bool showParty;
@@ -31,11 +37,13 @@ class QuickAccessWidget extends StatelessWidget {
         fullWidth: true,
         color: AppPalettes.liteGreenColor,
       ),
+     
       QuickAccessModel(
         icon: AppImages.appointmentAccess,
         text: localization.appointments,
         route: Routes.appointmentPage,
       ),
+      
       QuickAccessModel(
         icon: AppImages.helpAccess,
         text: localization.wall_of_help,
@@ -61,7 +69,7 @@ class QuickAccessWidget extends StatelessWidget {
       QuickAccessModel(
         icon: AppImages.volunteerAccess,
         text: localization.be_a_volunteer,
-        route: Routes.beVolunteerPage,
+        route: Routes.topVolunteersPage,
         fullWidth: true,
       ),
       QuickAccessModel(
@@ -108,6 +116,7 @@ class QuickAccessWidget extends StatelessWidget {
               (showParty ? partyQuickAccess : userQuickAccess).length,
               (index) {
                 return _getDialog(
+                  context,
                   textTheme,
                   (showParty ? partyQuickAccess : userQuickAccess)[index],
                 );
@@ -120,9 +129,14 @@ class QuickAccessWidget extends StatelessWidget {
   }
 }
 
-Widget _getDialog(TextTheme style, QuickAccessModel data) {
+
+Widget _getDialog(
+  BuildContext context,
+  TextTheme style,
+  QuickAccessModel data,
+) {
   return GestureDetector(
-    onTap: () => RouteManager.pushNamed(data.route),
+    onTap: () => _handleQuickAccessTap(context, data),
     child: LayoutBuilder(
       builder: (context, constraints) {
         return Container(
@@ -163,6 +177,95 @@ Widget _getDialog(TextTheme style, QuickAccessModel data) {
       },
     ),
   );
+}
+
+Future<void> _handleQuickAccessTap(
+  BuildContext context,
+  QuickAccessModel data,
+) async {
+  if (data.route == Routes.topVolunteersPage) {
+    await _handleVolunteerTap(context);
+    return;
+  }
+  if (data.route == Routes.nearestMemberPage) {
+    CommonSnackbar(text: "Updating soon...").showToast();
+    return;
+  }
+  RouteManager.pushNamed(data.route);
+}
+
+Future<void> _handleVolunteerTap(BuildContext context) async {
+  final navigator = Navigator.of(context, rootNavigator: true);
+  var isDialogVisible = false;
+
+  void closeDialog() {
+    if (isDialogVisible && navigator.mounted && navigator.canPop()) {
+      navigator.pop();
+      isDialogVisible = false;
+    }
+  }
+
+  showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(
+      child: CircularProgressIndicator(
+        color: AppPalettes.primaryColor,
+      ),
+    ),
+  );
+  isDialogVisible = true;
+
+  try {
+    final token = await SessionController.instance.getToken();
+    final response =
+        await DashboardRepository().fetchDashboard(token: token);
+
+    closeDialog();
+
+    if (response.error != null) {
+      CommonSnackbar(text: response.error?.message ?? "Unable to fetch status")
+          .showToast();
+      return;
+    }
+
+    final dashboard = response.data;
+    if (dashboard?.responseCode != 200 || dashboard?.data == null) {
+      CommonSnackbar(
+        text: dashboard?.message ?? "Unable to fetch status",
+      ).showToast();
+      return;
+    }
+
+    final DashboardData? data = dashboard?.data;
+    final status = data?.volunteerStatus?.toLowerCase().trim();
+    final isVolunteer = data?.isVolunteer == true;
+
+    if (status == 'approved' || isVolunteer) {
+      RouteManager.pushNamed(Routes.volunteerAnalyticsPage);
+      return;
+    }
+
+    if (status == 'pending') {
+      RouteManager.pushNamed(
+        Routes.topVolunteersPage,
+        arguments: const TopVolunteersViewArgs(
+          canApply: false,
+          statusMessage: "Volunteer request is pending",
+        ),
+      );
+      return;
+    }
+
+    RouteManager.pushNamed(Routes.topVolunteersPage);
+  } catch (error, stackTrace) {
+    closeDialog();
+    debugPrint("Error fetching volunteer status: $error");
+    debugPrint(stackTrace.toString());
+    CommonSnackbar(
+      text: "Something went wrong, please try again later",
+    ).showToast();
+  }
 }
 
 class QuickAccessModel {

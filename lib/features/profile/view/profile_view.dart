@@ -47,6 +47,7 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
                   name: value.profile?.name,
                   number: value.profile?.phone,
                   onTap: () => RouteManager.pushNamed(Routes.profileEditView),
+                  
                 );
               },
             ),
@@ -173,6 +174,24 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
               onTap: () =>
                   _launchURL("https://sites.google.com/view/inldsevak/home"),
             ),
+            // ProfileHelper.getCommonBox(
+            //   'Leaderboard',
+            //   subtext: 'See top monthly performers',
+            //   icon: AppImages.leaderboardIcon,
+            //   onTap: () => RouteManager.pushNamed(Routes.leaderBoardPage),
+            // ),
+            // ProfileHelper.getCommonBox(
+            //   'Coins History',
+            //   subtext: 'View your  earned coins',
+            //   icon: AppImages.dollarIcon,
+            //   onTap: () => RouteManager.pushNamed(Routes.coinsHistoryPage),
+            // ),
+            //  ProfileHelper.getCommonBox(
+            //   'Refer & Earn',
+            //   subtext: 'Invite friends and earn coins',
+            //   icon: AppImages.shareIcon,
+            //   onTap: () => RouteManager.pushNamed(Routes.coinsHistoryPage),
+            // ),
             ProfileHelper.getCommonBox(
               localization.help_and_support,
               subtext: localization.help_and_support_subtext,

@@ -76,16 +76,20 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                 controller: value.flatNoController,
                 headingText: "Flat, House no, Apartment",
                 hintText: "House Number",
+                enableSpeechInput: true,
                 validator: (text) =>
                     text?.validate(argument: "Please enter your house number"),
+                autovalidateMode: value.addressAutovalidateMode,
               ),
               FormTextFormField(
                 isRequired: true,
                 headingText: "Area, Street",
                 hintText: "Area",
                 controller: value.areaController,
+                enableSpeechInput: true,
                 validator: (text) =>
                     text?.validate(argument: "Please enter your area"),
+                autovalidateMode: value.addressAutovalidateMode,
               ),
               FormCommonChild(
                 heading: localization.pincode,
@@ -97,10 +101,12 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       child: FormTextFormField(
                         hintText: localization.pincode_6_digits,
                         controller: value.pincodeController,
+                        enableSpeechInput: true,
                         keyboardType: TextInputType.number,
                         maxLength: 6,
                         validator: (text) =>
                             text?.validatePincode(argument: "Enter Pincode"),
+                        autovalidateMode: value.addressAutovalidateMode,
                       ),
                     ),
                     Expanded(
@@ -134,8 +140,10 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: "Tehsil",
                       hintText: "Tehsil",
                       controller: value.tehsilController,
+                      enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: "Enter Tehsil"),
+                      autovalidateMode: value.addressAutovalidateMode,
                     ),
                   ),
                   Expanded(
@@ -143,8 +151,10 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: "City / Town",
                       hintText: localization.city,
                       controller: value.cityController,
+                      enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: "Enter City"),
+                      autovalidateMode: value.addressAutovalidateMode,
                     ),
                   ),
                 ],
@@ -157,8 +167,10 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: localization.district,
                       hintText: localization.district,
                       controller: value.districtController,
+                      enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: "Enter District"),
+                      autovalidateMode: value.addressAutovalidateMode,
                     ),
                   ),
                   Expanded(
@@ -166,8 +178,10 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: localization.state,
                       hintText: localization.state,
                       controller: value.stateController,
+                      enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: "Enter State"),
+                      autovalidateMode: value.addressAutovalidateMode,
                     ),
                   ),
                 ],

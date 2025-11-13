@@ -4,12 +4,11 @@ import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
-import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
-import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
 import 'package:inldsevak/features/complaints/widgets/complaint_helpers.dart';
+import 'package:inldsevak/core/utils/app_images.dart';
 
 class ComplaintThreadWidget extends StatelessWidget {
   final Data thread;
@@ -38,41 +37,46 @@ class ComplaintThreadWidget extends StatelessWidget {
           border: Border.all(color: AppPalettes.primaryColor),
         ),
         child: Column(
-          spacing: Dimens.gapX1B,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: Dimens.gapX1,
           children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: Wrap(
+                spacing: Dimens.gapX2,
+                runSpacing: Dimens.gapX1,
+                children: [
+                  CommonHelpers.buildStatus(
+                    thread.messages?.first.date?.toDdMmmYyyy() ?? "",
+                    statusColor: AppPalettes.liteGreenColor,
+                  ),
+                  CommonHelpers.buildStatus(
+                    thread.status?.capitalize() ?? "",
+                    statusColor: ComplaintHelper.getStatusColor(
+                      thread.status,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               spacing: Dimens.gapX3,
               children: [
-                CommonHelpers.buildIcons(
-                  color: AppPalettes.liteGreenColor,
+              CircleAvatar(
+                radius: Dimens.scaleX2B,
+                backgroundColor: AppPalettes.liteGreenColor,
+                child: CommonHelpers.buildIcons(
                   path: AppImages.emailIcon,
                   iconColor: AppPalettes.primaryColor,
-                  iconSize: Dimens.scaleX2,
-                  padding: Dimens.paddingX2B,
+                  iconSize: Dimens.scaleX1B,
                 ),
+              ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: Dimens.gapX1,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        spacing: Dimens.gapX2,
-                        children: [
-                          CommonHelpers.buildStatus(
-                            thread.messages?.first.date?.toDdMmmYyyy() ?? "",
-                            statusColor: AppPalettes.liteGreenColor,
-                          ),
-                          CommonHelpers.buildStatus(
-                            thread.status?.capitalize() ?? "",
-                            statusColor: ComplaintHelper.getStatusColor(
-                              thread.status,
-                            ),
-                          ),
-                        ],
-                      ),
                       Text(
                         thread.messages?.first.subject?.capitalize() ??
                             "No Subject found !",
@@ -80,22 +84,9 @@ class ComplaintThreadWidget extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizeBox.size,
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                SizeBox.sizeWX2,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: Dimens.gapX1,
-                    children: [
                       Text(
-                        thread.messages?.first.snippet ?? "Unknown Description",
+                        thread.messages?.first.snippet ??
+                            "Unknown Description",
                         maxLines: 2,
                         style: textTheme.labelMedium?.copyWith(
                           color: AppPalettes.lightTextColor,

@@ -9,18 +9,23 @@ import 'package:quickalert/quickalert.dart';
 
 class MyHelpRequestsViewModel extends BaseViewModel {
   @override
-  Future<void> onInit() {
+  Future<void> onInit() async {
     scrollController.addListener(_scrollListener);
-    onRefresh();
+    await onRefresh();
     return super.onInit();
   }
 
   List<model.FinancialRequest> myWallOFHelpLists = [];
+  List<model.FinancialRequest> _filteredList = [];
+  List<model.FinancialRequest> get filteredList => _filteredList;
+
   final WallOfHelpRepository repository = WallOfHelpRepository();
 
   // Pagination
-
   final ScrollController scrollController = ScrollController();
+
+  final TextEditingController searchController = TextEditingController();
+  bool showSearchWidget = false;
 
   void _scrollListener() {
     if (scrollController.position.pixels >=
@@ -46,10 +51,10 @@ class MyHelpRequestsViewModel extends BaseViewModel {
     }
   }
 
-  onRefresh() {
+  Future<void> onRefresh() async {
     _currentPage = 1;
     _isLastPage = false;
-    getMyWallOfHelpList();
+    await getMyWallOfHelpList();
   }
 
   int _currentPage = 1;
@@ -66,6 +71,7 @@ class MyHelpRequestsViewModel extends BaseViewModel {
     if (_currentPage == 1) {
       myWallOFHelpLists.clear();
       isLoading = true;
+      _applySearchFilter(searchController.text);
     } else {
       isScrollLoading = true;
     }
@@ -77,15 +83,15 @@ class MyHelpRequestsViewModel extends BaseViewModel {
       );
 
       if (response.data?.responseCode == 200) {
-        final data = response.data?.data?.financialRequest;
-
-        if (data?.isEmpty == true) {
+        final data = response.data?.data?.financialRequest ?? [];
+        if (data.isEmpty) {
           _isLastPage = true;
-          return;
+        } else {
+          myWallOFHelpLists.addAll(
+            List<model.FinancialRequest>.from(data),
+          );
         }
-        if (data?.isNotEmpty == true) {
-          myWallOFHelpLists.addAll(List.from(data as List));
-        }
+        _applySearchFilter(searchController.text);
       }
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
@@ -93,12 +99,19 @@ class MyHelpRequestsViewModel extends BaseViewModel {
     } finally {
       isScrollLoading = false;
       isLoading = false;
+      notifyListeners();
     }
   }
 
-  Future<void> closeMyFinancialHelp(int index) async {
+  Future<void> closeMyFinancialHelp(model.FinancialRequest request) async {
     try {
       isLoading = true;
+      final index = myWallOFHelpLists.indexWhere(
+        (element) => element.sId == request.sId,
+      );
+      if (index == -1) {
+        return;
+      }
       final response = await repository.closeFinancialHelp(
         token: token,
         id: myWallOFHelpLists[index].sId!,
@@ -120,5 +133,58 @@ class MyHelpRequestsViewModel extends BaseViewModel {
     } finally {
       isLoading = false;
     }
+  }
+
+  void toggleSearch() {
+    if (showSearchWidget) {
+      hideSearch();
+    } else {
+      showSearchWidget = true;
+      notifyListeners();
+    }
+  }
+
+  void hideSearch() {
+    if (!showSearchWidget) return;
+    showSearchWidget = false;
+    searchController.clear();
+    _applySearchFilter("");
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    _applySearchFilter("");
+  }
+
+  void onSearchChanged(String query) {
+    _applySearchFilter(query);
+  }
+
+  void _applySearchFilter(String query) {
+    if (query.trim().isEmpty) {
+      _filteredList = List.from(myWallOFHelpLists);
+    } else {
+      final lowerQuery = query.trim().toLowerCase();
+      _filteredList = myWallOFHelpLists.where((request) {
+        final title = request.title?.toLowerCase() ?? "";
+        final status = request.status?.toLowerCase() ?? "";
+        final helpType = request.typeOfHelp?.name?.toLowerCase() ?? "";
+        final requester = request.name?.toLowerCase() ?? "";
+        return title.contains(lowerQuery) ||
+            status.contains(lowerQuery) ||
+            helpType.contains(lowerQuery) ||
+            requester.contains(lowerQuery);
+      }).toList();
+    }
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_scrollListener);
+    scrollController.dispose();
+    searchController.dispose();
+    super.dispose();
   }
 }

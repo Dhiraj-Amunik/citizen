@@ -50,6 +50,7 @@ class BeAVolunteerView extends StatelessWidget {
                         hintText: localization.enter_your_name,
                         headingText: localization.name,
                         keyboardType: TextInputType.name,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validateName(
                           argument: localization.name_validator,
                         ),
@@ -62,6 +63,7 @@ class BeAVolunteerView extends StatelessWidget {
                         hintText: localization.enter_email,
                         headingText: localization.email,
                         keyboardType: TextInputType.emailAddress,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validateEmail(
                           argument: localization.email_validator,
                         ),
@@ -73,6 +75,7 @@ class BeAVolunteerView extends StatelessWidget {
                         controller: provider.phoneNumberController,
                         hintText: localization.enter_phone_number,
                         headingText: localization.phone_number,
+                        enableSpeechInput: true,
                         keyboardType: TextInputType.number,
                         maxLength: 10,
                         validator: (text) => text?.validateNumber(
@@ -85,6 +88,7 @@ class BeAVolunteerView extends StatelessWidget {
                         controller: provider.ageController,
                         hintText: localization.enter_age,
                         headingText: localization.age,
+                        enableSpeechInput: true,
                         keyboardType: TextInputType.number,
                         validator: (text) => text?.validate(
                           argument: localization.age_validator,

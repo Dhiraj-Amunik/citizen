@@ -16,6 +16,9 @@ class AppImages {
   static const uploadIcon = '$_iconsURL/upload_icon.svg';
   static const locationIcon = '$_iconsURL/location_icon.svg';
   static const userProfileIcon = '$_iconsURL/user_profile.svg';
+  static const topVolunteerImage = '$_imageURL/topvolunteerimage.png';
+  static const topVolunteerBg = '$_imageURL/topvolunteerbg.png';
+  static const crownImage = '$_imageURL/crownimage.png';
 
   static const calenderIcon = '$_iconsURL/calender_icon.svg';
   static const userIcon = '$_iconsURL/user_icon.svg';
@@ -32,6 +35,14 @@ class AppImages {
   static const copyIcon = '$_iconsURL/copy_icon.svg';
   static const stackIcon = '$_iconsURL/stack_icon.svg';
   static const microphoneIcon = '$_iconsURL/microphone_icon.svg';
+    static const clipBoardIcon = '$_iconsURL/clipboardicon.svg';
+  static const clipBoardChecked = '$_iconsURL/clipboardchecked.svg';
+  static const handshakeIcon = '$_iconsURL/handshakeicon.svg';
+  static const rankIcon = '$_iconsURL/badgeicon.svg';
+  static const donateIcon = '$_iconsURL/donateicon.svg';
+  static const leaderboardIcon = '$_iconsURL/leaderboardicon.svg';
+  static const dollarIcon = '$_iconsURL/dollaricon.svg';
+  static const chatIcon = '$_iconsURL/chaticon.svg';
 
   static const navComplaintIcon = '$_navIconsURL/complaint_icon.svg';
   static const navDonateIcon = '$_navIconsURL/donate_icon.svg';

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/routes/routes.dart';
@@ -16,6 +14,28 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
 
   Position? currentPosition;
 
+  Map<String, String> _snapshotControllers() {
+    return {
+      'flat': flatNoController.text,
+      'area': areaController.text,
+      'pincode': pincodeController.text,
+      'tehsil': tehsilController.text,
+      'city': cityController.text,
+      'district': districtController.text,
+      'state': stateController.text,
+    };
+  }
+
+  void _restoreControllers(Map<String, String> cached) {
+    flatNoController.text = cached['flat'] ?? flatNoController.text;
+    areaController.text = cached['area'] ?? areaController.text;
+    pincodeController.text = cached['pincode'] ?? pincodeController.text;
+    tehsilController.text = cached['tehsil'] ?? tehsilController.text;
+    cityController.text = cached['city'] ?? cityController.text;
+    districtController.text = cached['district'] ?? districtController.text;
+    stateController.text = cached['state'] ?? stateController.text;
+  }
+
   final flatNoController = TextEditingController();
   final areaController = TextEditingController();
   final tehsilController = TextEditingController();
@@ -23,6 +43,9 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
   final districtController = TextEditingController();
   final stateController = TextEditingController();
   final pincodeController = TextEditingController();
+  bool _shouldValidate = false;
+  AutovalidateMode get addressAutovalidateMode =>
+      _shouldValidate ? AutovalidateMode.always : AutovalidateMode.disabled;
 
   bool _isEnabled = true;
   bool get isEnabled => _isEnabled;
@@ -32,44 +55,70 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
   }
 
   getCurrentLocation(Function(String) parlimentController) async {
+    final cachedValues = _snapshotControllers();
     isEnabled = false;
-    clear();
-    LocationPermission permission = await Geolocator.checkPermission();
+    _shouldValidate = false;
+    clear(safeClear: false);
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        await customRightCupertinoDialog(
+          content:
+              "Location services are disabled. Please enable them in settings.",
+          rightButton: "Open Settings",
+          onTap: () async {
+            RouteManager.pop();
+            await Geolocator.openLocationSettings();
+          },
+        );
+        return;
+      }
 
-    if (permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always) {
-      currentPosition = await Geolocator.getCurrentPosition();
-    }
+      LocationPermission permission = await Geolocator.checkPermission();
 
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        await customRightCupertinoDialog(
+          content:
+              "Location permission is denied permanently. Please enable it in settings.",
+          rightButton: "Open Settings",
+          onTap: () async {
+            RouteManager.pop();
+            await Geolocator.openAppSettings();
+          },
+        );
+        return;
+      }
 
       if (permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always) {
         currentPosition = await Geolocator.getCurrentPosition();
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      await customRightCupertinoDialog(
-        content:
-            "Location permission is denied permanently. Please enable it in settings.",
-        rightButton: "Open Settings",
-        onTap: () async {
-          RouteManager.pop();
-          await Geolocator.openAppSettings();
-        },
-      );
-    }
-    if (permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always) {
-      currentPosition = await Geolocator.getCurrentPosition();
-    }
+      if (currentPosition == null) {
+        await CommonSnackbar(
+          text: "Unable to fetch your current location. Please try again.",
+        ).showAnimatedDialog(type: QuickAlertType.warning);
+        _restoreControllers(cachedValues);
+        return;
+      }
 
-    isEnabled = true;
-
-    if (currentPosition != null) {
       await getLoactionByCoordinates(parlimentController);
+      if (address == null) {
+        _restoreControllers(cachedValues);
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
+      await CommonSnackbar(
+        text: "Something went wrong while fetching your location.",
+      ).showAnimatedDialog(type: QuickAlertType.error);
+      _restoreControllers(cachedValues);
+    } finally {
+      isEnabled = true;
     }
   }
 
@@ -91,12 +140,15 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
         return;
       }
 
-      return await CommonSnackbar(
+      await CommonSnackbar(
         text: "No Address found please try again",
       ).showAnimatedDialog(type: QuickAlertType.warning);
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
+      await CommonSnackbar(
+        text: "Unable to load address details. Please try again.",
+      ).showAnimatedDialog(type: QuickAlertType.error);
     }
   }
 
@@ -157,20 +209,20 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
     return null;
   }
 
-  clear({bool? safeClear = true}) {
-    if (safeClear == true) {
+  clear({bool safeClear = true}) {
+    if (safeClear) {
       pincodeController.clear();
+      flatNoController.clear();
+      areaController.clear();
+      tehsilController.clear();
+      cityController.clear();
+      districtController.clear();
+      stateController.clear();
+      currentPosition = null;
+      address = null;
     }
-    address = null;
-    currentPosition = null;
-    cityController.clear();
-    districtController.clear();
-    stateController.clear();
-    flatNoController.clear();
-    areaController.clear();
-    tehsilController.clear();
+    _shouldValidate = false;
     searchplaces.clear();
-    
   }
 
   loadAddress({AddressModel? model}) {
@@ -181,6 +233,7 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
     tehsilController.text = model?.tehsil ?? "";
     flatNoController.text = model?.houseNo ?? model?.flatNo ?? "";
     areaController.text = model?.area ?? model?.subLocality ?? "";
+    _shouldValidate = true;
   }
 }
 

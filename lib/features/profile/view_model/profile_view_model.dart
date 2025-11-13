@@ -268,7 +268,7 @@ class ProfileViewModel extends BaseViewModel
         voterIdImage = null;
         await getUserProfile();
         CommonSnackbar(
-          text: "Profile updated successfully1",
+          text: "Profile updated successfully",
         ).showAnimatedDialog(type: QuickAlertType.success);
       }
     } catch (err, stackTrace) {

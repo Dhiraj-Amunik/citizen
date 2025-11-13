@@ -35,7 +35,7 @@ class WallOfHelpPartyView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: commonAppBar(
-          center: false,
+          center: true,
           title: localization.wall_of_help,
           action: [
             SizeBox.sizeWX2,

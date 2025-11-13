@@ -68,10 +68,13 @@ class ProfileHelper {
                 ],
               ),
             ),
-            Icon(
-              Icons.edit_square,
-              size: Dimens.scaleX3,
-              color: AppPalettes.primaryColor,
+            SvgPicture.asset(
+              height: Dimens.scaleX3,
+              AppImages.edit,
+              colorFilter: ColorFilter.mode(
+                AppPalettes.primaryColor,
+                BlendMode.srcIn,
+              ),
             ),
           ],
         ),

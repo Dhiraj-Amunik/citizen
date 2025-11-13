@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/cupertino.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
@@ -62,15 +63,38 @@ class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
   Future<void> verifyOtp() async {
     try {
       isLoading = true;
+      // determine device type string
+      final deviceType = Platform.isIOS
+          ? 'ios'
+          : Platform.isAndroid
+              ? 'android'
+              : null;
+
+      // Only request FCM token on platforms that implement the plugin
+      String? deviceToken;
+      try {
+        if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+          deviceToken = await FirebaseMessaging.instance.getToken();
+        } else if (kIsWeb) {
+          // On web, the plugin is supported but may require additional setup
+          // If you use web, ensure Firebase.initializeApp was called and
+          // replace the VAPID key below if needed.
+          deviceToken = await FirebaseMessaging.instance.getToken();
+        } else {
+          // Unsupported desktop platform (windows/linux/macos) for firebase_messaging
+          deviceToken = null;
+        }
+      } catch (e, s) {
+        debugPrint('FCM token error: $e');
+        debugPrint('$s');
+        deviceToken = null;
+      }
+
       final data = OtpRequestModel(
         phoneNo: numberController.text,
         otp: otpController.text,
-        deviceType: Platform.isIOS
-            ? "ios"
-            : Platform.isAndroid
-            ? "android"
-            : null,
-        deviceToken: await FirebaseMessaging.instance.getToken(),
+        deviceType: deviceType,
+        deviceToken: deviceToken,
       );
       final response = await AuthRepository().validateOTP(data);
 

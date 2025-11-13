@@ -1,12 +1,18 @@
-import 'dart:async';
-import 'dart:developer';
-
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
-import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'dart:async';
+import 'dart:developer';
+import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -51,7 +57,10 @@ class FormTextFormField extends StatefulWidget {
   final String? initialValue;
   final bool? showCounterText;
   final bool? isRequired;
-  final bool? disableVoiceText;
+  final bool enableSpeechInput;
+  final void Function(String message)? onMicAvailabilityDenied;
+  final bool showDefaultSuffix;
+  final AutovalidateMode? autovalidateMode;
 
   const FormTextFormField({
     super.key,
@@ -82,8 +91,6 @@ class FormTextFormField extends StatefulWidget {
     this.fillColor,
     this.fontSize,
     this.initialValue,
-
-    //Material
     this.elevation = 0.0,
     this.backgroundColor = AppPalettes.whiteColor,
     this.shadowColor,
@@ -93,41 +100,165 @@ class FormTextFormField extends StatefulWidget {
     this.labelStyle,
     this.labelText,
     this.isRequired,
-    this.disableVoiceText,
+    this.enableSpeechInput = false,
+    this.onMicAvailabilityDenied,
+    this.showDefaultSuffix = true,
+    this.autovalidateMode,
   });
 
   @override
   State<FormTextFormField> createState() => _FormTextFormFieldState();
 }
 
-class _FormTextFormFieldState extends State<FormTextFormField> {
-  bool isListening = false;
-  late stt.SpeechToText _speechToText;
-  Timer? _statusCheckTimer;
-  DateTime? _lastSpeechTime;
+class _FormTextFormFieldState extends State<FormTextFormField>
+    with SingleTickerProviderStateMixin {
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
+  String _lastFinalRecognizedNormalized = '';
+  late final AnimationController _micPulseController;
+  late final Animation<double> _micPulseAnimation;
 
   @override
   void initState() {
-    _speechToText = stt.SpeechToText();
     super.initState();
+    _micPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _micPulseAnimation = Tween<double>(begin: 1.0, end: 1.25).animate(
+      CurvedAnimation(
+        parent: _micPulseController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  Future<void> _handleMicTap() async {
+    if (!widget.enableSpeechInput || widget.controller == null) return;
+
+    if (!_isListening) {
+      try {
+        final available = await _speech.initialize(
+          onStatus: _onSpeechStatus,
+          onError: _onSpeechError,
+        );
+        if (!available) {
+          final hasPermission = await _speech.hasPermission;
+          final message = hasPermission
+              ? 'Speech recognition is not supported on this device.'
+              : 'Microphone permission is required for speech input.';
+          _handleMicAvailabilityDenied(message);
+          return;
+        }
+      } on PlatformException catch (error, _) {
+        final message = _mapSpeechErrorToMessage(error);
+        _handleMicAvailabilityDenied(message);
+        return;
+      } catch (_) {
+        _handleMicAvailabilityDenied(
+          'Something went wrong while starting speech input.',
+        );
+        return;
+      }
+
+      _lastFinalRecognizedNormalized = '';
+      widget.controller?.clear();
+      try {
+        await _speech.listen(
+          onResult: _onSpeechResult,
+          listenMode: stt.ListenMode.dictation,
+          partialResults: true,
+        );
+      } on PlatformException catch (error, _) {
+        if (error.code == 'notListening') {
+          await _speech.stop();
+        }
+        final message = _mapSpeechErrorToMessage(error);
+        _handleMicAvailabilityDenied(message);
+        return;
+      }
+      setState(() {
+        _isListening = true;
+      });
+      _micPulseController
+        ..reset()
+        ..repeat(reverse: true);
+    } else {
+      await _speech.stop();
+      setState(() {
+        _isListening = false;
+      });
+      _stopMicAnimation();
+    }
+  }
+
+  void _onSpeechResult(SpeechRecognitionResult result) {
+    final recognizedWords = result.recognizedWords.trim();
+    final controller = widget.controller;
+    if (controller != null) {
+      controller.value = TextEditingValue(
+        text: recognizedWords,
+        selection: TextSelection.collapsed(offset: recognizedWords.length),
+        composing: TextRange.empty,
+      );
+    }
+
+    if (result.finalResult) {
+      final normalized = recognizedWords.toLowerCase();
+      if (normalized.isEmpty ||
+          normalized == _lastFinalRecognizedNormalized) {
+        return;
+      }
+
+      _lastFinalRecognizedNormalized = normalized;
+      if (_isListening) {
+        _speech.stop();
+        setState(() {
+          _isListening = false;
+        });
+        _stopMicAnimation();
+      }
+      widget.onChanged?.call(controller?.text ?? recognizedWords);
+    }
+  }
+
+  void _stopMicAnimation() {
+    if (_micPulseController.isAnimating || _micPulseController.value != 0) {
+      _micPulseController
+        ..stop()
+        ..reset();
+    }
+  }
+
+  void _onSpeechStatus(String status) {
+    if (status == 'done' || status == 'notListening') {
+      setState(() {
+        _isListening = false;
+      });
+      _stopMicAnimation();
+    }
+  }
+
+  void _onSpeechError(SpeechRecognitionError error) {
+    setState(() {
+      _isListening = false;
+    });
+    _stopMicAnimation();
+    _handleMicAvailabilityDenied(_mapSpeechError(error));
   }
 
   @override
   void dispose() {
-    _resetSpeechState();
-    _statusCheckTimer?.cancel();
+    _micPulseController.dispose();
+    _speech.stop();
     super.dispose();
   }
-
-  @override
   Widget build(BuildContext context) {
     final respRadius = widget.radius ?? Dimens.radiusX4;
     final border = OutlineInputBorder(
       borderSide: widget.borderColor == null
           ? BorderSide.none
-          : BorderSide(
-              color: widget.borderColor ?? AppPalettes.transparentColor,
-            ),
+          : BorderSide(color: widget.borderColor ?? AppPalettes.transparentColor),
       borderRadius: BorderRadius.circular(respRadius),
     );
     final iconColor = ColorFilter.mode(context.iconsColor, BlendMode.srcIn);
@@ -149,7 +280,9 @@ class _FormTextFormFieldState extends State<FormTextFormField> {
           cursorHeight: Dimens.paddingX5,
           style: widget.textStyle ?? context.textTheme.bodySmall,
           focusNode: widget.focus,
+          textCapitalization: TextCapitalization.sentences,
           enabled: widget.enabled,
+          autovalidateMode: widget.autovalidateMode,
           keyboardType: widget.keyboardType,
           controller: widget.controller,
           decoration: InputDecoration(
@@ -213,31 +346,16 @@ class _FormTextFormFieldState extends State<FormTextFormField> {
             suffixIcon: Transform.translate(
               offset: Offset(
                 0,
-                widget.maxLines == 1 ? 0 : (-(widget.maxLines! * 5) + 0.0),
+                widget.maxLines == 1
+                    ? 0
+                    : (-(widget.maxLines! * 5) + 0.0),
               ),
-              child:
-                  widget.suffixWidget ??
-                  GestureDetector(
-                    onTap: _captureVoice,
-                    child: Container(
-                      child:
-                          SvgPicture.asset(
-                            widget.suffixIcon ?? AppImages.microphoneIcon,
-                            colorFilter: isListening
-                                ? ColorFilter.mode(
-                                    AppPalettes.redColor,
-                                    BlendMode.srcIn,
-                                  )
-                                : iconColor,
-                            width: Dimens.scaleX2B,
-                          ).onlyPadding(
-                            left: Dimens.paddingX2,
-                            right: Dimens.paddingX4,
-                            top: Dimens.paddingX3B,
-                            bottom: Dimens.paddingX3B,
-                          ),
-                    ),
-                  ),
+              child: widget.suffixWidget ??
+                  (widget.showDefaultSuffix
+                      ? _buildMicIcon(
+                          iconColor: iconColor,
+                        )
+                      : const SizedBox.shrink()),
             ),
           ),
           maxLines: widget.maxLines,
@@ -254,120 +372,143 @@ class _FormTextFormFieldState extends State<FormTextFormField> {
     );
   }
 
-  void _captureVoice() async {
-    if (widget.disableVoiceText == true) return;
-
-    FocusScope.of(context).unfocus();
-
-    if (isListening) {
-      _resetSpeechState();
-      return;
-    }
-
-    bool listen = await _speechToText.initialize(
-      onStatus: (status) {
-        log('Speech status: $status');
-
-        final normalizedStatus = status.trim().toLowerCase();
-
-        if (normalizedStatus !=
-                stt.SpeechToText.listeningStatus.toLowerCase() &&
-            !normalizedStatus.contains('listening') &&
-            !normalizedStatus.contains('receiving')) {
-          log('Resetting due to status: $status');
-          _resetSpeechState();
-        }
-
-        if (normalizedStatus == stt.SpeechToText.doneStatus.toLowerCase() ||
-            normalizedStatus.contains('done') ||
-            normalizedStatus.contains('finished') ||
-            normalizedStatus.contains('complete') ||
-            normalizedStatus.contains('not listening')) {
-          log('Resetting due to completion status: $status');
-          _resetSpeechState();
-        }
-      },
-      onError: (error) {
-        log('Speech error: ${error.errorMsg}');
-        _resetSpeechState();
-        CommonSnackbar(
-          text: 'Speech recognition error: ${error.errorMsg}',
-        ).showToast();
-      },
+  Widget _buildMicIcon({required ColorFilter iconColor}) {
+    final mic = SvgPicture.asset(
+      widget.suffixIcon ?? AppImages.microphoneIcon,
+      colorFilter: iconColor,
+      width: Dimens.scaleX2B,
+    ).onlyPadding(
+      left: Dimens.paddingX2,
+      right: Dimens.paddingX4,
+      top: Dimens.paddingX3B,
+      bottom: Dimens.paddingX3B,
     );
 
-    if (listen) {
-      setState(() {
-        isListening = true;
-        _lastSpeechTime = DateTime.now();
-      });
+    if (!widget.enableSpeechInput || widget.suffixWidget != null) {
+      return mic;
+    }
 
-      _startStatusCheckTimer();
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _handleMicTap,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: Dimens.paddingX2,
+          right: Dimens.paddingX4,
+          top: Dimens.paddingX3B,
+          bottom: Dimens.paddingX3B,
+        ),
+        child: SizedBox(
+          width: Dimens.paddingX6,
+          height: Dimens.paddingX6,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (_isListening)
+                AnimatedBuilder(
+                  animation: _micPulseController,
+                  builder: (context, child) {
+                    final scale = _micPulseAnimation.value;
+                    final opacity =
+                        ((1.3 - scale) / 0.3).clamp(0.0, 1.0).toDouble();
+                    return Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        width: Dimens.paddingX6,
+                        height: Dimens.paddingX6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppPalettes.primaryColor
+                              .withOpacityExt(0.25 * opacity),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              if (_isListening)
+                AnimatedBuilder(
+                  animation: _micPulseController,
+                  builder: (context, child) {
+                    final scale = 1 + (_micPulseAnimation.value - 1) * 1.4;
+                    final opacity =
+                        ((_micPulseAnimation.value - 1) / 0.25).clamp(0.0, 1.0);
+                    return Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        width: Dimens.paddingX6,
+                        height: Dimens.paddingX6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppPalettes.primaryColor
+                                .withOpacityExt(0.35 * opacity),
+                            width: 1.2,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              SvgPicture.asset(
+                widget.suffixIcon ?? AppImages.microphoneIcon,
+                colorFilter: _isListening
+                    ? ColorFilter.mode(AppPalettes.primaryColor, BlendMode.srcIn)
+                    : iconColor,
+                width: Dimens.scaleX2B,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-      await _speechToText
-          .listen(
-            onResult: (result) {
-              widget.controller?.text = result.recognizedWords;
-              _lastSpeechTime = DateTime.now();
+  String _mapSpeechErrorToMessage(PlatformException exception) {
+    switch (exception.code) {
+      case 'recognizerNotAvailable':
+      case 'notAvailableOnDevice':
+        return 'Speech recognition is not available on this device.';
+      case 'notListening':
+        return 'Unable to start listening. Please try again.';
+      case 'audioError':
+        return 'Microphone is unavailable.';
+      case 'network':
+        return 'Network error occurred while using speech recognition.';
+      default:
+        return exception.message ??
+            'Unable to start speech recognition. Please try again.';
+    }
+  }
 
-              if (result.finalResult) {
-                _resetSpeechState();
-              }
-            },
-            listenFor: const Duration(
-              minutes: 5,
-            ), // Very long timeout as backup only
-            pauseFor: const Duration(
-              seconds: 3,
-            ), // Auto-pause after 3 seconds of silence
-          )
-          .catchError((error) {
-            log('Listen error: $error');
-            _resetSpeechState();
-          });
+  String _mapSpeechError(SpeechRecognitionError error) {
+    switch (error.errorMsg) {
+      case 'error_network':
+      case 'error_network_timeout':
+        return 'Network error occurred while using speech recognition.';
+      case 'error_audio':
+        return 'Microphone is unavailable.';
+      case 'error_no_match':
+        return 'No speech recognized. Please try speaking again.';
+      case 'error_insufficient_permissions':
+        return 'Microphone permission is required for speech input.';
+      case 'error_client':
+      case 'client_error':
+        return 'Speech recognition client error occurred.';
+      default:
+        return error.errorMsg.isNotEmpty
+            ? error.errorMsg
+            : 'Unable to continue speech recognition. Please try again.';
+    }
+  }
+
+  void _handleMicAvailabilityDenied(String message) {
+    final safeMessage = message.trim().isEmpty
+        ? 'Voice input is currently unavailable.'
+        : message.trim();
+    if (widget.onMicAvailabilityDenied != null) {
+      widget.onMicAvailabilityDenied!(safeMessage);
     } else {
-      CommonSnackbar(text: 'Speech recognition not available').showToast();
+      CommonSnackbar(text: safeMessage).showSnackbar();
     }
-  }
-
-  void _startStatusCheckTimer() {
-    _statusCheckTimer?.cancel();
-    _statusCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      if (!isListening) {
-        timer.cancel();
-        return;
-      }
-
-      if (_lastSpeechTime != null &&
-          DateTime.now().difference(_lastSpeechTime!).inSeconds > 10) {
-        log('No speech activity for 10 seconds, forcing reset');
-        _resetSpeechState();
-        timer.cancel();
-        return;
-      }
-
-      try {
-        log('Status check: speech recognition active check');
-      } catch (e) {
-        log('Status check error: $e');
-      }
-    });
-  }
-
-  void _resetSpeechState() {
-    _statusCheckTimer?.cancel();
-
-    if (isListening) {
-      log('Resetting speech state from listening to false');
-      setState(() => isListening = false);
-    }
-
-    try {
-      _speechToText.stop();
-    } catch (e) {
-      log('Error stopping speech: $e');
-    }
-
-    _lastSpeechTime = null;
   }
 }

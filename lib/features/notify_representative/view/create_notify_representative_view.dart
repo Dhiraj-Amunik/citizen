@@ -44,6 +44,7 @@ class CreateNotifyRepresentativeView extends StatelessWidget
                         headingText: localization.event_type,
                         hintText: localization.title,
                         controller: provider.eventTypeController,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: localization.event_title_validatore,
                         ),
@@ -53,6 +54,7 @@ class CreateNotifyRepresentativeView extends StatelessWidget
                         headingText: localization.location_venue,
                         hintText: localization.enter_location,
                         controller: provider.locationController,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: localization.event_location_validator,
                         ),
@@ -108,6 +110,7 @@ class CreateNotifyRepresentativeView extends StatelessWidget
                         hintText: localization.description_info,
                         controller: provider.descriptionController,
                         maxLines: 5,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: localization.notify_description_validatore,
                         ),
