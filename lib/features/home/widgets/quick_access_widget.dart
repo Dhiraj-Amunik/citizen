@@ -187,10 +187,6 @@ Future<void> _handleQuickAccessTap(
     await _handleVolunteerTap(context);
     return;
   }
-  if (data.route == Routes.nearestMemberPage) {
-    CommonSnackbar(text: "Updating soon...").showToast();
-    return;
-  }
   RouteManager.pushNamed(data.route);
 }
 

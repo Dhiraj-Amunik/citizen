@@ -149,7 +149,7 @@ Widget getPage(Routes route, {dynamic arguments}) {
       return MyMembersMessagesListView();
     case Routes.photoDetailsPage:
       return PhotoDetailsView(media: arguments);
-    case Routes.notifyRepresentativePage:
+    case Routes.notifyRepresentativePage: 
       return NotifyRepresentativeView();
     case Routes.createNotifyRepresentativePage:
       return CreateNotifyRepresentativeView();

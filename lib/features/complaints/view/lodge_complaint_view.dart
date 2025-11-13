@@ -61,7 +61,6 @@ class LodgeComplaintView extends StatelessWidget {
             elevation: Dimens.elevation,
           ),
           
-
           body: Consumer<AddComplaintsViewModel>(
             builder: (context, value, _) {
               return Form(

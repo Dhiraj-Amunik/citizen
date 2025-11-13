@@ -45,6 +45,7 @@ class _NearestMemberSilverAppbarState extends State<NearestMemberSilverAppbar> {
     final provider = context.read<NearestMemberViewModel>();
     final localization = context.localizations;
     final textTheme = context.textTheme;
+    final collapsedHeightValue = 60.height();
 
     return SliverAppBar(
       actionsPadding: EdgeInsets.zero,
@@ -131,7 +132,9 @@ class _NearestMemberSilverAppbarState extends State<NearestMemberSilverAppbar> {
       backgroundColor: AppPalettes.liteGreenColor,
       pinned: true,
       expandedHeight: 400.height(),
-      collapsedHeight: 60.height(),
+      collapsedHeight: collapsedHeightValue >= kToolbarHeight
+          ? collapsedHeightValue
+          : kToolbarHeight,
       floating: true,
       snap: true,
       flexibleSpace: FlexibleSpaceBar(
