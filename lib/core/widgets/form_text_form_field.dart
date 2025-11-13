@@ -10,6 +10,12 @@ import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
+import 'dart:async';
+import 'dart:developer';
+import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/extensions/padding_extension.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class FormTextFormField extends StatefulWidget {
@@ -304,7 +310,16 @@ class _FormTextFormFieldState extends State<FormTextFormField>
                 ),
             errorStyle: AppStyles.errorStyle,
             border: border,
-            enabledBorder: border,
+            enabledBorder: border.copyWith(
+              borderSide: BorderSide(
+                color: isListening
+                    ? AppPalettes.blackColor
+                    : widget.fillColor != null
+                    ? AppPalettes.blackColor
+                    : AppPalettes.transparentColor,
+              ),
+            ),
+
             disabledBorder: border,
             focusedBorder: border.copyWith(
               borderSide: const BorderSide(color: AppPalettes.blackColor),
