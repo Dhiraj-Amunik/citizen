@@ -7,7 +7,8 @@ import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/features/notification/models/notifications_model.dart';
-import 'package:readmore/readmore.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
+import 'package:inldsevak/core/widgets/read_more_widget.dart';
 
 
 class NotificationCard extends StatelessWidget {
@@ -42,19 +43,13 @@ class NotificationCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: Dimens.gapX,
               children: [
-                Text(
-                  notification.title ?? 'Notification',
+                TranslatedText(
+                  text: notification.title ?? 'Notification',
                   style: textTheme.titleMedium,
                 ),
-                ReadMoreText(
-                  notification.message ?? 'No description available',
-                  trimLines: 2,
-                  trimMode: TrimMode.Line,
-                  textAlign: TextAlign.start,
-                  trimCollapsedText: ' Read‎‎‎more',
-                  trimExpandedText: ' Show‎‎‎less',
-                  moreStyle: textTheme.bodyMedium,
-                  lessStyle: textTheme.bodyMedium,
+                ReadMoreWidget(
+                  text: notification.message ?? 'No description available',
+                  maxLines: 2,
                   style: AppStyles.bodyMedium.copyWith(
                     color: AppPalettes.lightTextColor,
                     fontSize: 14.spMax,
@@ -67,7 +62,8 @@ class NotificationCard extends StatelessWidget {
                   ),
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: Text(
+                    child: TranslatedText(
+                      text: 
                       notification.createdAt?.toRelativeTime() ?? "",
                       style: textTheme.labelMedium?.copyWith(
                         color: AppPalettes.lightTextColor,

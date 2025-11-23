@@ -7,6 +7,7 @@ import 'package:inldsevak/core/extensions/time_formatter.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/mixin/handle_multiple_files_sheet.dart';
+import 'package:inldsevak/core/secure/secure_storage.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
@@ -17,13 +18,122 @@ import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/features/nearest_member/model/nearest_members_model.dart';
 import 'package:inldsevak/features/nearest_member/view_model/chat_member_view_model.dart';
 import 'package:inldsevak/features/nearest_member/widgets/member_widget.dart';
+import 'package:inldsevak/features/party_member/model/request/request_member_details.dart';
+import 'package:inldsevak/features/party_member/services/party_member_repository.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/party/widgets/handle_chat_contribute_images_ui.dart';
 import 'package:provider/provider.dart';
 
-class ChatMemberView extends StatelessWidget with HandleMultipleFilesSheet {
+class ChatMemberView extends StatefulWidget {
   final PartyMember member;
 
   const ChatMemberView({super.key, required this.member});
+
+  @override
+  State<ChatMemberView> createState() => _ChatMemberViewState();
+}
+
+class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFilesSheet {
+  late PartyMember _member;
+  bool _isLoadingMemberDetails = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _member = widget.member;
+    // Fetch member details if location is missing
+    _fetchMemberDetailsIfNeeded();
+  }
+
+  Future<void> _fetchMemberDetailsIfNeeded() async {
+    // Check current state
+    final hasAddress = _member.address != null && _member.address!.trim().isNotEmpty;
+    final hasCoordinates = _member.location?.coordinates != null && 
+                           _member.location!.coordinates!.isNotEmpty &&
+                           _member.location!.coordinates!.length >= 2;
+    
+    debugPrint("=== ChatMemberView - Checking member location ===");
+    debugPrint("Member ID: ${_member.sId}");
+    debugPrint("Member name: ${_member.name}");
+    debugPrint("Has address: $hasAddress (value: '${_member.address}')");
+    debugPrint("Has coordinates: $hasCoordinates (value: ${_member.location?.coordinates})");
+    debugPrint("Phone: ${_member.phone}");
+    
+    // Only fetch if location and address are both missing
+    if (!hasAddress && !hasCoordinates && _member.phone != null && _member.phone!.isNotEmpty) {
+      debugPrint("=== Fetching member details for phone: ${_member.phone} ===");
+      setState(() {
+        _isLoadingMemberDetails = true;
+      });
+      
+      try {
+        final token = await SessionController.instance.getToken();
+        if (token == null || token.isEmpty) {
+          debugPrint("No token available, cannot fetch member details");
+          return;
+        }
+        
+        final request = RequestMemberDetails(phoneNumber: _member.phone!);
+        final response = await PartyMemberRepository().getUserDetails(
+          data: request,
+          token: token,
+        );
+
+        debugPrint("API Response Code: ${response.data?.responseCode}");
+        debugPrint("API Response Message: ${response.data?.message}");
+        
+        if (response.data?.responseCode == 200) {
+          final user = response.data?.data?.user;
+          debugPrint("User from API - address: '${user?.address}'");
+          debugPrint("User from API - name: '${user?.name}'");
+          
+          if (user != null && mounted) {
+            // Only update if we got a valid address
+            final newAddress = (user.address != null && user.address!.trim().isNotEmpty) 
+                ? user.address 
+                : _member.address;
+            
+            debugPrint("Updating member - new address: '${newAddress}'");
+            
+            setState(() {
+              // Update member with address from user details
+              _member = PartyMember(
+                sId: _member.sId ?? user.sId,
+                name: _member.name ?? user.name,
+                email: _member.email ?? user.email,
+                phone: _member.phone ?? user.phone,
+                address: newAddress,
+                avatar: _member.avatar ?? user.avatar,
+                location: _member.location, // User details don't have location coordinates
+                distance: _member.distance,
+                partyMemberDetails: _member.partyMemberDetails,
+              );
+            });
+            
+            debugPrint("Member updated - final address: '${_member.address}'");
+          } else {
+            debugPrint("User data is null in response");
+          }
+        } else {
+          debugPrint("API error: ${response.data?.message}");
+          if (response.error != null) {
+            debugPrint("API error details: ${response.error}");
+          }
+        }
+      } catch (e, stackTrace) {
+        debugPrint("Exception fetching member details: $e");
+        debugPrint("Stack trace: $stackTrace");
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoadingMemberDetails = false;
+          });
+          debugPrint("=== Finished fetching member details ===");
+        }
+      }
+    } else {
+      debugPrint("Skipping fetch - member already has location data or no phone");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +141,12 @@ class ChatMemberView extends StatelessWidget with HandleMultipleFilesSheet {
     final textTheme = context.textTheme;
     return ChangeNotifierProvider( 
       create: (context) => ChatMemberViewModel(
-        id: member.partyMemberDetails?.sId ?? "",
-        type: member.partyMemberDetails?.type ?? "PartyMember",
+        id: _member.partyMemberDetails?.sId ?? "",
+        type: _member.partyMemberDetails?.type ?? "PartyMember",
       ),
       builder: (contextP, widget) {
         final provider = contextP.watch<ChatMemberViewModel>();
-
+        
         return Scaffold(
           appBar: commonAppBar(
             title: localization.contribute,
@@ -44,11 +154,18 @@ class ChatMemberView extends StatelessWidget with HandleMultipleFilesSheet {
           ),
           body: Column(
             children: [
-              MemberWidget(
-                showIcon: false,
-                member: member,
-                onTap: () {},
-              ).horizontalPadding(Dimens.paddingX3),
+              if (_isLoadingMemberDetails)
+                Container(
+                  padding: EdgeInsets.all(Dimens.paddingX3),
+                  child: Center(child: CustomAnimatedLoading()),
+                )
+              else
+                MemberWidget(
+                  key: ValueKey('${_member.sId}_${_member.address}'), // Force rebuild when member or address changes
+                  showIcon: false,
+                  member: _member,
+                  onTap: () {},
+                ).horizontalPadding(Dimens.paddingX3),
               Expanded(
                 child: Container(
                   decoration: boxDecorationRoundedWithShadow(

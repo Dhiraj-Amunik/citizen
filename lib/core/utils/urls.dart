@@ -14,6 +14,7 @@ class URLs {
 
   //dashboard
   static const getDashboard = "/api/user/getUserDashboard"; /*Get*/
+  static const userDashboard = "/api/user/user-dashboard"; /*Post*/
   static const getVolunteerAnalytics =
       "/api/user/getVolunteerAnalytics"; /*Get*/
 
@@ -38,6 +39,7 @@ class URLs {
   static const userEvents = "/api/user/list-of-events"; /*Post*/
   static const userEventsDetails = "/api/user/get-single-event"; /*Post*/
   static const attendEvent = "/api/user/attend-Event"; /*Post*/
+  static const shareEvent = "/api/user/share-Event"; /*Post*/
   static const userLokVarta = "/api/user/lok-varta"; /*Post*/
   static const postDonation = "/api/user/create-donation"; /*Post*/
   static const pastDonation = "/api/user/list-of-donations-by-user"; /*Post*/
@@ -98,6 +100,7 @@ class URLs {
   // Notify representative
 
   static const getNotifyEventTypes = "/api/user/list-of-event-type-dropdown";
+  static const getNotifyFilters = "/api/user/getNotifyFilters"; /*Get*/
   static const postNotifyRepresentative =
       "/api/user/create-update-notify-representative";
   static const getListNotifyRepresentative =

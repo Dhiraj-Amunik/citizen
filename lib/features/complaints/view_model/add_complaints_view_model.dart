@@ -9,6 +9,7 @@ import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/complaints/model/request/request_authorities_model.dart';
 import 'package:inldsevak/features/complaints/model/response/authorites_model.dart'
     as authorities;
@@ -153,20 +154,37 @@ class AddComplaintsViewModel extends BaseViewModel
       children: [
         ListTile(
           leading: Icon(Icons.camera),
-          title: Text('Take a Picture'),
+          title: TranslatedText(text: 'Take a Picture'),
           onTap: () async {
             RouteManager.pop();
+            // Add small delay to ensure bottom sheet is fully closed
+            await Future.delayed(const Duration(milliseconds: 300));
             try {
-              multipleFiles.add(await createCameraImage() ?? []);
-              notifyListeners();
-            } catch (err) {
-              debugPrint("-------->$err");
+              final file = await createCameraImage();
+              if (file != null && await file.exists()) {
+                // Verify file is valid before adding
+                final fileSize = await file.length();
+                if (fileSize > 0) {
+                  multipleFiles.add(file);
+                  notifyListeners();
+                } else {
+                  CommonSnackbar(
+                    text: "Image file is invalid. Please try again.",
+                  ).showAnimatedDialog(type: QuickAlertType.error);
+                }
+              }
+            } catch (err, stackTrace) {
+              debugPrint("Error capturing image: $err");
+              debugPrint("Stack trace: $stackTrace");
+              CommonSnackbar(
+                text: "Failed to capture image. Please try again.",
+              ).showAnimatedDialog(type: QuickAlertType.error);
             }
           },
         ),
         ListTile(
           leading: Icon(Icons.photo_library),
-          title: Text('Choose from Gallery'),
+          title: TranslatedText(text: 'Choose from Gallery'),
           onTap: () async {
             RouteManager.pop();
             try {
@@ -179,7 +197,7 @@ class AddComplaintsViewModel extends BaseViewModel
         ),
         ListTile(
           leading: Icon(Icons.file_open),
-          title: Text('Choose from Files'),
+          title: TranslatedText(text: 'Choose from Files'),
           onTap: () async {
             RouteManager.pop();
             try {

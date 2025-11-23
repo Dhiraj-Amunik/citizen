@@ -7,6 +7,7 @@ import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/appointments/model/mla_dropdown_model.dart'
     as mla;
 import 'package:inldsevak/features/quick_access/appointments/model/request_appointment_model.dart';
@@ -21,9 +22,9 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
   final nameController = TextEditingController();
   final phoneNumberController = TextEditingController();
   final dateController = TextEditingController();
+  final timeSlotController = TextEditingController();
   final membershipController = TextEditingController();
   final mlaController = SingleSelectController<mla.Data?>(null);
-  // final timeSlotController = SingleSelectController<String>(null);
   final purposeOfAppointmentController = TextEditingController();
   final bookForController = SingleSelectController<BookFor?>(null);
   final descriptionController = TextEditingController();
@@ -65,20 +66,35 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
       children: [
         ListTile(
           leading: Icon(Icons.camera),
-          title: Text('Take a Picture'),
+          title: TranslatedText(text: 'Take a Picture'),
           onTap: () async {
             RouteManager.pop();
+            await Future.delayed(const Duration(milliseconds: 300));
             try {
-              multipleFiles.add(await createCameraImage() ?? []);
-              notifyListeners();
-            } catch (err) {
-              debugPrint("-------->$err");
+              final file = await createCameraImage();
+              if (file != null && await file.exists()) {
+                final fileSize = await file.length();
+                if (fileSize > 0) {
+                  multipleFiles.add(file);
+                  notifyListeners();
+                } else {
+                  CommonSnackbar(
+                    text: "Image file is invalid. Please try again.",
+                  ).showAnimatedDialog(type: QuickAlertType.error);
+                }
+              }
+            } catch (err, stackTrace) {
+              debugPrint("Error capturing image: $err");
+              debugPrint("Stack trace: $stackTrace");
+              CommonSnackbar(
+                text: "Failed to capture image. Please try again.",
+              ).showAnimatedDialog(type: QuickAlertType.error);
             }
           },
         ),
         ListTile(
           leading: Icon(Icons.photo_library),
-          title: Text('Choose from Gallery'),
+          title: TranslatedText(text: 'Choose from Gallery'),
           onTap: () async {
             RouteManager.pop();
             try {
@@ -91,7 +107,7 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
         ),
         ListTile(
           leading: Icon(Icons.file_open),
-          title: Text('Choose from Files'),
+          title: TranslatedText(text: 'Choose from Files'),
           onTap: () async {
             RouteManager.pop();
             try {
@@ -131,7 +147,7 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
         name: nameController.text,
         phone: phoneNumberController.text,
         date: companyDateFormat ?? "",
-        // timeSlot: timeSlotController.value ?? "",
+        timeSlot: timeSlotController.text.isEmpty ? "00:00" : timeSlotController.text,
         purpose: purposeOfAppointmentController.text,
         reason: descriptionController.text,
         documents: multipleFiles.isEmpty
@@ -187,8 +203,8 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
     nameController.clear();
     phoneNumberController.clear();
     dateController.clear();
+    timeSlotController.clear();
     companyDateFormat = null;
-    // timeSlotController.clear();
     purposeOfAppointmentController.clear();
     descriptionController.clear();
   }
@@ -200,7 +216,7 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
     nameController.dispose();
     phoneNumberController.dispose();
     dateController.dispose();
-    // timeSlotController.dispose();
+    timeSlotController.dispose();
     purposeOfAppointmentController.dispose();
     descriptionController.dispose();
     super.dispose();

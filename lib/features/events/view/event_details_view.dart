@@ -13,6 +13,7 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_expanded_widget.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/events/model/request_details_event_model.dart';
 import 'package:inldsevak/features/events/view_model/event_details_view_model.dart';
 import 'package:inldsevak/features/events/widgets/event_info_container.dart';
@@ -45,7 +46,10 @@ class EventDetailsView extends StatelessWidget {
                       iconColor: AppPalettes.whiteColor,
                       padding: Dimens.paddingX3,
                       iconSize: Dimens.scaleX2B,
-                      onTap: () => CommonHelpers.shareURL(url ?? ""),
+                      onTap: () {
+                        final eventId = eventModel.eventId;
+                        CommonHelpers.shareURL(url ?? "", eventId: eventId);
+                      },
                     );
                   }
                   return SizedBox();
@@ -79,7 +83,7 @@ class EventDetailsView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(height: 0.3.screenHeight),
-                        Text("Event not Found !"),
+                        TranslatedText(text: localization.event_not_found),
                       ],
                     );
                   }
@@ -100,8 +104,8 @@ class EventDetailsView extends StatelessWidget {
                       SizeBox.sizeHX2,
                       SizedBox(
                         width: 0.5.screenWidth,
-                        child: Text(
-                          event.title ?? "Unknown title",
+                        child: TranslatedText(
+                          text: event.title ?? "Unknown title",
                           style: textTheme.headlineSmall,
                           textAlign: TextAlign.center,
                         ),
@@ -117,20 +121,20 @@ class EventDetailsView extends StatelessWidget {
                           EventInfoContainer(
                             icon: AppImages.calenderIcon,
                             text:
-                                event.createdAt?.toDdMmmYyyy() ?? "00-00-0000",
+                                event.dateAndTime?.toDdMmmYyyy() ?? "00-00-0000",
                           ),
                           EventInfoContainer(
                             icon: AppImages.clockIcon,
-                            text: event.createdAt?.to12HourTime() ?? "00:00  ",
+                            text: event.dateAndTime?.to12HourTime() ?? "00:00  ",
                           ),
                           EventInfoContainer(
                             icon: AppImages.locationIcon,
-                            text: event.location ?? "No Location found",
+                            text: event.location ?? localization.no_location_found,
                           ),
                           CommonExpandedWidget(
                             color: AppPalettes.liteGreyColor,
 
-                            title: "View Poster",
+                            title: localization.view_poster,
                             childrenPadding: Dimens.paddingX3,
                             padding: EdgeInsets.symmetric(
                               horizontal: Dimens.paddingX3,

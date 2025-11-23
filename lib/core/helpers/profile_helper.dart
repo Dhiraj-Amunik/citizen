@@ -7,6 +7,7 @@ import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class ProfileHelper {
   static Widget getProfileBox({
@@ -52,8 +53,8 @@ class ProfileHelper {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name ?? "",
+                  TranslatedText(
+                    text: name ?? "",
                     style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

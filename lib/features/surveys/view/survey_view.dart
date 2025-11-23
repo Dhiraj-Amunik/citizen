@@ -7,6 +7,7 @@ import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/surveys/view_model/survey_view_model.dart';
 import 'package:inldsevak/features/surveys/widgets/survey_type.dart';
 import 'package:provider/provider.dart';
@@ -57,8 +58,8 @@ class SurveyView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "${index + 1}. ${data.text}",
+                      TranslatedText(
+                        text: "${index + 1}. ${data.text}",
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),

@@ -50,21 +50,102 @@ class UpdateNotifyRepresentativeView extends StatelessWidget
                         headingText: localization.event_type,
                         hintText: localization.title,
                         controller: provider.eventTypeController,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: localization.event_title_validatore,
                         ),
                       ),
+                      // Village Field - Text input
                       FormTextFormField(
                         isRequired: true,
-                        headingText: localization.location_venue,
-                        hintText: localization.enter_location,
-                        controller: provider.locationController,
+                        headingText: 'Village',
+                        hintText: 'Enter Village',
+                        controller: provider.villageController,
+                        textCapitalization: TextCapitalization.words,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
                         validator: (text) => text?.validate(
-                          argument: localization.event_location_validator,
+                          argument: 'Please enter Village',
                         ),
                       ),
+                      // FormTextFormField(
+                      //   isRequired: true,
+                      //   headingText: localization.location_venue,
+                      //   hintText: localization.enter_location,
+                      //   controller: provider.locationController,
+                      //   textCapitalization: TextCapitalization.sentences,
+                      //   enforceFirstLetterUppercase: true,
+                      //   enableSpeechInput: true,
+                      //   validator: (text) => text?.validate(
+                      //     argument: localization.event_location_validator,
+                      //   ),
+                      // ),
+                         // District Field - Text input
+                      FormTextFormField(
+                        isRequired: true,
+                        headingText: 'District',
+                        hintText: 'Enter District',
+                        controller: provider.districtController,
+                        textCapitalization: TextCapitalization.words,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
+                        validator: (text) => text?.validate(
+                          argument: 'Please enter District',
+                        ),
+                      ),
+
+                      // Mandal Field - Text input
+                      FormTextFormField(
+                        isRequired: true,
+                        headingText: 'Mandal',
+                        hintText: 'Enter Mandal',
+                        controller: provider.mandalController,
+                        textCapitalization: TextCapitalization.words,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
+                        validator: (text) => text?.validate(
+                          argument: 'Please enter Mandal',
+                        ),
+                      ),
+
+                      // Street Field
+                      FormTextFormField(
+                        isRequired: true,
+                        headingText: 'Street',
+                        hintText: 'Enter Street',
+                        controller: provider.streetController,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
+                        validator: (text) => text?.validate(
+                          argument: 'Please enter Street',
+                        ),
+                      ),
+
+                      // Pincode Field
+                      FormTextFormField(
+                        isRequired: true,
+                        headingText: 'Pincode',
+                        hintText: 'Enter Pincode',
+                        controller: provider.pincodeController,
+                        keyboardType: TextInputType.number,
+                        enableSpeechInput: true,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
+                        maxLength: 6,
+                        validator: (text) {
+                          if (text == null || text.isEmpty) {
+                            return 'Please enter Pincode';
+                          }
+                          if (text.length != 6) {
+                            return 'Please enter valid 6-digit Pincode';
+                          }
+                          return null;
+                        },
+                      ),
+
                       FormTextFormField(
                         isRequired: true,
                         headingText: localization.event_date,
@@ -109,18 +190,21 @@ class UpdateNotifyRepresentativeView extends StatelessWidget
                           argument: localization.event_time_validatore,
                         ),
                       ),
-
                       FormTextFormField(
                         isRequired: true,
                         headingText: localization.description,
                         hintText: localization.description_info,
                         controller: provider.descriptionController,
                         maxLines: 5,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: localization.notify_description_validatore,
                         ),
                       ),
+                   
+
                       if (value.existingDocuments.isNotEmpty)
                         _ExistingDocumentsGrid(
                           documents: value.existingDocuments,

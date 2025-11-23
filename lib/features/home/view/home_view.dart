@@ -30,6 +30,9 @@ class _HomeViewState extends State<HomeView> {
       }
 
       if (isVisible) {
+        // Mark as shown so other screens do not re-display the same notice
+        // (prevents duplicate display when navigating immediately).
+        await prefs.setBool('disclaimer_dismissed', false);
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,

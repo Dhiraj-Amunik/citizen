@@ -59,6 +59,8 @@ class RequestWallOfHelpView extends StatelessWidget
                       hintText: localization.enter_your_full_name,
                       headingText: localization.name,
                         enableSpeechInput: true,
+                      textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                       validator: (text) =>
                           text?.validate(argument: localization.name_validator),
                     ),
@@ -72,6 +74,8 @@ class RequestWallOfHelpView extends StatelessWidget
                       headingText: localization.mobile_number,
                         enableSpeechInput: true,
                       maxLength: 10,
+                      textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                       keyboardType: TextInputType.phone,
                       validator: (text) => text?.validate(
                         argument: localization.phone_validator,
@@ -84,6 +88,8 @@ class RequestWallOfHelpView extends StatelessWidget
                       hintText: localization.enter_your_address,
                       headingText: localization.address,
                       enableSpeechInput: true,
+                      textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                       validator: (text) => text?.validate(
                         argument: localization.address_validator,
                       ),
@@ -121,7 +127,9 @@ class RequestWallOfHelpView extends StatelessWidget
                         controller: provider.otherTypeController,
                         hintText: "Enter your reason",
                         headingText: "Be more specific",
-                       
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: "Others Help need to be specified",
                         ),
@@ -133,7 +141,9 @@ class RequestWallOfHelpView extends StatelessWidget
                       controller: provider.descriptionController,
                       hintText: localization.enter_description_of_request,
                       headingText: localization.description,
-                       enableSpeechInput: true,
+                      textCapitalization: TextCapitalization.sentences,
+                      enforceFirstLetterUppercase: true,
+                      enableSpeechInput: true,
                       validator: (text) => text?.validate(
                         argument: localization.please_enter_few_words,
                       ),
@@ -182,6 +192,9 @@ class RequestWallOfHelpView extends StatelessWidget
                         controller: provider.otherPreferredController,
                         hintText: "Enter your reason",
                         headingText: "Be more specific",
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: "Others Help need to be specified",
                         ),
@@ -198,7 +211,7 @@ class RequestWallOfHelpView extends StatelessWidget
                             isRequired: true,
                             controller: provider.amountController,
                             hintText: localization.enter_amount,
-                            headingText: localization.raise_amount,
+                            headingText: '${localization.raise_amount} (₹)',
                             validator: (text) => text?.validateAmount(
                               argument: localization.raise_amount_validator,
                               argument2: localization.less_amount_validator,

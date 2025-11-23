@@ -60,7 +60,10 @@ class ThreadViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> replyThread({required String id}) async {
+  Future<void> replyThread({
+    required String id,
+    String? status,
+  }) async {
     try {
       if (nextThreadController.text.isEmpty) {
         return CommonSnackbar(text: "Message can't be empty").showToast();
@@ -73,11 +76,17 @@ class ThreadViewModel extends BaseViewModel {
         multipartFiles.add(file);
       }
 
-      final FormData form = FormData.fromMap({
+      final Map<String, dynamic> formDataMap = {
         "message": nextThreadController.text.trim(),
         "complaintId": id,
         "attachments": multipartFiles,
-      });
+      };
+
+      if (status != null && status.isNotEmpty) {
+        formDataMap["status"] = status;
+      }
+
+      final FormData form = FormData.fromMap(formDataMap);
 
       final response = await ComplaintsRepository().replyComplaints(
         data: form,

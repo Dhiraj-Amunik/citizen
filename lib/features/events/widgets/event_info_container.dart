@@ -6,6 +6,7 @@ import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class EventInfoContainer extends StatelessWidget {
   final String icon;
@@ -30,7 +31,7 @@ class EventInfoContainer extends StatelessWidget {
                 padding: Dimens.paddingX2,
               ),
               SizeBox.sizeWX4,
-              Flexible(child: Text(text, style: context.textTheme.bodyMedium)),
+              Flexible(child: TranslatedText(text: text, style: context.textTheme.bodyMedium)),
             ],
           ).symmetricPadding(
             horizontal: Dimens.paddingX3,

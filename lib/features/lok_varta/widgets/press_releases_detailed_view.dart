@@ -12,6 +12,7 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
 import 'package:inldsevak/core/widgets/responisve_image_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/lok_varta/model/lok_varta_model.dart'
     as model;
 
@@ -27,16 +28,15 @@ class PressReleasesDetailedView extends StatelessWidget {
       backgroundColor: AppPalettes.whiteColor,
       appBar: commonAppBar(
         title: localization.lok_varta,
-
         action: [
           if (media.url != null)
             CommonHelpers.buildIcons(
               path: AppImages.shareIcon,
-              color: AppPalettes.primaryColor,
-              iconColor: AppPalettes.whiteColor,
+              color: AppPalettes.liteGreenColor,
+              iconColor: AppPalettes.blackColor,
               padding: Dimens.paddingX3,
               iconSize: Dimens.scaleX2B,
-              onTap: () => CommonHelpers.shareURL(media.url ?? ""),
+              onTap: () => CommonHelpers.shareURL(media.url ?? "", eventId: media.sId),
             ),
         ],
       ),
@@ -62,8 +62,8 @@ class PressReleasesDetailedView extends StatelessWidget {
               SizeBox.sizeHX2,
               SizedBox(
                 width: 0.8.screenWidth,
-                child: Text(
-                  media.title ?? "Unknown title",
+                child: TranslatedText(
+                  text: media.title ?? "Unknown title",
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -79,8 +79,8 @@ class PressReleasesDetailedView extends StatelessWidget {
               if (media.images?.isNotEmpty == true)
                 Row(
                   children: [
-                    Text(
-                      'Images',
+                    TranslatedText(
+                      text: 'Images',
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),

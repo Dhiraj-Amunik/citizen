@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/helpers/profile_helper.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
@@ -12,6 +14,7 @@ import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/id_card/widgets/id_card_widget.dart';
 import 'package:inldsevak/features/id_card/widgets/user_detail_widget.dart';
 import 'package:inldsevak/features/navigation/view/navigation_view.dart';
@@ -47,7 +50,6 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
                   name: value.profile?.name,
                   number: value.profile?.phone,
                   onTap: () => RouteManager.pushNamed(Routes.profileEditView),
-                  
                 );
               },
             ),
@@ -86,6 +88,63 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
                           ),
                         ),
                       );
+                    },
+                  ),
+                  Consumer<ProfileViewModel>(
+                    builder: (context, value, _) {
+                      if (value.profile?.inviteCode != null && 
+                          value.profile!.inviteCode!.trim().isNotEmpty) {
+                        return Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: Dimens.paddingX3,
+                            vertical: Dimens.paddingX3,
+                          ),
+                          decoration: boxDecorationRoundedWithShadow(
+                            Dimens.radiusX4,
+                            backgroundColor: AppPalettes.liteGreyColor,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  TranslatedText(
+                                    text: localization.invite_code,
+                                    style: context.textTheme.bodySmall?.copyWith(
+                                      color: AppPalettes.blackColor,
+                                    ),
+                                  ),
+                                  SizeBox.sizeHX1,
+                                  Text(
+                                     value.profile?.inviteCode ?? "",
+                                    style: context.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: AppPalettes.blackColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              CommonHelpers.buildIcons(
+                                path: AppImages.copyIcon,
+                                padding: Dimens.paddingX2,
+                                iconSize: Dimens.scaleX2,
+                                onTap: () {
+                                  if (value.profile?.inviteCode != null) {
+                                    Clipboard.setData(
+                                      ClipboardData(text: value.profile!.inviteCode!),
+                                    );
+                                    CommonSnackbar(
+                                      text: localization.invite_code_copied,
+                                    ).showToast();
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
                     },
                   ),
                   ProfileHelper.getCommonBox(

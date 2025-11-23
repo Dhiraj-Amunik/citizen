@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -16,9 +17,12 @@ class ComplaintsViewModel extends BaseViewModel {
     init();
   }
 
+  Timer? _autoRefreshTimer;
+
   void init() async {
     await initialize();
     await Future.wait([getComplaints(), getDepartments()]);
+    _startAutoRefresh();
   }
 
   //Filters
@@ -55,10 +59,17 @@ class ComplaintsViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> getComplaints() async {
+  Future<void> getComplaints({
+    bool showLoader = true,
+    bool preserveSearch = false,
+  }) async {
     try {
-      isLoading = true;
-      searchController.clear();
+      if (showLoader) {
+        isLoading = true;
+      }
+      if (!preserveSearch) {
+        searchController.clear();
+      }
       log(token.toString());
 
       final filters = MyComplaintRequestModel(
@@ -77,7 +88,12 @@ class ComplaintsViewModel extends BaseViewModel {
         final data = response.data?.data;
         filteredComplaintsList.clear();
         complaintsList = List<complaint.Data>.from(data as List);
-        filteredComplaintsList.addAll(complaintsList);
+        if (searchController.text.trim().isNotEmpty) {
+          filterList();
+        } else {
+          filteredComplaintsList.addAll(complaintsList);
+          notifyListeners();
+        }
       } else {
         CommonSnackbar(text: "Unable to fetch Complaints").showSnackbar();
       }
@@ -85,7 +101,9 @@ class ComplaintsViewModel extends BaseViewModel {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      isLoading = false;
+      if (showLoader) {
+        isLoading = false;
+      }
     }
   }
 
@@ -154,5 +172,22 @@ class ComplaintsViewModel extends BaseViewModel {
         toDate.text = toDateCompany?.toDdMmYyyy() ?? "";
         break;
     }
+  }
+
+  void _startAutoRefresh() {
+    _autoRefreshTimer?.cancel();
+    _autoRefreshTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => getComplaints(showLoader: false, preserveSearch: true),
+    );
+  }
+
+  @override
+  void dispose() {
+    _autoRefreshTimer?.cancel();
+    searchController.dispose();
+    fromDate.dispose();
+    toDate.dispose();
+    super.dispose();
   }
 }

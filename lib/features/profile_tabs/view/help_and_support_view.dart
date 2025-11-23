@@ -46,6 +46,9 @@ class _HelpAndSupportViewState extends State<HelpAndSupportView> {
                     controller: provider.searchController,
                     prefixIcon: AppImages.searchIcon,
                     hintText: localization.search_for_help,
+                    enableSpeechInput: true,
+                    textCapitalization: TextCapitalization.sentences,
+                    enforceFirstLetterUppercase: true,
                   ),
                   Container(
                     decoration: boxDecorationRoundedWithShadow(

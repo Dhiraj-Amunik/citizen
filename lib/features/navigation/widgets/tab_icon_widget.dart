@@ -5,6 +5,7 @@ import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/navigation/model/navigation_model.dart';
 
 class TabIconWidget extends StatefulWidget {
@@ -97,8 +98,8 @@ class _TabIconWidgetState extends State<TabIconWidget>
             if (widget.isSelected)
               FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text(
-                  widget.data.text!,
+                child: TranslatedText(
+                  text: widget.data.text!,
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                     color: widget.isSelected

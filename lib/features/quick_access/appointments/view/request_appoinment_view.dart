@@ -85,6 +85,8 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                         FormTextFormField(
                           isRequired: true,
                             enableSpeechInput: true,
+                            textCapitalization: TextCapitalization.sentences,
+                            enforceFirstLetterUppercase: true,
                           headingText: localization.name,
                           hintText: localization.enter_your_full_name,
                           controller: provider.nameController,
@@ -96,6 +98,8 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                         if (roleProvider.isPartyMember)
                           FormTextFormField( 
                              enableSpeechInput: true,
+                             textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                             isRequired: true,
                             headingText: localization.membership_id,
                             hintText: localization.membership_id,
@@ -113,6 +117,8 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                           hintText: localization.enter_mobile_number,
                           controller: provider.phoneNumberController,
                           keyboardType: TextInputType.number,
+                          textCapitalization: TextCapitalization.sentences,
+                          enforceFirstLetterUppercase: true,
                           validator: (text) => text?.validateNumber(
                             argument: localization
                                 .please_provide_valid_10_digit_number,
@@ -152,6 +158,22 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                                     .please_select_your_appointment_date,
                               ),
                             ),
+                            FormTextFormField(
+                              isRequired: true,
+                              suffixIcon: AppImages.clockIcon,
+                              headingText: localization.time_slot,
+                              hintText: localization.select_time_slot,
+                              keyboardType: TextInputType.none,
+                              showCursor: false,
+                              controller: provider.timeSlotController,
+                              onTap: () async {
+                                final time = await custom24HrsTimePicker();
+                                provider.timeSlotController.text = time ?? "";
+                              },
+                              validator: (text) => text?.validate(
+                                argument: "Please select time slot for your appointment",
+                              ),
+                            ),
                             SizeBox.sizeHX2,
                             Text(
                               localization.appointment_note,
@@ -161,7 +183,6 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                               textAlign: TextAlign.justify,
                             ).horizontalPadding(Dimens.paddingX2),
                             SizeBox.sizeHX1B,
-
                             FormTextFormField(
                               isRequired: true,
                               headingText: localization.purpose_of_appointment,
@@ -169,6 +190,8 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                                   localization.enter_your_appointment_reason,
                               controller:
                                   provider.purposeOfAppointmentController,
+                              textCapitalization: TextCapitalization.sentences,
+                              enforceFirstLetterUppercase: true,
                               enableSpeechInput: true,
                               onMicAvailabilityDenied: (message) {
                                 CommonSnackbar(
@@ -201,6 +224,8 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                           hintText: localization.description_info,
                           controller: provider.descriptionController,
                           maxLines: 5,
+                          textCapitalization: TextCapitalization.sentences,
+                          enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
                           onMicAvailabilityDenied: (message) {
                             CommonSnackbar(

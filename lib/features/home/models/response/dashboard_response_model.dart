@@ -34,16 +34,24 @@ class DashboardResponseModel {
 class DashboardData {
   DashboardData({
     this.user,
+    this.userDetails,
     this.isVolunteer,
     this.volunteerStatus,
     this.unReadNotificationsCount,
   });
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
+    // Handle both 'user' and 'userDetails' fields
+    profile.Data? userData;
+    if (json['user'] != null) {
+      userData = profile.Data.fromJson(json['user'] as Map<String, dynamic>);
+    } else if (json['userDetails'] != null) {
+      userData = profile.Data.fromJson(json['userDetails'] as Map<String, dynamic>);
+    }
+    
     return DashboardData(
-      user: json['user'] == null
-          ? null
-          : profile.Data.fromJson(json['user'] as Map<String, dynamic>),
+      user: userData,
+      userDetails: userData, // Same data, accessible via both names
       isVolunteer: json['isVolunteer'] as bool?,
       volunteerStatus: json['volunteerStatus'] as String?,
       unReadNotificationsCount: json['unReadNotificationsCount'] as int?,
@@ -51,6 +59,7 @@ class DashboardData {
   }
 
   final profile.Data? user;
+  final profile.Data? userDetails; // Alias for user, for API response compatibility
   final bool? isVolunteer;
   final String? volunteerStatus;
   final int? unReadNotificationsCount;

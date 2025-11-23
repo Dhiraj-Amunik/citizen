@@ -76,6 +76,8 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                 controller: value.flatNoController,
                 headingText: "Flat, House no, Apartment",
                 hintText: "House Number",
+                textCapitalization: TextCapitalization.sentences,
+                enforceFirstLetterUppercase: true,
                 enableSpeechInput: true,
                 validator: (text) =>
                     text?.validate(argument: "Please enter your house number"),
@@ -86,6 +88,8 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                 headingText: "Area, Street",
                 hintText: "Area",
                 controller: value.areaController,
+                textCapitalization: TextCapitalization.sentences,
+                enforceFirstLetterUppercase: true,
                 enableSpeechInput: true,
                 validator: (text) =>
                     text?.validate(argument: "Please enter your area"),
@@ -102,6 +106,8 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                         hintText: localization.pincode_6_digits,
                         controller: value.pincodeController,
                         enableSpeechInput: true,
+                      textCapitalization: TextCapitalization.sentences,
+                      enforceFirstLetterUppercase: true,
                         keyboardType: TextInputType.number,
                         maxLength: 6,
                         validator: (text) =>
@@ -140,6 +146,8 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: "Tehsil",
                       hintText: "Tehsil",
                       controller: value.tehsilController,
+                    textCapitalization: TextCapitalization.sentences,
+                    enforceFirstLetterUppercase: true,
                       enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: "Enter Tehsil"),
@@ -151,6 +159,8 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: "City / Town",
                       hintText: localization.city,
                       controller: value.cityController,
+                      textCapitalization: TextCapitalization.sentences,
+                      enforceFirstLetterUppercase: true,
                       enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: "Enter City"),
@@ -167,6 +177,8 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: localization.district,
                       hintText: localization.district,
                       controller: value.districtController,
+                    textCapitalization: TextCapitalization.sentences,
+                    enforceFirstLetterUppercase: true,
                       enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: "Enter District"),
@@ -178,6 +190,8 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: localization.state,
                       hintText: localization.state,
                       controller: value.stateController,
+                    textCapitalization: TextCapitalization.sentences,
+                    enforceFirstLetterUppercase: true,
                       enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: "Enter State"),

@@ -145,7 +145,10 @@ class WallOfHelpRepository {
     final response = await _network.post(
       path: URLs.completeMyFinancialHelp,
       token: token,
-      data: {"requestId": id},
+      data: {
+        "requestId": id,
+        "type": "complete", // API expects type field with enum value "complete" for closing/completing requests
+      },
     );
     return response is APIException
         ? RepoResponse(error: response)

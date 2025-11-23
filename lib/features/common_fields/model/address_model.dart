@@ -51,6 +51,7 @@ class AddressModel {
     String? district;
 
     // Extract address components from first result
+    String? route; // Street name
     for (var component in firstResult.addressComponents!) {
       final types = component.types ?? [];
       
@@ -58,9 +59,15 @@ class AddressModel {
         houseNo = component.longName ?? component.shortName;
       } else if (types.contains('street_number')) {
         flatNo = component.longName ?? component.shortName;
+      } else if (types.contains('route')) {
+        // Route (street name) - primary source for area field
+        route = component.longName ?? component.shortName;
       } else if (types.contains('sublocality_level_2') || 
                  types.contains('neighborhood')) {
-        area = component.longName ?? component.shortName;
+        // Use sublocality_level_2 or neighborhood for area if route not available
+        if (area == null || area.isEmpty) {
+          area = component.longName ?? component.shortName;
+        }
       } else if (types.contains('sublocality_level_1') || 
                  types.contains('sublocality')) {
         subLocality = component.longName ?? component.shortName;
@@ -75,6 +82,11 @@ class AddressModel {
       } else if (types.contains('postal_code')) {
         postalCode = component.longName ?? component.shortName;
       }
+    }
+    
+    // Set area to route (street name) if available, otherwise keep sublocality/neighborhood
+    if (route != null && route.isNotEmpty) {
+      area = route;
     }
 
     return AddressModel(
@@ -119,7 +131,7 @@ class AddressModel {
 
   // Get a short address representation (handles null values)
   String get shortAddress {
-    final parts = [houseNo, area, city].where((part) => part != null && part!.isNotEmpty).toList();
+    final parts = [houseNo, area, city].where((part) => part != null && part.isNotEmpty).toList();
     return parts.join(', ');
   }
 

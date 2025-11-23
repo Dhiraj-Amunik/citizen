@@ -30,6 +30,7 @@ class UserRegisterViewModel extends BaseViewModel
   String? companyDateFormat;
   final aadharController = TextEditingController();
   final voterIdController = TextEditingController();
+  final invitedByController = TextEditingController();
 
   List<String> genderList = ['Male', 'Female', 'others'];
   final genderController = SingleSelectController<String>(null);
@@ -124,6 +125,9 @@ class UserRegisterViewModel extends BaseViewModel
           ],
         ),
         whatsappNo: whathsappNoController.text,
+        invitedBy: invitedByController.text.trim().isEmpty 
+            ? null 
+            : invitedByController.text.trim(),
       );
 
       final response = await UserProfileRepository().userRegister(
@@ -181,6 +185,9 @@ class UserRegisterViewModel extends BaseViewModel
     emailController.dispose();
     dobController.dispose();
     aadharController.dispose();
+    voterIdController.dispose();
+    whathsappNoController.dispose();
+    invitedByController.dispose();
     genderController.dispose();
     super.dispose();
   }

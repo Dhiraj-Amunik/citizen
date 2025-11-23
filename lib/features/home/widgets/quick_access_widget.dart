@@ -237,6 +237,11 @@ Future<void> _handleVolunteerTap(BuildContext context) async {
     final status = data?.volunteerStatus?.toLowerCase().trim();
     final isVolunteer = data?.isVolunteer == true;
 
+    if (data?.user?.isPartyMember != null) {
+      await SessionController.instance
+          .setPartyMember(isPartyMember: data!.user!.isPartyMember ?? false);
+    }
+
     if (status == 'approved' || isVolunteer) {
       RouteManager.pushNamed(Routes.volunteerAnalyticsPage);
       return;
@@ -248,6 +253,17 @@ Future<void> _handleVolunteerTap(BuildContext context) async {
         arguments: const TopVolunteersViewArgs(
           canApply: false,
           statusMessage: "Volunteer request is pending",
+        ),
+      );
+      return;
+    }
+
+    if (status == 'rejected') {
+      RouteManager.pushNamed(
+        Routes.topVolunteersPage,
+        arguments: const TopVolunteersViewArgs(
+          canApply: false,
+          statusMessage: "Volunteer request is rejected",
         ),
       );
       return;

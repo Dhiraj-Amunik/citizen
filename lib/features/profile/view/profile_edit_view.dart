@@ -75,14 +75,22 @@ class _ProfileEditViewState extends State<ProfileEditView>
               await constituencyProvider.getAssemblyConstituencies(
                 id: parliamentId,
               );
-              final match = constituencyProvider.assemblyConstituencyLists
-                  .firstWhere(
-                (constituency) =>
-                    constituency?.sId == provider.assemblyConstituencyData?.sId,
-                orElse: () => null,
-              );
-              if (match != null) {
-                assemblyconstituencyController.value = match;
+              if (provider.assemblyConstituencyData != null) {
+                final match = constituencyProvider.assemblyConstituencyLists
+                    .firstWhere(
+                  (constituency) =>
+                      constituency?.sId == provider.assemblyConstituencyData?.sId,
+                  orElse: () => null,
+                );
+                if (match != null) {
+                  assemblyconstituencyController.value = match;
+                } else {
+                  // If not found in the list, add it to the list and set it
+                  constituencyProvider.assemblyConstituencyLists.add(
+                    provider.assemblyConstituencyData!,
+                  );
+                  assemblyconstituencyController.value = provider.assemblyConstituencyData!;
+                }
               }
             }
           }),
@@ -120,6 +128,8 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           headingText: localization.name,
                           nextFocus: provider.emailFocus,
                           keyboardType: TextInputType.name,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
                           validator: (text) => text?.validateName(
                             argument: localization.name_validator,
@@ -131,6 +141,8 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           controller: provider.emailController,
                           prefixIcon: AppImages.emailIcon,
                           headingText: localization.email,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
                           validator: (text) => text?.validateEmail(
                             argument: localization.email_validator,
@@ -146,7 +158,6 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           maxLength: 10,
                           enabled: false,
                         ),
-
                         MapSearchLocation(
                           findPincode: (text) async {
                             if (text.length == 6) {
@@ -168,11 +179,18 @@ class _ProfileEditViewState extends State<ProfileEditView>
                               parliamentaryconstituencyController,
                           onChange: (constituency) {
                             if (constituency == null) return;
-                            assemblyconstituencyController.clear();
-                            if (constituency.sId.toString().trim() !=
-                                    provider.parlimentaryConstituencyData?.sId
-                                        .toString()
-                                        .trim() ||
+                            
+                            // Only clear assembly constituency if parliamentary constituency actually changed
+                            final currentParliamentaryId = provider.parlimentaryConstituencyData?.sId?.toString().trim();
+                            final newParliamentaryId = constituency.sId.toString().trim();
+                            final hasChanged = currentParliamentaryId != newParliamentaryId;
+                            
+                            if (hasChanged) {
+                              assemblyconstituencyController.clear();
+                            }
+                            
+                            // Only fetch assembly constituencies if parliamentary constituency changed or list is empty
+                            if (hasChanged ||
                                 constituencyProvider
                                     .assemblyConstituencyLists
                                     .isEmpty) {
@@ -231,6 +249,8 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           controller: provider.aadharController,
                           prefixIcon: AppImages.aadharIcon,
                           keyboardType: TextInputType.number,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
                           validator: (text) => text?.validateAadhar(
                             argument: localization.aadhar_validator,
@@ -257,6 +277,8 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           controller: provider.voterIdController,
                           prefixIcon: AppImages.aadharIcon,
                           keyboardType: TextInputType.text,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
                           validator: (text) => text?.validateVoterID(
                             argument: localization.voter_id_validator,

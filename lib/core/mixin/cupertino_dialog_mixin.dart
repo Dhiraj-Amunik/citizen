@@ -9,8 +9,11 @@ mixin CupertinoDialogMixin {
     required String leftButton,
     Function()? onTap,
   }) {
+    final context = RouteManager.navigatorKey.currentState!.context;
+    final localization = context.localizations;
+    
     return showCupertinoDialog(
-      context: RouteManager.navigatorKey.currentState!.context,
+      context: context,
       builder: (BuildContext context) => CupertinoAlertDialog(
         content: Text(content, style: context.textTheme.titleSmall),
         actions: [
@@ -24,7 +27,7 @@ mixin CupertinoDialogMixin {
             ),
           ),
           CupertinoDialogAction(
-            child: Text('Cancel', style: context.textTheme.labelMedium!),
+            child: Text(localization.cancel, style: context.textTheme.labelMedium!),
             onPressed: () {
               RouteManager.pop();
             },
@@ -39,13 +42,16 @@ mixin CupertinoDialogMixin {
     required String rightButton,
     Function()? onTap,
   }) {
+    final context = RouteManager.navigatorKey.currentState!.context;
+    final localization = context.localizations;
+    
     return showCupertinoDialog(
-      context: RouteManager.navigatorKey.currentState!.context,
+      context: context,
       builder: (BuildContext context) => CupertinoAlertDialog(
         content: Text(content, style: context.textTheme.titleSmall),
         actions: [
           CupertinoDialogAction(
-            child: Text('Cancel', style: context.textTheme.labelLarge!),
+            child: Text(localization.cancel, style: context.textTheme.labelLarge!),
             onPressed: () {
               RouteManager.pop();
             },

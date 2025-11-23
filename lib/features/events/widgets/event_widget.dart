@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
-import 'package:inldsevak/core/extensions/string_extension.dart';
 import 'package:inldsevak/core/extensions/time_formatter.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
@@ -9,6 +8,7 @@ import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/events/model/events_model.dart' as model;
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/features/events/model/request_details_event_model.dart';
@@ -68,7 +68,7 @@ class EventWidget extends StatelessWidget {
                           backgroundColor: AppPalettes.liteBlueColor,
                         ),
                         child: Text(
-                          event.createdAt?.toDdMmmYyyy() ?? "0-00-0000",
+                          event.dateAndTime?.toDdMmmYyyy() ?? "0-00-0000",
                           style: textTheme.labelMedium?.copyWith(
                             color: AppPalettes.lightTextColor,
                           ),
@@ -91,7 +91,7 @@ class EventWidget extends StatelessWidget {
                             ),
 
                             Text(
-                              event.createdAt?.to12HourTime() ?? "00:00  ",
+                              event.dateAndTime?.to12HourTime() ?? "00:00  ",
                               style: textTheme.labelMedium?.copyWith(
                                 color: AppPalettes.lightTextColor,
                               ),
@@ -104,6 +104,7 @@ class EventWidget extends StatelessWidget {
                 ),
               ],
             ),
+            
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -113,14 +114,14 @@ class EventWidget extends StatelessWidget {
                   spacing: Dimens.gapX,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      event.title ?? "Unknown title",
+                    TranslatedText(
+                      text: event.title ?? "Unknown title",
                       style: textTheme.bodyMedium,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
-                      event.location ?? "Unknown Location",
+                    TranslatedText(
+                      text: event.location ?? "Unknown Location",
                       style: textTheme.bodySmall?.copyWith(
                         color: AppPalettes.lightTextColor,
                       ),
@@ -129,18 +130,26 @@ class EventWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (event.url.showDataNull)
-                  Container(
-                    color: Colors.white,
-                    child: CommonHelpers.buildIcons(
-                      path: AppImages.shareIcon,
-                      color: AppPalettes.primaryColor,
-                      iconColor: AppPalettes.whiteColor,
-                      padding: Dimens.paddingX2,
-                      iconSize: Dimens.scaleX2,
-                      onTap: () => CommonHelpers.shareURL(event.url!),
+                Container(
+                  color: Colors.white,
+                  child: CommonHelpers.buildIcons(
+                    path: AppImages.shareIcon,
+                    color: AppPalettes.liteGreenColor,
+                    iconColor: AppPalettes.blackColor,
+                    padding: Dimens.paddingX2,
+                    iconSize: Dimens.scaleX2,
+                    onTap: () => CommonHelpers.shareEventDetails(
+                      title: event.title,
+                      description: event.description,
+                      dateAndTime: event.dateAndTime,
+                      location: event.location,
+                      eventType: event.eventType,
+                      url: event.url,
+                      poster: event.poster,
+                      eventId: event.sId,
                     ),
                   ),
+                ),
               ],
             ),
           ],

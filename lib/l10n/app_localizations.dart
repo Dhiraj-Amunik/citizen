@@ -302,6 +302,30 @@ abstract class AppLocalizations {
   /// **'Please enter your voter id number'**
   String get voter_id_validator;
 
+  /// No description provided for @invited_by.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited By'**
+  String get invited_by;
+
+  /// No description provided for @invited_by_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter invitation code (Optional)'**
+  String get invited_by_hint;
+
+  /// No description provided for @invite_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Code'**
+  String get invite_code;
+
+  /// No description provided for @invite_code_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code copied to clipboard'**
+  String get invite_code_copied;
+
   /// No description provided for @register.
   ///
   /// In en, this message translates to:
@@ -577,6 +601,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Event Details'**
   String get event_details;
+
+  /// No description provided for @view_poster.
+  ///
+  /// In en, this message translates to:
+  /// **'View Poster'**
+  String get view_poster;
+
+  /// No description provided for @no_location_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No Location found'**
+  String get no_location_found;
+
+  /// No description provided for @event_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Event not Found !'**
+  String get event_not_found;
 
   /// No description provided for @edit_details.
   ///
@@ -1166,6 +1208,12 @@ abstract class AppLocalizations {
   /// **'Requested'**
   String get requested;
 
+  /// No description provided for @solved.
+  ///
+  /// In en, this message translates to:
+  /// **'Solved'**
+  String get solved;
+
   /// No description provided for @description.
   ///
   /// In en, this message translates to:
@@ -1418,6 +1466,114 @@ abstract class AppLocalizations {
   /// **'Become a Volunteer'**
   String get become_a_volunteer;
 
+  /// No description provided for @volunteer_analytics_data_not_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer analytics data is not available yet.'**
+  String get volunteer_analytics_data_not_available;
+
+  /// No description provided for @top_volunteers.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Volunteers'**
+  String get top_volunteers;
+
+  /// No description provided for @not_enough_data_leaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data to display the leaderboard yet.'**
+  String get not_enough_data_leaderboard;
+
+  /// No description provided for @my_analytics.
+  ///
+  /// In en, this message translates to:
+  /// **'My Analytics'**
+  String get my_analytics;
+
+  /// No description provided for @total_events.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Events'**
+  String get total_events;
+
+  /// No description provided for @attended.
+  ///
+  /// In en, this message translates to:
+  /// **'Attended'**
+  String get attended;
+
+  /// No description provided for @total_shares.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Shares'**
+  String get total_shares;
+
+  /// No description provided for @active_since.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Since'**
+  String get active_since;
+
+  /// No description provided for @refered_users.
+  ///
+  /// In en, this message translates to:
+  /// **'People Joined'**
+  String get refered_users;
+
+  /// No description provided for @events_attended_volunteer.
+  ///
+  /// In en, this message translates to:
+  /// **'Events Attended'**
+  String get events_attended_volunteer;
+
+  /// No description provided for @content_shared_volunteer.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Shared'**
+  String get content_shared_volunteer;
+
+  /// No description provided for @attended_events.
+  ///
+  /// In en, this message translates to:
+  /// **'Attended Events'**
+  String get attended_events;
+
+  /// No description provided for @no_attended_events_recently.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t attended any events recently.'**
+  String get no_attended_events_recently;
+
+  /// No description provided for @no_upcoming_events.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming events at the moment.'**
+  String get no_upcoming_events;
+
+  /// No description provided for @date_not_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Date not available'**
+  String get date_not_available;
+
+  /// No description provided for @location_not_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Location not available'**
+  String get location_not_available;
+
+  /// No description provided for @event_name_not_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Event name not available'**
+  String get event_name_not_available;
+
+  /// No description provided for @qr_scanning_supported_android_ios.
+  ///
+  /// In en, this message translates to:
+  /// **'QR scanning is supported only on Android and iOS devices.'**
+  String get qr_scanning_supported_android_ios;
+
   /// No description provided for @enter_age.
   ///
   /// In en, this message translates to:
@@ -1663,6 +1819,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to sign out from your account?'**
   String get logout_confirmation;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @close_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Request'**
+  String get close_request;
 
   /// No description provided for @notify_representative.
   ///

@@ -28,7 +28,7 @@ class NearestMemberView extends StatelessWidget {
       builder: (_, _) {
         return Scaffold(
           body: Consumer<NearestMemberViewModel>(
-            builder: (_, value, _) {
+            builder: (contextConsumer, value, _) {
               if (value.isLoading) {
                 return Center(child: CustomAnimatedLoading());
               }
@@ -140,13 +140,12 @@ class NearestMemberView extends StatelessWidget {
                                     Routes.chatMemberPage,
                                     arguments: data,
                                   ),
-
                                   showIcon: true,
                                 );
                               },
                               separatorBuilder: (_, _) => SizeBox.sizeHX3,
                             ),
-                    ],
+                    ], 
                   ),
                 ),
               );

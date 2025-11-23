@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
@@ -12,7 +13,9 @@ import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/core/utils/urls.dart';
+import 'package:inldsevak/l10n/app_localizations.dart';
 
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
@@ -42,8 +45,9 @@ class UserCardHelpWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               CommonHelpers.buildStatus(
-                help.status?.capitalize() ?? "Pending",
-                statusColor: AppPalettes.liteGreenColor,
+               
+                _resolveStatusLabel(localization),
+                statusColor: _resolveStatusColor(),
               ),
             ],
           ),
@@ -56,9 +60,11 @@ class UserCardHelpWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      help.title ?? "Unknow subject",
-                      style: textTheme.bodySmall,
+                    TranslatedText(
+                      text: help.title ?? "Unknow subject",
+                      style: textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -67,7 +73,7 @@ class UserCardHelpWidget extends StatelessWidget {
                       text: help.description.isNull(localization.not_found),
                       style: AppStyles.labelMedium.copyWith(
                         color: AppPalettes.lightTextColor,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                     SizeBox.sizeHX1,
@@ -103,7 +109,7 @@ class UserCardHelpWidget extends StatelessWidget {
     final initials = fallbackText.isNotEmpty
         ? CommonHelpers.getInitials(fallbackText)
         : "A";
-    final double radius = Dimens.scaleX3;
+    final double radius = 16.sp;
 
     if (avatarUrl != null) {
       return CircleAvatar(
@@ -140,5 +146,21 @@ class UserCardHelpWidget extends StatelessWidget {
     if (trimmed.startsWith('http')) return trimmed;
     if (trimmed.startsWith('/')) return "${URLs.baseURL}$trimmed";
     return "${URLs.baseURL}/$trimmed";
+  }
+
+  String _resolveStatusLabel(AppLocalizations localization) {
+    final rawStatus = help.status?.trim().toLowerCase();
+    if (rawStatus == 'approved') {
+      return localization.solved;
+    }
+    return help.status?.capitalize() ?? 'Pending';
+  }
+
+  Color _resolveStatusColor() {
+    final rawStatus = help.status?.trim().toLowerCase();
+    if (rawStatus == 'approved') {
+      return AppPalettes.greenColor;
+    }
+    return AppPalettes.liteGreenColor;
   }
 }

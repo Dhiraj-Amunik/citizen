@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class LeadersInfoWidget extends StatelessWidget {
   const LeadersInfoWidget({super.key});
@@ -48,16 +50,16 @@ class LeadersInfoWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     FittedBox(
-                      child: Text(
-                        "Abhay Singh Chautala",
+                      child: TranslatedText(
+                        text: "Abhay Singh Chautala",
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                     FittedBox(
-                      child: Text(
-                        "Indian National Lok Dal (INLD)",
+                      child: TranslatedText(
+                        text: "Indian National Lok Dal (INLD)",
                         style: textTheme.bodySmall,
                       ),
                     ),
@@ -66,22 +68,57 @@ class LeadersInfoWidget extends StatelessWidget {
               ),
             ],
           ),
-          CommonHelpers.getRow(
-            textTheme,
-            text: localization.position,
-            desc: "National President",
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TranslatedText(
+                text: "${localization.position} : ",
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: AppPalettes.blackColor,
+                ),
+              ),
+              Expanded(
+                child: TranslatedText(
+                  text: "National President",
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: AppPalettes.blackColor,
+                  ),
+                ),
+              ),
+            ],
           ),
-          CommonHelpers.getRow(
-            textTheme,
-            text: localization.experience,
-            desc: "Haryana Olympic Association President",
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TranslatedText(
+                text: "${localization.experience} : ",
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: AppPalettes.blackColor,
+                ),
+              ),
+              Expanded(
+                child: TranslatedText(
+                  text: "Haryana Olympic Association President",
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: AppPalettes.blackColor,
+                  ),
+                ),
+              ),
+            ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CommonHelpers.getRow(
-                textTheme,
+              TranslatedText(
                 text: localization.key_focus_area,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: AppPalettes.blackColor,
+                ),
               ),
               Row(
                 children: [
@@ -90,13 +127,13 @@ class LeadersInfoWidget extends StatelessWidget {
                     child: Column(
                       children: [
                         FittedBox(
-                          child: Text(
-                            "• Party leadership & strategic planning",
+                          child: TranslatedText(
+                            text: "• Party leadership & strategic planning",
                           ),
                         ),
                         FittedBox(
-                          child: Text(
-                            "• National-level governance initiatives",
+                          child: TranslatedText(
+                            text: "• National-level governance initiatives",
                           ),
                         ),
                       ],

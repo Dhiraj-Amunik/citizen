@@ -3,6 +3,7 @@ import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/events/model/request_event_model.dart';
 
 class EventsHelpers {
@@ -24,8 +25,8 @@ class EventsHelpers {
               path: AppImages.placeholderEmpty,
               iconSize: 0.5.screenWidth,
             ),
-            Text(
-              "No ${type.name} events found",
+            TranslatedText(
+              text: "No ${type.name} events found",
               style: AppStyles.titleMedium,
               maxLines: 2,
               textAlign: TextAlign.center,
@@ -51,8 +52,8 @@ class EventsHelpers {
               path: AppImages.placeholderEmpty,
               iconSize: 0.25.screenWidth,
             ),
-            Text(
-              "No ${EventFilter.upcoming.name} events found",
+            TranslatedText(
+              text: "No ${EventFilter.upcoming.name} events found",
               style: AppStyles.titleSmall,
               maxLines: 2,
               textAlign: TextAlign.center,

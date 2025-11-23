@@ -49,6 +49,20 @@ class FormCommonDropDown<T> extends StatelessWidget {
     final respRadius = radius ?? Dimens.radiusX4;
     final border = Border.fromBorderSide(BorderSide.none);
     final iconColor = ColorFilter.mode(context.iconsColor, BlendMode.srcIn);
+    final effectiveItems = items ?? const [];
+
+    // Only clear controller value if items list is not empty and value is not found
+    // This prevents clearing when items are still loading or empty
+    // This was causing assembly constituency to be cleared even when selected
+    if (controller != null && 
+        controller!.value != null && 
+        effectiveItems.isNotEmpty) {
+      final currentValue = controller!.value;
+      final hasMatch = effectiveItems.contains(currentValue);
+      if (!hasMatch) {
+        controller!.clear();
+      }
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +117,7 @@ class FormCommonDropDown<T> extends StatelessWidget {
             closedBorder: border,
           ),
           hintText: hintText,
-          items: items,
+          items: effectiveItems,
           excludeSelected: excludeSelected,
           onChanged: onChanged,
           validator: validator,

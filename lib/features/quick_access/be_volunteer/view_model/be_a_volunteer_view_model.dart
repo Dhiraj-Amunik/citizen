@@ -5,6 +5,7 @@ import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/model/request_volunteer_model.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/services/volunterr_repository.dart';
+import 'package:inldsevak/features/volunter/view/top_volunteers_view.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:inldsevak/features/quick_access/appointments/model/mla_dropdown_model.dart'
     as mla;
@@ -43,12 +44,16 @@ class BeAVolunteerViewModel extends BaseViewModel {
   }
 
   final preferredTimeSlotsController = SingleSelectController<String>(null);
-  final hoursPerWeekController = SingleSelectController<String>(null);
+  double _hoursPerWeek = 0;
+  double get hoursPerWeek => _hoursPerWeek;
+  set hoursPerWeek(double value) {
+    _hoursPerWeek = value;
+    notifyListeners();
+  }
 
   List<String> genderList = ['Male', 'Female', 'Others'];
   List<String> occupationList = ['Teacher', 'Engineer', 'Social Worker'];
-  List<String> timeSlotsList = ['Morning', 'Afternoon', 'Evening'];
-  List<String> hoursPerWeekList = ['1hrs', '2hrs', '3hrs'];
+  List<String> timeSlotsList = ['Morning', 'Afternoon', 'Evening','Complete Day'];
   List<String> interestsList = [
     'Community Events',
     'Social Welfare',
@@ -65,11 +70,25 @@ class BeAVolunteerViewModel extends BaseViewModel {
     selectedAvailability = option;
   }
 
+  String? validateHoursPerWeek(String? argument) {
+    if (_hoursPerWeek <= 0) {
+      return argument ?? "Please select hours per week";
+    }
+    return null;
+  }
+
   Future<void> creatNewVolunteer() async {
     if (formKey.currentState!.validate()) {
       autoValidateMode = AutovalidateMode.disabled;
     } else {
       autoValidateMode = AutovalidateMode.onUserInteraction;
+      return;
+    }
+
+    // Validate hours per week
+    if (_hoursPerWeek <= 0) {
+      autoValidateMode = AutovalidateMode.onUserInteraction;
+      notifyListeners();
       return;
     }
 
@@ -86,21 +105,23 @@ class BeAVolunteerViewModel extends BaseViewModel {
         areasOfInterest: selectedInterestList,
         availability: selectedAvailability!,
         preferredTimeSlot: preferredTimeSlotsController.value!,
-        hoursPerWeek: hoursPerWeekController.value!,
+        hoursPerWeek: "${_hoursPerWeek.round()} Hours",
         mlaId: mlaController.value!.sId!,
       );
 
       final response = await VolunterrRepository().createVolunteer(data, token);
       if (response.data?.responseCode == 200) {
         await CommonSnackbar(
-          text:
-              response.data?.message ??
-              "Volunteer request sent successfully!",
+          text: "Volunteer request is pending",
         ).showAnimatedDialog(
           type: QuickAlertType.success,
           onTap: () {
             RouteManager.pushNamedAndRemoveAll(
               Routes.topVolunteersPage,
+              arguments: const TopVolunteersViewArgs(
+                canApply: false,
+                statusMessage: "Volunteer request is pending",
+              ),
             );
           },
         );
@@ -146,7 +167,8 @@ class BeAVolunteerViewModel extends BaseViewModel {
     genderController.clear();
     occupationController.clear();
     preferredTimeSlotsController.clear();
-    hoursPerWeekController.clear();
+    _hoursPerWeek = 0;
+    notifyListeners();
   }
   void _preFillDropdownValue<T>({
     required SingleSelectController<T> controller,

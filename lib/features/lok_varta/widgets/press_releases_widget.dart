@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
-import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/extensions/relative_time_formatter_extension.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
@@ -10,6 +9,8 @@ import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
+import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/lok_varta/model/lok_varta_model.dart'
     as model;
 import 'package:inldsevak/features/lok_varta/model/request_lok_varta_model.dart';
@@ -57,16 +58,44 @@ class PressReleasesWidget extends StatelessWidget {
                 blurRadius: 2,
                 border: Border.all(width: 1, color: AppPalettes.primaryColor),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                spacing: Dimens.gapX2B,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: Dimens.gapX2,
                 children: [
-                  Column(
+                  Row(
+                    spacing: Dimens.gapX2,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Row(
+                        spacing: Dimens.gapX1,
+                        children: [
+                          CommonHelpers.buildStatus(
+                            media.createdAt?.toRelativeTime() ?? "unknown Date",
+                            statusColor: AppPalettes.liteGreenColor,
+                            opacity: 1,
+                          ),
+                        ],
+                      ),
+                      if (media.url != null)
+                        CommonHelpers.buildIcons(
+                          onTap: () {
+                            CommonHelpers.shareURL(media.url ?? "", eventId: media.sId);
+                          },
+                          path: AppImages.shareIcon,
+                          color: AppPalettes.liteBlueColor,
+                          padding: Dimens.paddingX1B,
+                          iconSize: Dimens.scaleX1B,
+                        ),
+                    ],
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: Dimens.gapX2B,
                     children: [
                       Container(
-                        margin: EdgeInsets.symmetric(vertical: Dimens.marginX2),
-                        height: 80.height(),
-                        width: 80.height(),
+                        margin: EdgeInsets.symmetric(vertical: Dimens.marginX1),
+                        height: 70.height(),
+                        width: 70.height(),
                         child: ClipRRect(
                           borderRadius: BorderRadiusGeometry.circular(
                             Dimens.radius100,
@@ -79,58 +108,30 @@ class PressReleasesWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: Dimens.gapX1,
-                      children: [
-                        Row(
-                          spacing: Dimens.gapX2,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.end,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: Dimens.gapX1,
                           children: [
-                            CommonHelpers.buildStatus(
-                              media.createdAt?.toRelativeTime() ??
-                                  "unknown Date",
-                              statusColor: AppPalettes.liteGreenColor,
-                              opacity: 1,
+                            TranslatedText(
+                              text: media.title ?? "unknown title",
+                              style: textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            if (media.url != null)
-                              CommonHelpers.buildIcons(
-                                onTap: () {
-                                  CommonHelpers.shareURL(media.url ?? "");
-                                },
-                                path: AppImages.shareIcon,
-                                color: AppPalettes.liteBlueColor,
-                                padding: Dimens.paddingX1B,
-                                iconSize: Dimens.scaleX1B,
-                              ).onlyPadding(top: Dimens.paddingX1),
+                            ReadMoreWidget(
+                              text: media.content ??
+                                  "No content available at the moment",
+                              maxLines: 2,
+                              
+                            ),
                           ],
                         ),
-                        Text(
-                          media.title ?? "unknown title",
-                          style: textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-
-                        Text(
-                          media.content ?? "no content available at the moment",
-                          style: textTheme.labelMedium?.copyWith(
-                            color: AppPalettes.lightTextColor,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-
                 ],
               ),
             ),

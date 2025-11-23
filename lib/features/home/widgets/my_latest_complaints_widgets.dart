@@ -5,7 +5,7 @@ import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
-import 'package:inldsevak/features/complaints/model/thread_model.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/complaints/widgets/complaint_widget.dart';
 import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
 
@@ -31,8 +31,8 @@ class MyLatestComplaintsWidgets extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            Text(
-              "${complaintList.length} total",
+            TranslatedText(
+              text: "${complaintList.length} total",
               style: textTheme.titleMedium?.copyWith(
                 color: AppPalettes.lightTextColor,
               ),
@@ -49,6 +49,7 @@ class MyLatestComplaintsWidgets extends StatelessWidget {
             final thread = complaintList[index];
             return ComplaintThreadWidget(
               thread: thread,
+              showCompaint: true,
               onTap: () async {
                 await RouteManager.pushNamed(
                   Routes.threadComplaintPage,

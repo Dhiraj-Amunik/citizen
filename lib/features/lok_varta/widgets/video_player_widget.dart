@@ -13,6 +13,7 @@ import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/lok_varta/model/request_lok_varta_model.dart';
 import 'package:inldsevak/features/lok_varta/widgets/lokvarta_helpers.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -96,7 +97,7 @@ class VideoPlayerWidget extends StatelessWidget {
                       right: Dimens.paddingX3,
                       child: CommonHelpers.buildIcons(
                         onTap: () =>
-                            CommonHelpers.shareURL(data.videoUrl ?? ""),
+                            CommonHelpers.shareURL(data.videoUrl ?? "", eventId: data.sId),
                         padding: Dimens.paddingX2,
                         iconSize: Dimens.scaleX2,
                         path: AppImages.shareIcon,
@@ -110,7 +111,7 @@ class VideoPlayerWidget extends StatelessWidget {
               ],
             );
           },
-          separatorBuilder: (context, index) => SizeBox.sizeHX4,
+          separatorBuilder: (context, index) => SizeBox.sizeHX8,
         ),
       ),
     );
@@ -128,8 +129,8 @@ class BuildYoutubeData extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: Dimens.gapX,
       children: [
-        Text(
-          data.title ?? "",
+        TranslatedText(
+          text: data.title ?? "",
           style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
         ReadMoreWidget(
@@ -343,7 +344,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               iconColor: AppPalettes.blackColor,
               padding: Dimens.paddingX3,
               iconSize: Dimens.scaleX2,
-              onTap: () => CommonHelpers.shareURL(currentVideo.videoUrl ?? ""),
+              onTap: () => CommonHelpers.shareURL(currentVideo.videoUrl ?? "", eventId: currentVideo.sId),
             ),
           ],
         ),

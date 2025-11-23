@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
+import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
@@ -14,6 +15,7 @@ import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/view_model/be_a_volunteer_view_model.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/widgets/availability_options_widget.dart';
 import 'package:inldsevak/features/quick_access/be_volunteer/widgets/interest_choice_widget.dart';
+import 'package:inldsevak/features/quick_access/be_volunteer/widgets/hours_slider_widget.dart';
 import 'package:provider/provider.dart';
 
 class BeAVolunteerView extends StatelessWidget {
@@ -41,7 +43,7 @@ class BeAVolunteerView extends StatelessWidget {
                   child: Column(
                     spacing: Dimens.textFromSpacing,
                     children: [
-                      MlaDropDownWidget(mlaController: provider.mlaController),
+                       
                       FormTextFormField(
                         isRequired: true,
                         focus: provider.nameFocus,
@@ -50,6 +52,8 @@ class BeAVolunteerView extends StatelessWidget {
                         hintText: localization.enter_your_name,
                         headingText: localization.name,
                         keyboardType: TextInputType.name,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
                         validator: (text) => text?.validateName(
                           argument: localization.name_validator,
@@ -63,6 +67,8 @@ class BeAVolunteerView extends StatelessWidget {
                         hintText: localization.enter_email,
                         headingText: localization.email,
                         keyboardType: TextInputType.emailAddress,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
                         validator: (text) => text?.validateEmail(
                           argument: localization.email_validator,
@@ -76,6 +82,8 @@ class BeAVolunteerView extends StatelessWidget {
                         hintText: localization.enter_phone_number,
                         headingText: localization.phone_number,
                         enableSpeechInput: true,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         keyboardType: TextInputType.number,
                         maxLength: 10,
                         validator: (text) => text?.validateNumber(
@@ -89,6 +97,8 @@ class BeAVolunteerView extends StatelessWidget {
                         hintText: localization.enter_age,
                         headingText: localization.age,
                         enableSpeechInput: true,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         keyboardType: TextInputType.number,
                         validator: (text) => text?.validate(
                           argument: localization.age_validator,
@@ -114,7 +124,21 @@ class BeAVolunteerView extends StatelessWidget {
                           argument: localization.occupation_validator,
                         ),
                       ),
-
+                      FormTextFormField(
+                        isRequired: true,
+                        focus: provider.addressFocus,
+                        controller: provider.addressController,
+                        hintText: localization.address,
+                        headingText: localization.address,
+                        enableSpeechInput: true,
+                        maxLines: 4,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
+                        keyboardType: TextInputType.text,
+                        validator: (text) => text?.validate(
+                          argument: localization.address_validator,
+                        ),
+                      ),
                       FormCommonChild(
                         isRequired: true,
                         heading: localization.area_of_interest,
@@ -144,15 +168,64 @@ class BeAVolunteerView extends StatelessWidget {
                           argument: localization.time_slot_validator,
                         ),
                       ),
-                      FormCommonDropDown<String>(
-                        isRequired: true,
-                        heading: localization.hours_per_week,
-                        hintText: localization.select_hours,
-                        items: provider.hoursPerWeekList,
-                        controller: provider.hoursPerWeekController,
-                        validator: (text) => text.toString().validateDropDown(
-                          argument: localization.hours_per_week_validator,
-                        ),
+                      Consumer<BeAVolunteerViewModel>(
+                        builder: (context, value, _) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: Dimens.gapX1,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${localization.hours_per_week} *",
+                                    style: context.textTheme.bodySmall,
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: Dimens.paddingX4,
+                                      vertical: Dimens.paddingX2,
+                                    ),
+                                    decoration: boxDecorationRoundedWithShadow(
+                                      Dimens.radiusX2,
+                                      backgroundColor: AppPalettes.liteGreenColor,
+                                    ),
+                                    child: Text(
+                                      "${value.hoursPerWeek.round()} hours",
+                                      style: context.textTheme.bodySmall?.copyWith(
+                                        color: AppPalettes.primaryColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              HoursSliderWidget(
+                                value: value.hoursPerWeek,
+                                onChanged: (newValue) {
+                                  value.hoursPerWeek = newValue;
+                                },
+                                min: 0,
+                                max: 160,
+                              ),
+                              if (value.autoValidateMode ==
+                                      AutovalidateMode.onUserInteraction &&
+                                  value.hoursPerWeek <= 0)
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: Dimens.gapX1,
+                                    left: Dimens.paddingX2,
+                                  ),
+                                  child: Text(
+                                    localization.hours_per_week_validator,
+                                    style: context.textTheme.bodySmall?.copyWith(
+                                      color: AppPalettes.redColor,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -165,7 +238,7 @@ class BeAVolunteerView extends StatelessWidget {
                     spacing: Dimens.gapX3,
                     children: [
                       CommonButton(
-                        onTap: () => provider.clear(),
+                        onTap: () => contextP.read<BeAVolunteerViewModel>().clear(),
                         color: AppPalettes.whiteColor,
                         borderColor: AppPalettes.primaryColor,
                         textColor: AppPalettes.primaryColor,

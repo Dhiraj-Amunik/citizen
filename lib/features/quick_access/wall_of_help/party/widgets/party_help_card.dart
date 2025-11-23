@@ -16,6 +16,7 @@ import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
@@ -72,8 +73,8 @@ class PartyHelpCard extends StatelessWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                helpRequest.name.isNull(localization.not_found),
+                              child: TranslatedText(
+                                text: helpRequest.name.isNull(localization.not_found),
                                 style: textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -83,28 +84,16 @@ class PartyHelpCard extends StatelessWidget {
                             ),
                             SizeBox.sizeWX2,
                             CommonHelpers.buildStatus(
-                              helpRequest.preferredWayForHelp?.name
-                                      ?.capitalize()
-                                      .isNull(localization.not_found) ??
-                                  localization.not_found,
+                              _getStatusText(helpRequest.status, localization),
                               textColor: AppPalettes.blackColor,
-                              statusColor: AppPalettes.greenColor,
+                              statusColor: helpRequest.status == "rejected"
+                                  ? AppPalettes.liteRedColor
+                                  : helpRequest.status == "pending"
+                                  ? AppPalettes.liteOrangeColor
+                                  : helpRequest.status == "closed"
+                                  ? AppPalettes.liteGreyColor
+                                  : AppPalettes.yellowColor,
                             ),
-                            if (isEditable) SizeBox.sizeWX2,
-                            if (isEditable)
-                              CommonHelpers.buildStatus(
-                                helpRequest.status
-                                    .isNull(localization.not_found)
-                                    .capitalize(),
-                                textColor: AppPalettes.blackColor,
-                                statusColor: helpRequest.status == "rejected"
-                                    ? AppPalettes.liteRedColor
-                                    : helpRequest.status == "pending"
-                                    ? AppPalettes.liteOrangeColor
-                                    : helpRequest.status == "closed"
-                                    ? AppPalettes.liteGreyColor
-                                    : AppPalettes.yellowColor,
-                              ),
                           ],
                         ),
                         Row(
@@ -130,33 +119,41 @@ class PartyHelpCard extends StatelessWidget {
               ),
             ],
           ),
-          RichText(
-            textAlign: TextAlign.start,
-            text: TextSpan(
-              style: textTheme.bodySmall?.copyWith(
-                color: AppPalettes.blackColor,
-                fontWeight: FontWeight.w500,
-              ),
-              children: [
-                TextSpan(text: localization.requested),
-                const TextSpan(text: " : "),
-                TextSpan(
-                  text: isFinancialHelp
-                      ? "₹ ${helpRequest.amountRequested}"
-                      : helpRequest.typeOfHelp?.name,
-                  style: textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: AppPalettes.lightTextColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "${localization.description} : ",
+              TranslatedText(
+                text: "${localization.requested} : ",
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppPalettes.blackColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Expanded(
+                child: isFinancialHelp
+                    ? Text(
+                        "₹ ${helpRequest.amountRequested}",
+                        style: textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppPalettes.lightTextColor,
+                        ),
+                      )
+                    : TranslatedText(
+                        text: helpRequest.typeOfHelp?.name ?? "",
+                        style: textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppPalettes.lightTextColor,
+                        ),
+                      ),
+              ),
+            ],
+          ),
+          
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TranslatedText(
+                text: "${localization.description} : ",
                 style: textTheme.bodySmall?.copyWith(
                   color: AppPalettes.blackColor,
                   fontWeight: FontWeight.w500,
@@ -296,7 +293,7 @@ class PartyHelpCard extends StatelessWidget {
           if (isEditable && helpRequest.status != "closed")
             CommonButton(
               onTap: closeRequest,
-              text: "Close Request",
+              text: localization.close_request,
               height: 32.height(),
               radius: Dimens.radiusX4,
               padding: EdgeInsets.symmetric(
@@ -376,5 +373,16 @@ class PartyHelpCard extends StatelessWidget {
     if (trimmed.startsWith('http')) return trimmed;
     if (trimmed.startsWith('/')) return "${URLs.baseURL}$trimmed";
     return "${URLs.baseURL}/$trimmed";
+  }
+
+  String _getStatusText(String? status, dynamic localization) {
+    if (status == null || status.isEmpty) {
+      return localization.not_found;
+    }
+    final rawStatus = status.trim().toLowerCase();
+    if (rawStatus == 'approved') {
+      return localization.solved;
+    }
+    return status.capitalize();
   }
 }

@@ -80,11 +80,14 @@ class LodgeComplaintView extends StatelessWidget {
                         controller: value.titleController,
                         headingText: localization.complaint_title,
                         hintText: localization.enter_title,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
                         validator: (value) => value?.validate(
                           argument: localization.please_enter_a_title,
                         ),
                       ),
+                      
                       AssemblyConstituencyDropDownWidget(
                         constituencyController: constituencyController,
                       ),
@@ -141,6 +144,8 @@ class LodgeComplaintView extends StatelessWidget {
                         controller: value.descriptionController,
                         headingText: localization.description,
                         hintText: localization.provide_detailed_info,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
                         validator: (value) => value?.validate(
                           argument: localization.please_provide_a_detailed_desc,

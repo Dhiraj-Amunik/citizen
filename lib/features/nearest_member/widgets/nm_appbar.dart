@@ -1,16 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
+import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
+import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/common_search_dropdown.dart';
+import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
+import 'package:inldsevak/core/widgets/form_common_child.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
 import 'package:inldsevak/features/nearest_member/model/nearest_members_model.dart';
 import 'package:inldsevak/features/nearest_member/view_model/nearest_member_view_model.dart';
@@ -46,10 +54,54 @@ class _NearestMemberSilverAppbarState extends State<NearestMemberSilverAppbar> {
     final localization = context.localizations;
     final textTheme = context.textTheme;
     final collapsedHeightValue = 60.height();
+    final navigatorContext = RouteManager.navigatorKey.currentContext;
+    final bool canPop =
+        navigatorContext != null ? Navigator.canPop(navigatorContext) : false;
 
     return SliverAppBar(
-      actionsPadding: EdgeInsets.zero,
+      actionsPadding: EdgeInsets.only(right: Dimens.horizontalspacing),
       centerTitle: false,
+      leading: canPop
+          ? Padding(
+              padding: EdgeInsets.only(
+                left: Dimens.horizontalspacing,
+              ),
+              child: Center(
+                child: Container(
+                  width: 40.r,
+                  height: 40.r,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppPalettes.whiteColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppPalettes.liteGreenColor.withOpacityExt(0.3),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => Navigator.of(
+                        RouteManager.navigatorKey.currentContext!,
+                      ).pop(),
+                      child: Center(
+                        child: Icon(
+                          Icons.chevron_left,
+                          color: AppPalettes.blackColor,
+                          size: 24.r,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
+      leadingWidth: canPop ? 60.r : 0,
       title: widget.isScrolled
           ? Text(
               localization.nearest_member,
@@ -129,6 +181,135 @@ class _NearestMemberSilverAppbarState extends State<NearestMemberSilverAppbar> {
                 );
               },
             ),
+            
+      actions: widget.isScrolled
+          ? null
+          : [
+              CommonHelpers.buildIcons(
+                path: AppImages.filterIcon,
+                color: AppPalettes.whiteColor,
+                iconSize: Dimens.scaleX2,
+                padding: Dimens.paddingX3,
+                radius: Dimens.radiusX3,
+                iconColor: AppPalettes.blackColor ,
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (modalContext) {
+                      return ChangeNotifierProvider<NearestMemberViewModel>.value(
+                        value: provider,
+                        child: DraggableSheetWidget(
+                          showClose: true,
+                          size: 0.4,
+                          bottomChild: Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: Dimens.paddingX4,
+                              horizontal: Dimens.paddingX4,
+                            ),
+                            child: Row(
+                              spacing: Dimens.gapX4,
+                              children: [
+                                Expanded(
+                                  child: CommonButton(
+                                    height: 45,
+                                    color: Colors.white,
+                                    borderColor: AppPalettes.greenColor,
+                                    textColor: AppPalettes.greenColor,
+                                    onTap: () {
+                                      RouteManager.pop();
+                                      provider.clearDistance();
+                                      provider.getMembers();
+                                    },
+                                    child: TranslatedText(
+                                      text: 'Clear',
+                                      style: modalContext.textTheme.bodyLarge?.copyWith(
+                                        color: AppPalettes.greenColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: CommonButton(
+                                    height: 45,
+                                    child: TranslatedText(
+                                      text: 'Apply',
+                                      style: modalContext.textTheme.bodyLarge?.copyWith(
+                                        color: AppPalettes.whiteColor,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      RouteManager.pop();
+                                      provider.getMembers();
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TranslatedText(
+                                    text: 'Filters',
+                                    style: modalContext.textTheme.headlineSmall,
+                                  ),
+                                ],
+                              ),
+                              SizeBox.sizeHX2,
+                              Consumer<NearestMemberViewModel>(
+                                builder: (_, provider, _) {
+                                  return FormCommonChild(
+                                    heading: 'Distance (${provider.radiusValue.round()} km)',
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Slider(
+                                          value: provider.radiusValue,
+                                          min: 0,
+                                          max: 100,
+                                          divisions: 100,
+                                          label: '${provider.radiusValue.round()} km',
+                                          onChanged: (value) {
+                                            provider.setRadius(value);
+                                          },
+                                          activeColor: AppPalettes.primaryColor,
+                                          inactiveColor: AppPalettes.liteGreyColor,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              '0 km',
+                                              style: modalContext.textTheme.bodySmall?.copyWith(
+                                                color: AppPalettes.lightTextColor,
+                                              ),
+                                            ),
+                                            Text(
+                                              '100 km',
+                                              style: modalContext.textTheme.bodySmall?.copyWith(
+                                                color: AppPalettes.lightTextColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ).symmetricPadding(horizontal: Dimens.horizontalspacing),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
       backgroundColor: AppPalettes.liteGreenColor,
       pinned: true,
       expandedHeight: 400.height(),

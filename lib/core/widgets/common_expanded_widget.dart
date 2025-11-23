@@ -3,6 +3,7 @@ import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class CommonExpandedWidget extends StatelessWidget {
   final Widget? svg;
@@ -72,16 +73,16 @@ class CommonExpandedWidget extends StatelessWidget {
 
         subtitle: subtTitle == null
             ? null
-            : Text(
-                subtTitle ?? "",
+            : TranslatedText(
+                text: subtTitle ?? "",
                 style:
                     subTitleTextStyle ??
                     context.textTheme.labelSmall?.copyWith(
                       fontSize: titleFontSize,
                     ),
               ).onlyPadding(top: Dimens.paddingX1),
-        title: Text(
-          title,
+        title: TranslatedText(
+          text: title,
           style:
               textStyle ??
               context.textTheme.bodyMedium?.copyWith(fontSize: titleFontSize),

@@ -5,6 +5,7 @@ import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class CommonTextFormField extends StatelessWidget {
   final TextEditingController? controller;
@@ -110,8 +111,12 @@ class CommonTextFormField extends StatelessWidget {
                     ? AppPalettes.whiteColor
                     : backgroundColor!;
               }),
-        labelText: labelText,
-        labelStyle: labelStyle,
+        label: labelText == null
+            ? null
+            : TranslatedText(
+                text: labelText,
+                style: labelStyle,
+              ),
         isDense: true,
         filled: true,
 
@@ -123,12 +128,14 @@ class CommonTextFormField extends StatelessWidget {
               vertical: Dimens.paddingX3,
               horizontal: Dimens.paddingX5,
             ),
-        hintText: hintText,
-        hintStyle:
-            textStyle ??
-            context.textTheme.bodyMedium?.copyWith(
-              color: AppPalettes.lightTextColor,
-            ),
+        hint: hintText == null
+            ? null
+            : TranslatedText(
+                text: hintText,
+                style: (textStyle ?? context.textTheme.bodyMedium)?.copyWith(
+                  color: AppPalettes.lightTextColor,
+                ),
+              ),
         errorStyle: AppStyles.errorStyle,
         border: border,
         enabledBorder: border,

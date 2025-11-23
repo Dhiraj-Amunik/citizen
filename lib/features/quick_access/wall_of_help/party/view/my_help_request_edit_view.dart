@@ -114,6 +114,9 @@ class MyHelpRequestEditView extends StatelessWidget {
                         controller: provider.otherTypeController,
                         hintText: "Enter your reason",
                         headingText: "Be more specific",
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: "Others Help need to be specified",
                         ),
@@ -125,6 +128,9 @@ class MyHelpRequestEditView extends StatelessWidget {
                       controller: provider.descriptionController,
                       hintText: localization.enter_description_of_request,
                       headingText: localization.description,
+                      textCapitalization: TextCapitalization.sentences,
+                      enforceFirstLetterUppercase: true,
+                      enableSpeechInput: true,
                       validator: (text) => text?.validate(
                         argument: localization.please_enter_few_words,
                       ),
@@ -173,6 +179,9 @@ class MyHelpRequestEditView extends StatelessWidget {
                         controller: provider.otherPreferredController,
                         hintText: "Enter your reason",
                         headingText: "Be more specific",
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: "Others Help need to be specified",
                         ),

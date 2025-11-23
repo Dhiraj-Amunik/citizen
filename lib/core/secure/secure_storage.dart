@@ -82,6 +82,20 @@ class SessionController {
     }
   }
 
+  Future<void> setPartyMember({required bool isPartyMember}) async {
+    try {
+      await _storage.write(
+        key: "isParty",
+        value: isPartyMember.toString().toLowerCase(),
+      );
+      _model?.isPartyMemeber = isPartyMember;
+      _authController.add(_model);
+    } catch (err, stackTrace) {
+      debugPrint("Error: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    }
+  }
+
   Future<void> clearSession() async {
     _model = null;
     await Future.wait([

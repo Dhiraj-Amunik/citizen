@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/notify_representative/model/request/nr_pagination_model.dart';
+import 'package:inldsevak/features/notify_representative/model/response/notify_filters_model.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_lists_model.dart';
 import 'package:inldsevak/features/notify_representative/services/notify_repository.dart';
 
@@ -13,8 +15,82 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
   Future<void> onInit() {
     recentScrollController.addListener(_recentScrollListener);
     pastScrollController.addListener(_pastScrollListener);
-    getAllNotifyData();
+    Future.wait([
+      getNotifyFilters(),
+      getAllNotifyData(),
+    ]);
     return super.onInit();
+  }
+
+  // Filters
+  NotifyFiltersData? filtersData;
+  ConstituencyFilter? selectedConstituency;
+  MlaFilter? selectedMla;
+  String? selectedDistrict;
+  String? selectedMandal;
+  String? selectedVillage;
+
+  Future<void> getNotifyFilters() async {
+    try {
+      final response = await _repository.getNotifyFilters(token: token);
+      if (response.data?.responseCode == 200) {
+        filtersData = response.data?.data;
+        notifyListeners();
+      } else {
+        CommonSnackbar(
+          text: response.data?.message ?? 'Unable to fetch filters',
+        ).showToast();
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error fetching filters: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    }
+  }
+
+  void setConstituency(ConstituencyFilter? constituency) {
+    selectedConstituency = constituency;
+    selectedMla = null; // Reset MLA when constituency changes
+    notifyListeners();
+    _applyFilters();
+  }
+
+  void setMla(MlaFilter? mla) {
+    selectedMla = mla;
+    notifyListeners();
+    _applyFilters();
+  }
+
+  void setDistrict(String? district) {
+    selectedDistrict = district;
+    notifyListeners();
+    _applyFilters();
+  }
+
+  void setMandal(String? mandal) {
+    selectedMandal = mandal;
+    notifyListeners();
+    _applyFilters();
+  }
+
+  void setVillage(String? village) {
+    selectedVillage = village;
+    notifyListeners();
+    _applyFilters();
+  }
+
+  void clearFilters() {
+    selectedConstituency = null;
+    selectedMla = null;
+    selectedDistrict = null;
+    selectedMandal = null;
+    selectedVillage = null;
+    notifyListeners();
+    _applyFilters();
+  }
+
+  void _applyFilters() {
+    onRecentRefresh();
+    onPastRefresh();
   }
 
   Future<void> getAllNotifyData() async {
@@ -73,7 +149,7 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
     if (isLoading || _isScrollLoading) {
       return;
     }
-    if (!_isLastPage) {
+    if (!_recentIsLastPage) {
       _recentCurrentPage++;
       getNotifyLists(NotifyReprFilter.recent);
     }
@@ -83,7 +159,7 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
     if (isLoading || _isScrollLoading) {
       return;
     }
-    if (!_isLastPage) {
+    if (!_pastIsLastPage) {
       _pastCurrentPage++;
       getNotifyLists(NotifyReprFilter.past);
     }
@@ -91,19 +167,22 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
 
   onRecentRefresh() {
     _recentCurrentPage = 1;
-    _isLastPage = false;
+    _recentIsLastPage = false;
+    recentNotifyLists.clear(); // Ensure list is cleared before refresh
     getNotifyLists(NotifyReprFilter.recent);
   }
 
   onPastRefresh() {
     _pastCurrentPage = 1;
-    _isLastPage = false;
+    _pastIsLastPage = false;
+    pastNotifyLists.clear(); // Ensure list is cleared before refresh
     getNotifyLists(NotifyReprFilter.past);
   }
 
   int _recentCurrentPage = 1;
   int _pastCurrentPage = 1;
-  bool _isLastPage = false;
+  bool _recentIsLastPage = false;
+  bool _pastIsLastPage = false;
 
   bool _isScrollLoading = false;
   bool get isScrollLoading => _isScrollLoading;
@@ -134,12 +213,29 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
     }
 
     try {
+      // Convert single selections to arrays as API expects
       final paginationModel = NotifyReprPaginationModel(
         filter: filter,
         page: NotifyReprFilter.recent == filter
             ? _recentCurrentPage
             : _pastCurrentPage,
-        search: searchController.text,
+        search: searchController.text.isEmpty ? null : searchController.text,
+        constituencies: selectedConstituency?.sId != null 
+            ? [selectedConstituency!.sId!] 
+            : null,
+        mlaIds: selectedMla?.sId != null 
+            ? [selectedMla!.sId!] 
+            : null,
+        districts: selectedDistrict != null && selectedDistrict!.isNotEmpty
+            ? [selectedDistrict!]
+            : null,
+        mandals: selectedMandal != null && selectedMandal!.isNotEmpty
+            ? [selectedMandal!]
+            : null,
+        villages: selectedVillage != null && selectedVillage!.isNotEmpty
+            ? [selectedVillage!]
+            : null,
+        sortBy: "-1", // Default to descending (newest first)
       );
       final response = await _repository.getNotifyRepresentative(
         token: token,
@@ -150,20 +246,41 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
         final data = response.data?.data?.notifyRepresentative;
 
         if (data?.isEmpty == true) {
-          _isLastPage = true;
+          // Set the appropriate last page flag
+          if (filter == NotifyReprFilter.recent) {
+            _recentIsLastPage = true;
+          } else {
+            _pastIsLastPage = true;
+          }
           return;
         }
         if (data?.isNotEmpty == true) {
-          if (data?.isNotEmpty == true) {
-            switch (filter) {
-              case NotifyReprFilter.recent:
-                recentNotifyLists.addAll(List.from(data as List));
-                break;
+          // Convert to list and filter out duplicates
+          final newItems = List<NotifyRepresentative>.from(data as List);
+          final pageSize = response.data?.data?.pageSize ?? 20;
+          
+          switch (filter) {
+            case NotifyReprFilter.recent:
+              // Filter out duplicates based on sId before adding
+              final existingIds = recentNotifyLists.map((e) => e.sId).toSet();
+              final uniqueItems = newItems.where((item) => !existingIds.contains(item.sId)).toList();
+              recentNotifyLists.addAll(uniqueItems);
+              // Update last page flag - if we got less items than page size, we're on the last page
+              if (newItems.length < pageSize) {
+                _recentIsLastPage = true;
+              }
+              break;
 
-              case NotifyReprFilter.past:
-                pastNotifyLists.addAll(List.from(data as List));
-                break;
-            }
+            case NotifyReprFilter.past:
+              // Filter out duplicates based on sId before adding
+              final existingIds = pastNotifyLists.map((e) => e.sId).toSet();
+              final uniqueItems = newItems.where((item) => !existingIds.contains(item.sId)).toList();
+              pastNotifyLists.addAll(uniqueItems);
+              // Update last page flag - if we got less items than page size, we're on the last page
+              if (newItems.length < pageSize) {
+                _pastIsLastPage = true;
+              }
+              break;
           }
         }
       }

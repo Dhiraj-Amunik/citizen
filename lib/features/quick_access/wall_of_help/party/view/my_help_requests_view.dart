@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
@@ -124,6 +125,7 @@ class MyHelpRequestsView extends StatelessWidget {
       ),
       child: TextField(
         controller: value.searchController,
+        cursorColor: AppPalettes.primaryColor,
         decoration: InputDecoration(
           hintText: localization.search,
           prefixIcon: const Icon(Icons.search),
@@ -135,6 +137,19 @@ class MyHelpRequestsView extends StatelessWidget {
                 ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(Dimens.radiusX3),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(Dimens.radiusX3),
+            borderSide: const BorderSide(
+              color: AppPalettes.primaryColor,
+              width: 2,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(Dimens.radiusX3),
+            borderSide: BorderSide(
+              color: AppPalettes.borderColor,
+            ),
           ),
         ),
         onChanged: value.onSearchChanged,

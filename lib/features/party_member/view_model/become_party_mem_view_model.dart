@@ -10,6 +10,7 @@ import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/party_member/model/request/party_member_request_model.dart';
 import 'package:inldsevak/features/party_member/services/party_member_repository.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -55,20 +56,35 @@ class BecomePartyMemViewModel extends BaseViewModel
       children: [
         ListTile(
           leading: Icon(Icons.camera),
-          title: Text('Take a Picture'),
+          title: TranslatedText(text: 'Take a Picture'),
           onTap: () async {
             RouteManager.pop();
+            await Future.delayed(const Duration(milliseconds: 300));
             try {
-              multipleFiles.add(await createCameraImage() ?? []);
-              notifyListeners();
-            } catch (err) {
-              debugPrint("-------->$err");
+              final file = await createCameraImage();
+              if (file != null && await file.exists()) {
+                final fileSize = await file.length();
+                if (fileSize > 0) {
+                  multipleFiles.add(file);
+                  notifyListeners();
+                } else {
+                  CommonSnackbar(
+                    text: "Image file is invalid. Please try again.",
+                  ).showAnimatedDialog(type: QuickAlertType.error);
+                }
+              }
+            } catch (err, stackTrace) {
+              debugPrint("Error capturing image: $err");
+              debugPrint("Stack trace: $stackTrace");
+              CommonSnackbar(
+                text: "Failed to capture image. Please try again.",
+              ).showAnimatedDialog(type: QuickAlertType.error);
             }
           },
         ),
         ListTile(
           leading: Icon(Icons.photo_library),
-          title: Text('Choose from Gallery'),
+          title: TranslatedText(text: 'Choose from Gallery'),
           onTap: () async {
             RouteManager.pop();
             try {
@@ -81,7 +97,7 @@ class BecomePartyMemViewModel extends BaseViewModel
         ),
         ListTile(
           leading: Icon(Icons.file_open),
-          title: Text('Choose from Files'),
+          title: TranslatedText(text: 'Choose from Files'),
           onTap: () async {
             RouteManager.pop();
             try {

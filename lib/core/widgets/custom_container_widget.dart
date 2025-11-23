@@ -7,6 +7,7 @@ import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart' show SizeBox;
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class CustomContainerWidget extends StatelessWidget {
   final Routes route;
@@ -25,6 +26,7 @@ class CustomContainerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.symmetric(
         horizontal: Dimens.paddingX3,
         vertical: Dimens.paddingX3,
@@ -41,13 +43,22 @@ class CustomContainerWidget extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(heading, style: textTheme.bodyMedium),
+              TranslatedText(
+                text: heading,
+                style: textTheme.bodyMedium,
+              ),
               SizeBox.sizeHX1,
-              Text(
-                desciption,
-                style: textTheme.labelMedium?.copyWith(
-                  color: AppPalettes.lightTextColor,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TranslatedText(
+                      text: desciption,
+                      style: textTheme.labelMedium?.copyWith(
+                        color: AppPalettes.lightTextColor,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizeBox.sizeHX8,
             ],

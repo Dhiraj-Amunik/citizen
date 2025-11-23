@@ -6,9 +6,11 @@ import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
 import 'package:inldsevak/features/complaints/widgets/complaint_helpers.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
+import 'package:inldsevak/core/widgets/read_more_widget.dart';
 
 class ComplaintThreadWidget extends StatelessWidget {
   final Data thread;
@@ -77,37 +79,36 @@ class ComplaintThreadWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: Dimens.gapX1,
                     children: [
-                      Text(
-                        thread.messages?.first.subject?.capitalize() ??
+                      ReadMoreWidget(
+                        text: thread.messages?.first.subject?.capitalize() ??
                             "No Subject found !",
-                        style: textTheme.bodyMedium,
                         maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodyMedium,
                       ),
-                      Text(
-                        thread.messages?.first.snippet ??
+                      ReadMoreWidget(
+                        text: thread.messages?.first.snippet ??
                             "Unknown Description",
                         maxLines: 2,
-                        style: textTheme.labelMedium?.copyWith(
-                          color: AppPalettes.lightTextColor,
-                          fontWeight: FontWeight.w500,
-                        ),
+                       
                       ),
                       if (showCompaint)
                         Row(
                           children: [
-                            Text(
-                              "Complaint ID : ",
+                            TranslatedText(
+                              text: "Complaint ID : ",
                               maxLines: 2,
                               style: textTheme.labelMedium?.copyWith(
-                                color: AppPalettes.lightTextColor,
+                                color: AppPalettes.blackColor,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             Text(
                               thread.threadId ?? "",
                               maxLines: 2,
-                              style: textTheme.labelMedium,
+                              style: textTheme.labelMedium?.copyWith(
+                                color: AppPalettes.lightTextColor,
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
                           ],
                         ),
@@ -115,14 +116,14 @@ class ComplaintThreadWidget extends StatelessWidget {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "Submitted To : ",
+                            TranslatedText(
+                              text: "Submitted To : ",
                               maxLines: 2,
                               style: textTheme.labelMedium,
                             ),
                             Expanded(
-                              child: Text(
-                                '${thread.department?.name ?? "Department"} - ${thread.authorityName ?? "Authority"}',
+                              child: TranslatedText(
+                                text: '${thread.department?.name ?? "Department"} - ${thread.authorityName ?? "Authority"}',
                                 maxLines: 2,
                                 style: textTheme.labelMedium?.copyWith(
                                   color: AppPalettes.lightTextColor,

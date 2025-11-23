@@ -10,6 +10,7 @@ import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -57,6 +58,8 @@ class FormTextFormField extends StatefulWidget {
   final void Function(String message)? onMicAvailabilityDenied;
   final bool showDefaultSuffix;
   final AutovalidateMode? autovalidateMode;
+  final TextCapitalization textCapitalization;
+  final bool enforceFirstLetterUppercase;
 
   const FormTextFormField({
     super.key,
@@ -100,6 +103,8 @@ class FormTextFormField extends StatefulWidget {
     this.onMicAvailabilityDenied,
     this.showDefaultSuffix = true,
     this.autovalidateMode,
+    this.textCapitalization = TextCapitalization.sentences,
+    this.enforceFirstLetterUppercase = false,
   });
 
   @override
@@ -110,10 +115,10 @@ class _FormTextFormFieldState extends State<FormTextFormField>
     with SingleTickerProviderStateMixin {
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isListening = false;
-  String _lastFinalRecognizedNormalized = '';
   late final AnimationController _micPulseController;
   late final Animation<double> _micPulseAnimation;
-  bool get isListening => _isListening;
+  bool _isApplyingFormattedText = false;
+  String _micSessionBaseText = '';
 
   @override
   void initState() {
@@ -158,8 +163,7 @@ class _FormTextFormFieldState extends State<FormTextFormField>
         return;
       }
 
-      _lastFinalRecognizedNormalized = '';
-      widget.controller?.clear();
+      _micSessionBaseText = widget.controller?.text ?? '';
       try {
         await _speech.listen(
           onResult: _onSpeechResult,
@@ -193,21 +197,29 @@ class _FormTextFormFieldState extends State<FormTextFormField>
     final recognizedWords = result.recognizedWords.trim();
     final controller = widget.controller;
     if (controller != null) {
-      controller.value = TextEditingValue(
-        text: recognizedWords,
-        selection: TextSelection.collapsed(offset: recognizedWords.length),
-        composing: TextRange.empty,
+      var updatedText = _micSessionBaseText;
+
+      if (updatedText.isNotEmpty && !_endsWithWhitespace(updatedText)) {
+        updatedText += ' ';
+      }
+
+      if (recognizedWords.isNotEmpty) {
+        updatedText += recognizedWords;
+      }
+
+      if (widget.enforceFirstLetterUppercase) {
+        updatedText = _ensureFirstLetterUppercase(updatedText);
+      }
+
+      _updateControllerText(
+        updatedText,
+        selection: TextSelection.collapsed(offset: updatedText.length),
       );
+
+      widget.onChanged?.call(updatedText);
     }
 
     if (result.finalResult) {
-      final normalized = recognizedWords.toLowerCase();
-      if (normalized.isEmpty ||
-          normalized == _lastFinalRecognizedNormalized) {
-        return;
-      }
-
-      _lastFinalRecognizedNormalized = normalized;
       if (_isListening) {
         _speech.stop();
         setState(() {
@@ -215,7 +227,7 @@ class _FormTextFormFieldState extends State<FormTextFormField>
         });
         _stopMicAnimation();
       }
-      widget.onChanged?.call(controller?.text ?? recognizedWords);
+      _micSessionBaseText = widget.controller?.text ?? '';
     }
   }
 
@@ -263,9 +275,19 @@ class _FormTextFormFieldState extends State<FormTextFormField>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.headingText != null)
-          Text(
-            "${widget.headingText!} ${widget.isRequired == true ? '*' : ''}",
-            style: widget.headingStyle ?? context.textTheme.bodySmall,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TranslatedText(
+                text: widget.headingText!,
+                style: widget.headingStyle ?? context.textTheme.bodySmall,
+              ),
+              if (widget.isRequired == true)
+                Text(
+                  ' *',
+                  style: widget.headingStyle ?? context.textTheme.bodySmall,
+                ),
+            ],
           ).onlyPadding(bottom: Dimens.gapX1B),
         TextFormField(
           initialValue: widget.initialValue,
@@ -277,7 +299,7 @@ class _FormTextFormFieldState extends State<FormTextFormField>
           cursorHeight: Dimens.paddingX5,
           style: widget.textStyle ?? context.textTheme.bodySmall,
           focusNode: widget.focus,
-          textCapitalization: TextCapitalization.sentences,
+          textCapitalization: widget.textCapitalization,
           enabled: widget.enabled,
           autovalidateMode: widget.autovalidateMode,
           keyboardType: widget.keyboardType,
@@ -299,17 +321,20 @@ class _FormTextFormFieldState extends State<FormTextFormField>
                 ),
             labelText: widget.labelText,
             labelStyle: widget.labelStyle ?? context.textTheme.bodySmall,
-            hintText: widget.hintText,
-            hintStyle:
-                widget.textStyle ??
-                context.textTheme.labelLarge?.copyWith(
-                  color: AppPalettes.lightTextColor,
-                ),
+            hint: widget.hintText == null
+                ? null
+                : TranslatedText(
+                    text: widget.hintText!,
+                    style: widget.textStyle ??
+                        context.textTheme.labelLarge?.copyWith(
+                          color: AppPalettes.lightTextColor,
+                        ),
+                  ),
             errorStyle: AppStyles.errorStyle,
             border: border,
             enabledBorder: border.copyWith(
               borderSide: BorderSide(
-                color: isListening
+                color: _isListening
                     ? AppPalettes.blackColor
                     : widget.fillColor != null
                     ? AppPalettes.blackColor
@@ -339,7 +364,6 @@ class _FormTextFormFieldState extends State<FormTextFormField>
                     bottom: Dimens.paddingX3B,
                   )
                 : null,
-
             suffixIcon: Transform.translate(
               offset: Offset(
                 0,
@@ -359,7 +383,33 @@ class _FormTextFormFieldState extends State<FormTextFormField>
           obscureText: widget.isPassword,
           obscuringCharacter: '.',
           validator: widget.validator,
-          onChanged: widget.onChanged,
+          onChanged: (value) {
+            if (_isApplyingFormattedText) {
+              widget.onChanged?.call(value);
+              return;
+            }
+
+            var updatedValue = value;
+
+            if (widget.enforceFirstLetterUppercase &&
+                value.trimLeft().isNotEmpty &&
+                widget.controller != null) {
+              final controller = widget.controller!;
+              final selection = controller.selection;
+              final formattedValue = _ensureFirstLetterUppercase(value);
+
+              if (formattedValue != value) {
+                _updateControllerText(
+                  formattedValue,
+                  selection: selection,
+                );
+                updatedValue = formattedValue;
+              }
+            }
+
+            widget.onChanged?.call(updatedValue);
+            _micSessionBaseText = updatedValue;
+          },
           onEditingComplete: widget.onComplete,
           onFieldSubmitted: (submitValue) {
             FocusScope.of(context).requestFocus(widget.nextFocus);
@@ -507,5 +557,68 @@ class _FormTextFormFieldState extends State<FormTextFormField>
     } else {
       CommonSnackbar(text: safeMessage).showSnackbar();
     }
+  }
+
+  String _ensureFirstLetterUppercase(String value) {
+    if (value.isEmpty) return value;
+
+    final trimmedLeft = value.trimLeft();
+    if (trimmedLeft.isEmpty) return value;
+
+    final leadingSpaceCount = value.length - trimmedLeft.length;
+    final leadingSpaces =
+        leadingSpaceCount > 0 ? value.substring(0, leadingSpaceCount) : '';
+    final firstChar = trimmedLeft[0];
+    final remaining = trimmedLeft.substring(1);
+
+    if (_isLetter(firstChar) && firstChar != firstChar.toUpperCase()) {
+      return '$leadingSpaces${firstChar.toUpperCase()}$remaining';
+    }
+
+    return value;
+  }
+
+  bool _isLetter(String character) {
+    if (character.isEmpty) return false;
+    final codeUnit = character.codeUnitAt(0);
+    return (codeUnit >= 65 && codeUnit <= 90) ||
+        (codeUnit >= 97 && codeUnit <= 122);
+  }
+
+  bool _endsWithWhitespace(String value) {
+    if (value.isEmpty) return false;
+    final lastChar = value[value.length - 1];
+    return lastChar.trim().isEmpty;
+  }
+
+  void _updateControllerText(
+    String text, {
+    TextSelection? selection,
+  }) {
+    if (widget.controller == null) return;
+
+    _isApplyingFormattedText = true;
+
+    final validatedSelection = selection != null
+        ? selection.copyWith(
+            baseOffset: _clampSelectionOffset(selection.baseOffset, text.length),
+            extentOffset:
+                _clampSelectionOffset(selection.extentOffset, text.length),
+          )
+        : TextSelection.collapsed(offset: text.length);
+
+    widget.controller!.value = widget.controller!.value.copyWith(
+      text: text,
+      selection: validatedSelection,
+      composing: TextRange.empty,
+    );
+
+    _isApplyingFormattedText = false;
+  }
+
+  int _clampSelectionOffset(int offset, int max) {
+    if (offset < 0) return 0;
+    if (offset > max) return max;
+    return offset;
   }
 }

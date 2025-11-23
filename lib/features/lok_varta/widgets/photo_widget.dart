@@ -6,6 +6,7 @@ import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/lok_varta/model/lok_varta_model.dart'
     as model;
 import 'package:inldsevak/features/lok_varta/model/request_lok_varta_model.dart';
@@ -91,8 +92,8 @@ class PhotoWidget extends StatelessWidget {
                         ),
                         constraints: BoxConstraints(maxWidth: double.infinity),
                         color: AppPalettes.blackColor.withOpacityExt(0.5),
-                        child: Text(
-                          singleMediaImgs[index].title!,
+                        child: TranslatedText(
+                          text: singleMediaImgs[index].title!,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: textTheme.bodySmall?.copyWith(

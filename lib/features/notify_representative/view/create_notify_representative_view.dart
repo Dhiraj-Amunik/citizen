@@ -11,7 +11,9 @@ import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/upload_multi_files.dart';
+import 'package:inldsevak/features/notify_representative/model/response/notify_filters_model.dart';
 import 'package:inldsevak/features/notify_representative/view_model/create_notify_representative_view_model.dart';
 import 'package:inldsevak/features/notify_representative/view_model/notify_representative_view_model.dart';
 import 'package:provider/provider.dart';
@@ -44,21 +46,103 @@ class CreateNotifyRepresentativeView extends StatelessWidget
                         headingText: localization.event_type,
                         hintText: localization.title,
                         controller: provider.eventTypeController,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
+                        
                         validator: (text) => text?.validate(
                           argument: localization.event_title_validatore,
                         ),
                       ),
+                      // Village Field - Text input
                       FormTextFormField(
                         isRequired: true,
-                        headingText: localization.location_venue,
-                        hintText: localization.enter_location,
-                        controller: provider.locationController,
+                        headingText: 'Village',
+                        hintText: 'Enter Village',
+                        controller: provider.villageController,
+                        textCapitalization: TextCapitalization.words,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
                         validator: (text) => text?.validate(
-                          argument: localization.event_location_validator,
+                          argument: 'Please enter Village',
                         ),
                       ),
+                      // FormTextFormField(
+                      //   isRequired: true,
+                      //   headingText: localization.location_venue,
+                      //   hintText: localization.enter_location,
+                      //   controller: provider.locationController,
+                      //   textCapitalization: TextCapitalization.sentences,
+                      //   enforceFirstLetterUppercase: true,
+                      //   enableSpeechInput: true,
+                      //   validator: (text) => text?.validate(
+                      //     argument: localization.event_location_validator,
+                      //   ),
+                      // ),
+
+                      // District Field - Text input
+                      FormTextFormField(
+                        isRequired: true,
+                        headingText: 'District',
+                        hintText: 'Enter District',
+                        controller: provider.districtController,
+                        textCapitalization: TextCapitalization.words,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
+                        validator: (text) => text?.validate(
+                          argument: 'Please enter District',
+                        ),
+                      ),
+                      // Mandal Field - Text input
+                      FormTextFormField(
+                        isRequired: true,
+                        headingText: 'Mandal',
+                        hintText: 'Enter Mandal',
+                        controller: provider.mandalController,
+                        textCapitalization: TextCapitalization.words,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
+                        validator: (text) => text?.validate(
+                          argument: 'Please enter Mandal',
+                        ),
+                      ),
+
+                      // Street Field
+                      FormTextFormField(
+                        isRequired: true,
+                        headingText: 'Street',
+                        hintText: 'Enter Street',
+                        controller: provider.streetController,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
+                        enableSpeechInput: true,
+                        validator: (text) => text?.validate(
+                          argument: 'Please enter Street',
+                        ),
+                      ),
+
+                      // Pincode Field
+                      FormTextFormField(
+                        isRequired: true,
+                        headingText: 'Pincode',
+                        hintText: 'Enter Pincode',
+                        controller: provider.pincodeController,
+                        keyboardType: TextInputType.number,
+                        enableSpeechInput: true,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
+                        maxLength: 6,
+                        validator: (text) {
+                          if (text == null || text.isEmpty) {
+                            return 'Please enter Pincode';
+                          }
+                          if (text.length != 6) {
+                            return 'Please enter valid 6-digit Pincode';
+                          }
+                          return null;
+                        },
+                      ),
+
                       FormTextFormField(
                         isRequired: true,
                         headingText: localization.event_date,
@@ -75,7 +159,7 @@ class CreateNotifyRepresentativeView extends StatelessWidget
                               DateTime.now().month + 2,
                             ),
                           );
-                          if (date != null) {
+                          if (date != null) { 
                             provider.companyDateFormat = date
                                 .toString()
                                 .toYyyyMmDd();
@@ -107,14 +191,52 @@ class CreateNotifyRepresentativeView extends StatelessWidget
                       FormTextFormField(
                         isRequired: true,
                         headingText: localization.description,
-                        hintText: localization.description_info,
+                        hintText: 'Enter detailed description for notify representative',
                         controller: provider.descriptionController,
                         maxLines: 5,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                         enableSpeechInput: true,
                         validator: (text) => text?.validate(
                           argument: localization.notify_description_validatore,
                         ),
                       ),
+                      
+                      // MLA Dropdown
+                      Consumer<CreateNotifyRepresentativeViewModel>(
+                        builder: (contextP, value, _) {
+                          if (value.filtersData?.mlas != null &&
+                              value.filtersData!.mlas!.isNotEmpty) {
+                            return FormCommonDropDown<MlaFilter>(
+                              isRequired: true,
+                              heading: 'Select MLA',
+                              hintText: 'Choose MLA',
+                              controller: value.mlaController,
+                              items: value.filtersData!.mlas,
+                              listItemBuilder: (context, mla, _, __) {
+                                return Text(
+                                  mla.user?.name ?? '',
+                                  style: context.textTheme.bodySmall,
+                                );
+                              },
+                              headerBuilder: (context, mla, _) {
+                                return Text(
+                                  mla.user?.name ?? '',
+                                  style: context.textTheme.bodySmall,
+                                );
+                              },
+                              validator: (MlaFilter? mla) {
+                                if (mla == null) {
+                                  return localization.mla_validator;
+                                }
+                                return null;
+                              },
+                            );
+                          }
+                          return SizedBox.shrink();
+                        },
+                      ),
+
                       Consumer<CreateNotifyRepresentativeViewModel>(
                         builder: (contextP, value, _) {
                           return UploadMultiFilesWidget(

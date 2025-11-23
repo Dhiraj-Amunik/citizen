@@ -19,6 +19,7 @@ class AppointmentsViewModel extends BaseViewModel {
     "Rejected",
     "Completed",
     "Cancelled",
+    "Rescheduled",
   ];
   List<String> dateItems = ["Recent", "One Month", "Six Months"];
 

@@ -113,6 +113,18 @@ class AppLocalizationsHi extends AppLocalizations {
   String get voter_id_validator => 'कृपया अपना मतदाता आईडी नंबर दर्ज करें';
 
   @override
+  String get invited_by => 'आमंत्रित किया गया';
+
+  @override
+  String get invited_by_hint => 'आमंत्रण कोड दर्ज करें (वैकल्पिक)';
+
+  @override
+  String get invite_code => 'आमंत्रण कोड';
+
+  @override
+  String get invite_code_copied => 'आमंत्रण कोड क्लिपबोर्ड पर कॉपी किया गया';
+
+  @override
   String get register => 'पंजीकरण करें';
 
   @override
@@ -149,11 +161,11 @@ class AppLocalizationsHi extends AppLocalizations {
   String get donate => 'दान करें';
 
   @override
-  String get donate_for => 'Donation For';
+  String get donate_for => 'दान का उद्देश्य';
 
   @override
   String get donate_for_description =>
-      'Your support, in any form, will help us create wonderful memories at this party. More importantly, your contribution goes beyond celebration - it becomes a source of hope for those in need. Every donation you make will be directed toward helping underprivileged citizens and supporting community welfare initiatives. Whether it is providing essential resources, medical assistance, or financial aid, your kindness will make a meaningful difference in someone’s life. By standing with us, you are not just donating - you are joining hands in building a stronger, more caring society. Together, we can ensure that joy is shared with everyone, especially those who need it most.';
+      'आपका सहयोग, किसी भी रूप में, इस आयोजन को यादगार बनाने में हमारी मदद करेगा। इससे भी अधिक महत्त्वपूर्ण यह है कि आपका योगदान केवल उत्सव तक सीमित नहीं रहेगा—यह जरूरतमंदों के लिए आशा का स्रोत बनेगा। आपके द्वारा किया गया हर दान वंचित नागरिकों की सहायता और सामुदायिक कल्याण पहलों को समर्पित होगा। चाहे आवश्यक संसाधन उपलब्ध कराना हो, चिकित्सीय सहायता देनी हो या आर्थिक मदद पहुँचानी हो, आपकी दयालुता किसी के जीवन में सार्थक बदलाव लाएगी। हमारे साथ जुड़कर आप केवल दान नहीं कर रहे, बल्कि एक मजबूत और संवेदनशील समाज के निर्माण में सहभागी बन रहे हैं। आइए मिलकर यह सुनिश्चित करें कि खुशी उन तक भी पहुँचे जिन्हें इसकी सबसे अधिक आवश्यकता है।';
 
   @override
   String get donation_history => 'दान इतिहास';
@@ -251,6 +263,15 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get event_details => 'कार्यक्रम विवरण';
+
+  @override
+  String get view_poster => 'पोस्टर देखें';
+
+  @override
+  String get no_location_found => 'स्थान नहीं मिला';
+
+  @override
+  String get event_not_found => 'कार्यक्रम नहीं मिला !';
 
   @override
   String get edit_details => 'विवरण संपादित करें';
@@ -438,7 +459,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enter_address => 'पता दर्ज करें';
 
   @override
-  String get enter_your_address => 'Enter your Address';
+  String get enter_your_address => 'अपना पता दर्ज करें';
 
   @override
   String get address_validator => 'कृपया अपना घर का पता दर्ज करें';
@@ -450,14 +471,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get request_appointment => 'अपॉइंटमेंट का अनुरोध करें';
 
   @override
-  String get scheduled_date => 'Scheduled Date';
+  String get scheduled_date => 'निर्धारित तिथि';
 
   @override
-  String get rescheduled_date => 'Rescheduled Date';
+  String get rescheduled_date => 'पुनर्निर्धारित तिथि';
 
   @override
   String get appointment_note =>
-      'Note: As per the availability of Associate can rescheduled ur preferred date in appointment';
+      'ध्यान दें: सहयोगी की उपलब्धता के अनुसार आपकी पसंदीदा तिथि बदली जा सकती है';
 
   @override
   String get appointment_list => 'अपॉइंटमेंट सूची';
@@ -466,10 +487,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get select_mla => 'MLA चुनें';
 
   @override
-  String get select_associate => 'Select Associate';
+  String get select_associate => 'सहयोगी चुनें';
 
   @override
-  String get your_notified_events => 'Your Notified Events';
+  String get your_notified_events => 'आपके सूचित कार्यक्रम';
 
   @override
   String get book_for => 'के लिए बुक करें';
@@ -478,7 +499,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get membership_id => 'सदस्यता आईडी';
 
   @override
-  String get membership_validator => 'Please enter Membership ID';
+  String get membership_validator => 'कृपया सदस्यता आईडी दर्ज करें';
 
   @override
   String get date => 'तिथि';
@@ -491,7 +512,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mla_validator => 'कृपया एक MLA चुनें';
 
   @override
-  String get choose_your_associate => 'Choose your Associate';
+  String get choose_your_associate => 'अपने सहयोगी का चयन करें';
 
   @override
   String get phone_number => 'फोन नंबर';
@@ -506,7 +527,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get time_slot => 'समय स्लॉट';
 
   @override
-  String get preferred_date => 'Preferred Date';
+  String get preferred_date => 'पसंदीदा तिथि';
 
   @override
   String get select_time_slot => 'पसंदीदा समय स्लॉट चुनें';
@@ -560,6 +581,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get requested => 'अनुरोधित';
 
   @override
+  String get solved => 'समाधान हुआ';
+
+  @override
   String get description => 'विवरण';
 
   @override
@@ -582,37 +606,38 @@ class AppLocalizationsHi extends AppLocalizations {
   String get please_enter_few_words => 'कृपया कुछ शब्द दर्ज करें';
 
   @override
-  String get type_of_help_needed => 'Type of Help Needed';
+  String get type_of_help_needed => 'आवश्यक सहायता का प्रकार';
 
   @override
-  String get choose_the_options => 'Choose the options';
+  String get choose_the_options => 'विकल्प चुनें';
 
   @override
-  String get dropdown_validator => 'Please select one option';
+  String get dropdown_validator => 'कृपया एक विकल्प चुनें';
 
   @override
-  String get enter_description_of_request => 'Enter description of request';
+  String get enter_description_of_request => 'अनुरोध का विवरण दर्ज करें';
 
   @override
-  String get urgency_level => 'Urgency Level';
+  String get urgency_level => 'तत्कालता स्तर';
 
   @override
-  String get preferred_way_to_receive_help => 'Preferred Way to Receive Help*';
+  String get preferred_way_to_receive_help =>
+      'सहायता प्राप्त करने का पसंदीदा तरीका*';
 
   @override
-  String get supporting_documents => 'Supporting Documents (If Any)';
+  String get supporting_documents => 'समर्थन दस्तावेज़ (यदि कोई हों)';
 
   @override
-  String get less_amount_validator => 'Minimun 10rs is allowed';
+  String get less_amount_validator => 'न्यूनतम 10 रुपये आवश्यक हैं';
 
   @override
-  String get chat => 'Chat';
+  String get chat => 'चैट';
 
   @override
-  String get my_chat => 'My Chats';
+  String get my_chat => 'मेरी चैट';
 
   @override
-  String get update => 'Update';
+  String get update => 'अपडेट करें';
 
   @override
   String get enter_detail_description => 'विस्तृत विवरण दर्ज करें';
@@ -657,19 +682,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get previous_contributions => 'पिछले योगदान';
 
   @override
-  String get my_requests => 'My Requests';
+  String get my_requests => 'मेरे अनुरोध';
 
   @override
-  String get edit => 'Edit';
+  String get edit => 'संपादित करें';
 
   @override
-  String get delete => 'Delete';
+  String get delete => 'हटाएं';
 
   @override
   String get my_complaints => 'मेरी शिकायतें';
 
   @override
-  String get not_found => 'Not Found';
+  String get not_found => 'मिला नहीं';
 
   @override
   String get id_card => 'आईडी कार्ड';
@@ -685,6 +710,64 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get become_a_volunteer => 'स्वयंसेवक बनें';
+
+  @override
+  String get volunteer_analytics_data_not_available =>
+      'स्वयंसेवक एनालिटिक्स डेटा अभी उपलब्ध नहीं है।';
+
+  @override
+  String get top_volunteers => 'शीर्ष स्वयंसेवक';
+
+  @override
+  String get not_enough_data_leaderboard =>
+      'लीडरबोर्ड प्रदर्शित करने के लिए अभी पर्याप्त डेटा नहीं है।';
+
+  @override
+  String get my_analytics => 'मेरी एनालिटिक्स';
+
+  @override
+  String get total_events => 'कुल कार्यक्रम';
+
+  @override
+  String get attended => 'उपस्थित';
+
+  @override
+  String get total_shares => 'कुल शेयर';
+
+  @override
+  String get active_since => 'सक्रिय तब से';
+
+  @override
+  String get refered_users => 'लोग जुड़े';
+
+  @override
+  String get events_attended_volunteer => 'कार्यक्रम में भाग लिया';
+
+  @override
+  String get content_shared_volunteer => 'सामग्री साझा की';
+
+  @override
+  String get attended_events => 'उपस्थित कार्यक्रम';
+
+  @override
+  String get no_attended_events_recently =>
+      'आपने हाल ही में कोई कार्यक्रम में भाग नहीं लिया है।';
+
+  @override
+  String get no_upcoming_events => 'इस समय कोई आगामी कार्यक्रम नहीं है।';
+
+  @override
+  String get date_not_available => 'तिथि उपलब्ध नहीं';
+
+  @override
+  String get location_not_available => 'स्थान उपलब्ध नहीं';
+
+  @override
+  String get event_name_not_available => 'कार्यक्रम का नाम उपलब्ध नहीं';
+
+  @override
+  String get qr_scanning_supported_android_ios =>
+      'QR स्कैनिंग केवल Android और iOS उपकरणों पर समर्थित है।';
 
   @override
   String get enter_age => 'उम्र दर्ज करें';
@@ -814,88 +897,94 @@ class AppLocalizationsHi extends AppLocalizations {
       'क्या आप वाकई अपने अकाउंट से साइन आउट करना चाहते हैं?';
 
   @override
-  String get notify_representative => 'Notify Representative';
+  String get cancel => 'रद्द करें';
 
   @override
-  String get notify => 'Notify';
+  String get close_request => 'अनुरोध बंद करें';
 
   @override
-  String get notify_mla => 'Notify Mla';
+  String get notify_representative => 'प्रतिनिधि को सूचित करें';
+
+  @override
+  String get notify => 'सूचित करें';
+
+  @override
+  String get notify_mla => 'विधायक को सूचित करें';
 
   @override
   String get notify_description =>
       'Beyond politics, we build trust and support. With the Wall of Help, you’re never alone assistance is always near.';
 
   @override
-  String get recent => 'Recent';
+  String get recent => 'हाल के';
 
   @override
-  String get past => 'Past';
+  String get past => 'पूर्व';
 
   @override
-  String get view_how_member_notified => 'View how members Notified';
+  String get view_how_member_notified => 'देखें सदस्यों को कैसे सूचित किया गया';
 
   @override
-  String get nearest_member => 'Nearest Member';
+  String get nearest_member => 'निकटतम सदस्य';
 
   @override
-  String get list_of_nearest_member => 'List Of Nearest Member';
+  String get list_of_nearest_member => 'निकटतम सदस्यों की सूची';
 
   @override
-  String get apply => 'Apply';
+  String get apply => 'आवेदन करें';
 
   @override
-  String get phone_no => 'Phone No';
+  String get phone_no => 'फोन नंबर';
 
   @override
   String get notify_description_validatore =>
       'Enter detail description to notify';
 
   @override
-  String get event_title_validatore => 'Please enter event name';
+  String get event_title_validatore => 'कृपया कार्यक्रम का नाम दर्ज करें';
 
   @override
-  String get event_time_validatore => 'Please select event time';
+  String get event_time_validatore => 'कृपया कार्यक्रम का समय चुनें';
 
   @override
-  String get event_date_validatore => 'Please select your event date';
+  String get event_date_validatore => 'कृपया कार्यक्रम की तिथि चुनें';
 
   @override
-  String get event_date => 'Event Date';
+  String get event_date => 'कार्यक्रम की तिथि';
 
   @override
-  String get event_type => 'Event Type';
+  String get event_type => 'कार्यक्रम का प्रकार';
 
   @override
-  String get event_time => 'Event Time';
+  String get event_time => 'कार्यक्रम का समय';
 
   @override
-  String get select_time => 'Select Time';
+  String get select_time => 'समय चुनें';
 
   @override
-  String get enter_location => 'Enter Location';
+  String get enter_location => 'स्थान दर्ज करें';
 
   @override
-  String get event_location_validator => 'Please enter event location';
+  String get event_location_validator => 'कृपया कार्यक्रम का स्थान दर्ज करें';
 
   @override
   String get location_venue => 'Location / Venue';
 
   @override
-  String get inbox => 'Inbox';
+  String get inbox => 'इनबॉक्स';
 
   @override
-  String get filters => 'Filters';
+  String get filters => 'फ़िल्टर';
 
   @override
-  String get status => 'Status';
+  String get status => 'स्थिति';
 
   @override
   String get search => 'Search...';
 
   @override
-  String get message => 'Message';
+  String get message => 'संदेश';
 
   @override
-  String get images => 'Images';
+  String get images => 'चित्र';
 }

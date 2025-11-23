@@ -37,4 +37,18 @@ class EventsRepository {
         ? RepoResponse(error: response)
         : RepoResponse(data: EventDetailsModel.fromJson(response));
   }
+
+  Future<RepoResponse<Map<String, dynamic>>> shareEvent({
+    String? token,
+    required String eventId,
+  }) async {
+    final response = await _network.post(
+      path: URLs.shareEvent,
+      token: token,
+      data: {"eventId": eventId},
+    );
+    return response is APIException
+        ? RepoResponse(error: response)
+        : RepoResponse(data: response as Map<String, dynamic>);
+  }
 }

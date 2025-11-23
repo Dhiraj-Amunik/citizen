@@ -10,6 +10,7 @@ import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
+import 'package:inldsevak/core/secure/secure_storage.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
 import 'package:inldsevak/features/common_fields/model/address_model.dart';
 import 'package:inldsevak/features/common_fields/model/geocoding_model.dart';
@@ -17,6 +18,8 @@ import 'package:inldsevak/features/common_fields/services/search_repository.dart
 import 'package:inldsevak/features/nearest_member/model/my_location_request_model.dart';
 import 'package:inldsevak/features/nearest_member/model/nearest_members_model.dart';
 import 'package:inldsevak/features/nearest_member/services/nearest_member_repository.dart';
+import 'package:inldsevak/features/home/services/dashboard_repository.dart';
+import 'package:inldsevak/features/home/models/request/dashboard_request_model.dart';
 import 'package:quickalert/quickalert.dart';
 import 'dart:ui' as ui;
 
@@ -38,6 +41,22 @@ class NearestMemberViewModel extends BaseViewModel with CupertinoDialogMixin {
   Position? searchedPosition;
 
   AddressModel? currentAddress;
+  
+  // Get current location coordinates as string
+  String? get currentLocationCoordinates {
+    if (currentPosition != null) {
+      return "Latitude: ${currentPosition!.latitude.toStringAsFixed(6)}, Longitude: ${currentPosition!.longitude.toStringAsFixed(6)}";
+    }
+    return null;
+  }
+  
+  // Get current location coordinates in array format [lat, lng]
+  List<double>? get currentLocationCoordinatesArray {
+    if (currentPosition != null) {
+      return [currentPosition!.latitude, currentPosition!.longitude];
+    }
+    return null;
+  }
 
   List<PartyMember> membersList = [];
   Set<Marker> markers = {};
@@ -45,38 +64,178 @@ class NearestMemberViewModel extends BaseViewModel with CupertinoDialogMixin {
   final SingleSelectController<Predictions?> searchController =
       SingleSelectController(null);
 
+  // Distance filter - slider value (0-100 km)
+  double _radiusValue = 50.0; // Default to 50 km
+  double get radiusValue => _radiusValue;
+  
+  setRadius(double value) {
+    _radiusValue = value;
+    notifyListeners();
+  }
+
+  clearDistance() {
+    _radiusValue = 50.0; // Reset to default
+    notifyListeners();
+  }
+
+  // Clear searched position to go back to using live GPS location
+  clearSearchedLocation() {
+    searchedPosition = null;
+    notifyListeners();
+    getMembers(); // Refresh with live location
+  }
+
   Future<void> getMembers() async {
-    if (currentPosition == null) {
-      RouteManager.pop();
-      CommonSnackbar(
-        text: "Location Permission requried !",
-      ).showAnimatedDialog(type: QuickAlertType.error);
-      return;
-    }
     markers = {};
     isLoading = true;
     try {
+      // Get location coordinates (prioritize searched location over live GPS)
+      double? latitude;
+      double? longitude;
+      
+      // Priority 1: Use searched position if user explicitly searched for a location
+      if (searchedPosition != null) {
+        latitude = searchedPosition!.latitude;
+        longitude = searchedPosition!.longitude;
+        debugPrint("📍 Using searched position: $latitude, $longitude");
+      } else if (currentPosition != null) {
+        // Priority 2: Use live GPS location if available (and no search performed)
+        latitude = currentPosition!.latitude;
+        longitude = currentPosition!.longitude;
+        debugPrint("📍 Using live GPS location: $latitude, $longitude");
+        
+        // Update user-dashboard API with live coordinates (optional, for server sync)
+        try {
+          final dashboardRequestModel = DashboardRequestModel(
+            latitude: currentPosition!.latitude,
+            longitude: currentPosition!.longitude,
+          );
+          
+          debugPrint("📤 Updating user-dashboard with live coordinates: ${currentPosition!.latitude}, ${currentPosition!.longitude}");
+          
+          // Call user-dashboard API to update server (fire and forget, don't wait for response)
+          DashboardRepository().fetchUserDashboard(
+            token: token,
+            model: dashboardRequestModel,
+          ).then((dashboardResponse) {
+            if (dashboardResponse.data?.responseCode == 200) {
+              debugPrint("✅ User-dashboard updated successfully with live coordinates");
+            }
+          }).catchError((e) {
+            debugPrint("⚠️ Error updating user-dashboard (non-critical): $e");
+          });
+        } catch (e) {
+          debugPrint("Error calling user-dashboard API: $e");
+        }
+      } else {
+        // Priority 3: Try to get coordinates from dashboard API
+        try {
+          final token = await SessionController.instance.getToken();
+          
+          // Try GET dashboard API to get stored coordinates
+          final dashboardResponse = await DashboardRepository().fetchDashboard(token: token);
+          
+          if (dashboardResponse.data?.responseCode == 200) {
+            final userData = dashboardResponse.data?.data?.user ?? 
+                           dashboardResponse.data?.data?.userDetails;
+            final userLocation = userData?.location;
+            
+            if (userLocation?.coordinates != null && userLocation!.coordinates!.length >= 2) {
+              // Dashboard returns coordinates as [latitude, longitude]
+              latitude = userLocation.coordinates![0];
+              longitude = userLocation.coordinates![1];
+              debugPrint("📍 Using coordinates from dashboard GET API: $latitude, $longitude");
+            }
+          }
+        } catch (e) {
+          debugPrint("Error fetching dashboard coordinates: $e");
+        }
+        
+        // Priority 4: Request location permission if we still don't have coordinates
+        if (latitude == null || longitude == null) {
+          await checkPermission();
+          if (currentPosition != null) {
+            latitude = currentPosition!.latitude;
+            longitude = currentPosition!.longitude;
+            debugPrint("📍 Got location after permission check: $latitude, $longitude");
+          } else {
+            // Final fallback to default coordinates
+            RouteManager.pop();
+            CommonSnackbar(
+              text: "Location Permission required!",
+            ).showAnimatedDialog(type: QuickAlertType.error);
+            return;
+          }
+        }
+      }
+      
+      // Convert radius value to integer for API (round to nearest integer)
+      int? radiusInKm = _radiusValue.round();
+      
+      // Create request model with coordinates in format [latitude, longitude]
       final model = MyCurrentLocationRequestModel(
-        longitude:
-            searchedPosition?.longitude ??
-            currentPosition?.longitude ??
-            78.9629,
-        latitude:
-            searchedPosition?.latitude ?? currentPosition?.latitude ?? 20.5937,
-
+        latitude: latitude,
+        longitude: longitude,
         page: 1,
         pageSize: 10,
+        radius: radiusInKm,
       );
+      
+      debugPrint("📤 Sending request with coordinates: [$latitude, $longitude], radius: $radiusInKm");
+      
       final response = await NearestMemberRepository().getNearestMember(
         token,
         model: model,
       );
 
-      if (response.data?.responseCode == 200) {
-        final data = response.data?.data?.partyMember;
-        membersList = List<PartyMember>.from(data as List);
+      if (response.error != null) {
+        debugPrint("API Error: ${response.error}");
+        membersList = [];
         notifyListeners();
-        await _addUsersToMap();
+        return;
+      }
+
+      if (response.data?.responseCode == 200) {
+        debugPrint("API Response - responseCode: ${response.data?.responseCode}");
+        debugPrint("API Response - message: ${response.data?.message}");
+        debugPrint("API Response - data object: ${response.data?.data}");
+        debugPrint("API Response - data is null: ${response.data?.data == null}");
+        debugPrint("API Response - totalPartyMember: ${response.data?.data?.totalPartyMember}");
+        
+        final data = response.data?.data?.partyMember;
+        debugPrint("API Response - partyMember data: $data");
+        debugPrint("API Response - partyMember is null: ${data == null}");
+        debugPrint("API Response - partyMember is List: ${data is List}");
+        debugPrint("API Response - partyMember length: ${data?.length ?? 0}");
+        
+        if (data != null && data.isNotEmpty) {
+          membersList = data;
+          debugPrint("✓ Members list updated with ${membersList.length} members");
+          notifyListeners();
+          
+          // Add markers to map (wrapped in try-catch to prevent marker errors from affecting list display)
+          try {
+            await _addUsersToMap();
+          } catch (e, stackTrace) {
+            debugPrint("Error adding markers to map: $e");
+            debugPrint("Stack trace: $stackTrace");
+            // Don't clear membersList if marker creation fails
+          }
+        } else {
+          membersList = [];
+          debugPrint("✗ No party members in response or list is empty");
+          if (data == null) {
+            debugPrint("✗ partyMember is null");
+          } else if (data.isEmpty) {
+            debugPrint("✗ partyMember list is empty");
+          }
+          notifyListeners();
+        }
+      } else {
+        debugPrint("✗ Response code is not 200: ${response.data?.responseCode}");
+        debugPrint("Response message: ${response.data?.message}");
+        membersList = [];
+        notifyListeners();
       }
       shiftCameraPositions();
     } catch (err, stackTrace) {
@@ -84,6 +243,7 @@ class NearestMemberViewModel extends BaseViewModel with CupertinoDialogMixin {
       debugPrint("Stack Trace: $stackTrace");
     } finally {
       isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -95,6 +255,18 @@ class NearestMemberViewModel extends BaseViewModel with CupertinoDialogMixin {
   getCurrentLocation() async {
     currentPosition = await Geolocator.getCurrentPosition();
     Position? position = currentPosition;
+    
+    // Log current location coordinates
+    if (position != null) {
+      debugPrint("═══════════════════════════════════════");
+      debugPrint("📍 YOUR CURRENT LOCATION COORDINATES:");
+      debugPrint("Latitude: ${position.latitude.toStringAsFixed(6)}");
+      debugPrint("Longitude: ${position.longitude.toStringAsFixed(6)}");
+      debugPrint("Coordinates Array: [${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}]");
+      debugPrint("Accuracy: ${position.accuracy.toStringAsFixed(2)} meters");
+      debugPrint("═══════════════════════════════════════");
+    }
+    
     cameraPosition = CameraPosition(
       target: LatLng(
         position?.latitude ?? 20.5937,
@@ -114,6 +286,10 @@ class NearestMemberViewModel extends BaseViewModel with CupertinoDialogMixin {
     if (permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always) {
       currentPosition = await Geolocator.getCurrentPosition();
+      // Log coordinates when permission is granted
+      if (currentPosition != null) {
+        debugPrint("📍 Current Location: ${currentPosition!.latitude.toStringAsFixed(6)}, ${currentPosition!.longitude.toStringAsFixed(6)}");
+      }
     }
 
     if (permission == LocationPermission.denied) {
@@ -193,7 +369,7 @@ class NearestMemberViewModel extends BaseViewModel with CupertinoDialogMixin {
         placeID: placeID,
       );
       if (response.data?.status == "OK") {
-        getMembers();
+        // Set searchedPosition FIRST, then call getMembers() so it uses the searched location
         searchedPosition = Position(
           longitude: response.data?.result?.geometry?.location?.lng ?? 78.9629,
           latitude: response.data?.result?.geometry?.location?.lat ?? 20.5937,
@@ -206,6 +382,9 @@ class NearestMemberViewModel extends BaseViewModel with CupertinoDialogMixin {
           speed: 0,
           speedAccuracy: 0,
         );
+        debugPrint("📍 Location searched: ${searchedPosition!.latitude}, ${searchedPosition!.longitude}");
+        // Now call getMembers() which will use the searchedPosition
+        getMembers();
       }
     } catch (err) {
       debugPrint(err.toString());

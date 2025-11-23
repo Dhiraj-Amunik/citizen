@@ -4,6 +4,7 @@ import 'package:inldsevak/core/dio/repo_reponse.dart';
 import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/features/notify_representative/model/request/nr_pagination_model.dart';
 import 'package:inldsevak/features/notify_representative/model/request/request_notify_model.dart';
+import 'package:inldsevak/features/notify_representative/model/response/notify_filters_model.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_lists_model.dart';
 import 'package:inldsevak/features/surveys/model/success_model.dart';
 
@@ -50,5 +51,17 @@ class NotifyRepository {
     return response is APIException
         ? RepoResponse(error: response)
         : RepoResponse(data: SuccessModel.fromJson(response));
+  }
+
+  Future<RepoResponse<NotifyFiltersModel>> getNotifyFilters({
+    String? token,
+  }) async {
+    final response = await _network.get(
+      token: token,
+      path: URLs.getNotifyFilters,
+    );
+    return response is APIException
+        ? RepoResponse(error: response)
+        : RepoResponse(data: NotifyFiltersModel.fromJson(response));
   }
 }

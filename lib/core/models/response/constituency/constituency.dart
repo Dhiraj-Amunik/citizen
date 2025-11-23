@@ -24,4 +24,14 @@ class Constituency {
 
     return data;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! Constituency) return false;
+    return other.sId == sId;
+  }
+
+  @override
+  int get hashCode => (sId ?? '').hashCode;
 }

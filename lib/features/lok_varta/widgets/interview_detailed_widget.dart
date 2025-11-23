@@ -11,6 +11,7 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
 import 'package:inldsevak/core/widgets/responisve_image_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/lok_varta/model/lok_varta_model.dart'
     as model;
 
@@ -26,15 +27,20 @@ class InterviewDetailedWidget extends StatelessWidget {
     return Scaffold(
       appBar: commonAppBar(
         action: [
-          if (media.url != null)
-            CommonHelpers.buildIcons(
-              path: AppImages.shareIcon,
-              color: AppPalettes.primaryColor,
-              iconColor: AppPalettes.whiteColor,
-              padding: Dimens.paddingX3,
-              iconSize: Dimens.scaleX2B,
-              onTap: () => CommonHelpers.shareURL(media.url ?? ""),
+          CommonHelpers.buildIcons(
+            path: AppImages.shareIcon,
+            color: AppPalettes.liteGreenColor,
+            iconColor: AppPalettes.blackColor,
+            padding: Dimens.paddingX2,
+            iconSize: Dimens.scaleX2,
+            onTap: () => CommonHelpers.shareArticleDetails(
+              title: media.title,
+              summary: media.content,
+              date: media.createdAt?.toDdMmmYyyy(),
+              url: media.url,
+              eventId: media.sId,
             ),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -45,8 +51,8 @@ class InterviewDetailedWidget extends StatelessWidget {
             children: [
               SizedBox(
                 width: 0.8.screenWidth,
-                child: Text(
-                  media.title.isNull(localization.not_found),
+                child: TranslatedText(
+                  text: media.title.isNull(localization.not_found),
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),

@@ -42,6 +42,7 @@ class Data {
   String? createdAt;
   String? updatedAt;
   int? iV;
+  bool? isFollowUpDue;
 
   Data(
       {this.sId,
@@ -56,7 +57,8 @@ class Data {
       this.lastSyncedAt,
       this.createdAt,
       this.updatedAt,
-      this.iV});
+      this.iV,
+      this.isFollowUpDue});
 
   Data.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -81,6 +83,7 @@ class Data {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    isFollowUpDue = json['isFollowUpDue'];
   }
 
   Map<String, dynamic> toJson() {
@@ -107,6 +110,7 @@ class Data {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['isFollowUpDue'] = this.isFollowUpDue;
     return data;
   }
 }

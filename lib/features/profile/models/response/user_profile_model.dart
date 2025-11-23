@@ -61,6 +61,8 @@ class Data {
   Constituency? parliamentryConstituency;
   Constituency? assemblyConstituency;
   int? unReadNotificationsCount;
+  String? inviteCode;
+  String? invitedBy;
   Data({
     this.sId,
     this.name,
@@ -98,6 +100,8 @@ class Data {
     this.parliamentryConstituency,
     this.unReadNotificationsCount,
     this.membershipId,
+    this.inviteCode,
+    this.invitedBy,
   });
 
   Data.fromJson(Map<String, dynamic> json) {
@@ -147,6 +151,8 @@ class Data {
     whatsapp = json['whatsapp'];
     membershipId = json['memberShipId'];
     unReadNotificationsCount = json['unReadNotificationsCount'];
+    inviteCode = json['inviteCode'];
+    invitedBy = json['invitedBy'];
 
     parliamentryConstituency = json['parliamentryConstituency'] != null
         ? new Constituency.fromJson(json['parliamentryConstituency'])
@@ -205,6 +211,8 @@ class Data {
       data['assemblyConstituency'] = this.assemblyConstituency!.toJson();
     }
     data['unReadNotificationsCount'] = this.unReadNotificationsCount;
+    data['inviteCode'] = this.inviteCode;
+    data['invitedBy'] = this.invitedBy;
     return data;
   }
 }

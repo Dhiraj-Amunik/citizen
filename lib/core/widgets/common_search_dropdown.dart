@@ -121,10 +121,13 @@ class CommonSearchDropDown<T> extends StatelessWidget {
             children: [
               SvgPicture.asset(AppImages.locationIcon),
               SizeBox.sizeWX3,
-              Text(
-                hintText,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: AppPalettes.lightTextColor,
+              Expanded(
+                child: Text(
+                  hintText,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: AppPalettes.lightTextColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

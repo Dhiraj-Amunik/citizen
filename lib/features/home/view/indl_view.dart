@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
@@ -8,6 +9,7 @@ import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:inldsevak/features/home/widgets/upcoming_home_events_widget.dart';
 import 'package:inldsevak/features/home/widgets/my_latest_complaints_widgets.dart';
@@ -75,8 +77,8 @@ class IndlView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: Dimens.gapX1,
               children: [
-                Text(
-                  "Hi, ${profile.profile?.name ?? '...'}",
+                TranslatedText(
+                  text: "Hi, ${profile.profile?.name ?? '...'}",
                   style: textTheme.headlineMedium,
                 ),
                 Row(
@@ -88,9 +90,10 @@ class IndlView extends StatelessWidget {
                       color: AppPalettes.primaryColor,
                     ),
                     Flexible(
-                      child: Text(
-                        profile.profile?.assemblyConstituency?.name ??
+                      child: TranslatedText(
+                        text: profile.profile?.assemblyConstituency?.name ??
                             "Loading...",
+                       
                         style: textTheme.labelMedium,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -106,18 +109,39 @@ class IndlView extends StatelessWidget {
         child: Column(
           spacing: Dimens.widgetSpacing,
           children: [
-            Container(
-              margin: EdgeInsets.symmetric(
-                horizontal: Dimens.horizontalspacing,
-              ).copyWith(top: Dimens.paddingX2),
-              decoration: boxDecorationRoundedWithShadow(
-                Dimens.radiusX2,
-                blurRadius: 2,
-                spreadRadius: 2,
-              ),
-              child: Image.asset(
+            CarouselSlider(
+              items: [
                 "assets/banners/banner_1.png",
-                fit: BoxFit.cover,
+                "assets/banners/banner_1.png",
+                "assets/banners/banner_1.png",
+              ]
+                  .map(
+                    (asset) => Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: Dimens.horizontalspacing,
+                      ).copyWith(top: Dimens.paddingX2),
+                      decoration: boxDecorationRoundedWithShadow(
+                        Dimens.radiusX2,
+                        blurRadius: 2,
+                        spreadRadius: 2,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(Dimens.radiusX2),
+                        child: Image.asset(
+                          asset,
+                          fit: BoxFit.contain,
+                          width: double.infinity,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+              options: CarouselOptions(
+                autoPlay: true,
+                viewportFraction: 1,
+                enlargeCenterPage: false,
+                height: 150,
+                enableInfiniteScroll: true,
               ),
             ),
             QuickAccessWidget(showParty: roleProvider.isPartyMember),

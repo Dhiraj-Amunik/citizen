@@ -4,12 +4,14 @@ import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
+import 'package:inldsevak/core/extensions/time_formatter.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/appointments/model/appointment_model.dart';
 
 class AppointmentCard extends StatelessWidget {
@@ -21,12 +23,24 @@ class AppointmentCard extends StatelessWidget {
     final textTheme = context.textTheme;
     final localization = context.localizations;
     final scheduledDate = appointment.date?.toDdMmmYyyy() ?? '--';
-    final rescheduledDate = (appointment.rescheduledDate ?? '')
+    final timeSlot = appointment.timeSlot ?? '';
+    final timeSlot12Hour = timeSlot.isNotEmpty ? timeSlot.to12HourTimeFormat() : '';
+    final hasRescheduledDate = (appointment.rescheduledDate ?? '')
         .toString()
         .trim()
-        .isEmpty
-        ? null
-        : appointment.rescheduledDate?.toDdMmmYyyy();
+        .isNotEmpty;
+    // If rescheduled, show timeSlot only with rescheduled date, not with scheduled date
+    final scheduledDateTime = hasRescheduledDate
+        ? scheduledDate
+        : (timeSlot12Hour.isNotEmpty 
+            ? "$scheduledDate at $timeSlot12Hour"
+            : scheduledDate);
+    final rescheduledDateFormatted = hasRescheduledDate
+        ? appointment.rescheduledDate?.toDdMmmYyyy()
+        : null;
+    final rescheduledDateTime = rescheduledDateFormatted != null && timeSlot12Hour.isNotEmpty
+        ? "$rescheduledDateFormatted at $timeSlot12Hour"
+        : rescheduledDateFormatted;
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: Dimens.paddingX4,
@@ -54,8 +68,8 @@ class AppointmentCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: Text(
-                            appointment.purpose?.capitalize() ??
+                          child: TranslatedText(
+                            text: appointment.purpose?.capitalize() ??
                                 "Unknow subject",
                             style: textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w500,
@@ -81,7 +95,7 @@ class AppointmentCard extends StatelessWidget {
                       spacing: Dimens.gapX1B,
                       children: [
                         Text(
-                          "${localization.scheduled_date} : $scheduledDate",
+                          "${localization.scheduled_date} : $scheduledDateTime",
                           style: textTheme.labelMedium?.copyWith(
                             color: AppPalettes.lightTextColor,
                             fontWeight: FontWeight.w500,
@@ -89,9 +103,9 @@ class AppointmentCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (rescheduledDate != null)
+                        if (rescheduledDateFormatted != null)
                           Text(
-                            "${localization.rescheduled_date} : $rescheduledDate",
+                            "${localization.rescheduled_date} : $rescheduledDateTime",
                             style: textTheme.labelMedium?.copyWith(
                               color: AppPalettes.lightTextColor,
                               fontWeight: FontWeight.w500,
@@ -104,10 +118,6 @@ class AppointmentCard extends StatelessWidget {
                     ReadMoreWidget(
                       text: appointment.reason ?? "Unknown Reason",
                       maxLines: 2,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: AppPalettes.lightTextColor,
-                        fontWeight: FontWeight.w500,
-                      ),
                     ),
                   ],
                 ),

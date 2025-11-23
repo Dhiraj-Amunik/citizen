@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:inldsevak/core/dio/exception_handlers.dart';
 import 'package:inldsevak/core/utils/urls.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 
 class NetworkRequester {
   late Dio _dio;
@@ -11,14 +12,38 @@ class NetworkRequester {
 
   void prepareRequest() {
     BaseOptions dioOptions = BaseOptions(
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
+        connectTimeout: const Duration(seconds: 120), // Increased to 2 minutes
+        receiveTimeout: const Duration(seconds: 120), // Increased to 2 minutes
         baseUrl: URLs.baseURL,
         contentType: Headers.jsonContentType,
         responseType: ResponseType.json,
         headers: {'Accept': Headers.jsonContentType});
     _dio = Dio(dioOptions);
     _dio.interceptors.clear();
+    
+    // Add language interceptor to include Accept-Language header
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        try {
+          // Get current locale from GeneralStream
+          final locale = GeneralStream.instance.locale;
+          final languageCode = locale.languageCode;
+          
+          // Add Accept-Language header (standard HTTP header for language preference)
+          options.headers['Accept-Language'] = languageCode;
+          
+          // Also add as query parameter if API requires it (uncomment if needed)
+          // options.queryParameters ??= {};
+          // options.queryParameters!['lang'] = languageCode;
+        } catch (e) {
+          // Fallback to English if GeneralStream is not available
+          options.headers['Accept-Language'] = 'en';
+        }
+        
+        handler.next(options);
+      },
+    ));
+    
     _dio.interceptors.add(LogInterceptor(
       error: true,
       request: true,

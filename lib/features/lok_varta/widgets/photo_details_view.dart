@@ -12,6 +12,7 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
 import 'package:inldsevak/core/widgets/responisve_image_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/lok_varta/model/lok_varta_model.dart'
     as model;
 import 'package:inldsevak/features/lok_varta/view_model/lok_varta_view_model.dart';
@@ -31,20 +32,24 @@ class PhotoDetailsView extends StatelessWidget {
     return Scaffold(
       appBar: commonAppBar(
         action: [
-          Consumer<LokVartaViewModel>(
-            builder: (context, value, _) {
-              if (value.showShareIcon) {
-                return CommonHelpers.buildIcons(
-                  path: AppImages.shareIcon,
-                  color: AppPalettes.liteGreenColor,
-                  iconColor: AppPalettes.blackColor,
-                  padding: Dimens.paddingX3,
-                  iconSize: Dimens.scaleX2,
-                  onTap: () => CommonHelpers.shareURL(media.url ?? ""),
-                );
-              } else {
-                return SizedBox();
-              }
+          CommonHelpers.buildIcons(
+            path: AppImages.shareIcon,
+            color: AppPalettes.liteGreenColor,
+            iconColor: AppPalettes.blackColor,
+            padding: Dimens.paddingX3,
+            iconSize: Dimens.scaleX2,
+            onTap: () async {
+              // Get detailed media for sharing
+              final detailedMedia = await provider.getLokVartaDetails(media.sId ?? "");
+              final mediaToShare = detailedMedia ?? media;
+              CommonHelpers.shareLokVartaDetails(
+                title: mediaToShare.title,
+                content: mediaToShare.content,
+                date: mediaToShare.createdAt,
+                images: mediaToShare.images,
+                url: mediaToShare.url,
+                eventId: mediaToShare.sId,
+              );
             },
           ),
         ],
@@ -57,20 +62,18 @@ class PhotoDetailsView extends StatelessWidget {
         child: FutureBuilder(
           future: provider.getLokVartaDetails(media.sId ?? ""),
           builder: (context, snapshot) {
-            final media = snapshot.data;
+            final detailedMedia = snapshot.data;
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CustomAnimatedLoading());
             }
-            if (media == null) {
-              return Center(child: Text("Lok Varta not Found !"));
-            }
+            final mediaToDisplay = detailedMedia ?? media;
             return SingleChildScrollView(
               child: Column(
                 children: [
                   SizedBox(
                     width: 0.8.screenWidth,
-                    child: Text(
-                      media.title.isNull(localization.not_found),
+                    child: TranslatedText(
+                      text: mediaToDisplay.title.isNull(localization.not_found),
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -79,7 +82,7 @@ class PhotoDetailsView extends StatelessWidget {
                   ),
                   SizeBox.sizeHX,
                   Text(
-                    media.createdAt?.toDdMmYyyy() ??
+                    mediaToDisplay.createdAt?.toDdMmYyyy() ??
                         DateTime.now().toString().toDdMmYyyy(),
                     style: textTheme.titleMedium?.copyWith(
                       color: AppPalettes.lightTextColor,
@@ -88,9 +91,9 @@ class PhotoDetailsView extends StatelessWidget {
                   ),
                   ReadMoreWidget(
                     maxLines: 4,
-                    text: media.content.isNull(localization.not_found),
+                    text: mediaToDisplay.content.isNull(localization.not_found),
                   ),
-                  if (media.images?.isNotEmpty == true)
+                  if (mediaToDisplay.images?.isNotEmpty == true)
                     Row(
                       children: [
                         Text(
@@ -102,8 +105,8 @@ class PhotoDetailsView extends StatelessWidget {
                       ],
                     ),
                   SizeBox.sizeHX2,
-                  if (media.images?.isNotEmpty == true)
-                    ResponisveImageWidget(images: media.images ?? []),
+                  if (mediaToDisplay.images?.isNotEmpty == true)
+                    ResponisveImageWidget(images: mediaToDisplay.images ?? []),
                 ],
               ),
             );

@@ -18,6 +18,7 @@ class RequestRegisterModel {
   String? area;
   String? flatNo;
   String? tehsil;
+  String? invitedBy;
 
   RequestRegisterModel({
     this.name,
@@ -39,6 +40,7 @@ class RequestRegisterModel {
     this.area,
     this.flatNo,
     this.tehsil,
+    this.invitedBy,
   });
 
   Map<String, dynamic> toJson() {
@@ -62,6 +64,7 @@ class RequestRegisterModel {
       "area": area,
       "flatNumber": flatNo,
       "teshil": tehsil,
+      "invitedBy": invitedBy ?? "",
     };
   }
 }

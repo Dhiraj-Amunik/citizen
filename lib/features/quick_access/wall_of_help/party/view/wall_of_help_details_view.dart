@@ -11,6 +11,7 @@ import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
 import 'package:inldsevak/core/widgets/responisve_image_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
 
@@ -42,8 +43,8 @@ class WallOfHelpDetailsView extends StatelessWidget {
             children: [
               SizedBox(
                 width: 0.8.screenWidth,
-                child: Text(
-                  helpRequest.typeOfHelp?.name?.capitalize() ?? "",
+                child: TranslatedText(
+                  text: helpRequest.typeOfHelp?.name?.capitalize() ?? "",
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -68,57 +69,61 @@ class WallOfHelpDetailsView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      localization.urgency_level,
+                    TranslatedText(
+                      text: localization.urgency_level,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppPalettes.lightTextColor,
+                        color: AppPalettes.blackColor,
+                        fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
                     ),
-                    Text(
-                      helpRequest.urgency ?? "",
+                    TranslatedText(
+                      text: helpRequest.urgency ?? "",
                       style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizeBox.sizeHX1,
-                    Text(
-                      localization.preferred_way_to_receive_help,
-                      style: textTheme.bodySmall?.copyWith(
                         color: AppPalettes.lightTextColor,
                       ),
                     ),
-                    Text(
-                      helpRequest.preferredWayForHelp?.name ?? "",
-                      style: textTheme.bodyMedium?.copyWith(
+                    SizeBox.sizeHX1,
+                    TranslatedText(
+                      text: localization.preferred_way_to_receive_help,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppPalettes.blackColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    SizeBox.sizeHX1,
-                    Text(
-                      localization.name,
-                      style: textTheme.bodySmall?.copyWith(
+                    TranslatedText(
+                      text: helpRequest.preferredWayForHelp?.name ?? "",
+                      style: textTheme.bodyMedium?.copyWith(
                         color: AppPalettes.lightTextColor,
                       ),
                     ),
-                    Text(
-                      helpRequest.name ?? "",
-                      style: textTheme.bodyMedium?.copyWith(
+                    SizeBox.sizeHX1,
+                    TranslatedText(
+                      text: localization.name,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppPalettes.blackColor,
                         fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    TranslatedText(
+                      text: helpRequest.name ?? "",
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: AppPalettes.lightTextColor,
                       ),
                     ),
                     SizeBox.sizeHX1,
 
-                    Text(
-                      localization.address,
+                    TranslatedText(
+                      text: localization.address,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppPalettes.lightTextColor,
+                        color: AppPalettes.blackColor,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Text(
-                      helpRequest.address ?? "",
+                    TranslatedText(
+                      text: helpRequest.address ?? "",
                       style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        color: AppPalettes.lightTextColor,
                       ),
                     ),
                     SizeBox.sizeHX1,

@@ -15,6 +15,7 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/volunter/models/response/volunteer_analytics_response_model.dart';
 import 'package:inldsevak/features/volunter/view/volunteer_event_scanner_view.dart';
 import 'package:inldsevak/features/volunter/view_model/volunteer_analytics_view_model.dart';
@@ -29,9 +30,10 @@ class VolunteerAnalyticsView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => VolunteerAnalyticsViewModel(),
       builder: (context, _) {
+        final localization = context.localizations;
         return Scaffold(
           appBar: commonAppBar(
-            title: "Be a Volunteer",
+            title: localization.be_a_volunteer,
             action: [
               IconButton(
                 onPressed: () => _onScanQr(context),
@@ -58,8 +60,8 @@ class VolunteerAnalyticsView extends StatelessWidget {
                             minHeight: constraints.maxHeight,
                           ),
                           child: Center(
-                            child: Text(
-                              "Volunteer analytics data is not available yet.",
+                            child: TranslatedText(
+                              text: localization.volunteer_analytics_data_not_available,
                               style: context.textTheme.bodyMedium,
                               textAlign: TextAlign.center,
                             ).symmetricPadding(
@@ -111,25 +113,28 @@ class VolunteerAnalyticsView extends StatelessWidget {
                       ),
                       SizeBox.sizeHX6,
                       _buildMyAnalyticsSection(
+                        context: context,
                         textTheme: textTheme,
                         analytics: myAnalytics,
                       ),
                       SizeBox.sizeHX6,
                       _buildEventsSection(
-                        title: "Attended Events",
+                        context: context,
+                        title: localization.attended_events,
                         events: viewModel.attendedEvents,
                         textTheme: textTheme,
                         emptyMessage:
-                            "You haven't attended any events recently.",
+                            localization.no_attended_events_recently,
                         highlightColor: AppPalettes.liteGreenColor,
                         showCoinsEarned: true,
                       ),
                       SizeBox.sizeHX6,
                       _buildEventsSection(
-                        title: "Upcoming Events",
+                        context: context,
+                        title: localization.upcoming_events,
                         events: viewModel.upcomingEvents,
                         textTheme: textTheme,
-                        emptyMessage: "No upcoming events at the moment.",
+                        emptyMessage: localization.no_upcoming_events,
                         highlightColor: AppPalettes.liteBlueColor,
                         showRewardCoins: true,
                       ),
@@ -150,14 +155,15 @@ class VolunteerAnalyticsView extends StatelessWidget {
     required String lastMonth,
     required List<LeaderboardEntry> entries,
   }) {
+    final localization = context.localizations;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "Top Volunteers",
+            TranslatedText(
+              text: localization.top_volunteers,
               style: textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w500,
                 fontSize: 18.sp,
@@ -192,8 +198,8 @@ class VolunteerAnalyticsView extends StatelessWidget {
               Dimens.radiusX4,
               backgroundColor: AppPalettes.liteGreyColor,
             ),
-            child: Text(
-              "Not enough data to display the leaderboard yet.",
+            child: TranslatedText(
+              text: localization.not_enough_data_leaderboard,
               style: textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
@@ -203,45 +209,47 @@ class VolunteerAnalyticsView extends StatelessWidget {
   }
 
   Widget _buildMyAnalyticsSection({
+    required BuildContext context,
     required TextTheme textTheme,
     required MyVolunteerAnalytics analytics,
   }) {
+    final localization = context.localizations;
     final cards = [
       _AnalyticsCardData(
-        icon: AppImages.clipBoardIcon,
+        icon: AppImages.userIcon,
         iconColor: const Color(0xffFFEDC0),
         backgroundColor: const Color(0xffFFF8E6),
-        number: analytics.totalEvents?.toString() ?? "-",
-        label: "Total Events",
+        number: analytics.referedUsers?.toString() ?? "-",
+        label: localization.refered_users,
       ),
       _AnalyticsCardData(
         icon: AppImages.clipBoardChecked,
         iconColor: const Color(0xffC8E2D1),
         backgroundColor: const Color(0xffE9F8EE),
         number: analytics.attendedEvents?.toString() ?? "-",
-        label: "Attended",
+        label: localization.events_attended_volunteer,
       ),
       _AnalyticsCardData(
         icon: AppImages.shareIcon,
         iconColor: const Color(0xffBAD4DE),
         backgroundColor: const Color(0xffE8F6FB),
-        number: analytics.totalShares?.toString() ?? "-",
-        label: "Total Shares",
+        number: analytics.sharedEvents?.toString() ?? "-",
+        label: localization.content_shared_volunteer,
       ),
       _AnalyticsCardData(
         icon: AppImages.clockIcon,
         iconColor: const Color(0xffD8D8D8),
         backgroundColor: const Color(0xffEDEDED),
         title: analytics.activeSince ?? "-",
-        label: "Active Since",
+        label: localization.active_since,
       ),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "My Analytics",
+        TranslatedText(
+          text: localization.my_analytics,
           style: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
             fontSize: 18.sp,
@@ -262,7 +270,7 @@ class VolunteerAnalyticsView extends StatelessWidget {
             final card = cards[index];
             return _buildAnalyticsCard(cardData: card);
           },
-        ),
+        ),  
       ],
     );
   }
@@ -320,8 +328,8 @@ class VolunteerAnalyticsView extends StatelessWidget {
                   ),
                 ),
               SizedBox(height: Dimens.gapX),
-              Text(
-                cardData.label,
+              TranslatedText(
+                text: cardData.label,
                 style: TextStyle(
                   fontSize: 11.sp,
                   color: AppPalettes.blackColor,
@@ -335,6 +343,7 @@ class VolunteerAnalyticsView extends StatelessWidget {
   }
 
   Widget _buildEventsSection({
+    required BuildContext context,
     required String title,
     required List<VolunteerEvent> events,
     required TextTheme textTheme,
@@ -343,11 +352,12 @@ class VolunteerAnalyticsView extends StatelessWidget {
     bool showCoinsEarned = false,
     bool showRewardCoins = false,
   }) {
+    final localization = context.localizations;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
+        TranslatedText(
+          text: title,
           style: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
             fontSize: 18.sp,
@@ -362,8 +372,8 @@ class VolunteerAnalyticsView extends StatelessWidget {
               Dimens.radiusX3,
               backgroundColor: AppPalettes.liteGreyColor,
             ),
-            child: Text(
-              emptyMessage,
+            child: TranslatedText(
+              text: emptyMessage,
               style: textTheme.bodyMedium,
             ),
           )
@@ -372,8 +382,8 @@ class VolunteerAnalyticsView extends StatelessWidget {
             spacing: Dimens.gapX2,
             children: events.map((event) {
               final formattedDate =
-                  event.eventDate?.toDdMmmYyyy() ?? "Date not available";
-              final subtitle = event.location ?? "Location not available";
+                  event.eventDate?.toDdMmmYyyy() ?? localization.date_not_available;
+              final subtitle = event.location ?? localization.location_not_available;
               // ignore: unused_local_variable
               final chipText = showCoinsEarned
                   ? "${event.eventType ?? ''} • ${event.coinsEarned ?? 0} Coins"
@@ -392,20 +402,20 @@ class VolunteerAnalyticsView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: Dimens.gapX,
                   children: [
-                    Text(
-                      event.eventName ?? "Event name not available",
+                    TranslatedText(
+                      text: event.eventName ?? localization.event_name_not_available,
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Text(
-                      subtitle,
+                    TranslatedText(
+                      text: subtitle,
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Text(
-                      formattedDate,
+                    TranslatedText(
+                      text: formattedDate,
                       style: textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w400,
                       ),
@@ -441,9 +451,10 @@ class VolunteerAnalyticsView extends StatelessWidget {
   }
 
   Future<void> _onScanQr(BuildContext context) async {
+    final localization = context.localizations;
     if (!_isScannerSupported()) {
       CommonSnackbar(
-        text: "QR scanning is supported only on Android and iOS devices.",
+        text: localization.qr_scanning_supported_android_ios,
       ).showToast();
       return;
     }

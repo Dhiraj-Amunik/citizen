@@ -70,11 +70,17 @@ class NotifyRepresentative {
   List<SpecialInvite>? specialInvites;
   bool? isActive;
   bool? isDeleted;
+  String? status;
   List<ResponseItem>? responses;
   String? createdAt;
   String? updatedAt;
   int? iV;
   PartyMember? partyMember;
+  String? street;
+  String? pincode;
+  String? district;
+  String? mandal;
+  String? village;
 
   NotifyRepresentative(
       {this.location,
@@ -87,14 +93,33 @@ class NotifyRepresentative {
       this.specialInvites,
       this.isActive,
       this.isDeleted,
+      this.status,
       this.responses,
       this.createdAt,
       this.updatedAt,
       this.iV,
-      this.partyMember});
+      this.partyMember,
+      this.street,
+      this.pincode,
+      this.district,
+      this.mandal,
+      this.village});
 
   NotifyRepresentative.fromJson(Map<String, dynamic> json) {
-    location = json['location'];
+    // Handle location - it might be a string or an object {lat, lng}
+    if (json['location'] != null) {
+      if (json['location'] is String) {
+        location = json['location'];
+      } else if (json['location'] is Map) {
+        // If location is an object, we can't store it as string
+        // Set to null and let UI construct from address fields
+        location = null;
+      } else {
+        location = json['location'].toString();
+      }
+    } else {
+      location = null;
+    }
     sId = json['_id'];
     title = json['title'];
     eventType = json['eventType'];
@@ -113,6 +138,7 @@ class NotifyRepresentative {
     }
     isActive = json['isActive'];
     isDeleted = json['isDeleted'];
+    status = json['status'];
     if (json['responses'] != null) {
       responses = <ResponseItem>[];
       json['responses'].forEach((v) {
@@ -127,6 +153,11 @@ class NotifyRepresentative {
     partyMember = json['partyMember'] != null
         ? new PartyMember.fromJson(json['partyMember'])
         : null;
+    street = json['street'];
+    pincode = json['pincode'];
+    district = json['district'];
+    mandal = json['mandal'];
+    village = json['village'];
   }
 
   Map<String, dynamic> toJson() {
@@ -144,6 +175,7 @@ class NotifyRepresentative {
     }
     data['isActive'] = this.isActive;
     data['isDeleted'] = this.isDeleted;
+    data['status'] = this.status;
     if (responses != null) {
       data['responses'] =
           responses!.map((ResponseItem v) => v.toJson()).toList();
@@ -154,6 +186,11 @@ class NotifyRepresentative {
     if (this.partyMember != null) {
       data['partyMember'] = this.partyMember!.toJson();
     }
+    data['street'] = this.street;
+    data['pincode'] = this.pincode;
+    data['district'] = this.district;
+    data['mandal'] = this.mandal;
+    data['village'] = this.village;
     return data;
   }
 }

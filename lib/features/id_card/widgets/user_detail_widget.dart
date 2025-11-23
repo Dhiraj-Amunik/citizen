@@ -3,6 +3,7 @@ import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/profile/models/response/user_profile_model.dart';
 
 class UserDetailWidget extends StatelessWidget {
@@ -47,8 +48,9 @@ class UserDetailWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "${profile?.name}",
+                TranslatedText(
+                  text: "${profile?.name}",
+             
                   style: heading?.copyWith(fontWeight: FontWeight.w500),
                   overflow: TextOverflow.ellipsis,
                 ),

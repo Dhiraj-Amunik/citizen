@@ -167,15 +167,15 @@ class WallOfHelpViewModel extends BaseViewModel with UploadFilesMixin {
     try {
       final paginationModel = WOHPaginationModel(
         page: _currentPage,
-        search: searchController.text,
-        status: statusKey,
+        search: searchController.text.isEmpty ? null : searchController.text,
+        status: statusKey == "all" || statusKey == null ? null : statusKey,
         date: dateKey == "Recent"
             ? 7
             : dateKey == "One Month"
             ? 30
             : dateKey == "Six Months"
             ? 180
-            : 0,
+            : null,
       );
       final response = await WallOfHelpRepository().getUsersWallOFHelp(
         token: token,

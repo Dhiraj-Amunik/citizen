@@ -21,9 +21,26 @@ class NearestMemberRepository {
       token: token,
       data: model.toJson(),
     );
-    return response is APIException
-        ? RepoResponse(error: response)
-        : RepoResponse(data: NearestMembersModel.fromJson(response));
+    
+    if (response is APIException) {
+      return RepoResponse(error: response);
+    }
+    
+    // Debug: Print raw response
+    print("Raw API Response: $response");
+    print("Response type: ${response.runtimeType}");
+    
+    try {
+      final parsedModel = NearestMembersModel.fromJson(response);
+      print("Parsed model - responseCode: ${parsedModel.responseCode}");
+      print("Parsed model - data: ${parsedModel.data}");
+      print("Parsed model - partyMember count: ${parsedModel.data?.partyMember?.length ?? 0}");
+      return RepoResponse(data: parsedModel);
+    } catch (e, stackTrace) {
+      print("Error parsing NearestMembersModel: $e");
+      print("Stack trace: $stackTrace");
+      rethrow;
+    }
   }
 
   Future<RepoResponse<MemberMessagesModel>> getMessages({

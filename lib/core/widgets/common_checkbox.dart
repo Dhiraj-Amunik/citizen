@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
-import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class CommonCheckbox extends StatelessWidget {
   final VoidCallback? onTap;
@@ -54,7 +54,7 @@ class CommonCheckbox extends StatelessWidget {
               ),
             ),
             10.horizontalSpace,
-            Flexible(child: Text(title, style: context.textTheme.labelLarge)),
+            Flexible(child: TranslatedText(text: title, style: context.textTheme.labelLarge)),
           ],
         ),
       ),

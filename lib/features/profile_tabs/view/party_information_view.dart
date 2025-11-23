@@ -5,6 +5,7 @@ import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class PartyInformationView extends StatelessWidget {
   const PartyInformationView({super.key});
@@ -44,8 +45,9 @@ class PartyInformationView extends StatelessWidget {
                       child: Image.asset("assets/logo/login_image.png"),
                     ),
                     Flexible(
-                      child: Text(
-                        "Indian National Lok Dal (INLD)",
+                      child: TranslatedText(
+                        text: "Indian National Lok Dal (INLD)",
+                     
                         style: textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -78,23 +80,25 @@ class PartyInformationView extends StatelessWidget {
 }
 
 Widget getRow(TextTheme style, {required String text, String? desc}) {
-  return RichText(
-    text: TextSpan(
-      style: style.bodyMedium?.copyWith(
-        fontWeight: FontWeight.w500,
-        color: AppPalettes.blackColor,
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      TranslatedText(
+        text: "$text : ",
+        style: style.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w500,
+          color: AppPalettes.blackColor,
+        ),
       ),
-      children: [
-        TextSpan(text: text),
-        TextSpan(text: " : "),
-        TextSpan(
-          text: desc,
+      Expanded(
+        child: TranslatedText(
+          text: desc ?? "",
           style: style.bodySmall?.copyWith(
             fontWeight: FontWeight.w500,
             color: AppPalettes.blackColor,
           ),
         ),
-      ],
-    ),
+      ),
+    ],
   );
 }

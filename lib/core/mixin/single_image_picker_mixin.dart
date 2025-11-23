@@ -6,6 +6,7 @@ import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 mixin SingleImagePickerMixin {
   Future<File?> showSingleImageSheet({bool isImage = false}) {
@@ -26,7 +27,10 @@ mixin SingleImagePickerMixin {
                   Icons.photo_library,
                   color: AppPalettes.blackColor,
                 ),
-                title: Text('Choose from Gallery', style: AppStyles.bodyMedium),
+                title: TranslatedText(
+                  text: 'Choose from Gallery',
+                  style: AppStyles.bodyMedium,
+                ),
                 onTap: () async {
                   File? file = await pickGalleryImage();
                   RouteManager.pop(file);
@@ -34,7 +38,10 @@ mixin SingleImagePickerMixin {
               ),
               ListTile(
                 leading: Icon(Icons.camera_alt, color: AppPalettes.blackColor),
-                title: Text('Take Photo', style: AppStyles.bodyMedium),
+                title: TranslatedText(
+                  text: 'Take Photo',
+                  style: AppStyles.bodyMedium,
+                ),
                 onTap: () async {
                   File? file = await createCameraImage();
                   RouteManager.pop(file);
@@ -43,7 +50,10 @@ mixin SingleImagePickerMixin {
 
               ListTile(
                 leading: Icon(Icons.camera_alt, color: AppPalettes.blackColor),
-                title: Text('Choose from Files', style: AppStyles.bodyMedium),
+                title: TranslatedText(
+                  text: 'Choose from Files',
+                  style: AppStyles.bodyMedium,
+                ),
                 onTap: () async {
                   File? file = await pickSingleFile(isImage: isImage);
                   RouteManager.pop(file);

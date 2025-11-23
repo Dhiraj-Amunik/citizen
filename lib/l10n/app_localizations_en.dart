@@ -112,6 +112,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voter_id_validator => 'Please enter your voter id number';
 
   @override
+  String get invited_by => 'Invited By';
+
+  @override
+  String get invited_by_hint => 'Enter invitation code (Optional)';
+
+  @override
+  String get invite_code => 'Invite Code';
+
+  @override
+  String get invite_code_copied => 'Invite code copied to clipboard';
+
+  @override
   String get register => 'Register';
 
   @override
@@ -250,6 +262,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get event_details => 'Event Details';
+
+  @override
+  String get view_poster => 'View Poster';
+
+  @override
+  String get no_location_found => 'No Location found';
+
+  @override
+  String get event_not_found => 'Event not Found !';
 
   @override
   String get edit_details => 'Edit Details';
@@ -561,6 +582,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requested => 'Requested';
 
   @override
+  String get solved => 'Solved';
+
+  @override
   String get description => 'Description';
 
   @override
@@ -688,6 +712,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get become_a_volunteer => 'Become a Volunteer';
 
   @override
+  String get volunteer_analytics_data_not_available =>
+      'Volunteer analytics data is not available yet.';
+
+  @override
+  String get top_volunteers => 'Top Volunteers';
+
+  @override
+  String get not_enough_data_leaderboard =>
+      'Not enough data to display the leaderboard yet.';
+
+  @override
+  String get my_analytics => 'My Analytics';
+
+  @override
+  String get total_events => 'Total Events';
+
+  @override
+  String get attended => 'Attended';
+
+  @override
+  String get total_shares => 'Total Shares';
+
+  @override
+  String get active_since => 'Active Since';
+
+  @override
+  String get refered_users => 'People Joined';
+
+  @override
+  String get events_attended_volunteer => 'Events Attended';
+
+  @override
+  String get content_shared_volunteer => 'Content Shared';
+
+  @override
+  String get attended_events => 'Attended Events';
+
+  @override
+  String get no_attended_events_recently =>
+      'You haven\'t attended any events recently.';
+
+  @override
+  String get no_upcoming_events => 'No upcoming events at the moment.';
+
+  @override
+  String get date_not_available => 'Date not available';
+
+  @override
+  String get location_not_available => 'Location not available';
+
+  @override
+  String get event_name_not_available => 'Event name not available';
+
+  @override
+  String get qr_scanning_supported_android_ios =>
+      'QR scanning is supported only on Android and iOS devices.';
+
+  @override
   String get enter_age => 'Enter age';
 
   @override
@@ -812,6 +894,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get logout_confirmation =>
       'Are you sure you want to sign out from your account?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get close_request => 'Close Request';
 
   @override
   String get notify_representative => 'Notify Representative';

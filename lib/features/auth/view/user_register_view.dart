@@ -81,6 +81,8 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           focus: provider.nameFocus,
                           nextFocus: provider.emailFocus,
                           prefixIcon: AppImages.userIcon,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
                           controller: provider.nameController,
                           keyboardType: TextInputType.name,
@@ -109,6 +111,8 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           // nextFocus: provider.wathsappFocus,
                           controller: provider.emailController,
                           prefixIcon: AppImages.emailIcon,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
                           validator: (text) => text?.validateEmail(
                             argument: localization.email_validator,
@@ -198,6 +202,8 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           controller: provider.aadharController,
                           prefixIcon: AppImages.aadharIcon,
                           keyboardType: TextInputType.number,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
                           validator: (text) => text?.validateAadhar(
                             argument: localization.aadhar_validator,
@@ -220,6 +226,8 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           enableSpeechInput: true,
                           prefixIcon: AppImages.aadharIcon,
                           keyboardType: TextInputType.text,
+                        textCapitalization: TextCapitalization.sentences,
+                        enforceFirstLetterUppercase: true,
                           validator: (text) => text?.validateVoterID(
                             argument: localization.voter_id_validator,
                           ),
@@ -231,6 +239,15 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           onRemoveTap: () =>
                               provider.removeImage(isAadhar: false),
                           imageFile: provider.voterIdImage,
+                        ),
+                        FormTextFormField(
+                          isRequired: false,
+                          headingText: localization.invited_by,
+                          hintText: localization.invited_by_hint,
+                          controller: provider.invitedByController,
+                          prefixIcon: AppImages.userIcon,
+                          keyboardType: TextInputType.text,
+                          textCapitalization: TextCapitalization.sentences,
                         ),
                       ],
                     ),
@@ -251,12 +268,18 @@ class _UserRegisterViewState extends State<UserRegisterView>
                         isLoading: value.isLoading,
                         text: localization.register,
                         onTap: () async {
+                          // Debug: Check controller values
+                          final assemblyId = assemblyconstituencyController.value?.sId;
+                          final parliamentaryId = parliamentaryconstituencyController.value?.sId;
+                          
+                          debugPrint('Assembly Constituency ID: $assemblyId');
+                          debugPrint('Parliamentary Constituency ID: $parliamentaryId');
+                          debugPrint('Assembly Constituency Value: ${assemblyconstituencyController.value}');
+                          
                           await provider.registerUserDetails(
                             searchProvider: searchProvider,
-                            assemblyConstituenciesID:
-                                assemblyconstituencyController.value?.sId,
-                            parliamentaryConstituenciesID:
-                                parliamentaryconstituencyController.value?.sId,
+                            assemblyConstituenciesID: assemblyId,
+                            parliamentaryConstituenciesID: parliamentaryId,
                           );
                         },
                       ),

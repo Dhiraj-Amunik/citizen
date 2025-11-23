@@ -1,34 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/helpers/translation_helper.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
-import 'package:inldsevak/core/utils/app_styles.dart';
-import 'package:readmore/readmore.dart';
 import 'package:shimmer/shimmer.dart';
 
-class ReadMoreWidget extends StatefulWidget {
-  final String text;
-  final int maxLines;
+/// Widget that automatically translates text based on current locale
+class TranslatedText extends StatefulWidget {
+  final String? text;
   final TextStyle? style;
-  final String collapsedText;
-  final String expandedText;
-  const ReadMoreWidget({
+  final int? maxLines;
+  final TextOverflow? overflow;
+  final TextAlign? textAlign;
+
+  const TranslatedText({
     super.key,
     required this.text,
-    this.maxLines = 2,
     this.style,
-    String? collapsedText,
-    String? expandedText,
-  })  : collapsedText = collapsedText ?? 'Read more',
-        expandedText = expandedText ?? 'Show less';
+    this.maxLines,
+    this.overflow,
+    this.textAlign,
+  });
 
   @override
-  State<ReadMoreWidget> createState() => _ReadMoreWidgetState();
+  State<TranslatedText> createState() => _TranslatedTextState();
 }
 
-class _ReadMoreWidgetState extends State<ReadMoreWidget> {
+class _TranslatedTextState extends State<TranslatedText> {
   String? _translatedText;
-  String? _translatedCollapsed;
-  String? _translatedExpanded;
   bool _isTranslating = false;
 
   @override
@@ -38,16 +35,22 @@ class _ReadMoreWidgetState extends State<ReadMoreWidget> {
   }
 
   @override
-  void didUpdateWidget(ReadMoreWidget oldWidget) {
+  void didUpdateWidget(TranslatedText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text ||
-        oldWidget.collapsedText != widget.collapsedText ||
-        oldWidget.expandedText != widget.expandedText) {
+    if (oldWidget.text != widget.text) {
       _translateText();
     }
   }
 
   Future<void> _translateText() async {
+    if (widget.text == null || widget.text!.isEmpty) {
+      setState(() {
+        _translatedText = widget.text;
+        _isTranslating = false;
+      });
+      return;
+    }
+
     // Check if translation is needed
     final needsTranslation = TranslationHelper.needsTranslation(widget.text);
     
@@ -55,8 +58,6 @@ class _ReadMoreWidgetState extends State<ReadMoreWidget> {
       // No translation needed, show text immediately
       setState(() {
         _translatedText = widget.text;
-        _translatedCollapsed = widget.collapsedText;
-        _translatedExpanded = widget.expandedText;
         _isTranslating = false;
       });
       return;
@@ -66,21 +67,13 @@ class _ReadMoreWidgetState extends State<ReadMoreWidget> {
     setState(() {
       _isTranslating = true;
       _translatedText = null;
-      _translatedCollapsed = null;
-      _translatedExpanded = null;
     });
 
     try {
       final translated = await TranslationHelper.translateText(widget.text);
-      final translatedCollapsed =
-          await TranslationHelper.translateText(widget.collapsedText);
-      final translatedExpanded =
-          await TranslationHelper.translateText(widget.expandedText);
       if (mounted) {
         setState(() {
           _translatedText = translated;
-          _translatedCollapsed = translatedCollapsed;
-          _translatedExpanded = translatedExpanded;
           _isTranslating = false;
         });
       }
@@ -88,8 +81,6 @@ class _ReadMoreWidgetState extends State<ReadMoreWidget> {
       if (mounted) {
         setState(() {
           _translatedText = widget.text;
-          _translatedCollapsed = widget.collapsedText;
-          _translatedExpanded = widget.expandedText;
           _isTranslating = false;
         });
       }
@@ -98,11 +89,11 @@ class _ReadMoreWidgetState extends State<ReadMoreWidget> {
 
   /// Builds a skeleton loading widget that matches the text style
   Widget _buildSkeleton() {
-    final style = widget.style ?? AppStyles.bodySmall;
+    final style = widget.style ?? const TextStyle();
     final fontSize = style.fontSize ?? 14.0;
     final lineHeight = style.height ?? 1.2;
-    final maxLines = widget.maxLines;
-    final textWidth = widget.text.length;
+    final maxLines = widget.maxLines ?? 1;
+    final textWidth = widget.text?.length ?? 50;
     final estimatedLineWidth = (textWidth * fontSize * 0.6).clamp(50.0, 300.0);
     final lineHeightValue = fontSize * lineHeight;
     
@@ -110,7 +101,11 @@ class _ReadMoreWidgetState extends State<ReadMoreWidget> {
       baseColor: AppPalettes.liteGreyColor,
       highlightColor: AppPalettes.whiteColor,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: widget.textAlign == TextAlign.center
+            ? CrossAxisAlignment.center
+            : widget.textAlign == TextAlign.right
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: List.generate(
           maxLines,
@@ -138,28 +133,17 @@ class _ReadMoreWidgetState extends State<ReadMoreWidget> {
     if (_isTranslating) {
       return _buildSkeleton();
     }
-
-    final resolvedStyle = (widget.style ?? AppStyles.bodySmall).copyWith(
-      color: widget.style?.color ?? AppPalettes.lightTextColor,
-      fontWeight: widget.style?.fontWeight ?? FontWeight.w400,
-    );
-    final linkStyle = resolvedStyle.copyWith(
-      color: AppPalettes.primaryColor,
-      fontWeight: FontWeight.w600,
-      decoration: TextDecoration.underline,
-      decorationColor: AppPalettes.primaryColor,
-    );
-    final displayText = _translatedText ?? widget.text;
-    return ReadMoreText(
+    
+    // Show translated text or original if translation not needed
+    final displayText = _translatedText ?? widget.text ?? '';
+    
+    return Text(
       displayText,
-      trimLines: widget.maxLines,
-      trimMode: TrimMode.Line,
-      textAlign: TextAlign.left,
-      trimCollapsedText: ' ${_translatedCollapsed ?? widget.collapsedText}',
-      trimExpandedText: ' ${_translatedExpanded ?? widget.expandedText}',
-      moreStyle: linkStyle,
-      lessStyle: linkStyle,
-      style: resolvedStyle,
+      style: widget.style,
+      maxLines: widget.maxLines,
+      overflow: widget.overflow,
+      textAlign: widget.textAlign,
     );
   }
 }
+

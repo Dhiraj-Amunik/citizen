@@ -5,6 +5,7 @@ import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
@@ -33,30 +34,30 @@ class AboutView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Mission Statement:",
+            TranslatedText(
+              text: "Mission Statement:",
               style: textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             SizedBox(height: 4.height()),
-            Text(
-              "To empower citizens by ensuring transparency in governance, supporting local development, and promoting equality in society.",
+            TranslatedText(
+              text: "To empower citizens by ensuring transparency in governance, supporting local development, and promoting equality in society.",
               style: textTheme.bodySmall?.copyWith(
                 color: AppPalettes.lightTextColor,
               ),
             ),
 
             SizedBox(height: 16.height()),
-            Text(
-              "Vision / Objectives:",
+            TranslatedText(
+              text: "Vision / Objectives:",
               style: textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             SizedBox(height: 4.height()),
-            Text(
-              '''• Build a corruption-free system.
+            TranslatedText(
+              text: '''• Build a corruption-free system.
 • Encourage youth participation in politics.
 • Provide better healthcare and education facilities.
 • Strengthen local employment opportunities.
@@ -66,15 +67,15 @@ class AboutView extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16.height()),
-            Text(
-              "Short History",
+            TranslatedText(
+              text: "Short History",
               style: textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             SizedBox(height: 4.height()),
-            Text(
-              "The Indian National Lok Dal (INLD) is a political party based primarily in the Indian state of Haryana. It was initially founded as the Haryana Lok Dal (Rashtriya) by Devi Lal in 1996, who served as the Deputy Prime Minister of India.",
+            TranslatedText(
+              text: "The Indian National Lok Dal (INLD) is a political party based primarily in the Indian state of Haryana. It was initially founded as the Haryana Lok Dal (Rashtriya) by Devi Lal in 1996, who served as the Deputy Prime Minister of India.",
               style: textTheme.bodySmall?.copyWith(
                 color: AppPalettes.lightTextColor,
               ),

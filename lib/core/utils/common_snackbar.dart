@@ -35,7 +35,7 @@ class CommonSnackbar {
     
     _isToastShowing = true;
     Fluttertoast.showToast(
-      msg: text ?? 'Try again in some time',
+      msg: text ?? 'Please try again',
       toastLength: Toast.LENGTH_LONG,
       timeInSecForIosWeb: 3,
       gravity: ToastGravity.BOTTOM,

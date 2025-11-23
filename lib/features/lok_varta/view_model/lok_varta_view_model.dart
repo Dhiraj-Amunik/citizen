@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/string_extension.dart';
@@ -11,6 +10,7 @@ import 'package:inldsevak/features/lok_varta/model/request_lok_varta_model.dart'
 import 'package:inldsevak/features/lok_varta/services/lok_varta_repository.dart';
 import 'package:inldsevak/features/lok_varta/model/mla_details_model.dart'
     as mladetails;
+import 'package:inldsevak/features/events/services/events_repository.dart';
 
 class LokVartaViewModel extends BaseViewModel {
   @override
@@ -164,6 +164,23 @@ class LokVartaViewModel extends BaseViewModel {
       debugPrint("Stack Trace: $stackTrace");
     }
     return null;
+  }
+
+  Future<void> shareEvent(String eventId) async {
+    try {
+      final response = await EventsRepository().shareEvent(
+        token: token,
+        eventId: eventId,
+      );
+      if (response.error != null) {
+        debugPrint("Error sharing event: ${response.error?.message}");
+      } else if (response.data != null) {
+        debugPrint("Event shared successfully: ${response.data}");
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error in shareEvent: $err");
+      debugPrint("Stack Trace: $stackTrace");
+    }
   }
 }
 

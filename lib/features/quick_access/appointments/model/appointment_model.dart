@@ -56,7 +56,8 @@ class Data {
 
 class Appointments {
   String? sId;
-  String? mla;
+  dynamic mla; // Can be String (ID) or Mla object (populated)
+  Mla? mlaObject; // Parsed MLA object
   String? bookFor;
   String? name;
   String? profileImage;
@@ -83,6 +84,7 @@ class Appointments {
   Appointments({
     this.sId,
     this.mla,
+    this.mlaObject,
     this.bookFor,
     this.name,
     this.profileImage,
@@ -109,7 +111,16 @@ class Appointments {
 
   Appointments.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
-    mla = json['mla'];
+    // Handle MLA - can be String (ID) or Object (populated)
+    if (json['mla'] != null) {
+      if (json['mla'] is String) {
+        mla = json['mla'];
+        mlaObject = null;
+      } else if (json['mla'] is Map) {
+        mlaObject = Mla.fromJson(json['mla']);
+        mla = mlaObject?.sId;
+      }
+    }
     bookFor = json['bookFor'];
     name = json['name'];
     profileImage =
@@ -169,6 +180,82 @@ class Appointments {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    return data;
+  }
+}
+
+// MLA class for appointment model
+class Mla {
+  String? sId;
+  User? user;
+  String? constituency;
+  String? party;
+  String? address;
+  String? avatar;
+
+  Mla({
+    this.sId,
+    this.user,
+    this.constituency,
+    this.party,
+    this.address,
+    this.avatar,
+  });
+
+  Mla.fromJson(Map<String, dynamic> json) {
+    sId = json['_id'];
+    user = json['user'] != null ? User.fromJson(json['user']) : null;
+    constituency = json['constituency'];
+    party = json['party'];
+    address = json['address'];
+    avatar = json['avatar'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['_id'] = sId;
+    if (user != null) {
+      data['user'] = user!.toJson();
+    }
+    data['constituency'] = constituency;
+    data['party'] = party;
+    data['address'] = address;
+    data['avatar'] = avatar;
+    return data;
+  }
+}
+
+// User class for MLA
+class User {
+  String? sId;
+  String? name;
+  String? email;
+  String? phone;
+  String? avatar;
+
+  User({
+    this.sId,
+    this.name,
+    this.email,
+    this.phone,
+    this.avatar,
+  });
+
+  User.fromJson(Map<String, dynamic> json) {
+    sId = json['_id'];
+    name = json['name'];
+    email = json['email'];
+    phone = json['phone'];
+    avatar = json['avatar'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['_id'] = sId;
+    data['name'] = name;
+    data['email'] = email;
+    data['phone'] = phone;
+    data['avatar'] = avatar;
     return data;
   }
 }

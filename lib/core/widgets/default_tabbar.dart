@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class DefaultTabBar extends StatelessWidget {
   final TabController controller;
@@ -50,8 +51,8 @@ class DefaultTabBar extends StatelessWidget {
             padding: REdgeInsets.symmetric(
               horizontal: Dimens.paddingX2,
             ).copyWith(bottom: Dimens.paddingX2),
-            child: Text(
-              entry.value,
+            child: TranslatedText(
+              text: entry.value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textTheme.bodyMedium?.copyWith(

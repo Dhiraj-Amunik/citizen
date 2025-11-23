@@ -16,11 +16,13 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/commom_text_form_field.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
 import 'package:inldsevak/features/quick_access/wall_of_help/party/widgets/get_help_details.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/party/widgets/handle_chat_contribute_images_ui.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/chat_contribute_help_view_model.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
 
 class ChatContributeView extends StatelessWidget with HandleMultipleFilesSheet {
@@ -46,40 +48,47 @@ class ChatContributeView extends StatelessWidget with HandleMultipleFilesSheet {
           ),
           body: Column(
             children: [
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: Dimens.paddingX3),
-                padding: EdgeInsets.all(Dimens.paddingX3B),
-                decoration: boxDecorationRoundedWithShadow(
-                  Dimens.radiusX3,
-                  border: Border.all(color: AppPalettes.primaryColor),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: Dimens.gapX1B,
-                  children: [
-                    Text(
-                      "${localization.request_details} :",
-                      style: textTheme.headlineSmall,
+              StreamBuilder<Locale>(
+                stream: GeneralStream.instance.language,
+                builder: (context, localeSnapshot) {
+                  // Access localization inside StreamBuilder to get updated translations
+                  final updatedLocalization = context.localizations;
+                  return Container(
+                    margin: EdgeInsets.symmetric(horizontal: Dimens.paddingX3),
+                    padding: EdgeInsets.all(Dimens.paddingX3B),
+                    decoration: boxDecorationRoundedWithShadow(
+                      Dimens.radiusX3,
+                      border: Border.all(color: AppPalettes.primaryColor),
                     ),
-                    SizeBox.size,
-                    getHelpDetails(
-                      text: localization.name,
-                      desc: helpRequest.name,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: Dimens.gapX1B,
+                      children: [
+                        TranslatedText(
+                          text: "${updatedLocalization.request_details} :",
+                          style: textTheme.headlineSmall,
+                        ),
+                        SizeBox.size,
+                        getHelpDetails(
+                          text: updatedLocalization.name,
+                          desc: helpRequest.name,
+                        ),
+                        getHelpDetails(
+                          text: updatedLocalization.location,
+                          desc: helpRequest.address,
+                        ),
+                        getHelpDetails(
+                          text: updatedLocalization.category,
+                          desc: helpRequest.typeOfHelp?.name?.capitalize(),
+                        ),
+                        getHelpDetails(
+                          text: updatedLocalization.description,
+                          desc: helpRequest.description,
+                        ),
+                      ],
                     ),
-                    getHelpDetails(
-                      text: localization.location,
-                      desc: helpRequest.address,
-                    ),
-                    getHelpDetails(
-                      text: localization.category,
-                      desc: helpRequest.typeOfHelp?.name?.capitalize(),
-                    ),
-                    getHelpDetails(
-                      text: localization.description,
-                      desc: helpRequest.description,
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
               Expanded(
                 child: Container(
@@ -165,8 +174,8 @@ class ChatContributeView extends StatelessWidget with HandleMultipleFilesSheet {
                                                 ? Dimens.screenWidth
                                                 : Dimens.scale50,
                                           ),
-                                          child: Text(
-                                            message.message ?? "",
+                                          child: TranslatedText(
+                                            text: message.message ?? "",
                                             style: textTheme.bodyMedium
                                                 ?.copyWith(
                                                   color: AppPalettes
@@ -247,7 +256,7 @@ class ChatContributeView extends StatelessWidget with HandleMultipleFilesSheet {
                           vertical: Dimens.paddingX3B,
                         ),
                         radius: Dimens.radius100,
-                        hintText: "Message",
+                        hintText: localization.message,
                         controller: provider.messageController,
                         maxLines: 1,
                         suffixWidget: provider.multipleFiles.isNotEmpty
@@ -265,8 +274,8 @@ class ChatContributeView extends StatelessWidget with HandleMultipleFilesSheet {
                                       width: 1,
                                     ),
                                   ),
-                                  label: Text(
-                                    "${provider.multipleFiles.length} Images",
+                                  label: TranslatedText(
+                                    text: "${provider.multipleFiles.length} ${localization.images}",
                                   ),
                                   onDeleted: () => provider.removefiles(),
                                 ),
@@ -340,8 +349,8 @@ class ChatContributeView extends StatelessWidget with HandleMultipleFilesSheet {
           color: AppPalettes.primaryColor.withOpacityExt(0.1),
           borderRadius: BorderRadius.circular(Dimens.radiusX4),
         ),
-        child: Text(
-          dateText.toWhatsAppRelativeTime(),
+        child: TranslatedText(
+          text: dateText.toWhatsAppRelativeTime(),
           style: textTheme.bodySmall?.copyWith(
             color: AppPalettes.primaryColor,
             fontWeight: FontWeight.w500,

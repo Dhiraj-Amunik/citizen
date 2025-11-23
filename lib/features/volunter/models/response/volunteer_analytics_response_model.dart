@@ -126,6 +126,8 @@ class MyVolunteerAnalytics {
     this.totalShares,
     this.activeSince,
     this.lastMonth,
+    this.referedUsers,
+    this.sharedEvents,
   });
 
   factory MyVolunteerAnalytics.fromJson(Map<String, dynamic> json) {
@@ -135,6 +137,8 @@ class MyVolunteerAnalytics {
       totalShares: (json['totalShares'] as num?)?.toInt(),
       activeSince: json['activeSince'] as String?,
       lastMonth: json['lastMonth'] as String?,
+      referedUsers: (json['referedUsers'] as num?)?.toInt(),
+      sharedEvents: (json['sharedEvents'] as num?)?.toInt(),
     );
   }
 
@@ -143,6 +147,8 @@ class MyVolunteerAnalytics {
   final int? totalShares;
   final String? activeSince;
   final String? lastMonth;
+  final int? referedUsers;
+  final int? sharedEvents;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -151,6 +157,8 @@ class MyVolunteerAnalytics {
       'totalShares': totalShares,
       'activeSince': activeSince,
       'lastMonth': lastMonth,
+      'referedUsers': referedUsers,
+      'sharedEvents': sharedEvents,
     };
   }
 }

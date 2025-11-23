@@ -10,6 +10,7 @@ import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
 import 'package:inldsevak/features/quick_access/wall_of_help/party/widgets/wall_of_help_helpers.dart';
@@ -69,12 +70,12 @@ class MyHelpMessagesListView extends StatelessWidget {
                         child: CommonHelpers.getCacheNetworkImage(user?.avatar),
                       ),
                     ),
-                    title: Text(
-                      user?.name?.capitalize() ?? "+91 ${user?.phone}",
+                    title: TranslatedText(
+                      text: user?.name?.capitalize() ?? "+91 ${user?.phone}",
                       style: textTheme.bodyMedium,
                     ),
-                    subtitle: Text(
-                      "Open to see new message",
+                    subtitle: TranslatedText(
+                      text: "Open to see new message",
                       style: textTheme.bodySmall?.copyWith(
                         color: AppPalettes.lightTextColor,
                       ),

@@ -6,6 +6,7 @@ import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/url_launcher.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/lok_varta/model/mla_details_model.dart'
     as mladetails;
 
@@ -52,8 +53,8 @@ class MlaDetailsSilverAppbar extends StatelessWidget {
                   Flexible(
                     child: FittedBox(
                       fit: BoxFit.fitWidth,
-                      child: Text(
-                        mlaModel?.user?.name ?? "...",
+                      child: TranslatedText(
+                        text: mlaModel?.user?.name ?? "...",
                         style: textTheme.headlineMedium,
                         maxLines: 1,
                         textAlign: TextAlign.start,

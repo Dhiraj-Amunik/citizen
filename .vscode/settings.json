@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/_amunik/inldsevak/linux"
+    "cmake.sourceDirectory": "D:/_amunik/inldsevak/linux",
+    "cmake.ignoreCMakeListsMissing": true
 }

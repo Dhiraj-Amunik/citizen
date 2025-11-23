@@ -106,6 +106,9 @@ class ContributeView extends StatelessWidget {
                               prefixIcon: AppImages.rupeeIcon,
                               textStyle: textTheme.titleMedium,
                               isRequired: true,
+                              enableSpeechInput: true,
+                              textCapitalization: TextCapitalization.sentences,
+                              enforceFirstLetterUppercase: true,
                               hintText: "$pendingAmount",
                               controller: value.amountController,
                               validator: (value) => value!.validateMaxAmount(
@@ -122,25 +125,34 @@ class ContributeView extends StatelessWidget {
                             isLoading: value.isLoading,
                             isEnable: !value.isLoading,
                             onTap: () {
-                              if (helpRequest.uPI?.isEmpty == true) {
+                              // Check if UPI is null or empty
+                              if (helpRequest.uPI == null || 
+                                  helpRequest.uPI!.isEmpty) {
                                 CommonSnackbar(
-                                  text: "Unable to Process this Transcation",
+                                  text: "Unable to Process this Transaction. Payment method not available.",
                                 ).showAnimatedDialog(
                                   type: QuickAlertType.error,
                                 );
-                              } else {
-                                if (value.amountController.text.isEmpty) {
-                                  UrlLauncher().launchURL(
-                                    'upi://pay?pa=${helpRequest.uPI}',
-                                  );
-                                } else {
-                                  UrlLauncher().launchURL(
-                                    'upi://pay?pa=${helpRequest.uPI}&am=${value.amountController.text}&cu=INR',
-                                  );
-                                }
+                                return;
                               }
-
-                              //
+                              
+                              // Validate form before proceeding
+                              if (!value.formKey.currentState!.validate()) {
+                                value.autoValidateMode = AutovalidateMode.onUserInteraction;
+                                return;
+                              }
+                              
+                              // Launch UPI payment
+                              final upiId = helpRequest.uPI!;
+                              if (value.amountController.text.isEmpty) {
+                                UrlLauncher().launchURL(
+                                  'upi://pay?pa=$upiId',
+                                );
+                              } else {
+                                UrlLauncher().launchURL(
+                                  'upi://pay?pa=$upiId&am=${value.amountController.text}&cu=INR',
+                                );
+                              }
                             },
                             text: localization.confirm,
                           ),

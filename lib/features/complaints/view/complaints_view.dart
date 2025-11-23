@@ -19,6 +19,7 @@ import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_common_child.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:inldsevak/features/complaints/widgets/complaint_widget.dart';
@@ -54,7 +55,7 @@ class _ComplaintsViewState extends State<ComplaintsView>
                 children: [
                   Expanded(
                     child: FormTextFormField(
-                      hintText: 'Search...',
+                      hintText: localization.search,
                       suffixIcon: AppImages.searchIcon,
                       controller: context
                           .read<ComplaintsViewModel>()
@@ -89,7 +90,6 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                 children: [
                                   Expanded(
                                     child: CommonButton(
-                                      text: 'Clear',
                                       height: 45,
                                       color: AppPalettes.whiteColor,
                                       borderColor: AppPalettes.primaryColor,
@@ -102,14 +102,25 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                         provider.toDate.clear();
                                         provider.fromDateCompany = null;
                                         provider.toDateCompany = null;
-                                        provider.getComplaints();
+                                      provider.getComplaints();
                                       },
+                                      child: TranslatedText(
+                                        text: 'Clear',
+                                        style: context.textTheme.bodyLarge?.copyWith(
+                                          color: AppPalettes.primaryColor,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     child: CommonButton(
                                       height: 45,
-                                      text: 'Apply',
+                                      child: TranslatedText(
+                                        text: 'Apply',
+                                        style: context.textTheme.bodyLarge?.copyWith(
+                                          color: AppPalettes.whiteColor,
+                                        ),
+                                      ),
                                       onTap: () {
                                         RouteManager.pop();
                                         provider.getComplaints();
@@ -127,17 +138,18 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      'Filters',
+                                    TranslatedText(
+                                      text: 'Filters',
                                       style: context.textTheme.headlineSmall,
                                     ),
                                   ],
                                 ),
 
                                 Consumer<ComplaintsViewModel>(
-                                  builder: (_, _, _) {
+                                  builder: (context, _, _) {
+                                    final textTheme = context.textTheme;
                                     return FormCommonChild(
-                                      heading: "Status",
+                                      heading: localization.status,
                                       child: Wrap(
                                         spacing: Dimens.gapX2,
                                         runSpacing: Dimens.gapX2,
@@ -170,12 +182,19 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                                   horizontal: Dimens.paddingX4,
                                                   vertical: Dimens.paddingX1B,
                                                 ),
-                                                text: provider
-                                                    .complaintFilterList[index],
                                                 height: 33.height(),
                                                 onTap: () => provider.setStatus(
                                                   provider
                                                       .complaintFilterList[index],
+                                                ),
+                                                child: TranslatedText(
+                                                  text: provider
+                                                      .complaintFilterList[index],
+                                                  style: textTheme.labelMedium?.copyWith(
+                                                    color: isSelected
+                                                        ? AppPalettes.whiteColor
+                                                        : AppPalettes.lightTextColor,
+                                                  ),
                                                 ),
                                               );
                                             },
@@ -201,14 +220,14 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                   hintText: localization.select_department,
                                   items: provider.departmentLists,
                                   listItemBuilder: (p0, department, p2, p3) {
-                                    return Text(
-                                      "${department.name}",
+                                    return TranslatedText(
+                                      text: "${department.name}",
                                       style: context.textTheme.bodySmall,
                                     );
                                   },
                                   headerBuilder: (p0, department, p2) {
-                                    return Text(
-                                      "${department.name}",
+                                    return TranslatedText(
+                                      text: "${department.name}",
                                       style: context.textTheme.bodySmall,
                                     );
                                   },
@@ -302,12 +321,17 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                                 horizontal: Dimens.paddingX2,
                                                 vertical: Dimens.paddingX1B,
                                               ),
-                                              text: "Today",
                                               height: 33.height(),
                                               onTap: () => provider
                                                   .determineSelectedFilter(
                                                     "today",
                                                   ),
+                                              child: TranslatedText(
+                                                text: "Today",
+                                                style: context.textTheme.labelMedium?.copyWith(
+                                                  color: AppPalettes.lightTextColor,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                           Expanded(
@@ -322,12 +346,17 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                                 horizontal: Dimens.paddingX2,
                                                 vertical: Dimens.paddingX1B,
                                               ),
-                                              text: "This Week",
                                               height: 33.height(),
                                               onTap: () => provider
                                                   .determineSelectedFilter(
                                                     "week",
                                                   ),
+                                              child: TranslatedText(
+                                                text: "This Week",
+                                                style: context.textTheme.labelMedium?.copyWith(
+                                                  color: AppPalettes.lightTextColor,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                           Expanded(
@@ -342,12 +371,17 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                                 horizontal: Dimens.paddingX2,
                                                 vertical: Dimens.paddingX1B,
                                               ),
-                                              text: "This Month",
                                               height: 33.height(),
                                               onTap: () => provider
                                                   .determineSelectedFilter(
                                                     "month",
                                                   ),
+                                              child: TranslatedText(
+                                                text: "This Month",
+                                                style: context.textTheme.labelMedium?.copyWith(
+                                                  color: AppPalettes.lightTextColor,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ],

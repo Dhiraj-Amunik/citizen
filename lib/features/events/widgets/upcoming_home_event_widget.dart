@@ -9,6 +9,7 @@ import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/features/events/model/events_model.dart' as model;
 import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/events/model/request_details_event_model.dart';
 
 class UpcomingEventWidget extends StatelessWidget {
@@ -49,14 +50,14 @@ class UpcomingEventWidget extends StatelessWidget {
               spacing: Dimens.gapX,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  event.title ?? "Unknown title",
+                TranslatedText(
+                  text: event.title ?? "Unknown title",
                   style: textTheme.bodyMedium,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  event.location ?? "Unknown Location",
+                TranslatedText(
+                  text: event.location ?? "Unknown Location",
                   style: textTheme.labelMedium?.copyWith(
                     color: AppPalettes.lightTextColor,
                   ),
@@ -80,7 +81,7 @@ class UpcomingEventWidget extends StatelessWidget {
                                 size: Dimens.scaleX1B,
                               ),
                               Text(
-                                event.createdAt?.toDdMmmYyyy() ?? "0-00-0000",
+                                event.dateAndTime?.toDdMmmYyyy() ?? "0-00-0000",
                                 style: textTheme.labelMedium?.copyWith(
                                   color: AppPalettes.lightTextColor,
                                 ),
@@ -94,7 +95,7 @@ class UpcomingEventWidget extends StatelessWidget {
                             children: [
                               Icon(Icons.access_time, size: Dimens.scaleX1B),
                               Text(
-                                event.createdAt?.to12HourTime() ?? "00:00  ",
+                                event.dateAndTime?.to12HourTime() ?? "00:00  ",
                                 style: textTheme.labelMedium?.copyWith(
                                   color: AppPalettes.lightTextColor,
                                 ),

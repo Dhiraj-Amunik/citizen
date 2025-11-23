@@ -6,6 +6,7 @@ import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 PreferredSize commonAppBar({
   double appBarHeight = 60,
@@ -92,8 +93,8 @@ PreferredSize commonAppBar({
       leadingWidth: canPop ? 60.r : 0,
       iconTheme: iconColor != null ? IconThemeData(color: iconColor) : null,
       title: child?.horizontalPadding(Dimens.horizontalspacing) ??
-          Text(
-            title ?? "",
+          TranslatedText(
+            text: title ?? "",
             style: style ??
                 AppStyles.headlineMedium.copyWith(
                   color: AppPalettes.blackColor,

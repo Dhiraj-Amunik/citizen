@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/features/lok_varta/widgets/photo_view_widget.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:inldsevak/core/utils/app_palettes.dart';
 
 class ResponisveImageWidget extends StatelessWidget {
   final List<String> images;
@@ -31,10 +33,7 @@ class ResponisveImageWidget extends StatelessWidget {
                 builder: (_) => PhotoViewWidget(photos: images, index: index),
               ),
             ),
-            child: CommonHelpers.getCacheNetworkImage(
-              images[index],
-              fit: BoxFit.cover,
-            ),
+            child: _buildImageWithSkeleton(images[index]),
           ),
         );
       },
@@ -99,4 +98,39 @@ List<QuiltedGridTile> _getGridPattern(int itemCount) {
   }
 
   return result;
+}
+
+Widget _buildImageWithSkeleton(String imageUrl) {
+  return CachedNetworkImage(
+    imageUrl: imageUrl,
+    fit: BoxFit.cover,
+    progressIndicatorBuilder: (context, url, downloadProgress) {
+      return _buildSkeletonLoader();
+    },
+    errorWidget: (context, url, error) {
+      return Container(
+        color: AppPalettes.imageholderColor,
+        child: Icon(
+          Icons.image_not_supported,
+          color: AppPalettes.lightTextColor,
+        ),
+      );
+    },
+  );
+}
+
+Widget _buildSkeletonLoader() {
+  return Shimmer.fromColors(
+    baseColor: AppPalettes.liteGreyColor,
+    highlightColor: AppPalettes.whiteColor,
+    period: const Duration(milliseconds: 1500),
+    child: Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: AppPalettes.liteGreyColor,
+        borderRadius: BorderRadius.circular(Dimens.radiusX2),
+      ),
+    ),
+  );
 }

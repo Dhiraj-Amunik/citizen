@@ -7,12 +7,19 @@ class WOHPaginationModel {
   const WOHPaginationModel({this.status, this.date, this.page, this.search});
 
   Map<String, dynamic> toJson() {
-    return {
+    final Map<String, dynamic> data = {
       'page': page ?? 1,
       'pageSize': 5,
-      'search': search,
-      'status': status,
-      'date': date,
     };
+    if (search != null && search!.isNotEmpty) {
+      data['search'] = search;
+    }
+    if (status != null && status!.isNotEmpty) {
+      data['status'] = status;
+    }
+    if (date != null) {
+      data['date'] = date;
+    }
+    return data;
   }
 }

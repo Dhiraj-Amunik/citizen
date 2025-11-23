@@ -34,11 +34,29 @@ class Data {
     totalPartyMember = json['totalPartyMember'];
     page = json['page'];
     pageSize = json['pageSize'];
+    // radiusUsed is optional and not used in the model, but present in API response
     if (json['partyMember'] != null) {
       partyMember = <PartyMember>[];
-      json['partyMember'].forEach((v) {
-        partyMember!.add(new PartyMember.fromJson(v));
-      });
+      try {
+        final partyMemberList = json['partyMember'] as List;
+        for (var v in partyMemberList) {
+          try {
+            partyMember!.add(new PartyMember.fromJson(v as Map<String, dynamic>));
+          } catch (e) {
+            print("Error parsing individual party member: $e");
+            print("Member data: $v");
+            // Continue parsing other members even if one fails
+          }
+        }
+        print("Successfully parsed ${partyMember!.length} party members");
+      } catch (e) {
+        print("Error parsing partyMember list: $e");
+        print("partyMember value: ${json['partyMember']}");
+        partyMember = [];
+      }
+    } else {
+      print("partyMember is null in response");
+      partyMember = [];
     }
   }
 
@@ -119,7 +137,16 @@ class Location {
 
   Location.fromJson(Map<String, dynamic> json) {
     type = json['type'];
-    coordinates = json['coordinates'].cast<double>();
+    if (json['coordinates'] != null) {
+      try {
+        final coords = json['coordinates'] as List;
+        coordinates = coords.map((e) => (e as num).toDouble()).toList();
+      } catch (e) {
+        print("Error parsing coordinates: $e");
+        print("Coordinates value: ${json['coordinates']}");
+        coordinates = null;
+      }
+    }
   }
 
   Map<String, dynamic> toJson() {

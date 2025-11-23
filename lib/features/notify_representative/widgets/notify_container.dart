@@ -14,12 +14,132 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_lists_model.dart';
 
 class NotifyContainer extends StatelessWidget {
   final NotifyRepresentative model;
   final Function? onDelete;
   const NotifyContainer({super.key, this.onDelete, required this.model});
+
+  String _getLocationText(NotifyRepresentative model, dynamic localization) {
+    // First check if location string is available and valid
+    if (model.location != null && model.location!.isNotEmpty) {
+      final locationTrimmed = model.location!.trim();
+      // Handle case where location might be an object string representation
+      if (locationTrimmed.startsWith('{') || locationTrimmed.startsWith('[')) {
+        // If it's a JSON object/array string, construct from address fields
+        return _buildLocationFromAddress(model, localization);
+      }
+      // If location is a valid string, use it directly
+      return locationTrimmed;
+    }
+    
+    // If location is null/empty, try to construct from address fields
+    return _buildLocationFromAddress(model, localization);
+  }
+
+  String _buildLocationFromAddress(NotifyRepresentative model, dynamic localization) {
+    final List<String> addressParts = [];
+    final Set<String> seenParts = {}; // To prevent duplicates
+    
+    // Helper function to add non-duplicate parts
+    void addIfNotDuplicate(String? value) {
+      if (value != null && value.trim().isNotEmpty) {
+        final trimmed = value.trim();
+        // Check if we haven't seen this exact value before
+        if (!seenParts.contains(trimmed.toLowerCase())) {
+          addressParts.add(trimmed);
+          seenParts.add(trimmed.toLowerCase());
+        }
+      }
+    }
+    
+    addIfNotDuplicate(model.street);
+    addIfNotDuplicate(model.village);
+    addIfNotDuplicate(model.mandal);
+    addIfNotDuplicate(model.district);
+    addIfNotDuplicate(model.pincode);
+    
+    if (addressParts.isNotEmpty) {
+      return addressParts.join(', ');
+    }
+    
+    return localization.not_found;
+  }
+
+  String _getStatusText(NotifyRepresentative model) {
+    String? statusText;
+    
+    // First check if status is directly provided from API
+    if (model.status != null && model.status!.isNotEmpty) {
+      statusText = model.status!;
+    }
+    // Check responses array for status
+    else if (model.responses != null && model.responses!.isNotEmpty) {
+      final latestResponse = model.responses!.last;
+      if (latestResponse.status != null && latestResponse.status!.isNotEmpty) {
+        statusText = latestResponse.status!;
+      }
+    }
+    
+    // Map "attending" to "seen"
+    if (statusText != null && statusText.toLowerCase() == 'attending') {
+      return "Seen";
+    }
+    
+    // Return capitalized status if we have one
+    if (statusText != null && statusText.isNotEmpty) {
+      return statusText.capitalize();
+    }
+    
+    // Fallback to checking isDeleted
+    if (model.isDeleted == true) {
+      return "Closed";
+    }
+    
+    // Fallback to isActive logic
+    return model.isActive == true ? "Pending" : "Completed";
+  }
+
+  Color _getStatusColor(NotifyRepresentative model) {
+    // First check if status is directly provided from API
+    if (model.status != null && model.status!.isNotEmpty) {
+      final statusLower = model.status!.toLowerCase();
+      if (statusLower == 'closed' || statusLower == 'rejected' || statusLower == 'cancelled') {
+        return AppPalettes.redColor;
+      } else if (statusLower == 'approved' || statusLower == 'completed' || statusLower == 'accepted') {
+        return AppPalettes.greenColor;
+      } else if (statusLower == 'pending' || statusLower == 'in-progress') {
+        return AppPalettes.yellowColor;
+      }
+    }
+    
+    // Fallback to isDeleted
+    if (model.isDeleted == true) {
+      return AppPalettes.redColor;
+    }
+    
+    // Check responses array for status
+    if (model.responses != null && model.responses!.isNotEmpty) {
+      final latestResponse = model.responses!.last;
+      if (latestResponse.status != null && latestResponse.status!.isNotEmpty) {
+        final statusLower = latestResponse.status!.toLowerCase();
+        if (statusLower == 'closed' || statusLower == 'rejected' || statusLower == 'cancelled') {
+          return AppPalettes.redColor;
+        } else if (statusLower == 'approved' || statusLower == 'completed' || statusLower == 'accepted') {
+          return AppPalettes.greenColor;
+        } else if (statusLower == 'pending' || statusLower == 'in-progress') {
+          return AppPalettes.yellowColor;
+        }
+      }
+    }
+    
+    // Fallback to isActive logic
+    return model.isActive == true
+        ? AppPalettes.yellowColor
+        : AppPalettes.greenColor;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,17 +170,9 @@ class NotifyContainer extends StatelessWidget {
                   statusColor: AppPalettes.liteBlueColor,
                 ),
                 CommonHelpers.buildStatus(
-                  model.isDeleted == true
-                      ? "Closed"
-                      : model.isActive == true
-                          ? "Pending"
-                          : "Completed",
+                  _getStatusText(model),
                   textColor: AppPalettes.blackColor,
-                  statusColor: model.isDeleted == true
-                      ? AppPalettes.redColor
-                      : model.isActive == true
-                          ? AppPalettes.yellowColor
-                          : AppPalettes.greenColor,
+                  statusColor: _getStatusColor(model),
                 ),
               ],
             ),
@@ -78,8 +190,8 @@ class NotifyContainer extends StatelessWidget {
               //     fontWeight: FontWeight.w600,
               //   ),
               // ),
-              Text(
-                model.title?.capitalize() ?? "Unknown Title",
+              TranslatedText(
+                text: model.title?.capitalize() ?? "Unknown Title",
                 style: textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -93,10 +205,10 @@ class NotifyContainer extends StatelessWidget {
                     color: AppPalettes.blackColor,
                   ),
                   Expanded(
-                    child: Text(
-                      model.location ?? localization.not_found,
+                    child: TranslatedText(
+                      text: _getLocationText(model, localization),
                       style: textTheme.bodySmall,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -213,3 +325,4 @@ class _DocumentPreviewGrid extends StatelessWidget {
     return "${URLs.baseURL}/$trimmed";
   }
 }
+

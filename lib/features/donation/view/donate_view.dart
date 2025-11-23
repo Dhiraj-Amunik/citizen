@@ -17,6 +17,7 @@ import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_common_child.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/donation/view_model/donation_view_model.dart';
 import 'package:inldsevak/features/donation/widget/donation_dialog.dart';
 import 'package:provider/provider.dart';
@@ -57,15 +58,15 @@ class DonateView extends StatelessWidget {
                           spacing: Dimens.gapX3,
                           children: [
                             CommonTextFormField(
-                              hintText: localization.enter_amount,
+                              hintText: 'Enter Amount in (₹)',
                               controller: provider.amount,
                               validator: (value) => value!.validateAmount(
                                 argument: "Please enter minimum of 10rs",
                               ),
                               keyboardType: TextInputType.number,
                             ),
-                            Text(
-                              'Your support, in any form, will help us create wonderful memories at this party.',
+                            TranslatedText(
+                              text: 'Your support, in any form, will help us create wonderful memories at this party.',
                               style: context.textTheme.labelMedium?.copyWith(
                                 color: AppPalettes.lightTextColor,
                               ),
@@ -79,6 +80,52 @@ class DonateView extends StatelessWidget {
                 );
               },
             ),
+
+          Container(
+            width: double.infinity,
+            decoration: boxDecorationRoundedWithShadow(
+              Dimens.radiusX4,
+           
+              border: Border.all(color: AppPalettes.primaryColor),
+            ),
+            child: Column(
+              spacing: Dimens.gapX,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    TranslatedText(text:  'UPI ID: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
+                    TranslatedText(text: '9988090768m@pnb',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    TranslatedText(text: 'Name: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
+                    TranslatedText(text: 'Indian National Lokdal',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    TranslatedText(text: 'Bank Name: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
+                    TranslatedText(text: 'Punjab National Bank',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    TranslatedText(text: 'Account No: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
+                    TranslatedText(text: '1504002100125555',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    TranslatedText(text: 'IFS Code: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
+                    TranslatedText(text: 'PUNB0148800',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
+                  ],
+                ),
+
+              ],
+            ).symmetricPadding(horizontal: Dimens.horizontalspacing,vertical: Dimens.verticalspacing),
+          ),
             Text(
               localization.select_payment_options,
               style: textTheme.headlineSmall,

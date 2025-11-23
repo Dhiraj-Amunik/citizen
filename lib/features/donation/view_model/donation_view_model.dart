@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
-import 'package:inldsevak/core/utils/url_launcher.dart';
 import 'package:inldsevak/features/donation/models/response/donation_history_model.dart';
 import 'package:inldsevak/features/donation/services/donation_repository.dart';
 import 'package:inldsevak/features/donation/models/request/donation_request_model.dart';
@@ -45,28 +44,29 @@ class DonationViewModel extends BaseViewModel {
 
   Future<bool> manualDonation() async {
     try {
-      if (amount.text.isNotEmpty) {
-        if (donationFormKey.currentState!.validate()) {
-          autoValidateMode = AutovalidateMode.disabled;
-        } else {
-          autoValidateMode = AutovalidateMode.onUserInteraction;
-          notifyListeners();
-          return false;
-        }
+      // First validate the form - this will show validation errors if amount is empty or invalid
+      if (!donationFormKey.currentState!.validate()) {
+        autoValidateMode = AutovalidateMode.onUserInteraction;
+        notifyListeners();
+        return false;
+      }
+      
+      // If validation passes, disable auto-validate mode
+      autoValidateMode = AutovalidateMode.disabled;
+      
+      // Check if amount is empty (should not happen if validation passed, but double-check)
+      if (amount.text.trim().isEmpty) {
+        autoValidateMode = AutovalidateMode.onUserInteraction;
+        notifyListeners();
+        return false;
       }
 
+      // Check if payment option is selected
       if (!(isUpiSelected || isNetSelected)) {
         CommonSnackbar(
           text: "Please select one payment option",
         ).showAnimatedDialog(type: QuickAlertType.warning);
         return false;
-      } else {
-        if (isUpiSelected && amount.text.isEmpty) {
-          UrlLauncher().launchURL(
-            'upi://pay?pa=9988090768m@pnb&pn=INDIAN NATIONAL LOKDAL',
-          );
-          return false;
-        }
       }
     } catch (err) {
       return false;

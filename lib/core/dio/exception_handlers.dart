@@ -27,16 +27,24 @@ class ExceptionHandler {
           CommonSnackbar(text: 'Please check your network').showSnackbar();
           return APIException(message: 'Please check your network');
         case DioExceptionType.connectionTimeout:
-          CommonSnackbar(text: 'Please try again later').showSnackbar();
-          log("connectionTimeout");
+          CommonSnackbar(
+            text: 'Connection timeout. Please check your internet connection and try again.',
+          ).showSnackbar();
+          log("connectionTimeout: ${error.message}");
 
-          return APIException(message: 'connectionTimeout');
+          return APIException(message: 'Connection timeout. Please try again.');
         case DioExceptionType.receiveTimeout:
           CommonSnackbar(
-            text: 'Server is not responding, please try again later.',
+            text: 'Server is taking too long to respond. Please try again in a moment.',
           ).showSnackbar();
-          log("connectionTimeout");
-          return APIException(message: 'connectionTimeout');
+          log("receiveTimeout: ${error.message}");
+          return APIException(message: 'Server timeout. Please try again.');
+        case DioExceptionType.sendTimeout:
+          CommonSnackbar(
+            text: 'Request is taking too long to send. Please check your connection and try again.',
+          ).showSnackbar();
+          log("sendTimeout: ${error.message}");
+          return APIException(message: 'Send timeout. Please try again.');
 
         case DioExceptionType.cancel:
           CommonSnackbar(text: "Request Cancelled: The request was aborted.");
@@ -54,13 +62,17 @@ class ExceptionHandler {
           );
 
         default:
-          CommonSnackbar(text: 'Something went wrong').showSnackbar();
-          return APIException(message: 'something went wrong');
+          CommonSnackbar(
+            text: 'Network error occurred. Please try again.',
+          ).showSnackbar();
+          return APIException(message: 'Network error. Please try again.');
       }
     } else {
-      CommonSnackbar(text: 'Something went wrong2').showSnackbar();
+      CommonSnackbar(
+        text: 'An unexpected error occurred. Please try again.',
+      ).showSnackbar();
 
-      return APIException(message: 'Something went wrong');
+      return APIException(message: 'Unexpected error. Please try again.');
     }
   }
 }
@@ -79,9 +91,10 @@ class HandleError {
         return "Bad Request: The request was invalid.";
       case 401:
         CommonSnackbar(
-          text: "You have been Logged Out!\nPlease Login again.",
+          text:
+              "Party Membership successfully approved.\nRe-login to access all membership features.",
         ).showAnimatedDialog(
-          type: QuickAlertType.warning,
+          type: QuickAlertType.success,
           onTap: () {
             SessionController.instance.clearSession();
           },

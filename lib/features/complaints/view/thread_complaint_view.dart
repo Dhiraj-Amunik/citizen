@@ -17,6 +17,10 @@ import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/features/complaints/view_model/thread_view_model.dart';
 import 'package:inldsevak/features/complaints/widgets/complaint_widget.dart';
 import 'package:inldsevak/features/complaints/widgets/handle_threads_images.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
+import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/core/widgets/form_common_child.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:provider/provider.dart';
 import 'package:inldsevak/features/complaints/model/response/complaints_model.dart';
 
@@ -35,6 +39,78 @@ class _ThreadComplaintViewState extends State<ThreadComplaintView>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkFollowUpDue();
+    });
+  }
+
+  void _checkFollowUpDue() {
+    if (widget.data.isFollowUpDue == true) {
+      _showFollowUpDialog();
+    }
+  }
+
+  void _showFollowUpDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Follow-up Required',
+          style: context.textTheme.headlineSmall,
+        ),
+        content: Text(
+          'Is this issue resolved?',
+          style: context.textTheme.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showReplyForm();
+            },
+            child: Text(
+              'No, Reply',
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: AppPalettes.primaryColor,
+              ),
+            ),
+          ),
+          CommonButton(
+            text: 'Yes, Resolved',
+            onTap: () {
+              Navigator.of(context).pop();
+              _markAsResolved();
+            },
+            fullWidth: false,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _markAsResolved() {
+    final provider = context.read<ThreadViewModel>();
+    provider.nextThreadController.text = 'Issue resolved';
+    provider.replyThread(
+      id: widget.data.sId ?? '',
+      status: 'resolved',
+    );
+  }
+
+  void _showReplyForm() {
+    final provider = context.read<ThreadViewModel>();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => ChangeNotifierProvider.value(
+        value: provider,
+        child: _FollowUpReplyForm(
+          complaintId: widget.data.sId ?? '',
+          currentStatus: widget.data.status ?? 'pending',
+        ),
+      ),
+    );
   }
 
   @override
@@ -47,9 +123,10 @@ class _ThreadComplaintViewState extends State<ThreadComplaintView>
       bottom: true,
       child: Scaffold(
         appBar: commonAppBar(
-          child: Text(
-            widget.data.messages?.first.subject?.capitalize() ?? '',
+          child: TranslatedText(
+            text: widget.data.messages?.first.subject?.capitalize() ?? '',
             style: textTheme.headlineMedium,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ).horizontalPadding(Dimens.horizontalspacing),
           scrollElevation: 0,
@@ -149,8 +226,8 @@ class _ThreadComplaintViewState extends State<ThreadComplaintView>
                                           constraints: BoxConstraints(
                                             minWidth: 50.width(),
                                           ),
-                                          child: Text(
-                                            threadData.from ==
+                                          child: TranslatedText(
+                                            text: threadData.from ==
                                                     "ajay.amunik@gmail.com"
                                                 ? threadData.snippet ?? ""
                                                 : threadData.snippet
@@ -338,6 +415,196 @@ class _ThreadComplaintViewState extends State<ThreadComplaintView>
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _FollowUpReplyForm extends StatefulWidget {
+  final String complaintId;
+  final String currentStatus;
+
+  const _FollowUpReplyForm({
+    required this.complaintId,
+    required this.currentStatus,
+  });
+
+  @override
+  State<_FollowUpReplyForm> createState() => _FollowUpReplyFormState();
+}
+
+class _FollowUpReplyFormState extends State<_FollowUpReplyForm>
+    with HandleMultipleFilesSheet {
+  final messageController = TextEditingController();
+  String selectedStatus = 'pending';
+  final List<String> statusOptions = [
+    'pending',
+    'in-progress',
+    'resolved',
+    'closed',
+    'escalated',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    selectedStatus = widget.currentStatus.toLowerCase();
+  }
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = context.textTheme;
+    final localization = context.localizations;
+    
+    return DraggableSheetWidget(
+      size: 0.9,
+      child: Padding(
+        padding: EdgeInsets.all(Dimens.paddingX3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Reply to Complaint',
+              style: textTheme.headlineSmall?.copyWith(
+                color: AppPalettes.primaryColor,
+              ),
+            ).verticalPadding(Dimens.paddingX2),
+            
+            // Status Dropdown
+            FormCommonChild(
+              heading: 'Status',
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Dimens.paddingX3,
+                  vertical: Dimens.paddingX2,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(Dimens.radiusX4),
+                  border: Border.all(color: AppPalettes.primaryColor),
+                ),
+                child: DropdownButton<String>(
+                  value: selectedStatus,
+                  isExpanded: true,
+                  underline: SizedBox(),
+                  items: statusOptions.map((status) {
+                    return DropdownMenuItem<String>(
+                      value: status,
+                      child: Text(
+                        status.split('-').map((word) => 
+                          word[0].toUpperCase() + word.substring(1)
+                        ).join(' '),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedStatus = value;
+                      });
+                    }
+                  },
+                ),
+              ),
+            ).verticalPadding(Dimens.paddingX2),
+            
+            // Message Field
+            FormCommonChild(
+              heading: localization.message,
+              child: CommonTextFormField(
+                controller: messageController,
+                hintText: 'Enter your message',
+                maxLines: 5,
+                contentPadding: EdgeInsets.all(Dimens.paddingX3),
+              ),
+            ).verticalPadding(Dimens.paddingX2),
+            
+            // Attachments
+            FormCommonChild(
+              heading: 'Attachments',
+              child: Consumer<ThreadViewModel>(
+                builder: (context, provider, _) {
+                  return Column(
+                    children: [
+                      if (provider.multipleFiles.isNotEmpty) ...[
+                        Wrap(
+                          spacing: Dimens.gapX2,
+                          runSpacing: Dimens.gapX2,
+                          children: provider.multipleFiles.map((file) {
+                            return Chip(
+                              label: Text(
+                                file.path.split('/').last,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList(),
+                        ).verticalPadding(Dimens.paddingX2),
+                        CommonButton(
+                          text: 'Clear All Attachments',
+                          onTap: () {
+                            provider.removefiles();
+                          },
+                          fullWidth: true,
+                          color: AppPalettes.redColor,
+                        ).verticalPadding(Dimens.paddingX1),
+                      ],
+                      CommonButton(
+                        text: 'Add Attachments',
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (context) => DraggableSheetWidget(
+                              size: 0.5,
+                              child: selectMultipleFiles(
+                                onTap: provider.addFiles,
+                              ),
+                            ),
+                          );
+                        },
+                        fullWidth: true,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ).verticalPadding(Dimens.paddingX2),
+            
+            // Submit Button
+            Consumer<ThreadViewModel>(
+              builder: (context, provider, _) {
+                return CommonButton(
+                  text: 'Send Reply',
+                  isLoading: provider.isLoading,
+                  onTap: () async {
+                    if (messageController.text.trim().isEmpty) {
+                      CommonSnackbar(
+                        text: "Message can't be empty",
+                      ).showToast();
+                      return;
+                    }
+                    
+                    provider.nextThreadController.text = messageController.text;
+                    await provider.replyThread(
+                      id: widget.complaintId,
+                      status: selectedStatus,
+                    );
+                    
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ).verticalPadding(Dimens.paddingX3);
+              },
+            ),
+          ],
         ),
       ),
     );

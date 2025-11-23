@@ -16,6 +16,7 @@ import 'package:inldsevak/core/widgets/custom_container_widget.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_common_child.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/party/widgets/party_help_card.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/party/widgets/wall_of_help_helpers.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_view_model.dart';
@@ -23,6 +24,22 @@ import 'package:provider/provider.dart';
 
 class WallOfHelpPartyView extends StatelessWidget {
   const WallOfHelpPartyView({super.key});
+
+  String _getFilterStatusText(String status) {
+    // For filter buttons, show the actual status name, not translated
+    switch (status.toLowerCase()) {
+      case 'all':
+        return 'All';
+      case 'approved':
+        return 'Approved';
+      case 'partially-funded':
+        return 'Partially-Funded';
+      case 'fully-funded':
+        return 'Fully-Funded';
+      default:
+        return status.capitalize();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +88,10 @@ class WallOfHelpPartyView extends StatelessWidget {
                       "Beyond politics, we build trust and support. With the Wall of Help, you’re never alone assistance is always near.",
                   buttonText: "+ ${localization.request_help}",
                 ),
-                Text(localization.helping_hands_gains_love,style: textTheme.headlineSmall,),
+                TranslatedText(
+                  text: localization.helping_hands_gains_love,
+                  style: textTheme.headlineSmall,
+                ),
                   Row(
                 spacing: Dimens.gapX2,
                 children: [
@@ -143,8 +163,8 @@ class WallOfHelpPartyView extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      localization.filters,
+                                    TranslatedText(
+                                      text: localization.filters,
                                       style: context.textTheme.headlineSmall,
                                     ),
                                   ],
@@ -152,7 +172,7 @@ class WallOfHelpPartyView extends StatelessWidget {
                                 SizeBox.sizeHX2,
 
                                 Consumer<WallOfHelpViewModel>(
-                                  builder: (_, _, _) {
+                                  builder: (context, viewModel, _) {
                                     return Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -166,11 +186,11 @@ class WallOfHelpPartyView extends StatelessWidget {
                                             alignment: WrapAlignment.start,
                                             children: [
                                               ...List.generate(
-                                                provider.statusItems.length,
+                                                viewModel.statusItems.length,
                                                 (index) {
                                                   final bool isSelected =
-                                                      provider.statusKey ==
-                                                      provider
+                                                      viewModel.statusKey ==
+                                                      viewModel
                                                           .statusItems[index];
                                                   return CommonButton(
                                                     fullWidth: false,
@@ -194,14 +214,20 @@ class WallOfHelpPartyView extends StatelessWidget {
                                                           vertical:
                                                               Dimens.paddingX1B,
                                                         ),
-                                                    text: provider
-                                                        .statusItems[index].capitalize(),
                                                     height: 33.height(),
                                                     onTap: () =>
-                                                        provider.setStatus(
-                                                          provider
+                                                        viewModel.setStatus(
+                                                          viewModel
                                                               .statusItems[index],
                                                         ),
+                                                    child: Text(
+                                                      _getFilterStatusText(viewModel.statusItems[index]),
+                                                      style: context.textTheme.labelMedium?.copyWith(
+                                                        color: isSelected
+                                                            ? AppPalettes.whiteColor
+                                                            : AppPalettes.lightTextColor,
+                                                      ),
+                                                    ),
                                                   );
                                                 },
                                               ),
@@ -217,11 +243,11 @@ class WallOfHelpPartyView extends StatelessWidget {
                                             alignment: WrapAlignment.start,
                                             children: [
                                               ...List.generate(
-                                                provider.dateItems.length,
+                                                viewModel.dateItems.length,
                                                 (index) {
                                                   final bool isSelected =
-                                                      provider.dateKey ==
-                                                      provider.dateItems[index];
+                                                      viewModel.dateKey ==
+                                                      viewModel.dateItems[index];
                                                   return CommonButton(
                                                     fullWidth: false,
                                                     borderColor: AppPalettes
@@ -243,14 +269,21 @@ class WallOfHelpPartyView extends StatelessWidget {
                                                           vertical:
                                                               Dimens.paddingX1B,
                                                         ),
-                                                    text: provider
-                                                        .dateItems[index],
                                                     height: 33.height(),
                                                     onTap: () =>
-                                                        provider.setDate(
-                                                          provider
+                                                        viewModel.setDate(
+                                                          viewModel
                                                               .dateItems[index],
                                                         ),
+                                                    child: TranslatedText(
+                                                      text: viewModel
+                                                          .dateItems[index],
+                                                      style: context.textTheme.labelMedium?.copyWith(
+                                                        color: isSelected
+                                                            ? AppPalettes.whiteColor
+                                                            : AppPalettes.lightTextColor,
+                                                      ),
+                                                    ),
                                                   );
                                                 },
                                               ),
@@ -298,8 +331,7 @@ class WallOfHelpPartyView extends StatelessWidget {
                           children: [
                             PartyHelpCard(
                               helpRequest: value.wallOFHelpLists[index],
-                              
-                            ),
+                               ),
                             if (value.isScrollLoading &&
                                 value.wallOFHelpLists.last ==
                                     value.wallOFHelpLists[index])

@@ -16,6 +16,7 @@ import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_common_child.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/appointments/viewmodel/appointments_view_model.dart';
 import 'package:inldsevak/features/quick_access/appointments/widget/appointment_card.dart';
 import 'package:provider/provider.dart';
@@ -44,6 +45,7 @@ class AppointmentsView extends StatelessWidget {
             spacing: Dimens.gapX4,
             children: [
               Container(
+                width: double.infinity,
                 padding: EdgeInsets.symmetric(
                   horizontal: Dimens.paddingX3,
                   vertical: Dimens.paddingX3,
@@ -59,17 +61,24 @@ class AppointmentsView extends StatelessWidget {
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+
                       children: [
                         Text(
                           localization.appointments,
                           style: textTheme.bodyMedium,
                         ),
                         SizedBox(height: Dimens.gapX2),
-                        Text(
-                          "Beyond politics, we build trust and support. With the Appointments, you are never alone assistance is always near.",
-                          style: textTheme.labelMedium?.copyWith(
-                            color: AppPalettes.lightTextColor,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TranslatedText(
+                                text: "Beyond politics, we build trust and support. With the Appointments, you are never alone assistance is always near.",
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: AppPalettes.lightTextColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         SizeBox.sizeHX8,
                       ],
@@ -98,7 +107,7 @@ class AppointmentsView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: FormTextFormField(
-                      hintText: 'Search...',
+                      hintText: localization.search,
                       suffixIcon: AppImages.searchIcon,
                       controller: provider.searchController,
                       borderColor: AppPalettes.primaryColor,
@@ -132,7 +141,6 @@ class AppointmentsView extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: CommonButton(
-                                      text: 'Clear',
                                       height: 45,
                                       color: Colors.white,
                                       borderColor: AppPalettes.greenColor,
@@ -144,12 +152,23 @@ class AppointmentsView extends StatelessWidget {
                                         provider.dateKey = null;
                                         provider.getAppointmentsList();
                                       },
+                                      child: TranslatedText(
+                                        text: 'Clear',
+                                        style: context.textTheme.bodyLarge?.copyWith(
+                                          color: AppPalettes.greenColor,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     child: CommonButton(
                                       height: 45,
-                                      text: 'Apply',
+                                      child: TranslatedText(
+                                        text: 'Apply',
+                                        style: context.textTheme.bodyLarge?.copyWith(
+                                          color: AppPalettes.whiteColor,
+                                        ),
+                                      ),
                                       onTap: () {
                                         RouteManager.pop();
                                         provider.getAppointmentsList();
@@ -166,8 +185,8 @@ class AppointmentsView extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      'Filters',
+                                    TranslatedText(
+                                      text: 'Filters',
                                       style: context.textTheme.headlineSmall,
                                     ),
                                   ],
@@ -182,7 +201,7 @@ class AppointmentsView extends StatelessWidget {
                                       spacing: Dimens.gapX2,
                                       children: [
                                         FormCommonChild(
-                                          heading: "Status",
+                                          heading: localization.status,
                                           child: Wrap(
                                             spacing: Dimens.gapX2,
                                             runSpacing: Dimens.gapX2,
@@ -217,8 +236,15 @@ class AppointmentsView extends StatelessWidget {
                                                           vertical:
                                                               Dimens.paddingX1B,
                                                         ),
-                                                    text: provider
-                                                        .statusItems[index],
+                                                    child: TranslatedText(
+                                                      text: provider
+                                                          .statusItems[index],
+                                                      style: context.textTheme.labelMedium?.copyWith(
+                                                        color: isSelected
+                                                            ? AppPalettes.whiteColor
+                                                            : AppPalettes.lightTextColor,
+                                                      ),
+                                                    ),
                                                     height: 33.height(),
                                                     onTap: () =>
                                                         provider.setStatus(
@@ -233,7 +259,7 @@ class AppointmentsView extends StatelessWidget {
                                         ),
 
                                         FormCommonChild(
-                                          heading: "Date",
+                                          heading: localization.date,
                                           child: Wrap(
                                             spacing: Dimens.gapX2,
                                             runSpacing: Dimens.gapX2,
@@ -266,8 +292,15 @@ class AppointmentsView extends StatelessWidget {
                                                           vertical:
                                                               Dimens.paddingX1B,
                                                         ),
-                                                    text: provider
-                                                        .dateItems[index],
+                                                    child: TranslatedText(
+                                                      text: provider
+                                                          .dateItems[index],
+                                                      style: context.textTheme.labelMedium?.copyWith(
+                                                        color: isSelected
+                                                            ? AppPalettes.whiteColor
+                                                            : AppPalettes.lightTextColor,
+                                                      ),
+                                                    ),
                                                     height: 33.height(),
                                                     onTap: () =>
                                                         provider.setDate(
@@ -309,8 +342,8 @@ class AppointmentsView extends StatelessWidget {
                               path: AppImages.placeholderEmpty,
                               iconSize: 0.3.screenWidth,
                             ),
-                            Text(
-                              "No Appointments found",
+                            TranslatedText(
+                              text: "No Appointments found",
                               style: textTheme.titleSmall,
                               maxLines: 2,
                               textAlign: TextAlign.center,

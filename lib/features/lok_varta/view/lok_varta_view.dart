@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
+import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
@@ -27,6 +29,9 @@ class LokVartaView extends StatefulWidget {
 class _LokVartaViewState extends State<LokVartaView>
     with TickerProviderStateMixin {
   late TabController tabController;
+  final ScrollController _scrollController = ScrollController();
+  bool _previousSearchState = false;
+
   @override
   void initState() {
     tabController = TabController(
@@ -35,6 +40,12 @@ class _LokVartaViewState extends State<LokVartaView>
       animationDuration: Duration(milliseconds: 200),
     );
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,6 +69,7 @@ class _LokVartaViewState extends State<LokVartaView>
             toolbarHeight: 0,
           ),
           body: NestedScrollView(
+            controller: _scrollController,
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 Consumer<LokVartaViewModel>(
@@ -67,9 +79,28 @@ class _LokVartaViewState extends State<LokVartaView>
                     );
                   },
                 ),
+             
                 Consumer<ShowSearchLokVartaProvider>(
                   builder: (contextP, search, _) {
-                    return LokVartaTabbar(
+                    // Auto-scroll when search opens
+                    if (search.showSearchWidget && !_previousSearchState) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          if (_scrollController.hasClients) {
+                            final searchHeight = 35.h;
+                            _scrollController.animateTo(
+                              searchHeight,
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        });
+                      });
+                    }
+                   
+                    _previousSearchState = search.showSearchWidget;
+                                        return LokVartaTabbar(
+
                       showSearch: search.showSearchWidget,
                       searchController: provider.searchController,
                       controller: tabController,
@@ -91,64 +122,58 @@ class _LokVartaViewState extends State<LokVartaView>
                 ),
               ];
             },
-            body: Column(
-              children: [
-                Expanded(
-                  child: Consumer2<LokVartaViewModel, EventsViewModel>(
-                    builder: (context, value, events, _) {
-                      if (value.isLoading ||
-                          value.isLokVartaLoading ||
-                          events.isEventLoading) {
-                        return Center(child: CustomAnimatedLoading());
-                      }
-                      return TabBarView(
-                        controller: tabController,
-                        children: [
-                          EventsBuildWidget(
-                            data: events.upcomingEventList,
-                            onRefresh: () =>
-                                events.getEvents(EventFilter.upcoming),
-                            type: EventFilter.upcoming,
-                            height: 0.1,
-                          ),
-                          EventsBuildWidget(
-                            data: events.ongoingEventList,
-                            onRefresh: () =>
-                                events.getEvents(EventFilter.ongoing),
-                            type: EventFilter.ongoing,
-                            height: 0.1,
-                          ),
-                          PressReleasesWidget(
-                            medias: value.pressReleasesList,
-                            onRefresh: () =>
-                                value.getLokVarta(LokVartaFilter.PressRelease),
-                          ),
-                          InterviewWidget(
-                            medias: value.interviewsList,
-                            onRefresh: () =>
-                                value.getLokVarta(LokVartaFilter.Interview),
-                          ),
-                          VideoPlayerWidget(
-                            medias: value.videosList,
-                            onRefresh: () =>
-                                value.getLokVarta(LokVartaFilter.Videos),
-                          ),
-                          PhotoWidget(
-                            medias: value.photoLists,
-                            onRefresh: () =>
-                                value.getLokVarta(LokVartaFilter.PhotoGallery),
-                          ),
-                        ],
-                      ).onlyPadding(
-                        left: Dimens.paddingX3,
-                        right: Dimens.paddingX3,
-                        top: Dimens.verticalspacing,
-                      );
-                    },
-                  ),
-                ),
-                SizeBox.sizeHX11,
-              ],
+            body: Consumer2<LokVartaViewModel, EventsViewModel>(
+              builder: (context, value, events, _) {
+                if (value.isLoading ||
+                    value.isLokVartaLoading ||
+                    events.isEventLoading) {
+                  return Center(child: CustomAnimatedLoading());
+                }
+                return TabBarView(
+                  controller: tabController,
+                  children: [
+                    EventsBuildWidget(
+                      data: events.upcomingEventList,
+                      onRefresh: () =>
+                          events.getEvents(EventFilter.upcoming),
+                      type: EventFilter.upcoming,
+                      height: 0.1,
+                    ),
+                    EventsBuildWidget(
+                      data: events.ongoingEventList,
+                      onRefresh: () =>
+                          events.getEvents(EventFilter.ongoing),
+                      type: EventFilter.ongoing,
+                      height: 0.1,
+                    ),
+                    PressReleasesWidget(
+                      medias: value.pressReleasesList,
+                      onRefresh: () =>
+                          value.getLokVarta(LokVartaFilter.PressRelease),
+                    ),
+                    InterviewWidget(
+                      medias: value.interviewsList,
+                      onRefresh: () =>
+                          value.getLokVarta(LokVartaFilter.Interview),
+                    ),
+                    VideoPlayerWidget(
+                      medias: value.videosList,
+                      onRefresh: () =>
+                          value.getLokVarta(LokVartaFilter.Videos),
+                    ),
+                    PhotoWidget(
+                      medias: value.photoLists,
+                      onRefresh: () =>
+                          value.getLokVarta(LokVartaFilter.PhotoGallery),
+                    ),
+                  ],
+                ).onlyPadding(
+                  left: Dimens.paddingX3,
+                  right: Dimens.paddingX3,
+                  top: 0,
+                  bottom: Dimens.paddingX2,
+                );
+              },
             ),
           ),
         );
