@@ -3,7 +3,6 @@ import 'package:inldsevak/core/helpers/decoration.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/features/navigation/view_model/navigation_view_model.dart';
-import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/navigation/widgets/tab_icon_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -29,20 +28,21 @@ class NavigationView extends StatelessWidget {
             backgroundColor: AppPalettes.liteGreenColor,
           ),
           height: Dimens.scaleX9,
-          child: Consumer<NavigationViewModel>(
-            builder: (_, value, _) {
+          child: Selector<NavigationViewModel, int>(
+            selector: (context, viewModel) => viewModel.selectedTab,
+            builder: (context, selectedTab, child) {
+              final viewModel = Provider.of<NavigationViewModel>(context, listen: false);
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: value.userTabIconData
+                children: viewModel.userTabIconData
+                    .asMap()
+                    .entries
                     .map(
-                      (item) => TabIconWidget(
-                        key: UniqueKey(),
-                        data: item,
-                        onTap: () => value.selectedTab = value.userTabIconData
-                            .indexOf(item),
-                        isSelected:
-                            value.userTabIconData.indexOf(item) ==
-                            value.selectedTab,
+                      (entry) => TabIconWidget(
+                        key: ValueKey(entry.value.text),
+                        data: entry.value,
+                        onTap: () => viewModel.selectedTab = entry.key,
+                        isSelected: entry.key == selectedTab,
                       ),
                     )
                     .toList(),

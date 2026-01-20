@@ -18,13 +18,70 @@ import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_common_child.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/donation/view_model/donation_view_model.dart';
 import 'package:inldsevak/features/donation/widget/donation_dialog.dart';
+import 'package:inldsevak/features/navigation/view_model/navigation_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DonateView extends StatelessWidget {
+class DonateView extends StatefulWidget {
   const DonateView({super.key});
+
+  @override
+  State<DonateView> createState() => _DonateViewState();
+}
+
+class _DonateViewState extends State<DonateView> with WidgetsBindingObserver {
+  int? _previousTab;
+  bool _hasLaunchedPaymentApp = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final navigationViewModel = context.read<NavigationViewModel>();
+        _previousTab = navigationViewModel.selectedTab;
+        navigationViewModel.addListener(_onTabChanged);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    if (mounted) {
+      final navigationViewModel = context.read<NavigationViewModel>();
+      navigationViewModel.removeListener(_onTabChanged);
+    }
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed && _hasLaunchedPaymentApp) {
+      // App resumed after launching payment app, clear the form
+      final donationViewModel = context.read<DonationViewModel>();
+      donationViewModel.clear();
+      _hasLaunchedPaymentApp = false;
+    }
+  }
+
+  void _onTabChanged() {
+    if (!mounted) return;
+    final navigationViewModel = context.read<NavigationViewModel>();
+    final currentTab = navigationViewModel.selectedTab;
+    
+    // Clear donation form when switching away from donate tab (tab index 1)
+    if (_previousTab == 1 && currentTab != 1) {
+      final donationViewModel = context.read<DonationViewModel>();
+      donationViewModel.clear();
+    }
+    _previousTab = currentTab;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +117,7 @@ class DonateView extends StatelessWidget {
                             CommonTextFormField(
                               hintText: 'Enter Amount in (₹)',
                               controller: provider.amount,
+                              maxLength: 10,
                               validator: (value) => value!.validateAmount(
                                 argument: "Please enter minimum of 10rs",
                               ),
@@ -80,7 +138,6 @@ class DonateView extends StatelessWidget {
                 );
               },
             ),
-
           Container(
             width: double.infinity,
             decoration: boxDecorationRoundedWithShadow(
@@ -176,14 +233,37 @@ class DonateView extends StatelessWidget {
               isEnable: !provider.isLoading,
               isLoading: provider.isLoading,
               onTap: () async {
+                // Validate amount before proceeding
+                final amountText = provider.amount.text.trim();
+                
+                if (amountText.isEmpty) {
+                  CommonSnackbar(text: "Please enter amount").showToast();
+                  return;
+                }
+                
+                try {
+                  final amount = int.parse(amountText);
+                  if (amount < 10) {
+                    CommonSnackbar(text: "Please enter minimum of 10rs").showToast();
+                    return;
+                  }
+                } catch (e) {
+                  CommonSnackbar(text: "Please enter a valid amount").showToast();
+                  return;
+                }
+                
                 if (await provider.manualDonation()) {
                   if (provider.isUpiSelected) {
-                    await launchUrl(
+                    final launched = await launchUrl(
                       Uri.parse(
                         'upi://pay?pa=9988090768m@pnb&pn=INDIAN NATIONAL LOKDAL&am=${provider.amount.text}&cu=INR',
                       ),
                       mode: LaunchMode.externalApplication,
                     );
+                    // Mark that we launched payment app - will clear when app resumes
+                    if (launched) {
+                      _hasLaunchedPaymentApp = true;
+                    }
                   }
 
                   if (provider.isNetSelected) {
@@ -202,22 +282,20 @@ class DonateView extends StatelessWidget {
                                 localization.net_banking,
                                 style: context.textTheme.headlineSmall,
                               ),
-                              Text(
-                                "Please donate to the below account details",
+                              TranslatedText(
+                                text: "Please donate to the below account details",
                                 style: context.textTheme.bodySmall?.copyWith(
                                   color: AppPalettes.lightTextColor,
-                                ),
+                                ), 
                               ),
                               showBankDetails(
                                 title: "Bank Name",
                                 copyText: "Punjab national bank",
                               ),
-
                               showBankDetails(
                                 title: "Account No",
                                 copyText: "1504002100125555",
                               ),
-
                               showBankDetails(
                                 title: "IFS Code",
                                 copyText: "PUNB0148800",
@@ -227,16 +305,15 @@ class DonateView extends StatelessWidget {
                         );
                       },
                     );
+                    // Note: For net banking, we don't clear immediately since it's just a modal
+                    // The form will be cleared when user switches tabs (handled in _onTabChanged)
                   }
                 }
               },
               text: localization.donate,
             ),
-
             DonationDialog(),
-
             // Text(localization.donation_history, style: textTheme.headlineSmall),
-
             // Consumer<DonationViewModel>(
             //   builder: (_, _, _) {
             //     return ListView.separated(

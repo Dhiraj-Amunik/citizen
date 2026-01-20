@@ -7,6 +7,8 @@ import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
+import 'package:inldsevak/features/common_fields/model/address_model.dart';
+import 'package:inldsevak/features/common_fields/view_model/map_search_view_model.dart';
 import 'package:inldsevak/features/notify_representative/model/request/request_notify_model.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_filters_model.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_lists_model.dart';
@@ -54,8 +56,16 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
   final districtController = TextEditingController();
   final mandalController = TextEditingController();
   final villageController = TextEditingController();
+  final areaController = TextEditingController();
+  final stateController = TextEditingController();
+  final flatNoController = TextEditingController();
+  final tehsilController = TextEditingController();
+  final cityController = TextEditingController();
 
   String? companyDateFormat;
+  LocationCoordinates? locationCoordinates;
+  String? assemblyConstituenciesID;
+  String? parliamentaryConstituenciesID;
   NotifyFiltersData? filtersData;
 
   List<File> multipleFiles = [];
@@ -63,7 +73,8 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
   List<String> get existingDocuments => List.unmodifiable(_existingDocuments);
 
   Future<void> addFiles(Future<dynamic> future) async {
-    RouteManager.pop();
+    // Note: Bottom sheet is already closed in handle_multiple_files_sheet.dart
+    // No need to pop here as it would close the form page
     try {
       final data = await future;
       if (data != null) {
@@ -94,7 +105,9 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
     notifyListeners();
   }
 
-  Future<void> requestNotify({required Function onCompleted}) async {
+  Future<void> requestNotify({
+    required Function onCompleted,
+  }) async {
     try {
       // Validate all form fields
       if (!formKey.currentState!.validate()) {
@@ -106,11 +119,14 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
       autoValidateMode = AutovalidateMode.disabled;
       isLoading = true;
 
+      // Convert 12-hour format (with AM/PM) back to 24-hour format (HH:mm) for backend
+      final timeIn24Hour = eventTimeController.text.trim().from12HourTo24HourFormat();
+      
       final data = RequestNotifytModel(
         title: eventTypeController.text.trim(),
         location: locationController.text.trim().isEmpty ? null : locationController.text.trim(),
         eventDate: companyDateFormat ?? "",
-        eventTime: eventTimeController.text.trim(),
+        eventTime: timeIn24Hour,
         description: descriptionController.text.trim(),
         documents: [
           ..._existingDocuments,
@@ -123,6 +139,11 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
         village: villageController.text.trim(),
         street: streetController.text.trim(),
         pincode: pincodeController.text.trim(),
+        area: areaController.text.trim(),
+        state: stateController.text.trim(),
+        assemblyConstituency: null,
+        parliamentaryConstituency: null,
+        locationCoordinates: locationCoordinates,
       );
 
       final response = await _repository.createNotify(
@@ -131,14 +152,19 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
       );
 
       if (response.data?.responseCode == 200) {
+        // Successfully updated notify representative
+        final updatedNotify = response.data?.data;
+        if (updatedNotify != null) {
+          debugPrint("Notify Representative updated with ID: ${updatedNotify.sId}");
+        }
         onCompleted();
         await CommonSnackbar(
-          text: "Notify has been updated sucessfully",
+          text: response.data?.message ?? "Notify has been updated successfully",
         ).showAnimatedDialog(type: QuickAlertType.success);
         RouteManager.pop();
       } else {
         CommonSnackbar(
-          text: response.data?.message ?? "Some thing went wrong",
+          text: response.data?.message ?? "Something went wrong",
         ).showAnimatedDialog(type: QuickAlertType.warning);
       }
     } catch (err, stackTrace) {
@@ -150,6 +176,69 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
     } finally {
       isLoading = false;
     }
+  }
+
+  void loadAddressFromMapSearch(AddressModel? addressModel, MapSearchViewModel? mapSearchViewModel) {
+    if (addressModel == null && mapSearchViewModel == null) return;
+    
+    // Prefer values from MapSearchViewModel controllers as they are already populated
+    // Fallback to addressModel if controllers are empty
+    // District should come from MapSearchViewModel as it may be updated by API
+    final district = mapSearchViewModel?.districtController.text.isNotEmpty == true
+        ? mapSearchViewModel!.districtController.text
+        : (addressModel?.district ?? "");
+    
+    final area = mapSearchViewModel?.areaController.text.isNotEmpty == true
+        ? mapSearchViewModel!.areaController.text
+        : (addressModel?.area ?? addressModel?.subLocality ?? "");
+    
+    final tehsil = mapSearchViewModel?.tehsilController.text.isNotEmpty == true
+        ? mapSearchViewModel!.tehsilController.text
+        : (addressModel?.tehsil ?? "");
+    
+    final city = mapSearchViewModel?.cityController.text.isNotEmpty == true
+        ? mapSearchViewModel!.cityController.text
+        : (addressModel?.city ?? "");
+    
+    final state = mapSearchViewModel?.stateController.text.isNotEmpty == true
+        ? mapSearchViewModel!.stateController.text
+        : (addressModel?.state ?? "");
+    
+    final pincode = mapSearchViewModel?.pincodeController.text.isNotEmpty == true
+        ? mapSearchViewModel!.pincodeController.text
+        : (addressModel?.postalCode ?? "");
+    
+    // Map address fields from MapSearchViewModel to notify representative fields
+    // Based on payload: village, street, mandal, district, pincode, area, state
+    villageController.text = city.isNotEmpty ? city : (addressModel?.subLocality ?? "");
+    streetController.text = area;
+    mandalController.text = tehsil;
+    // Always update district - this is critical
+    districtController.text = district;
+    pincodeController.text = pincode;
+    areaController.text = area;
+    stateController.text = state;
+    
+    // Also update MapSearchViewModel controllers for reference
+    flatNoController.text = mapSearchViewModel?.flatNoController.text ?? 
+        (addressModel?.houseNo ?? addressModel?.flatNo ?? "");
+    tehsilController.text = tehsil;
+    cityController.text = city;
+    
+    // Store location coordinates if available
+    if (mapSearchViewModel?.currentPosition != null) {
+      locationCoordinates = LocationCoordinates(
+        lat: mapSearchViewModel!.currentPosition!.latitude,
+        lng: mapSearchViewModel.currentPosition!.longitude,
+      );
+    } else if (addressModel?.latitude != null && addressModel?.longitude != null) {
+      locationCoordinates = LocationCoordinates(
+        lat: addressModel!.latitude!,
+        lng: addressModel.longitude!,
+      );
+    }
+    
+    notifyListeners();
   }
 
   addData(NotifyRepresentative data) {
@@ -164,6 +253,24 @@ class UpdateNotifyRepresentativeViewModel extends BaseViewModel
     districtController.text = data.district ?? "";
     mandalController.text = data.mandal ?? "";
     villageController.text = data.village ?? "";
+    areaController.text = data.area ?? "";
+    stateController.text = data.state ?? "";
+    
+    // Store constituency IDs for editing
+    // Use the values from the model, even if they're null (they might not be in list response)
+    assemblyConstituenciesID = data.assemblyConstituency;
+    parliamentaryConstituenciesID = data.parliamentaryConstituency;
+    
+    debugPrint("UpdateNotifyRepresentativeViewModel.addData - Assembly ID: $assemblyConstituenciesID, Parliamentary ID: $parliamentaryConstituenciesID");
+    debugPrint("UpdateNotifyRepresentativeViewModel.addData - Model assemblyConstituency: ${data.assemblyConstituency}, parliamentaryConstituency: ${data.parliamentaryConstituency}");
+    
+    // Load existing data into MapSearchViewModel for editing
+    // This allows "Use my location" to work with existing data
+    // We'll populate what we have from the existing data
+    // Note: This creates a new instance, but the actual MapSearchViewModel used in the view
+    // is provided at a higher level, so we need to update it in the view's initState
+    // The view will handle populating the actual MapSearchViewModel instance
+    
     _existingDocuments
       ..clear()
       ..addAll(data.documents ?? const []);

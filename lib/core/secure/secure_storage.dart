@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:inldsevak/core/dio/exception_handlers.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/restart_app.dart';
 
@@ -105,6 +106,8 @@ class SessionController {
       _storage.delete(key: "isRegistered"),
     ]);
     _authController.add(_model);
+    // Reset party member approval dialog flag
+    HandleError.resetPartyMemberApprovalFlag();
     if (RouteManager.navigatorKey.currentState!.canPop()) {
       RouteManager.popUntilHome();
     }

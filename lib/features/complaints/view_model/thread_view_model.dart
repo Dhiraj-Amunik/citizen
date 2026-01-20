@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
-import 'package:inldsevak/features/complaints/model/request/thread_request_model.dart';
+import 'package:inldsevak/features/complaints/model/request/complaint_by_id_request_model.dart';
+import 'package:inldsevak/features/complaints/model/request/complaint_case_request_model.dart';
 import 'package:inldsevak/features/complaints/model/response/complaint_by_thread.dart'
     as threads;
 import 'package:inldsevak/features/complaints/repository/complaints_repository.dart';
@@ -15,10 +16,10 @@ class ThreadViewModel extends BaseViewModel {
   final Data arguments;
 
   ThreadViewModel({required this.arguments}) {
-    onCreated(id: arguments.threadId!);
+    onCreated(complaintId: arguments.sId);
   }
 
-  onCreated({required String id}) async {
+  onCreated({String? complaintId}) async {
     await initialize();
     await getThreads();
   }
@@ -33,28 +34,58 @@ class ThreadViewModel extends BaseViewModel {
   }
 
   List<threads.Data> threadsList = [];
+  threads.ComplaintThreadData? complaintData;
 
   Future<void> getThreads() async {
     try {
       loadMessages = true;
 
-      final data = ThreadRequestModel(threadID: arguments.threadId!);
+      // Use complaintId (sId) from arguments instead of threadId
+      if (arguments.sId == null || arguments.sId!.isEmpty) {
+        CommonSnackbar(text: "Complaint ID not found").showSnackbar();
+        loadMessages = false;
+        return;
+      }
 
-      final response = await ComplaintsRepository().getComplaintThread(
+      final data = ComplaintByIdRequestModel(complaintId: arguments.sId!);
+
+      final response = await ComplaintsRepository().getComplaintByThreadId(
         data: data,
         token: token,
       );
       if (response.data?.responseCode == 200) {
         threadsList.clear();
-        List<threads.Data> tempList = [];
-        tempList.addAll(List.from(response.data?.data as List));
-        threadsList.addAll(tempList.reversed);
+        
+        // Handle changed API response structure
+        // New structure: response.data?.data is an object with messages array
+        // Old structure: response.data?.data is a list of messages
+        
+        if (response.data?.complaintData != null) {
+          // Store complaint data for use in replies
+          complaintData = response.data!.complaintData;
+          notifyListeners();
+          // New structure: extract messages from complaintData
+          final messages = response.data!.complaintData!.messages;
+          if (messages != null && messages.isNotEmpty) {
+            threadsList = messages.map((msg) => threads.Data.fromMessage(msg)).toList();
+            threadsList = threadsList.reversed.toList();
+          }
+        } else if (response.data?.data != null && response.data!.data!.isNotEmpty) {
+          // Old structure: data is a list
+          List<threads.Data> tempList = [];
+          tempList.addAll(response.data!.data!);
+          threadsList.addAll(tempList.reversed);
+        } else {
+          debugPrint("⚠️ No messages found in response");
+        }
       } else {
-        CommonSnackbar(text: "Unable load messages !").showSnackbar();
+        final errorMessage = response.data?.message ?? "Unable load messages !";
+        CommonSnackbar(text: errorMessage).showSnackbar();
       }
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
+      CommonSnackbar(text: "Error loading messages").showSnackbar();
     } finally {
       loadMessages = false;
     }
@@ -65,8 +96,9 @@ class ThreadViewModel extends BaseViewModel {
     String? status,
   }) async {
     try {
-      if (nextThreadController.text.isEmpty) {
-        return CommonSnackbar(text: "Message can't be empty").showToast();
+      // Allow sending if either message has text or files are attached
+      if (nextThreadController.text.trim().isEmpty && multipleFiles.isEmpty) {
+        return CommonSnackbar(text: "Message or image is required").showToast();
       }
       isLoading = true;
 
@@ -76,16 +108,71 @@ class ThreadViewModel extends BaseViewModel {
         multipartFiles.add(file);
       }
 
-      final Map<String, dynamic> formDataMap = {
-        "message": nextThreadController.text.trim(),
-        "complaintId": id,
-        "attachments": multipartFiles,
-      };
+      // If message is empty but files are attached, send a space as placeholder
+      // This satisfies API requirement for non-empty message without showing visible text
+      // Get the exact text the user typed, trimmed of whitespace
+      // IMPORTANT: Use only what's in the controller, don't add any extra text
+      String messageText = nextThreadController.text.trim();
+      if (messageText.isEmpty && multipleFiles.isNotEmpty) {
+        messageText = " "; // Single space placeholder when sending only images
+      }
+      
+      // Debug: Log the exact message being sent to verify it's correct
+      debugPrint("📤 Message being sent: '$messageText'");
+      debugPrint("📤 Message length: ${messageText.length}");
+      debugPrint("📤 Controller text before trim: '${nextThreadController.text}'");
 
-      if (status != null && status.isNotEmpty) {
-        formDataMap["status"] = status;
+      // Get department, authority, and subject from complaint data
+      // Use complaintData if available (from thread response), otherwise use arguments
+      String? departmentId = complaintData?.department?.sId ?? arguments.department?.sId;
+      String? authorityId = complaintData?.authority?.authorityId ?? complaintData?.authority?.sId;
+      String? subject = arguments.messages?.isNotEmpty == true 
+          ? arguments.messages!.first.subject 
+          : complaintData?.messages?.isNotEmpty == true
+              ? complaintData!.messages!.first.subject
+              : "Re: Complaint";
+
+      // Validate required fields for reply
+      if (departmentId == null || departmentId.isEmpty) {
+        CommonSnackbar(text: "Department information not found").showToast();
+        isLoading = false;
+        return;
       }
 
+      if (authorityId == null || authorityId.isEmpty) {
+        CommonSnackbar(text: "Authority information not found").showToast();
+        isLoading = false;
+        return;
+      }
+
+      // Build FormData to match Postman format
+      // All text fields must be sent as strings, files as list
+      final Map<String, dynamic> formDataMap = {
+        "department": departmentId.toString(),
+        "authority": authorityId.toString(),
+        "subject": (subject ?? "Re: Complaint").toString(),
+        "message": messageText,
+        "complaintId": id.toString(), // Include complaintId for replies
+      };
+
+      // Add status if provided
+      if (status != null && status.isNotEmpty) {
+        formDataMap["status"] = status.toString();
+      }
+
+      // Add attachments as a list (Dio handles multiple files with same key)
+      if (multipartFiles.isNotEmpty) {
+        formDataMap["attachments"] = multipartFiles;
+      }
+
+      debugPrint("📤 Reply Form data keys: ${formDataMap.keys}");
+      debugPrint("📤 Department: $departmentId");
+      debugPrint("📤 Authority: $authorityId");
+      debugPrint("📤 ComplaintId: $id");
+      debugPrint("📤 Subject: ${subject ?? "Re: Complaint"}");
+      debugPrint("📤 Attachments count: ${multipartFiles.length}");
+
+      // Create FormData - Dio will handle multipart/form-data encoding
       final FormData form = FormData.fromMap(formDataMap);
 
       final response = await ComplaintsRepository().replyComplaints(
@@ -95,6 +182,7 @@ class ThreadViewModel extends BaseViewModel {
       if (response.data?.responseCode == 200) {
         removefiles();
         getThreads();
+        // Clear the controller after successful send
         nextThreadController.clear();
       } else {
         CommonSnackbar(
@@ -114,7 +202,8 @@ class ThreadViewModel extends BaseViewModel {
   List<File> multipleFiles = [];
 
   Future<void> addFiles(Future<dynamic> future) async {
-    RouteManager.pop();
+    // Note: Bottom sheet is already closed in handle_multiple_files_sheet.dart
+    // No need to pop here as it would close the form page
     try {
       final data = await future;
       if (data != null) {
@@ -137,5 +226,46 @@ class ThreadViewModel extends BaseViewModel {
   void removefiles() {
     multipleFiles.clear();
     notifyListeners();
+  }
+
+  Future<bool> submitComplaintCase({
+    required String complaintId,
+    required String response,
+    FeedbackModel? feedback,
+    String? date,
+  }) async {
+    try {
+      isLoading = true;
+      
+      final requestModel = ComplaintCaseRequestModel(
+        complaintId: complaintId,
+        response: response,
+        feedback: feedback,
+        date: date,
+      );
+
+      final responseData = await ComplaintsRepository().complaintCase(
+        data: requestModel,
+        token: token,
+      );
+
+      if (responseData.data?.responseCode == 200) {
+        // Refresh the threads to get updated data
+        await getThreads();
+        return true;
+      } else {
+        CommonSnackbar(
+          text: responseData.data?.message ?? 'Something went wrong',
+        ).showToast();
+        return false;
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error submitting complaint case: $err");
+      debugPrint("Stack Trace: $stackTrace");
+      CommonSnackbar(text: "Error submitting response").showToast();
+      return false;
+    } finally {
+      isLoading = false;
+    }
   }
 }

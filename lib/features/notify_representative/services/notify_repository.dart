@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:inldsevak/core/dio/exception_handlers.dart';
 import 'package:inldsevak/core/dio/network_requester.dart';
 import 'package:inldsevak/core/dio/repo_reponse.dart';
 import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/features/notify_representative/model/request/nr_pagination_model.dart';
 import 'package:inldsevak/features/notify_representative/model/request/request_notify_model.dart';
+import 'package:inldsevak/features/notify_representative/model/response/create_notify_response_model.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_filters_model.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_lists_model.dart';
 import 'package:inldsevak/features/surveys/model/success_model.dart';
@@ -25,7 +27,7 @@ class NotifyRepository {
         : RepoResponse(data: NotifyListModel.fromJson(response));
   }
 
-  Future<RepoResponse<SuccessModel>> createNotify({
+  Future<RepoResponse<CreateNotifyResponseModel>> createNotify({
     String? token,
     required RequestNotifytModel model,
   }) async {
@@ -34,9 +36,24 @@ class NotifyRepository {
       token: token,
       data: model.toJson(),
     );
-    return response is APIException
-        ? RepoResponse(error: response)
-        : RepoResponse(data: SuccessModel.fromJson(response));
+    
+    if (response is APIException) {
+      return RepoResponse(error: response);
+    }
+    
+    try {
+      return RepoResponse(data: CreateNotifyResponseModel.fromJson(response));
+    } catch (e, stackTrace) {
+      debugPrint("Error parsing CreateNotifyResponseModel: $e");
+      debugPrint("Stack trace: $stackTrace");
+      debugPrint("Response data: $response");
+      // Return error if parsing fails
+      return RepoResponse(
+        error: APIException(
+          message: "Failed to parse server response. Please try again.",
+        ),
+      );
+    }
   }
 
   Future<RepoResponse<SuccessModel>> deleteNotify({

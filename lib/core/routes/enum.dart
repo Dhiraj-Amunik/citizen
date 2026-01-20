@@ -55,6 +55,7 @@ enum Routes {
   coinsHistoryPage(path: "/CoinsHistoryView"),
   coinsInfoPage(path: "/CoinsInfoView"),
   chatPage(path: "/ChatView"),
+  allChatsPage(path: "/AllChatsView"),
   interviewDetailedPage(path: "/InterviewDetailedWidget");
 
   final String path;
@@ -173,6 +174,8 @@ Widget getPage(Routes route, {dynamic arguments}) {
       return CoinsInfoView();
     case Routes.chatPage:
       return ChatView();
+    case Routes.allChatsPage:
+      return AllChatsView();
     default:
       return LoginView();
   }

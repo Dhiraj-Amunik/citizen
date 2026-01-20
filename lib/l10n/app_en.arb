@@ -108,7 +108,7 @@
     "contact_information":"Contact Information",
     "get_in_touch_with_our_support_team":"Get in touch with our support team",
     "phone":"Phone",
-    "phone_validator":"Please enter you mobile number",
+    "phone_validator":"Please enter your mobile number",
     "support_24_7":"24/7 Support",
     "response_within_24_hours":"Response within 24 hours",
 
@@ -162,12 +162,14 @@
     "request_appointment":"Request Appointment",
     "scheduled_date":"Scheduled Date",
     "rescheduled_date":"Rescheduled Date",
-    "appointment_note":"Note: As per the availability of Associate can rescheduled ur preferred date in appointment",
+    "appointment_note":"Note: As per the availability of Associate can rescheduled ur preferred date and time in appointment",
     "appointment_list":"Appointment List",
     "select_mla":"Select MLA",
     "select_associate":"Select Associate",
     "your_notified_events":"Your Notified Events",
     "book_for":"Book for",
+    "my_self":"My Self",
+    "others":"Others",
     "membership_id":"Membership ID",
     "membership_validator":"Please enter Membership ID",
     "date":"Date",
@@ -183,8 +185,11 @@
     "select_time_slot":"Select Preferred Time Slot",
     "purpose_of_appointment":"Purpose of Appointment",
     "enter_your_appointment_reason":"Enter your appointment reason",
+    "appointment_purpose_validator":"Please select your appointment purpose",
+    "appointment_description_validator":"Please enter description for appointment",
     "upload_documents":"Upload Documents",
     "description_info":"Enter detail description for an appointment",
+    "department_validator":"Please select one department",
     "clear":"Clear",
 
     "wall_of_help":"Wall of Help",
@@ -199,6 +204,10 @@
     "requested_amount":"Requested Amount",
     "requested":"Requested",
     "solved":"Solved",
+    "all":"All",
+    "approved":"Approved",
+    "partially_funded":"Partially-Funded",
+    "fully_funded":"Fully-Funded",
     "description":"Description",
     "enter_your_issue":"Enter your issue",
     "enter_your_name":"Enter your name",
@@ -261,7 +270,7 @@
     "attended":"Attended",
     "total_shares":"Total Shares",
     "active_since":"Active Since",
-    "refered_users":"People Joined",
+    "refered_users":"Users Joined Through Your Referral",
     "events_attended_volunteer":"Events Attended",
     "content_shared_volunteer":"Content Shared",
     "attended_events":"Attended Events",
@@ -280,7 +289,7 @@
     "preferred_time_slots":"Preferred Time Slots",
     "select_time_preferrence":"Select Time Preferences",
     "time_slot_validator":"Please select your preferred time slot",
-    "hours_per_week":"Hours Per Week",
+    "hours_per_week":"Time Availability ( Hours Per Week)",
     "select_hours":"Select Hours",
     "hours_per_week_validator":"Please select your preferred volunteer duration",
     "area_of_interest":"Area of Interest",
@@ -333,7 +342,9 @@
     "logout_confirmation": "Are you sure you want to sign out from your account?",
     "cancel": "Cancel",
     "close_request": "Close Request",
-
+    "delete_confirmation": "Are you sure you want to delete this request?",
+    "close_confirmation": "Are you sure you want to close this request?",
+    "survey_submit_confirmation": "Are you sure you want to submit your response?",
 
     "notify_representative":"Notify Representative",
     "notify":"Notify",
@@ -341,6 +352,8 @@
     "notify_description":"Beyond politics, we build trust and support. With the Wall of Help, you’re never alone assistance is always near.",
     "recent":"Recent",
     "past":"Past",
+    "no_recent_notified_events_found":"No recent notified events found",
+    "no_past_notified_events_found":"No past notified events found",
     "view_how_member_notified":"View how members Notified",
     "nearest_member":"Nearest Member",
     "list_of_nearest_member":"List Of Nearest Member",
@@ -360,10 +373,68 @@
     "inbox":"Inbox",
 
     "filters":"Filters",
+    "distance":"Distance",
+    "km":"km",
     "status":"Status",
+    "pending":"Pending",
+    "in_progress":"In Progress",
+    "resolved":"Resolved",
+    "your_complaint_has_been_resolved":"Your complaint has been resolved",
     "search":"Search...",
     "message":"Message",
-    "images":"Images"
+    "images":"Images",
+    "important_notice":"Important Notice",
+    "disclaimer_description":"This app is developed for the Citizens and is not an official government app. It is intended for public grievance reporting and citizen engagement purposes only.",
+    "resend_otp_to":"Resend Otp to {phoneNumber}",
+    "@resend_otp_to":{
+        "placeholders":{
+            "phoneNumber":{
+                "type":"String"
+            }
+        }
+    },
+    "invalid_otp":"Invalid OTP",
+    "invalid_otp_please_try_again":"Invalid OTP Please try again later",
+    "please_check_your_contact_number":"Please check your contact number",
+    "please_check_your_otp":"Please check your OTP",
+    "please_enter_a_password":"Please enter a password",
+    "please_enter_min_8_digit":"Please enter min 8 digit",
+    "voter_id_cannot_be_empty":"Voter ID cannot be empty",
+    "invalid_voter_id":"Invalid Voter ID",
+    "aadhar_no_cannot_be_empty":"Aadhar No cannot be empty",
+    "invalid_aadhar_id":"Invalid Aadhar ID",
+    "something_went_wrong":"Something went wrong !",
+    "ok":"Ok",
+    "warning":"Warning",
+    "error":"Error",
+    "success":"Success",
+    "info":"Info",
+    "use_my_location":"Use my location",
+    "flat_house_no_apartment":"Flat, House no, Apartment",
+    "house_number":"House Number",
+    "house_number_validator":"Please enter your house number",
+    "area_street":"Area, Street",
+    "area":"Area",
+    "area_validator":"Please enter your area",
+    "enter_pincode":"Enter Pincode",
+    "find":"Find",
+    "do_you_want_to_change_pincode":"Do you want to change the pincode?",
+    "search":"Search",
+    "tehsil":"Tehsil",
+    "tehsil_validator":"Enter Tehsil",
+    "city_town":"City / Town",
+    "city_validator":"Enter City",
+    "district_validator":"Enter District",
+    "state_validator":"Enter State",
+    "unknown_subject":"Unknown subject",
+    "please_enter_at_least_characters":"Please enter at least {count} characters",
+    "@please_enter_at_least_characters":{
+        "placeholders":{
+            "count":{
+                "type":"int"
+            }
+        }
+    }
 
 
 }

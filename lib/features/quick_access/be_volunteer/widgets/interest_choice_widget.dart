@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/widgets/common_checkbox.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class InterestChoiceWidget extends StatefulWidget {
   final List<String>? selected;
@@ -52,7 +53,7 @@ class _InterestChoiceWidgetState extends State<InterestChoiceWidget> {
               child: CommonCheckbox(
                 borderColor: AppPalettes.primaryColor,
                 backgroundColor: AppPalettes.whiteColor,
-                title: entry,
+                title: entry, // Already translated in view model, CommonCheckbox uses TranslatedText internally
                 isSelected: selectionStates[entry]!,
                 onTap: () => _toggleOption(entry),
               ),

@@ -36,6 +36,47 @@ class ComplaintsView extends StatefulWidget {
 
 class _ComplaintsViewState extends State<ComplaintsView>
     with DateAndTimePicker {
+  DateTime? _lastRefreshTime;
+  bool _isInitialLoad = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Always fetch latest complaints when the view is opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ComplaintsViewModel>().getComplaints();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh when returning to this route (e.g., after navigating back)
+    final route = ModalRoute.of(context);
+    if (route != null && route.isCurrent) {
+      // Skip the initial load since initState() already handles it
+      if (_isInitialLoad) {
+        _isInitialLoad = false;
+        _lastRefreshTime = DateTime.now();
+        return;
+      }
+      
+      final now = DateTime.now();
+      // Only refresh if it's been more than 1 second since last refresh
+      // This prevents excessive refreshes while allowing refresh on return
+      if (_lastRefreshTime == null || 
+          now.difference(_lastRefreshTime!) > const Duration(seconds: 1)) {
+        _lastRefreshTime = now;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            final provider = context.read<ComplaintsViewModel>();
+            provider.getComplaints();
+          }
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final canPop = Navigator.canPop(context);
@@ -43,7 +84,21 @@ class _ComplaintsViewState extends State<ComplaintsView>
     final bool keyboardIsOpen = MediaQuery.of(context).viewInsets.bottom != 0;
 
     final provider = context.read<ComplaintsViewModel>();
-    return Scaffold(
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          provider.searchController.clear();
+          provider.selectedStatusList = [];
+          provider.departmentKey = null;
+          provider.fromDate.clear();
+          provider.toDate.clear();
+          provider.fromDateCompany = null;
+          provider.toDateCompany = null;
+          provider.selectedDateFilter = null;
+          provider.filterList();
+        }
+      },
+      child: Scaffold(
       appBar: commonAppBar(
         appBarHeight: 110,
         title: localization.my_complaints,
@@ -102,7 +157,8 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                         provider.toDate.clear();
                                         provider.fromDateCompany = null;
                                         provider.toDateCompany = null;
-                                      provider.getComplaints();
+                                        provider.selectedDateFilter = null;
+                                        provider.getComplaints();
                                       },
                                       child: TranslatedText(
                                         text: 'Clear',
@@ -261,6 +317,7 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                                       ),
                                                     );
                                                 if (date != null) {
+                                                  provider.selectedDateFilter = null; // Clear filter selection when manually selecting date
                                                   provider.fromDateCompany =
                                                       date
                                                           .toString()
@@ -269,6 +326,7 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                                       provider.fromDateCompany
                                                           ?.toDdMmYyyy() ??
                                                       "";
+                                                  provider.notifyListeners();
                                                 }
                                               },
                                             ),
@@ -291,6 +349,7 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                                       ),
                                                     );
                                                 if (date != null) {
+                                                  provider.selectedDateFilter = null; // Clear filter selection when manually selecting date
                                                   provider.toDateCompany = date
                                                       .toString()
                                                       .toYyyyMmDd();
@@ -298,6 +357,7 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                                       provider.toDateCompany
                                                           ?.toDdMmYyyy() ??
                                                       "";
+                                                  provider.notifyListeners();
                                                 }
                                               },
                                             ),
@@ -306,85 +366,108 @@ class _ComplaintsViewState extends State<ComplaintsView>
                                       ),
                                       SizeBox.sizeHX3,
 
-                                      Row(
-                                        spacing: Dimens.gapX2,
-                                        children: [
-                                          Expanded(
-                                            child: CommonButton(
-                                              borderColor:
-                                                  AppPalettes.primaryColor,
-                                              textColor:
-                                                  AppPalettes.lightTextColor,
-                                              color: AppPalettes.whiteColor,
-                                              radius: Dimens.radiusX3,
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: Dimens.paddingX2,
-                                                vertical: Dimens.paddingX1B,
-                                              ),
-                                              height: 33.height(),
-                                              onTap: () => provider
-                                                  .determineSelectedFilter(
-                                                    "today",
+                                      Consumer<ComplaintsViewModel>(
+                                        builder: (context, value, _) {
+                                          final isTodaySelected = value.selectedDateFilter == "today";
+                                          final isWeekSelected = value.selectedDateFilter == "week";
+                                          final isMonthSelected = value.selectedDateFilter == "month";
+                                          
+                                          return Row(
+                                            spacing: Dimens.gapX2,
+                                            children: [
+                                              Expanded(
+                                                child: CommonButton(
+                                                  borderColor:
+                                                      AppPalettes.primaryColor,
+                                                  textColor: isTodaySelected
+                                                      ? AppPalettes.whiteColor
+                                                      : AppPalettes.lightTextColor,
+                                                  color: isTodaySelected
+                                                      ? AppPalettes.primaryColor
+                                                      : AppPalettes.whiteColor,
+                                                  radius: Dimens.radiusX3,
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: Dimens.paddingX2,
+                                                    vertical: Dimens.paddingX1B,
                                                   ),
-                                              child: TranslatedText(
-                                                text: "Today",
-                                                style: context.textTheme.labelMedium?.copyWith(
-                                                  color: AppPalettes.lightTextColor,
+                                                  height: 33.height(),
+                                                  onTap: () => provider
+                                                      .determineSelectedFilter(
+                                                        "today",
+                                                      ),
+                                                  child: TranslatedText(
+                                                    text: "Today",
+                                                    style: context.textTheme.labelMedium?.copyWith(
+                                                      color: isTodaySelected
+                                                          ? AppPalettes.whiteColor
+                                                          : AppPalettes.lightTextColor,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: CommonButton(
-                                              borderColor:
-                                                  AppPalettes.primaryColor,
-                                              textColor:
-                                                  AppPalettes.lightTextColor,
-                                              color: AppPalettes.whiteColor,
-                                              radius: Dimens.radiusX3,
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: Dimens.paddingX2,
-                                                vertical: Dimens.paddingX1B,
-                                              ),
-                                              height: 33.height(),
-                                              onTap: () => provider
-                                                  .determineSelectedFilter(
-                                                    "week",
+                                              Expanded(
+                                                child: CommonButton(
+                                                  borderColor:
+                                                      AppPalettes.primaryColor,
+                                                  textColor: isWeekSelected
+                                                      ? AppPalettes.whiteColor
+                                                      : AppPalettes.lightTextColor,
+                                                  color: isWeekSelected
+                                                      ? AppPalettes.primaryColor
+                                                      : AppPalettes.whiteColor,
+                                                  radius: Dimens.radiusX3,
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: Dimens.paddingX2,
+                                                    vertical: Dimens.paddingX1B,
                                                   ),
-                                              child: TranslatedText(
-                                                text: "This Week",
-                                                style: context.textTheme.labelMedium?.copyWith(
-                                                  color: AppPalettes.lightTextColor,
+                                                  height: 33.height(),
+                                                  onTap: () => provider
+                                                      .determineSelectedFilter(
+                                                        "week",
+                                                      ),
+                                                  child: TranslatedText(
+                                                    text: "This Week",
+                                                    style: context.textTheme.labelMedium?.copyWith(
+                                                      color: isWeekSelected
+                                                          ? AppPalettes.whiteColor
+                                                          : AppPalettes.lightTextColor,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: CommonButton(
-                                              borderColor:
-                                                  AppPalettes.primaryColor,
-                                              textColor:
-                                                  AppPalettes.lightTextColor,
-                                              color: AppPalettes.whiteColor,
-                                              radius: Dimens.radiusX3,
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: Dimens.paddingX2,
-                                                vertical: Dimens.paddingX1B,
-                                              ),
-                                              height: 33.height(),
-                                              onTap: () => provider
-                                                  .determineSelectedFilter(
-                                                    "month",
+                                              Expanded(
+                                                child: CommonButton(
+                                                  borderColor:
+                                                      AppPalettes.primaryColor,
+                                                  textColor: isMonthSelected
+                                                      ? AppPalettes.whiteColor
+                                                      : AppPalettes.lightTextColor,
+                                                  color: isMonthSelected
+                                                      ? AppPalettes.primaryColor
+                                                      : AppPalettes.whiteColor,
+                                                  radius: Dimens.radiusX3,
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: Dimens.paddingX2,
+                                                    vertical: Dimens.paddingX1B,
                                                   ),
-                                              child: TranslatedText(
-                                                text: "This Month",
-                                                style: context.textTheme.labelMedium?.copyWith(
-                                                  color: AppPalettes.lightTextColor,
+                                                  height: 33.height(),
+                                                  onTap: () => provider
+                                                      .determineSelectedFilter(
+                                                        "month",
+                                                      ),
+                                                  child: TranslatedText(
+                                                    text: "This Month",
+                                                    style: context.textTheme.labelMedium?.copyWith(
+                                                      color: isMonthSelected
+                                                          ? AppPalettes.whiteColor
+                                                          : AppPalettes.lightTextColor,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                        ],
+                                            ],
+                                          );
+                                        },
                                       ),
                                     ],
                                   ),
@@ -406,6 +489,7 @@ class _ComplaintsViewState extends State<ComplaintsView>
 
       body: RefreshIndicator(
         onRefresh: () => context.read<ComplaintsViewModel>().getComplaints(),
+        color: AppPalettes.primaryColor,
         child: Column(
           children: [
             Expanded(
@@ -440,7 +524,7 @@ class _ComplaintsViewState extends State<ComplaintsView>
             ),
           ],
         ),
-      ),
+      ),   
       floatingActionButtonLocation:
           FloatingActionButtonLocation.miniCenterFloat,
       floatingActionButton: Visibility(
@@ -452,6 +536,7 @@ class _ComplaintsViewState extends State<ComplaintsView>
           child: CommonButton(
             text: localization.raise_complaint,
             onTap: () => RouteManager.pushNamed(Routes.lodgeComplaintPage),
+          ),
           ),
         ),
       ),
@@ -465,7 +550,7 @@ Widget buildComplaintsList(List<Data> complaintList) {
       mainAxisSize: MainAxisSize.max,
       children: [
         SizedBox(height: 0.3.screenHeight),
-        Center(child: Text("No Complaints Found", style: AppStyles.bodyMedium)),
+        Center(child: TranslatedText(text: "No Complaints Found", style: AppStyles.bodyMedium)),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/routes/routes.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 mixin CupertinoDialogMixin {
   Future<void> customLeftCupertinoDialog({
@@ -19,15 +20,18 @@ mixin CupertinoDialogMixin {
         actions: [
           CupertinoDialogAction(
             onPressed: onTap,
-            child: Text(
-              leftButton,
+            child: TranslatedText(
+              text: leftButton,
               style: context.textTheme.labelLarge?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
           CupertinoDialogAction(
-            child: Text(localization.cancel, style: context.textTheme.labelMedium!),
+            child: TranslatedText(
+              text: localization.cancel,
+              style: context.textTheme.labelMedium!,
+            ),
             onPressed: () {
               RouteManager.pop();
             },
@@ -48,18 +52,21 @@ mixin CupertinoDialogMixin {
     return showCupertinoDialog(
       context: context,
       builder: (BuildContext context) => CupertinoAlertDialog(
-        content: Text(content, style: context.textTheme.titleSmall),
+        content: TranslatedText(text: content, style: context.textTheme.titleSmall),
         actions: [
           CupertinoDialogAction(
-            child: Text(localization.cancel, style: context.textTheme.labelLarge!),
+            child: TranslatedText(
+              text: localization.cancel,
+              style: context.textTheme.labelLarge!,
+            ),
             onPressed: () {
               RouteManager.pop();
             },
           ),
           CupertinoDialogAction(
             onPressed: onTap,
-            child: Text(
-              rightButton,
+            child: TranslatedText(
+              text: rightButton,
               style: context.textTheme.labelLarge?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
               ),

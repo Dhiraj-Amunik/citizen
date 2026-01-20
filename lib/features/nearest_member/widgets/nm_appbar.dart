@@ -19,6 +19,7 @@ import 'package:inldsevak/core/widgets/common_search_dropdown.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_common_child.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
+import 'package:inldsevak/core/helpers/translation_helper.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
 import 'package:inldsevak/features/nearest_member/model/nearest_members_model.dart';
 import 'package:inldsevak/features/nearest_member/view_model/nearest_member_view_model.dart';
@@ -239,6 +240,7 @@ class _NearestMemberSilverAppbarState extends State<NearestMemberSilverAppbar> {
                                       ),
                                     ),
                                     onTap: () {
+                                      debugPrint("🔍 Applying filter with radius: ${provider.radiusValue.round()} km");
                                       RouteManager.pop();
                                       provider.getMembers();
                                     },
@@ -254,7 +256,7 @@ class _NearestMemberSilverAppbarState extends State<NearestMemberSilverAppbar> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   TranslatedText(
-                                    text: 'Filters',
+                                    text: modalContext.localizations.filters,
                                     style: modalContext.textTheme.headlineSmall,
                                   ),
                                 ],
@@ -262,34 +264,52 @@ class _NearestMemberSilverAppbarState extends State<NearestMemberSilverAppbar> {
                               SizeBox.sizeHX2,
                               Consumer<NearestMemberViewModel>(
                                 builder: (_, provider, _) {
+                                  // Build heading with translated text
+                                  final headingText = 'Distance (${provider.radiusValue.round()} km)';
                                   return FormCommonChild(
-                                    heading: 'Distance (${provider.radiusValue.round()} km)',
+                                    headingWidget: TranslatedText(
+                                      text: headingText,
+                                      style: modalContext.textTheme.bodySmall,
+                                    ),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Slider(
-                                          value: provider.radiusValue,
-                                          min: 0,
-                                          max: 100,
-                                          divisions: 100,
-                                          label: '${provider.radiusValue.round()} km',
-                                          onChanged: (value) {
-                                            provider.setRadius(value);
+                                        StatefulBuilder(
+                                          builder: (context, setState) {
+                                            // Translate slider label
+                                            final labelText = '${provider.radiusValue.round()} km';
+                                            return FutureBuilder<String>(
+                                              future: TranslationHelper.translateText(labelText, force: true),
+                                              builder: (context, snapshot) {
+                                                final translatedLabel = snapshot.data ?? labelText;
+                                                return Slider(
+                                                  value: provider.radiusValue,
+                                                  min: 1, // Minimum 1 km to ensure filter works
+                                                  max: 100,
+                                                  divisions: 99, // 99 divisions for 1-100 range
+                                                  label: translatedLabel,
+                                                  onChanged: (value) {
+                                                    provider.setRadius(value);
+                                                    setState(() {}); // Rebuild to update label
+                                                  },
+                                                  activeColor: AppPalettes.primaryColor,
+                                                  inactiveColor: AppPalettes.liteGreyColor,
+                                                );
+                                              },
+                                            );
                                           },
-                                          activeColor: AppPalettes.primaryColor,
-                                          inactiveColor: AppPalettes.liteGreyColor,
                                         ),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              '0 km',
+                                            TranslatedText(
+                                              text: '1 km',
                                               style: modalContext.textTheme.bodySmall?.copyWith(
                                                 color: AppPalettes.lightTextColor,
                                               ),
                                             ),
-                                            Text(
-                                              '100 km',
+                                            TranslatedText(
+                                              text: '100 km',
                                               style: modalContext.textTheme.bodySmall?.copyWith(
                                                 color: AppPalettes.lightTextColor,
                                               ),
@@ -338,8 +358,12 @@ class _NearestMemberSilverAppbarState extends State<NearestMemberSilverAppbar> {
               onCameraMove: (position) async {
                 value.cameraPosition = position;
               },
-              onMapCreated: (GoogleMapController controller) =>
-                  value.mapController.complete(controller),
+              onMapCreated: (GoogleMapController controller) {
+                // Only complete if not already completed to avoid "Future already completed" error
+                if (!value.mapController.isCompleted) {
+                  value.mapController.complete(controller);
+                }
+              },
               markers:widget.markers,
             );
           },

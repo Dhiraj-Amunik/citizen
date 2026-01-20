@@ -7,7 +7,6 @@ import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/commom_text_form_field.dart';
-import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/features/auth/utils/auth_appbar.dart';
 import 'package:inldsevak/features/auth/utils/launch_url.dart';
@@ -17,6 +16,8 @@ import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/disclaimer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
+import 'package:inldsevak/core/widgets/common_button.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -31,32 +32,121 @@ class _LoginViewState extends State<LoginView> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      bool isVisible = false;
       final prefs = await SharedPreferences.getInstance();
-      isVisible = prefs.getBool('disclaimer_dismissed') ?? true;
-
-      Future<void> dismissNotice() async {
-        RouteManager.pop();
-        isVisible = await prefs.setBool('disclaimer_dismissed', false);
-      }
-
-      if (isVisible) {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          builder: (context) {
-            return DraggableSheetWidget(
-              onCompleted: dismissNotice,
-              radius: Dimens.radiusX4,
-              backgroundColor: Colors.amber[50],
-              size: 0.24,
-              child: DisclaimerNotice(onDismiss: dismissNotice),
-            );
-          },
-        );
+      
+      // Show language selection popup only on first install
+      // Check both language_selected flag AND language_code to ensure it's truly first install
+      final languageSelected = prefs.getBool('language_selected') ?? false;
+      final languageCode = prefs.getString('language_code');
+      
+      // Only show language selection if BOTH are missing (true first install)
+      if (!languageSelected && languageCode == null) {
+        // Set default to English if not already set
+        await GeneralStream.instance.setLocale("en");
+        
+        // Show language selection dialog
+        _showLanguageDialog(context, prefs);
+      } else {
+        // Language was already selected (either flag is set or language_code exists)
+        // Sync the flag if language_code exists but flag is missing (edge case)
+        if (languageCode != null && !languageSelected) {
+          await prefs.setBool('language_selected', true);
+        }
+        // Show disclaimer if needed
+        _showDisclaimerIfNeeded(context, prefs);
       }
     });
     super.initState();
+  }
+
+  void _showLanguageDialog(BuildContext context, SharedPreferences prefs) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User must select a language
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            padding: EdgeInsets.all(Dimens.paddingX4),
+            decoration: BoxDecoration(
+              color: AppPalettes.whiteColor,
+              borderRadius: BorderRadius.circular(Dimens.paddingX4),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                SizeBox.sizeHX5,
+                Text(
+                  "Select Language",
+                  style: context.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizeBox.sizeHX3,
+                CommonButton(
+                  color: AppPalettes.whiteColor,
+                  textColor: AppPalettes.blackColor,
+                  text: "English",
+                  borderColor: AppPalettes.primaryColor,
+                  onTap: () async {
+                    await GeneralStream.instance.setLocale("en");
+                    await prefs.setBool('language_selected', true);
+                    if (context.mounted) {
+                      RouteManager.pop();
+                      // Show disclaimer after language selection
+                      _showDisclaimerIfNeeded(context, prefs);
+                    }
+                  },
+                ),
+                SizeBox.sizeHX3,
+                CommonButton(
+                  color: AppPalettes.whiteColor,
+                  textColor: AppPalettes.blackColor,
+                  text: "Hindi",
+                  borderColor: AppPalettes.primaryColor,
+                  onTap: () async {
+                    await GeneralStream.instance.setLocale("hi");
+                    await prefs.setBool('language_selected', true);
+                    if (context.mounted) {
+                      RouteManager.pop();
+                      // Show disclaimer after language selection
+                      _showDisclaimerIfNeeded(context, prefs);
+                    }
+                  },
+                ),
+                SizeBox.sizeHX5,
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDisclaimerIfNeeded(BuildContext context, SharedPreferences prefs) {
+    bool isVisible = prefs.getBool('disclaimer_dismissed') ?? true;
+
+    Future<void> dismissNotice() async {
+      if (context.mounted) {
+        RouteManager.pop();
+      }
+      await prefs.setBool('disclaimer_dismissed', false);
+    }
+
+    if (isVisible && context.mounted) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return DraggableSheetWidget(
+            onCompleted: dismissNotice,
+            radius: Dimens.radiusX4,
+            backgroundColor: Colors.amber[50],
+            size: 0.24,
+            child: DisclaimerNotice(onDismiss: dismissNotice),
+          );
+        },
+      );
+    }
   }
 
   @override

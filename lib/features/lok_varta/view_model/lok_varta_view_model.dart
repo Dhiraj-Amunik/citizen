@@ -35,6 +35,14 @@ class LokVartaViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  // Track which specific filter is currently loading
+  LokVartaFilter? _loadingFilter;
+  LokVartaFilter? get loadingFilter => _loadingFilter;
+  
+  bool isLoadingFilter(LokVartaFilter filter) {
+    return _loadingFilter == filter && _isLokVartaLoading;
+  }
+
   final searchController = TextEditingController();
   Timer? _debounce;
 
@@ -66,18 +74,24 @@ class LokVartaViewModel extends BaseViewModel {
 
   Future<void> getAllLokVarta() async {
     isLoading = true;
+    _isLokVartaLoading = true;
     try {
+      // Load all filters in parallel - skip individual loading state management
       await Future.wait([
-        getLokVarta(LokVartaFilter.PressRelease),
-        getLokVarta(LokVartaFilter.Interview),
-        getLokVarta(LokVartaFilter.PhotoGallery),
-        getLokVarta(LokVartaFilter.Videos),
+        getLokVarta(LokVartaFilter.PressRelease, skipLoadingState: true),
+        getLokVarta(LokVartaFilter.Interview, skipLoadingState: true),
+        getLokVarta(LokVartaFilter.PhotoGallery, skipLoadingState: true),
+        getLokVarta(LokVartaFilter.Videos, skipLoadingState: true),
       ]);
     } catch (err, stackTrace) {
-      debugPrint("Error: $err");
+      debugPrint("Error in getAllLokVarta: $err");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
       isLoading = false;
+      // Ensure loading state is cleared after all parallel calls complete
+      _isLokVartaLoading = false;
+      _loadingFilter = null;
+      notifyListeners();
     }
   }
 
@@ -90,11 +104,14 @@ class LokVartaViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> getLokVarta(LokVartaFilter filters) async {
+  Future<void> getLokVarta(LokVartaFilter filters, {bool skipLoadingState = false}) async {
     try {
-      if (isLokVartaLoading != true) {
+      // Track which filter is loading
+      _loadingFilter = filters;
+      if (!skipLoadingState && !isLokVartaLoading) {
         isLokVartaLoading = true;
       }
+      
       final request = RequestLokVartaModel(
         filter: filters,
         search: searchController.text,
@@ -106,27 +123,85 @@ class LokVartaViewModel extends BaseViewModel {
 
       if (response.data?.responseCode == 200) {
         final data = response.data?.data?.media;
+        
+        // Handle null or empty data
+        final mediaList = data != null ? List<model.Media>.from(data as List) : <model.Media>[];
 
         switch (filters) {
           case LokVartaFilter.PressRelease:
-            pressReleasesList = List<model.Media>.from(data as List);
+            pressReleasesList = mediaList;
             break;
           case LokVartaFilter.PhotoGallery:
-            photoLists = List<model.Media>.from(data as List);
+            photoLists = mediaList;
             break;
           case LokVartaFilter.Interview:
-            interviewsList = List<model.Media>.from(data as List);
+            interviewsList = mediaList;
             break;
           case LokVartaFilter.Videos:
-            videosList = List<model.Media>.from(data as List);
+            videosList = mediaList;
             break;
         }
+        // Notify listeners after updating the list
+        notifyListeners();
+      } else {
+        debugPrint("⚠️ getLokVarta failed for ${filters.name}: ${response.data?.message}");
+        // Don't clear the list if API call failed - keep existing data if any
+        // Only clear if this was the first load attempt
+        switch (filters) {
+          case LokVartaFilter.PressRelease:
+            if (pressReleasesList.isEmpty) {
+              pressReleasesList = [];
+            }
+            break;
+          case LokVartaFilter.PhotoGallery:
+            if (photoLists.isEmpty) {
+              photoLists = [];
+            }
+            break;
+          case LokVartaFilter.Interview:
+            if (interviewsList.isEmpty) {
+              interviewsList = [];
+            }
+            break;
+          case LokVartaFilter.Videos:
+            if (videosList.isEmpty) {
+              videosList = [];
+            }
+            break;
+        }
+        notifyListeners();
       }
     } catch (err, stackTrace) {
-      debugPrint("Error: $err");
+      debugPrint("🔴 Error in getLokVarta for ${filters.name}: $err");
       debugPrint("Stack Trace: $stackTrace");
+      // Don't clear existing data on error, only if list was empty
+      switch (filters) {
+        case LokVartaFilter.PressRelease:
+          if (pressReleasesList.isEmpty) {
+            pressReleasesList = [];
+          }
+          break;
+        case LokVartaFilter.PhotoGallery:
+          if (photoLists.isEmpty) {
+            photoLists = [];
+          }
+          break;
+        case LokVartaFilter.Interview:
+          if (interviewsList.isEmpty) {
+            interviewsList = [];
+          }
+          break;
+        case LokVartaFilter.Videos:
+          if (videosList.isEmpty) {
+            videosList = [];
+          }
+          break;
+      }
+      notifyListeners();
     } finally {
-      if (isLokVartaLoading != false) {
+      // Only clear loading state if this was the filter that was loading and not skipping loading state
+      if (!skipLoadingState && _loadingFilter == filters && isLokVartaLoading) {
+        _loadingFilter = null;
         isLokVartaLoading = false;
       }
     }

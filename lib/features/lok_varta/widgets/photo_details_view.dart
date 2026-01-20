@@ -42,6 +42,18 @@ class PhotoDetailsView extends StatelessWidget {
               // Get detailed media for sharing
               final detailedMedia = await provider.getLokVartaDetails(media.sId ?? "");
               final mediaToShare = detailedMedia ?? media;
+              
+              // Debug: Verify data from API response
+              debugPrint("📤 Sharing Lok Varta Details:");
+              debugPrint("📤 Title: ${mediaToShare.title ?? 'null'}");
+              debugPrint("📤 Content: ${mediaToShare.content != null && mediaToShare.content!.isNotEmpty ? 'Yes (${mediaToShare.content!.length} chars)' : 'null or empty'}");
+              debugPrint("📤 Images count: ${mediaToShare.images?.length ?? 0}");
+              if (mediaToShare.images != null && mediaToShare.images!.isNotEmpty) {
+                debugPrint("📤 First image: ${mediaToShare.images![0]}");
+                if (mediaToShare.images!.length > 1) {
+                  debugPrint("📤 Remaining images: ${mediaToShare.images!.length - 1}");
+                }
+              }
               CommonHelpers.shareLokVartaDetails(
                 title: mediaToShare.title,
                 content: mediaToShare.content,
@@ -54,6 +66,7 @@ class PhotoDetailsView extends StatelessWidget {
           ),
         ],
       ),
+      
       body: Padding(
         padding: EdgeInsetsGeometry.symmetric(
           horizontal: Dimens.horizontalspacing,

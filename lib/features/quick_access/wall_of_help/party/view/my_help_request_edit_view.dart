@@ -1,13 +1,18 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
+import 'package:inldsevak/core/mixin/handle_multiple_files_sheet.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
+import 'package:inldsevak/core/widgets/upload_multi_files.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/my_help_request_edit_view_model.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_view_model.dart';
 import 'package:provider/provider.dart';
@@ -18,9 +23,9 @@ import 'package:inldsevak/features/quick_access/wall_of_help/model/type_of_help_
 import 'package:inldsevak/features/quick_access/wall_of_help/model/preferred_way_model.dart'
     as preferred;
 
-class MyHelpRequestEditView extends StatelessWidget {
+class MyHelpRequestEditView extends StatelessWidget with HandleMultipleFilesSheet {
+  MyHelpRequestEditView({super.key, required this.editableData});
   final model.FinancialRequest editableData;
-  const MyHelpRequestEditView({super.key, required this.editableData});
 
   @override
   Widget build(BuildContext context) {
@@ -55,10 +60,10 @@ class MyHelpRequestEditView extends StatelessWidget {
                       controller: provider.nameController,
                       hintText: localization.enter_your_full_name,
                       headingText: localization.name,
+                      enableSpeechInput: true,
                       validator: (text) =>
                           text?.validate(argument: localization.name_validator),
                     ),
-
                     FormTextFormField(
                       isRequired: true,
                       focus: provider.phoneFocus,
@@ -67,6 +72,7 @@ class MyHelpRequestEditView extends StatelessWidget {
                       hintText: localization.enter_mobile_number,
                       headingText: localization.mobile_number,
                       maxLength: 10,
+                      enableSpeechInput: true,
                       keyboardType: TextInputType.phone,
                       validator: (text) => text?.validate(
                         argument: localization.phone_validator,
@@ -78,6 +84,7 @@ class MyHelpRequestEditView extends StatelessWidget {
                       controller: provider.addressController,
                       hintText: localization.enter_your_address,
                       headingText: localization.address,
+                      enableSpeechInput: true,
                       validator: (text) => text?.validate(
                         argument: localization.address_validator,
                       ),
@@ -89,15 +96,17 @@ class MyHelpRequestEditView extends StatelessWidget {
                       heading: localization.type_of_help_needed,
                       hintText: localization.choose_the_options,
                       headerBuilder: (_, text, _) {
-                        return Text(
-                          text?.name?.capitalize() ?? "",
+                        return TranslatedText(
+                          text: text?.name?.capitalize() ?? "",
                           style: textTheme.bodySmall,
+                          disableTranslation: false,
                         );
                       },
                       listItemBuilder: (_, text, _, _) {
-                        return Text(
-                          text?.name?.capitalize() ?? "",
+                        return TranslatedText(
+                          text: text?.name?.capitalize() ?? "",
                           style: textTheme.bodySmall,
+                          disableTranslation: false,
                         );
                       },
                       validator: (text) => text.toString().validateDropDown(
@@ -121,7 +130,6 @@ class MyHelpRequestEditView extends StatelessWidget {
                           argument: "Others Help need to be specified",
                         ),
                       ),
-
                     FormTextFormField(
                       isRequired: true,
                       maxLines: 5,
@@ -141,6 +149,20 @@ class MyHelpRequestEditView extends StatelessWidget {
                       items: provider.urgencyList,
                       heading: localization.urgency_level,
                       hintText: localization.choose_the_options,
+                      headerBuilder: (_, text, _) {
+                        return TranslatedText(
+                          text: text ?? "",
+                          style: textTheme.bodySmall,
+                          disableTranslation: false,
+                        );
+                      },
+                      listItemBuilder: (_, text, _, _) {
+                        return TranslatedText(
+                          text: text ?? "",
+                          style: textTheme.bodySmall,
+                          disableTranslation: false,
+                        );
+                      },
                       validator: (text) => text.toString().validateDropDown(
                         argument: localization.dropdown_validator,
                       ),
@@ -152,15 +174,17 @@ class MyHelpRequestEditView extends StatelessWidget {
                       heading: localization.preferred_way_to_receive_help,
                       hintText: localization.choose_the_options,
                       headerBuilder: (_, text, _) {
-                        return Text(
-                          text?.name?.capitalize() ?? "",
+                        return TranslatedText(
+                          text: text?.name?.capitalize() ?? "",
                           style: textTheme.bodySmall,
+                          disableTranslation: false,
                         );
                       },
                       listItemBuilder: (_, text, _, _) {
-                        return Text(
-                          text?.name?.capitalize() ?? "",
+                        return TranslatedText(
+                          text: text?.name?.capitalize() ?? "",
                           style: textTheme.bodySmall,
+                          disableTranslation: false,
                         );
                       },
                       validator: (text) => text.toString().validateDropDown(
@@ -201,6 +225,7 @@ class MyHelpRequestEditView extends StatelessWidget {
                             controller: provider.amountController,
                             hintText: localization.enter_amount,
                             headingText: localization.raise_amount,
+                            enableSpeechInput: true,
                             validator: (text) => text?.validateAmount(
                               argument: localization.raise_amount_validator,
                               argument2: localization.less_amount_validator,
@@ -211,6 +236,7 @@ class MyHelpRequestEditView extends StatelessWidget {
                             isRequired: true,
                             controller: provider.upiIdController,
                             hintText: "Enter UPI Id",
+                            disableHindiKeyboardOverlay: true,
                             headingText: "UPI",
                             validator: (text) => text?.validateUPI(
                               argument: "Enter valid UPI ID",
@@ -218,23 +244,37 @@ class MyHelpRequestEditView extends StatelessWidget {
                           ),
                         ],
                       ),
-
-                    // UploadMultiFilesWidget(
-                    //   title: localization.supporting_documents,
-                    //   onTap: () {
-                    //     showModalBottomSheet(
-                    //       context: context,
-                    //       builder: (context) => DraggableSheetWidget(
-                    //         size: 0.5,
-                    //         child: selectMultipleFiles(
-                    //           onTap: provider.addFiles,
-                    //         ),
-                    //       ),
-                    //     );
-                    //   },
-                    //   onRemove: (int index) => provider.removefile(index),
-                    //   multipleFiles: provider.multipleFiles,
-                    // ),
+                    if (provider.existingDocuments.isNotEmpty)
+                      _ExistingDocumentsGrid(
+                        documents: provider.existingDocuments,
+                        onRemove: provider.removeExistingDocument,
+                      ),
+                    Consumer<MyHelpRequestEditViewModel>(
+                      builder: (contextP, value, _) {
+                        return UploadMultiFilesWidget(
+                          title: localization.supporting_documents,
+                          onTap: () {
+                            // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: false,
+                              useRootNavigator: false,
+                              builder: (bottomSheetContext) => Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
+                                ),
+                                child: selectMultipleFiles(
+                                  onTap: value.addFiles,
+                                  context: bottomSheetContext,
+                                ),
+                              ),
+                            );
+                          },
+                          onRemove: (int index) => value.removeImage(index),
+                          multipleFiles: value.multipleFiles,
+                        );
+                      },
+                    ),
                   ],
                 ),
               );
@@ -274,5 +314,107 @@ class MyHelpRequestEditView extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _ExistingDocumentsGrid extends StatelessWidget {
+  const _ExistingDocumentsGrid({
+    required this.documents,
+    required this.onRemove,
+  });
+
+  final List<String> documents;
+  final void Function(int index) onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    if (documents.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: Dimens.gapX,
+      children: [
+        Text(
+          "Uploaded Files",
+          style: context.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: AppPalettes.lightTextColor,
+          ),
+        ),
+        Wrap(
+          spacing: Dimens.gapX1,
+          runSpacing: Dimens.gapX1,
+          children: List.generate(documents.length, (index) {
+            final resolvedUrl = _resolveUrl(documents[index]);
+            if (resolvedUrl == null) {
+              return const SizedBox.shrink();
+            }
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(Dimens.radiusX2),
+                  child: CachedNetworkImage(
+                    imageUrl: resolvedUrl,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Container(
+                      width: 72,
+                      height: 72,
+                      alignment: Alignment.center,
+                      color: AppPalettes.liteGreyColor,
+                      child: const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 1.5),
+                      ),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
+                      width: 72,
+                      height: 72,
+                      alignment: Alignment.center,
+                      color: AppPalettes.liteGreyColor,
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        size: 20,
+                        color: AppPalettes.lightTextColor,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: -6,
+                  right: -6,
+                  child: GestureDetector(
+                    onTap: () => onRemove(index),
+                    child: CircleAvatar(
+                      radius: Dimens.scaleX1B,
+                      backgroundColor: AppPalettes.whiteColor,
+                      child: Icon(
+                        Icons.close,
+                        size: Dimens.scaleX1B,
+                        color: AppPalettes.redColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  String? _resolveUrl(String? value) {
+    if (value == null) return null;
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+    if (trimmed.startsWith('http')) return trimmed;
+    if (trimmed.startsWith('/')) return "${URLs.baseURL}$trimmed";
+    return "${URLs.baseURL}/$trimmed";
   }
 }

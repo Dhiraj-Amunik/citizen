@@ -8,6 +8,7 @@ import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
+import 'package:inldsevak/core/widgets/transliterated_text.dart';
 
 class ProfileHelper {
   static Widget getProfileBox({
@@ -57,6 +58,7 @@ class ProfileHelper {
                     text: name ?? "",
                     style: AppStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
                     maxLines: 1,
+                    disableTranslation: true,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (number != null)

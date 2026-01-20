@@ -18,34 +18,70 @@ class ConstituencyViewModel extends BaseViewModel {
     required SingleSelectController<Constituency?> parlimentController,
   }) async {
     try {
-      if (pincode.length != 6) {
+      // Trim and validate pincode format
+      final trimmedPincode = pincode.trim();
+      
+      if (trimmedPincode.isEmpty) {
         CommonSnackbar(
           text: "Please enter a valid Pincode !",
         ).showAnimatedDialog(type: QuickAlertType.warning);
         return null;
       }
-      final intCode = int.tryParse(pincode);
+      
+      if (trimmedPincode.length != 6) {
+        CommonSnackbar(
+          text: "Pincode must be 6 digits !",
+        ).showAnimatedDialog(type: QuickAlertType.warning);
+        return null;
+      }
+      
+      // Safely parse pincode - use tryParse to prevent FormatException
+      final intCode = int.tryParse(trimmedPincode);
+      if (intCode == null) {
+        CommonSnackbar(
+          text: "Please enter a valid numeric Pincode !",
+        ).showAnimatedDialog(type: QuickAlertType.warning);
+        return null;
+      }
+      
       final model = RequestPincodeModel(pincode: intCode);
       final response = await ConstituenciesRepository()
           .getParliamentaryConstituencies(token: token, model: model);
       if (response.data?.responseCode == 200) {
         final data = response.data?.data;
-        if (data?.isEmpty == true) {
+        if (data == null) {
+          debugPrint("⚠️ Parliamentary constituencies data is null");
+          parliamentaryConstituencyLists = [];
+        } else if (data.isEmpty) {
+          debugPrint("⚠️ No parliamentary constituencies found");
           await CommonSnackbar(
             text: "No Constituencies Found !",
           ).showAnimatedDialog(type: QuickAlertType.warning);
+          parliamentaryConstituencyLists = [];
         } else {
-          parlimentController.clear();
-          parliamentaryConstituencyLists = List<Constituency>.from(
-            data as List,
-          );
-          if (parliamentaryConstituencyLists.isNotEmpty) {
-            parlimentController.value = parliamentaryConstituencyLists.first;
+          try {
+            // Data is already parsed as List<Constituency> from ConstituencyModel.fromJson
+            // Convert List<Constituency> to List<Constituency?> to match the field type
+            parlimentController.clear();
+            parliamentaryConstituencyLists = List<Constituency?>.from(data);
+            if (parliamentaryConstituencyLists.isNotEmpty) {
+              parlimentController.value = parliamentaryConstituencyLists.first;
+            }
+            debugPrint("✅ Loaded ${parliamentaryConstituencyLists.length} parliamentary constituencies");
+            notifyListeners();
+            return response.data?.district;
+          } catch (e, stackTrace) {
+            debugPrint("❌ Error assigning parliamentary constituencies: $e");
+            debugPrint("Stack trace: $stackTrace");
+            debugPrint("   Data type: ${data.runtimeType}");
+            parliamentaryConstituencyLists = [];
+            await CommonSnackbar(
+              text: "Error loading constituencies data",
+            ).showAnimatedDialog(type: QuickAlertType.error);
           }
-          notifyListeners();
-          return response.data?.district;
         }
       } else {
+        debugPrint("⚠️ Failed to get parliamentary constituencies: ${response.data?.message}");
         await CommonSnackbar(
           text: response.data?.message ?? "No Constituencies Found !",
         ).showAnimatedDialog(type: QuickAlertType.warning);
@@ -76,13 +112,41 @@ class ConstituencyViewModel extends BaseViewModel {
 
       if (response.data?.responseCode == 200) {
         final data = response.data?.data;
-        if (data?.isEmpty == true) {
+        if (data == null) {
+          debugPrint("⚠️ Assembly constituencies data is null");
+          assemblyConstituencyLists = [];
+        } else if (data.isEmpty) {
+          debugPrint("⚠️ No assembly constituencies found");
           await CommonSnackbar(
             text: "No Constituencies Found !",
           ).showAnimatedDialog(type: QuickAlertType.warning);
+          assemblyConstituencyLists = [];
         } else {
-          assemblyConstituencyLists = List<Constituency>.from(data as List);
+          try {
+            // Data is already parsed as List<Constituency> from ConstituencyModel.fromJson
+            // Convert List<Constituency> to List<Constituency?> to match the field type
+            assemblyConstituencyLists = List<Constituency?>.from(data);
+            debugPrint("✅ Loaded ${assemblyConstituencyLists.length} assembly constituencies");
+            // Log first item for debugging
+            if (assemblyConstituencyLists.isNotEmpty) {
+              final first = assemblyConstituencyLists.first;
+              debugPrint("   Example - Name: ${first?.name}, sId: ${first?.sId}");
+            }
+          } catch (e, stackTrace) {
+            debugPrint("❌ Error assigning assembly constituencies: $e");
+            debugPrint("Stack trace: $stackTrace");
+            debugPrint("   Data type: ${data.runtimeType}");
+            assemblyConstituencyLists = [];
+            await CommonSnackbar(
+              text: "Error loading constituencies data",
+            ).showAnimatedDialog(type: QuickAlertType.error);
+          }
         }
+        notifyListeners();
+      } else {
+        debugPrint("⚠️ Failed to get assembly constituencies: ${response.data?.message}");
+        debugPrint("   Response code: ${response.data?.responseCode}");
+        assemblyConstituencyLists = [];
         notifyListeners();
       }
     } catch (err, stackTrace) {

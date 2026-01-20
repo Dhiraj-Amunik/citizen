@@ -174,6 +174,7 @@ class Location {
   Location({this.lat, this.lng});
 
   Location.fromJson(Map<String, dynamic> json) {
+    // Google Places API returns coordinates in standard format: {"lat": latitude, "lng": longitude}
     lat = json['lat'];
     lng = json['lng'];
   }
@@ -189,9 +190,7 @@ class Location {
 class Viewport {
   Location? northeast;
   Location? southwest;
-
   Viewport({this.northeast, this.southwest});
-
   Viewport.fromJson(Map<String, dynamic> json) {
     northeast = json['northeast'] != null
         ? new Location.fromJson(json['northeast'])

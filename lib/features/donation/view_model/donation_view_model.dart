@@ -142,5 +142,8 @@ class DonationViewModel extends BaseViewModel {
     amount.clear();
     // purpose.clear();
     autoValidateMode = AutovalidateMode.disabled;
+    _isUpiSelected = false;
+    _isNetSelected = false;
+    notifyListeners();
   }
 }

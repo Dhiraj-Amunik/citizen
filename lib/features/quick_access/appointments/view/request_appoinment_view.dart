@@ -20,6 +20,7 @@ import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/features/quick_access/appointments/viewmodel/appointments_view_model.dart';
 import 'package:inldsevak/features/quick_access/appointments/viewmodel/request_appointment_view_model.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
 
 class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
@@ -35,22 +36,41 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
       builder: (context, child) {
         final provider = context.read<RequestAppointmentViewModel>();
         final textTheme = context.textTheme;
+        // Check if Hindi keyboard might be shown (Hindi language)
+        final isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+        // Hindi keyboard height is approximately 300px
+        const hindiKeyboardHeight = 300.0;
+        
         return Scaffold(
           appBar: commonAppBar(title: localization.request_appointment),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsetsGeometry.symmetric(
-                horizontal: Dimens.horizontalspacing,
-                vertical: Dimens.paddingX2,
-              ),
-              child: Consumer(
-                builder: (_, _, _) {
-                  return Form(
-                    key: provider.formKey,
-                    autovalidateMode: provider.autoValidateMode,
-                    child: Column(
-                      spacing: Dimens.textFromSpacing,
-                      children: [
+          body: Builder(
+            builder: (context) {
+              // Check if any text field has focus (which would show Hindi keyboard)
+              final hasFocus = FocusScope.of(context).hasFocus;
+              final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+              // Show padding if system keyboard is showing OR if Hindi keyboard might be showing (Hindi mode + focus)
+              final shouldShowKeyboardPadding = isHindiLanguage && hasFocus && viewInsets == 0;
+              
+              return SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  // Only add extra padding for Hindi locale, not for English
+                  bottom: isHindiLanguage && shouldShowKeyboardPadding
+                      ? hindiKeyboardHeight 
+                      : (viewInsets > 0 ? viewInsets : 0),
+                ),
+                child: Padding(
+                  padding: EdgeInsetsGeometry.symmetric(
+                    horizontal: Dimens.horizontalspacing,
+                    vertical: Dimens.paddingX2,
+                  ),
+                  child: Consumer(
+                    builder: (_, _, _) {
+                      return Form(
+                        key: provider.formKey,
+                        autovalidateMode: provider.autoValidateMode,
+                        child: Column(
+                          spacing: Dimens.textFromSpacing,
+                          children: [
                         MlaDropDownWidget(
                           mlaController: provider.mlaController,
                         ),
@@ -59,15 +79,21 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                           heading: localization.book_for,
                           controller: provider.bookForController,
                           items: provider.bookForList,
-                          headerBuilder: (_, data, _) {
+                          headerBuilder: (context, data, _) {
+                            final text = data?.key == 'self' 
+                                ? localization.my_self 
+                                : localization.others;
                             return Text(
-                              data?.value ?? "",
+                              text,
                               style: textTheme.bodySmall,
                             );
                           },
-                          listItemBuilder: (_, data, _, _) {
+                          listItemBuilder: (context, data, _, _) {
+                            final text = data?.key == 'self' 
+                                ? localization.my_self 
+                                : localization.others;
                             return Text(
-                              data?.value ?? "",
+                              text,
                               style: textTheme.bodySmall,
                             );
                           },
@@ -79,7 +105,7 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                             }
                           },
                           validator: (text) => text.toString().validateDropDown(
-                            argument: "Please select one option",
+                            argument: localization.dropdown_validator,
                           ),
                         ),
                         FormTextFormField(
@@ -88,6 +114,7 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                             textCapitalization: TextCapitalization.sentences,
                             enforceFirstLetterUppercase: true,
                           headingText: localization.name,
+                          minChar: 5,
                           hintText: localization.enter_your_full_name,
                           controller: provider.nameController,
                           keyboardType: TextInputType.name,
@@ -124,7 +151,6 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                                 .please_provide_valid_10_digit_number,
                           ),
                         ),
-
                         Column(
                           children: [
                             FormTextFormField(
@@ -158,22 +184,6 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                                     .please_select_your_appointment_date,
                               ),
                             ),
-                            FormTextFormField(
-                              isRequired: true,
-                              suffixIcon: AppImages.clockIcon,
-                              headingText: localization.time_slot,
-                              hintText: localization.select_time_slot,
-                              keyboardType: TextInputType.none,
-                              showCursor: false,
-                              controller: provider.timeSlotController,
-                              onTap: () async {
-                                final time = await custom24HrsTimePicker();
-                                provider.timeSlotController.text = time ?? "";
-                              },
-                              validator: (text) => text?.validate(
-                                argument: "Please select time slot for your appointment",
-                              ),
-                            ),
                             SizeBox.sizeHX2,
                             Text(
                               localization.appointment_note,
@@ -202,7 +212,7 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                               },
                               validator: (text) => text?.validate(
                                 argument:
-                                    "Please select your appointment purpose",
+                                    localization.appointment_purpose_validator,
                               ),
                             ),
                           ],
@@ -237,7 +247,7 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                           
                           validator: (text) => text?.validate(
                             argument:
-                                "Please enter description for appointment",
+                                localization.appointment_description_validator,
                           ),
                         ),
 
@@ -245,11 +255,16 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                           builder: (contextP, value, _) {
                             return UploadMultiFilesWidget(
                               onTap: () {
+                                // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
                                 showModalBottomSheet(
                                   context: context,
-                                  builder: (context) => DraggableSheetWidget(
-                                    size: 0.5,
-                                    child: value.selectMultipleImages(),
+                                  isScrollControlled: false,
+                                  useRootNavigator: true,
+                                  builder: (context) => Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                                    ),
+                                    child: value.selectMultipleImages(context: context),
                                   ),
                                 );
                               },
@@ -263,7 +278,9 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                   );
                 },
               ),
-            ),
+                ),
+              );
+            },
           ),
           bottomNavigationBar:
               Consumer2<RequestAppointmentViewModel, AppointmentsViewModel>(

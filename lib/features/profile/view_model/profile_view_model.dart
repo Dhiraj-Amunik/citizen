@@ -20,11 +20,12 @@ import 'package:inldsevak/core/models/response/constituency/constituency_model.d
 import 'package:inldsevak/features/profile/view_model/avatar_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 
 class ProfileViewModel extends BaseViewModel
     with UploadFilesMixin, SingleImagePickerMixin {
   GlobalKey<FormState> userDetailsFormKey = GlobalKey<FormState>();
-  AutovalidateMode autoValidateMode = AutovalidateMode.onUserInteraction;
+  AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
 
   final emailFocus = FocusNode();
 
@@ -38,8 +39,68 @@ class ProfileViewModel extends BaseViewModel
   Constituency? parlimentaryConstituencyData;
   Constituency? assemblyConstituencyData;
 
-  List<String> genderList = ['Male', 'Female', 'others'];
+  // Original English list (for API submission)
+  final List<String> _genderList = ['Male', 'Female', 'others'];
+  
+  // Translated list (for UI display)
+  List<String> get genderList {
+    final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+    if (!isHindiLocale) return _genderList;
+    
+    // Return translated versions
+    return _genderList.map((gender) {
+      switch (gender.toLowerCase()) {
+        case 'male':
+          return 'पुरुष';
+        case 'female':
+          return 'महिला';
+        case 'others':
+          return 'अन्य';
+        default:
+          return gender;
+      }
+    }).toList();
+  }
+  
   String? gender;
+  
+  // Helper method to get original English value from translated value for API
+  String? _getOriginalGenderValue(String? translatedValue) {
+    if (translatedValue == null) return null;
+    final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+    if (!isHindiLocale) return translatedValue;
+    
+    // Map Hindi back to English
+    switch (translatedValue) {
+      case 'पुरुष':
+        return 'Male';
+      case 'महिला':
+        return 'Female';
+      case 'अन्य':
+        return 'others';
+      default:
+        return translatedValue;
+    }
+  }
+  
+  // Helper method to convert English gender to translated value for display
+  String? _getTranslatedGenderValue(String? englishValue) {
+    if (englishValue == null) return null;
+    final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+    if (!isHindiLocale) return englishValue;
+    
+    // Map English to Hindi
+    switch (englishValue.toLowerCase()) {
+      case 'male':
+        return 'पुरुष';
+      case 'female':
+        return 'महिला';
+      case 'others':
+        return 'अन्य';
+      default:
+        return englishValue;
+    }
+  }
 
   model.Data? profile;
   AddressModel? address;
@@ -120,8 +181,13 @@ class ProfileViewModel extends BaseViewModel
     required AvatarViewModel avatar,
   }) async {
     try {
-      if (!userDetailsFormKey.currentState!.validate()) {
+      // Set autoValidateMode to onUserInteraction before validation so validators run
+      if (autoValidateMode == AutovalidateMode.disabled) {
         autoValidateMode = AutovalidateMode.onUserInteraction;
+        notifyListeners(); // Notify to rebuild Consumer widgets so validator runs
+      }
+      
+      if (!userDetailsFormKey.currentState!.validate()) {
         return;
       }
 
@@ -153,9 +219,11 @@ class ProfileViewModel extends BaseViewModel
         data.dateOfBirth = companyDateFormat;
       }
 
-      if (genderValue?.toLowerCase() != profile?.gender?.toLowerCase()) {
+      // Convert translated gender value back to English for API
+      final originalGenderValue = _getOriginalGenderValue(genderValue);
+      if (originalGenderValue?.toLowerCase() != profile?.gender?.toLowerCase()) {
         needUpdate = true;
-        data.gender = genderValue?.toLowerCase();
+        data.gender = originalGenderValue?.toLowerCase();
       }
 
       if (assemblyConstituenciesID != profile?.assemblyConstituency?.sId ||
@@ -284,7 +352,10 @@ class ProfileViewModel extends BaseViewModel
       voterIdImage = null;
       aadharImage = null;
       nameController.text = profile?.name ?? "";
-      gender = _safeFindMatch(genderList, profile?.gender?.capitalize());
+      // Get the English gender value from profile and convert to translated value for display
+      final englishGender = profile?.gender?.capitalize();
+      final translatedGender = _getTranslatedGenderValue(englishGender);
+      gender = _safeFindMatch(genderList, translatedGender) ?? translatedGender;
       emailController.text = profile?.email ?? "";
       phoneNumberController.text = profile?.phone ?? "";
       companyDateFormat = profile?.dateOfBirth ?? "";
@@ -293,12 +364,20 @@ class ProfileViewModel extends BaseViewModel
       if (profile?.document != null && profile?.document?.isNotEmpty == true) {
         profile?.document?.forEach((document) {
           if (document.documentType?.toLowerCase() == "aadhaar") {
-            aadharController.text = document.documentNumber ?? "";
-            generateAadhar(aadharController.text);
+            final aadhaar = document.documentNumber ?? "";
+            aadharController.value = TextEditingValue(
+              text: aadhaar,
+              selection: TextSelection.collapsed(offset: aadhaar.length),
+            );
+            generateAadhar(aadhaar);
             aadharURL = document.documentUrl;
           }
           if (document.documentType?.toLowerCase() == "voterid") {
-            voterIdController.text = document.documentNumber ?? "";
+            final voter = document.documentNumber ?? "";
+            voterIdController.value = TextEditingValue(
+              text: voter,
+              selection: TextSelection.collapsed(offset: voter.length),
+            );
             voterIdURL = document.documentUrl;
           }
         });
@@ -341,18 +420,26 @@ class ProfileViewModel extends BaseViewModel
   }
 
   void generateVoter(String? value) {
-    voterIdController.value = TextEditingValue(text: value!.toUpperCase());
+    final upper = (value ?? '').toUpperCase();
+    voterIdController.value = TextEditingValue(
+      text: upper,
+      selection: TextSelection.collapsed(offset: upper.length),
+    );
   }
 
   void generateAadhar(String? value) {
     // Remove all spaces first
-    String digitsOnly = value!.replaceAll(RegExp(r'\s+'), '');
+    final input = value ?? '';
+    String digitsOnly = input.replaceAll(RegExp(r'\s+'), '');
 
     // Add spaces after every 4 characters
     String formattedValue = digitsOnly
         .replaceAllMapped(RegExp(r".{1,4}"), (match) => "${match.group(0)} ")
         .trim();
-    aadharController.value = TextEditingValue(text: formattedValue);
+    aadharController.value = TextEditingValue(
+      text: formattedValue,
+      selection: TextSelection.collapsed(offset: formattedValue.length),
+    );
   }
 
   String? getInitialDocumentNumber(String? docType) {

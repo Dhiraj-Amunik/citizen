@@ -25,15 +25,23 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ProfileView extends StatelessWidget with CupertinoDialogMixin {
+class ProfileView extends StatefulWidget with CupertinoDialogMixin {
   const ProfileView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final localization = context.localizations;
-    final roleProvider = context.read<RoleViewModel>();
+  State<ProfileView> createState() => _ProfileViewState();
+}
 
-    return Scaffold(
+class _ProfileViewState extends State<ProfileView> with CupertinoDialogMixin {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<dynamic>(
+      stream: GeneralStream.instance.language,
+      builder: (context, snapshot) {
+        final localization = context.localizations;
+        final roleProvider = context.read<RoleViewModel>();
+
+        return Scaffold(
       appBar: commonAppBar(title: localization.profile),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
@@ -90,6 +98,7 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
                       );
                     },
                   ),
+
                   Consumer<ProfileViewModel>(
                     builder: (context, value, _) {
                       if (value.profile?.inviteCode != null && 
@@ -115,6 +124,7 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
                                       color: AppPalettes.blackColor,
                                     ),
                                   ),
+
                                   SizeBox.sizeHX1,
                                   Text(
                                      value.profile?.inviteCode ?? "",
@@ -202,11 +212,10 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
                             CommonButton(
                               color: AppPalettes.whiteColor,
                               textColor: AppPalettes.blackColor,
-                              text: "हिन्दी (Hindi)",
+                              text: "Hindi ",
                               borderColor: AppPalettes.primaryColor,
                               onTap: () {
                                 GeneralStream.instance.setLocale("hi");
-
                                 RouteManager.pop();
                               },
                             ),
@@ -263,21 +272,33 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
               icon: AppImages.phoneIcon,
               onTap: () => RouteManager.pushNamed(Routes.emergencyContactsPage),
             ),
-            ProfileHelper.getCommonBox(
-              localization.share_app,
-              subtext: localization.share_app_subtext,
-              icon: AppImages.shareIcon,
-              backgroundColor: AppPalettes.liteGreenColor,
-              onTap: () {
-                SharePlus.instance.share(
-                  ShareParams(
-                    title: "SEVAK",
-                    text:
-                        'SEVAK App is the simple way to raise issues and get them delivered.\nhttps://play.google.com/store/apps/details?id=org.amunik.sevak&pcampaignid=web_share},',
-                  ),
+            Consumer<ProfileViewModel>(
+              builder: (context, profileValue, _) {
+                return ProfileHelper.getCommonBox(
+                  localization.share_app,
+                  subtext: localization.share_app_subtext,
+                  icon: AppImages.shareIcon,
+                  backgroundColor: AppPalettes.liteGreenColor,
+                  onTap: () {
+                    final referralCode = profileValue.profile?.inviteCode;
+                    String shareText = 'SEVAK App is the simple way to raise issues and get them delivered.\nhttps://play.google.com/store/apps/details?id=org.amunik.sevak&pcampaignid=web_share';
+                    
+                    // Add referral code if available
+                    if (referralCode != null && referralCode.trim().isNotEmpty) {
+                      shareText += '\n\nUse my referral code: $referralCode';
+                    }
+                    
+                    SharePlus.instance.share(
+                      ShareParams(
+                        title: "SEVAK",
+                        text: shareText,
+                      ),
+                    );
+                  },
                 );
               },
             ),
+            
             ProfileHelper.getLogout(
               localization.logout,
               onTap: () {
@@ -319,6 +340,8 @@ class ProfileView extends StatelessWidget with CupertinoDialogMixin {
         ),
       ),
       bottomNavigationBar: DummyNav(),
+        );
+      },
     );
   }
 

@@ -11,6 +11,7 @@ import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/home/models/response/dashboard_response_model.dart';
 import 'package:inldsevak/features/home/services/dashboard_repository.dart';
+import 'package:inldsevak/features/home/view/indl_view.dart';
 import 'package:inldsevak/features/volunter/view/top_volunteers_view.dart';
 
 class QuickAccessWidget extends StatelessWidget {
@@ -187,6 +188,22 @@ Future<void> _handleQuickAccessTap(
     await _handleVolunteerTap(context);
     return;
   }
+  
+  // Check volunteer status before navigating to become a party member
+  if (data.route == Routes.becomePartMemberPage) {
+    await _handleBecomePartyMemberTap(context);
+    return;
+  }
+  
+  // Check location permission only when accessing nearest member
+  if (data.route == Routes.nearestMemberPage) {
+    final hasPermission = await checkLocationPermissionForNearestMember(context);
+    if (!hasPermission) {
+      // Permission denied, don't navigate
+      return;
+    }
+  }
+  
   RouteManager.pushNamed(data.route);
 }
 
@@ -236,17 +253,27 @@ Future<void> _handleVolunteerTap(BuildContext context) async {
     final DashboardData? data = dashboard?.data;
     final status = data?.volunteerStatus?.toLowerCase().trim();
     final isVolunteer = data?.isVolunteer == true;
+    final isPartyMember = data?.user?.isPartyMember == true;
 
     if (data?.user?.isPartyMember != null) {
       await SessionController.instance
           .setPartyMember(isPartyMember: data!.user!.isPartyMember ?? false);
     }
 
+    // If user is an approved volunteer, navigate to analytics
     if (status == 'approved' || isVolunteer) {
       RouteManager.pushNamed(Routes.volunteerAnalyticsPage);
       return;
     }
 
+    // If user is an approved party member, navigate directly to volunteer form
+    // This is the correct flow after party member approval
+    if (isPartyMember) {
+      RouteManager.pushNamed(Routes.beVolunteerPage);
+      return;
+    }
+
+    // For non-party members, show status messages
     if (status == 'pending') {
       RouteManager.pushNamed(
         Routes.topVolunteersPage,
@@ -269,6 +296,7 @@ Future<void> _handleVolunteerTap(BuildContext context) async {
       return;
     }
 
+    // Default: navigate to top volunteers page for non-party members
     RouteManager.pushNamed(Routes.topVolunteersPage);
   } catch (error, stackTrace) {
     closeDialog();
@@ -278,6 +306,12 @@ Future<void> _handleVolunteerTap(BuildContext context) async {
       text: "Something went wrong, please try again later",
     ).showToast();
   }
+}
+
+Future<void> _handleBecomePartyMemberTap(BuildContext context) async {
+  // Navigate directly to become party member view
+  // This is the correct flow: tap "become a party member" -> open party member form
+  RouteManager.pushNamed(Routes.becomePartMemberPage);
 }
 
 class QuickAccessModel {

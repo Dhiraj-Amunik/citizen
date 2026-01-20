@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
+import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
 
@@ -12,6 +13,7 @@ class WallOfHelpHelpers {
   }) {
     return RefreshIndicator(
       onRefresh: onRefresh,
+      color: AppPalettes.primaryColor,
       child: SingleChildScrollView(
         physics: AlwaysScrollableScrollPhysics(),
         child: Column(

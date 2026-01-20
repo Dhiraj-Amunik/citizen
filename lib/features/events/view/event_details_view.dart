@@ -133,7 +133,7 @@ class EventDetailsView extends StatelessWidget {
                           ),
                           CommonExpandedWidget(
                             color: AppPalettes.liteGreyColor,
-
+                            initialExpand: true,
                             title: localization.view_poster,
                             childrenPadding: Dimens.paddingX3,
                             padding: EdgeInsets.symmetric(

@@ -21,6 +21,7 @@ class HoursSliderWidget extends StatelessWidget {
     
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
+        valueIndicatorColor: AppPalettes.primaryColor,
         activeTrackColor: AppPalettes.primaryColor,
         inactiveTrackColor: AppPalettes.liteGreyColor,
         thumbColor: AppPalettes.whiteColor,
@@ -28,6 +29,7 @@ class HoursSliderWidget extends StatelessWidget {
           enabledThumbRadius: 12,
         ),
         overlayShape: const RoundSliderOverlayShape(
+
           overlayRadius: 20,
         ),
         trackHeight: 4,

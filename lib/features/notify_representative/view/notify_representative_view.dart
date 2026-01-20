@@ -15,6 +15,7 @@ import 'package:inldsevak/core/widgets/default_tabbar.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_filters_model.dart';
 import 'package:inldsevak/features/notify_representative/view_model/notify_representative_view_model.dart';
 import 'package:inldsevak/features/notify_representative/widgets/notify_container.dart';
@@ -52,8 +53,11 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
       builder: (contextP, _) {
         return PopScope(
           onPopInvokedWithResult: (didPop, result) {
+            if (didPop) {
             provider.searchController.clear();
+              provider.clearFilters();
             provider.onSearchChanged(tabController.index);
+            }
           },
           child: Scaffold(
             appBar: commonAppBar(
@@ -128,7 +132,10 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                           SizeBox.sizeHX3,
                           DefaultTabBar(
                             controller: tabController,
-                            tabLabels: const ["Recent", "Past"],
+                            tabLabels: [
+                              localization.recent,
+                              localization.past,
+                            ],
                           ),
                         ],
                       );
@@ -150,9 +157,11 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                             onRefresh: () async {
                               value.onRecentRefresh();
                             },
+                            color: AppPalettes.primaryColor,
                             child: value.recentNotifyLists.isEmpty
                                 ? NotifyReprHelper.emptyPlaceholder(
                                     type: "Recent",
+                                    context: context,
                                   )
                                 : ListView.separated(
                                     physics: AlwaysScrollableScrollPhysics(),
@@ -177,9 +186,11 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                             onRefresh: () async {
                               value.onPastRefresh();
                             },
+                            color: AppPalettes.primaryColor,
                             child: value.pastNotifyLists.isEmpty
                                 ? NotifyReprHelper.emptyPlaceholder(
                                     type: "Past",
+                                    context: context,
                                   )
                                 : ListView.separated(
                                     physics: AlwaysScrollableScrollPhysics(),
@@ -217,6 +228,10 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
     BuildContext context,
     NotifyRepresentativeViewModel provider,
   ) {
+    // Fetch fresh filters data every time the sheet opens
+    provider.getNotifyFilters();
+    final localization = context.localizations;
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -233,8 +248,8 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                     provider.clearFilters();
                     RouteManager.pop();
                   },
-                  child: Text(
-                    'Clear',
+                  child: TranslatedText(
+                    text: localization.clear,
                     style: context.textTheme.bodyLarge?.copyWith(
                       color: AppPalettes.primaryColor,
                     ),
@@ -244,8 +259,8 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
               Expanded(
                 child: CommonButton(
                   height: 45,
-                  child: Text(
-                    'Apply',
+                  child: TranslatedText(
+                    text: localization.apply,
                     style: context.textTheme.bodyLarge?.copyWith(
                       color: AppPalettes.whiteColor,
                     ),
@@ -260,12 +275,14 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
         ),
         child: Consumer<NotifyRepresentativeViewModel>(
           builder: (context, value, _) {
-            // Show loading if filters are not loaded yet
-            if (value.filtersData == null) {
+            // Show loading while filters are being fetched
+            if (value.isFiltersLoading || value.filtersData == null) {
               return Padding(
                 padding: EdgeInsets.all(Dimens.paddingX3),
                 child: Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(
+                    color: AppPalettes.primaryColor,
+                  ),
                 ),
               );
             }
@@ -279,8 +296,8 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'Filters',
+                      TranslatedText(
+                        text: localization.filters,
                         style: context.textTheme.headlineSmall,
                       ),
                     ],
@@ -290,55 +307,26 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: Dimens.gapX3,
                     children: [
-                      // Constituency Filter
-                      if (value.filtersData?.constituencies != null &&
-                          value.filtersData!.constituencies!.isNotEmpty)
-                        FormCommonDropDown<ConstituencyFilter>(
-                          heading: 'Constituency',
-                          hintText: 'Select Constituency',
-                          initialData: value.selectedConstituency,
-                          items: value.filtersData?.constituencies,
-                          listItemBuilder: (context, constituency, _, __) {
-                            return Text(
-                              constituency.name ?? '',
-                              style: context.textTheme.bodySmall,
-                            );
-                          },
-                          headerBuilder: (context, constituency, _) {
-                            return Text(
-                              constituency.name ?? '',
-                              style: context.textTheme.bodySmall,
-                            );
-                          },
-                          onChanged: (selectedValue) {
-                            value.setConstituency(selectedValue);
-                          },
-                        ),
-
-                      // MLA Filter (filtered by selected constituency)
+                      // MLA Filter
                       if (value.filtersData?.mlas != null &&
                           value.filtersData!.mlas!.isNotEmpty)
                         FormCommonDropDown<MlaFilter>(
                           heading: 'MLA',
-                          hintText: 'Select MLA',
+                          hintText: localization.select_mla,
                           initialData: value.selectedMla,
-                          items: value.filtersData?.mlas?.where((mla) {
-                            if (value.selectedConstituency == null) {
-                              return true;
-                            }
-                            return mla.constituency ==
-                                value.selectedConstituency?.sId;
-                          }).toList(),
+                          items: value.filtersData?.mlas,
                           listItemBuilder: (context, mla, _, __) {
-                            return Text(
-                              mla.user?.name ?? '',
+                            return TranslatedText(
+                              text: mla.user?.name ?? '',
                               style: context.textTheme.bodySmall,
+                              disableTranslation: true,
                             );
                           },
                           headerBuilder: (context, mla, _) {
-                            return Text(
-                              mla.user?.name ?? '',
+                            return TranslatedText(
+                              text: mla.user?.name ?? '',
                               style: context.textTheme.bodySmall,
+                              disableTranslation: true,
                             );
                           },
                           onChanged: (selectedValue) {
@@ -350,19 +338,19 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                       if (value.filtersData?.districts != null &&
                           value.filtersData!.districts!.isNotEmpty)
                         FormCommonDropDown<String>(
-                          heading: 'District',
+                          heading: localization.district,
                           hintText: 'Select District',
                           initialData: value.selectedDistrict,
                           items: value.filtersData?.districts,
                           listItemBuilder: (context, district, _, __) {
-                            return Text(
-                              district,
+                            return TranslatedText(
+                              text: district,
                               style: context.textTheme.bodySmall,
                             );
                           },
                           headerBuilder: (context, district, _) {
-                            return Text(
-                              district,
+                            return TranslatedText(
+                              text: district,
                               style: context.textTheme.bodySmall,
                             );
                           },
@@ -371,23 +359,23 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                           },
                         ),
 
-                      // Mandal Filter
+                      // Tehsil Filter
                       if (value.filtersData?.mandals != null &&
                           value.filtersData!.mandals!.isNotEmpty)
                         FormCommonDropDown<String>(
-                          heading: 'Mandal',
-                          hintText: 'Select Mandal',
+                          heading: 'Tehsil',
+                          hintText: 'Select Tehsil', // TODO: Add tehsil localization key
                           initialData: value.selectedMandal,
                           items: value.filtersData?.mandals,
                           listItemBuilder: (context, mandal, _, __) {
-                            return Text(
-                              mandal,
+                            return TranslatedText(
+                              text: mandal,
                               style: context.textTheme.bodySmall,
                             );
                           },
                           headerBuilder: (context, mandal, _) {
-                            return Text(
-                              mandal,
+                            return TranslatedText(
+                              text: mandal,
                               style: context.textTheme.bodySmall,
                             );
                           },
@@ -396,23 +384,23 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                           },
                         ),
 
-                      // Village Filter
+                      // City/Town Filter
                       if (value.filtersData?.villages != null &&
                           value.filtersData!.villages!.isNotEmpty)
                         FormCommonDropDown<String>(
-                          heading: 'Village',
-                          hintText: 'Select Village',
+                          heading: localization.city_village,
+                          hintText: 'Select City/Town',
                           initialData: value.selectedVillage,
                           items: value.filtersData?.villages,
                           listItemBuilder: (context, village, _, __) {
-                            return Text(
-                              village,
+                            return TranslatedText(
+                              text: village,
                               style: context.textTheme.bodySmall,
                             );
                           },
                           headerBuilder: (context, village, _) {
-                            return Text(
-                              village,
+                            return TranslatedText(
+                              text: village,
                               style: context.textTheme.bodySmall,
                             );
                           },

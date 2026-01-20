@@ -725,7 +725,7 @@ abstract class AppLocalizations {
   /// No description provided for @phone_validator.
   ///
   /// In en, this message translates to:
-  /// **'Please enter you mobile number'**
+  /// **'Please enter your mobile number'**
   String get phone_validator;
 
   /// No description provided for @support_24_7.
@@ -1007,7 +1007,7 @@ abstract class AppLocalizations {
   /// No description provided for @appointment_note.
   ///
   /// In en, this message translates to:
-  /// **'Note: As per the availability of Associate can rescheduled ur preferred date in appointment'**
+  /// **'Note: As per the availability of Associate can rescheduled ur preferred date and time in appointment'**
   String get appointment_note;
 
   /// No description provided for @appointment_list.
@@ -1039,6 +1039,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Book for'**
   String get book_for;
+
+  /// No description provided for @my_self.
+  ///
+  /// In en, this message translates to:
+  /// **'My Self'**
+  String get my_self;
+
+  /// No description provided for @others.
+  ///
+  /// In en, this message translates to:
+  /// **'Others'**
+  String get others;
 
   /// No description provided for @membership_id.
   ///
@@ -1124,6 +1136,18 @@ abstract class AppLocalizations {
   /// **'Enter your appointment reason'**
   String get enter_your_appointment_reason;
 
+  /// No description provided for @appointment_purpose_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your appointment purpose'**
+  String get appointment_purpose_validator;
+
+  /// No description provided for @appointment_description_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter description for appointment'**
+  String get appointment_description_validator;
+
   /// No description provided for @upload_documents.
   ///
   /// In en, this message translates to:
@@ -1135,6 +1159,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter detail description for an appointment'**
   String get description_info;
+
+  /// No description provided for @department_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select one department'**
+  String get department_validator;
 
   /// No description provided for @clear.
   ///
@@ -1213,6 +1243,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Solved'**
   String get solved;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @approved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approved;
+
+  /// No description provided for @partially_funded.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially-Funded'**
+  String get partially_funded;
+
+  /// No description provided for @fully_funded.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully-Funded'**
+  String get fully_funded;
 
   /// No description provided for @description.
   ///
@@ -1517,7 +1571,7 @@ abstract class AppLocalizations {
   /// No description provided for @refered_users.
   ///
   /// In en, this message translates to:
-  /// **'People Joined'**
+  /// **'Users Joined Through Your Referral'**
   String get refered_users;
 
   /// No description provided for @events_attended_volunteer.
@@ -1631,7 +1685,7 @@ abstract class AppLocalizations {
   /// No description provided for @hours_per_week.
   ///
   /// In en, this message translates to:
-  /// **'Hours Per Week'**
+  /// **'Time Availability ( Hours Per Week)'**
   String get hours_per_week;
 
   /// No description provided for @select_hours.
@@ -1832,6 +1886,24 @@ abstract class AppLocalizations {
   /// **'Close Request'**
   String get close_request;
 
+  /// No description provided for @delete_confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this request?'**
+  String get delete_confirmation;
+
+  /// No description provided for @close_confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to close this request?'**
+  String get close_confirmation;
+
+  /// No description provided for @survey_submit_confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to submit your response?'**
+  String get survey_submit_confirmation;
+
   /// No description provided for @notify_representative.
   ///
   /// In en, this message translates to:
@@ -1867,6 +1939,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Past'**
   String get past;
+
+  /// No description provided for @no_recent_notified_events_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent notified events found'**
+  String get no_recent_notified_events_found;
+
+  /// No description provided for @no_past_notified_events_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No past notified events found'**
+  String get no_past_notified_events_found;
 
   /// No description provided for @view_how_member_notified.
   ///
@@ -1976,16 +2060,52 @@ abstract class AppLocalizations {
   /// **'Filters'**
   String get filters;
 
+  /// No description provided for @distance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get distance;
+
+  /// No description provided for @km.
+  ///
+  /// In en, this message translates to:
+  /// **'km'**
+  String get km;
+
   /// No description provided for @status.
   ///
   /// In en, this message translates to:
   /// **'Status'**
   String get status;
 
+  /// No description provided for @pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pending;
+
+  /// No description provided for @in_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get in_progress;
+
+  /// No description provided for @resolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get resolved;
+
+  /// No description provided for @your_complaint_has_been_resolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Your complaint has been resolved'**
+  String get your_complaint_has_been_resolved;
+
   /// No description provided for @search.
   ///
   /// In en, this message translates to:
-  /// **'Search...'**
+  /// **'Search'**
   String get search;
 
   /// No description provided for @message.
@@ -1999,6 +2119,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Images'**
   String get images;
+
+  /// No description provided for @important_notice.
+  ///
+  /// In en, this message translates to:
+  /// **'Important Notice'**
+  String get important_notice;
+
+  /// No description provided for @disclaimer_description.
+  ///
+  /// In en, this message translates to:
+  /// **'This app is developed for the Citizens and is not an official government app. It is intended for public grievance reporting and citizen engagement purposes only.'**
+  String get disclaimer_description;
+
+  /// No description provided for @resend_otp_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Otp to {phoneNumber}'**
+  String resend_otp_to(String phoneNumber);
+
+  /// No description provided for @invalid_otp.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid OTP'**
+  String get invalid_otp;
+
+  /// No description provided for @invalid_otp_please_try_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid OTP Please try again later'**
+  String get invalid_otp_please_try_again;
+
+  /// No description provided for @please_check_your_contact_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your contact number'**
+  String get please_check_your_contact_number;
+
+  /// No description provided for @please_check_your_otp.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your OTP'**
+  String get please_check_your_otp;
+
+  /// No description provided for @please_enter_a_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get please_enter_a_password;
+
+  /// No description provided for @please_enter_min_8_digit.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter min 8 digit'**
+  String get please_enter_min_8_digit;
+
+  /// No description provided for @voter_id_cannot_be_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Voter ID cannot be empty'**
+  String get voter_id_cannot_be_empty;
+
+  /// No description provided for @invalid_voter_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid Voter ID'**
+  String get invalid_voter_id;
+
+  /// No description provided for @aadhar_no_cannot_be_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhar No cannot be empty'**
+  String get aadhar_no_cannot_be_empty;
+
+  /// No description provided for @invalid_aadhar_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid Aadhar ID'**
+  String get invalid_aadhar_id;
+
+  /// No description provided for @something_went_wrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong !'**
+  String get something_went_wrong;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Ok'**
+  String get ok;
+
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @success.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get success;
+
+  /// No description provided for @info.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get info;
+
+  /// No description provided for @use_my_location.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my location'**
+  String get use_my_location;
+
+  /// No description provided for @flat_house_no_apartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat, House no, Apartment'**
+  String get flat_house_no_apartment;
+
+  /// No description provided for @house_number.
+  ///
+  /// In en, this message translates to:
+  /// **'House Number'**
+  String get house_number;
+
+  /// No description provided for @house_number_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your house number'**
+  String get house_number_validator;
+
+  /// No description provided for @area_street.
+  ///
+  /// In en, this message translates to:
+  /// **'Area, Street'**
+  String get area_street;
+
+  /// No description provided for @area.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get area;
+
+  /// No description provided for @area_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your area'**
+  String get area_validator;
+
+  /// No description provided for @enter_pincode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Pincode'**
+  String get enter_pincode;
+
+  /// No description provided for @find.
+  ///
+  /// In en, this message translates to:
+  /// **'Find'**
+  String get find;
+
+  /// No description provided for @do_you_want_to_change_pincode.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to change the pincode?'**
+  String get do_you_want_to_change_pincode;
+
+  /// No description provided for @tehsil.
+  ///
+  /// In en, this message translates to:
+  /// **'Tehsil'**
+  String get tehsil;
+
+  /// No description provided for @tehsil_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Tehsil'**
+  String get tehsil_validator;
+
+  /// No description provided for @city_town.
+  ///
+  /// In en, this message translates to:
+  /// **'City / Town'**
+  String get city_town;
+
+  /// No description provided for @city_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter City'**
+  String get city_validator;
+
+  /// No description provided for @district_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter District'**
+  String get district_validator;
+
+  /// No description provided for @state_validator.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter State'**
+  String get state_validator;
+
+  /// No description provided for @unknown_subject.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown subject'**
+  String get unknown_subject;
+
+  /// No description provided for @please_enter_at_least_characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter at least {count} characters'**
+  String please_enter_at_least_characters(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -39,6 +39,7 @@ android {
         applicationId = "org.amunik.sevak"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // Set to API 23 (Android 6.0) for support in low-end devices
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

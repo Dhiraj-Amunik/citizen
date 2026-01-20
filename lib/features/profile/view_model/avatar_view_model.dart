@@ -40,7 +40,9 @@ class AvatarViewModel extends ChangeNotifier with BottomSheetMixin {
               ),
               onTap: () async {
                 RouteManager.pop();
-                await Future.delayed(const Duration(milliseconds: 300));
+                // Add longer delay for older devices to ensure bottom sheet is fully closed
+                // This prevents crashes on older devices when camera is accessed immediately
+                await Future.delayed(const Duration(milliseconds: 600));
                 try {
                   final file = await createCameraImage();
                   if (file != null && await file.exists()) {

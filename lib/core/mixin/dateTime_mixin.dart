@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/routes/routes.dart';
+import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:intl/intl.dart';
 
 mixin DateAndTimePicker {
@@ -43,9 +44,20 @@ mixin DateAndTimePicker {
 
   Future<String?> custom24HrsTimePicker() async {
     String? formattedTime;
+    final context = RouteManager.navigatorKey.currentState!.context;
     await showTimePicker(
       initialTime: TimeOfDay.now(),
-      context: RouteManager.navigatorKey.currentState!.context,
+      context: context,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: AppPalettes.primaryColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
     ).then((time) async {
       if (time != null) {
         formattedTime = DateFormat(

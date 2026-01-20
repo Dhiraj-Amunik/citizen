@@ -12,16 +12,45 @@ class NetworkRequester {
 
   void prepareRequest() {
     BaseOptions dioOptions = BaseOptions(
-        connectTimeout: const Duration(seconds: 120), // Increased to 2 minutes
-        receiveTimeout: const Duration(seconds: 120), // Increased to 2 minutes
+        connectTimeout: const Duration(seconds: 90), // Increased for slow server responses
+        receiveTimeout: const Duration(seconds: 90), // Increased for slow server responses
         baseUrl: URLs.baseURL,
         contentType: Headers.jsonContentType,
         responseType: ResponseType.json,
-        headers: {'Accept': Headers.jsonContentType});
+        headers: {'Accept': Headers.jsonContentType},
+        // Enable connection pooling for better performance
+        persistentConnection: true,
+        followRedirects: true);
     _dio = Dio(dioOptions);
     _dio.interceptors.clear();
     
+    // Add retry interceptor for timeout errors
+    _dio.interceptors.add(InterceptorsWrapper(
+      onError: (error, handler) {
+        // Retry on timeout errors (max 1 retry)
+        if (error.type == DioExceptionType.connectionTimeout ||
+            error.type == DioExceptionType.receiveTimeout) {
+          final options = error.requestOptions;
+          final retryCount = (options.extra['retryCount'] as int?) ?? 0;
+          
+          if (retryCount < 1) {
+            options.extra['retryCount'] = retryCount + 1;
+            log("🔄 Retrying request due to timeout (attempt ${retryCount + 1})");
+            
+            // Retry the request
+            _dio.fetch(options).then(
+              (response) => handler.resolve(response),
+              onError: (e) => handler.reject(e),
+            );
+            return;
+          }
+        }
+        handler.next(error);
+      },
+    ));
+    
     // Add language interceptor to include Accept-Language header
+    // Also handle FormData content-type correctly
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
         try {
@@ -31,6 +60,14 @@ class NetworkRequester {
           
           // Add Accept-Language header (standard HTTP header for language preference)
           options.headers['Accept-Language'] = languageCode;
+          
+          // If data is FormData, remove content-type header so Dio can set it automatically
+          // Dio will set it to multipart/form-data with boundary
+          if (options.data is FormData) {
+            options.headers.remove('content-type');
+            options.headers.remove('Content-Type');
+            options.contentType = null;
+          }
           
           // Also add as query parameter if API requires it (uncomment if needed)
           // options.queryParameters ??= {};
@@ -82,13 +119,19 @@ class NetworkRequester {
     String? token,
   }) async {
     try {
-      final options = Options(
-        headers: {},
-      );
+      final Map<String, dynamic> headers = {};
 
       if (token != null) {
-        options.headers?['Authorization'] = 'Bearer $token';
+        headers['Authorization'] = 'Bearer $token';
       }
+
+      // For FormData, explicitly set content-type to null so Dio can set multipart/form-data
+      // For other data types, use the default from BaseOptions (application/json)
+      final options = Options(
+        headers: headers,
+        contentType: data is FormData ? null : Headers.jsonContentType,
+      );
+
       final response = await _dio.post(
         path,
         queryParameters: query,

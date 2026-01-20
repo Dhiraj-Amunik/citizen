@@ -1,3 +1,5 @@
+import 'package:inldsevak/features/nearest_member/model/nearest_members_model.dart';
+
 class PartyMemberDetailsModel {
   int? responseCode;
   String? message;
@@ -55,6 +57,11 @@ class User {
   String? dateOfBirth;
   String? gender;
   String? address;
+  String? flatNumber;
+  String? area;
+  String? city;
+  String? district;
+  String? state;
   String? avatar;
   bool? isRegistered;
   bool? isPartyMember;
@@ -67,6 +74,7 @@ class User {
   String? createdAt;
   String? updatedAt;
   int? iV;
+  Location? location;
 
   User(
       {this.sId,
@@ -76,6 +84,11 @@ class User {
       this.dateOfBirth,
       this.gender,
       this.address,
+      this.flatNumber,
+      this.area,
+      this.city,
+      this.district,
+      this.state,
       this.avatar,
       this.isRegistered,
       this.isPartyMember,
@@ -87,7 +100,8 @@ class User {
       this.isActive,
       this.createdAt,
       this.updatedAt,
-      this.iV});
+      this.iV,
+      this.location});
 
   User.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -97,6 +111,11 @@ class User {
     dateOfBirth = json['dateOfBirth'];
     gender = json['gender'];
     address = json['address'];
+    flatNumber = json['flatNumber'];
+    area = json['area'];
+    city = json['city'];
+    district = json['district'];
+    state = json['state'];
     avatar = json['avatar'];
     isRegistered = json['isRegistered'];
     isPartyMember = json['isPartyMember'];
@@ -109,6 +128,9 @@ class User {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    location = json['location'] != null
+        ? Location.fromJson(json['location'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -132,6 +154,24 @@ class User {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    if (this.flatNumber != null) {
+      data['flatNumber'] = this.flatNumber;
+    }
+    if (this.area != null) {
+      data['area'] = this.area;
+    }
+    if (this.city != null) {
+      data['city'] = this.city;
+    }
+    if (this.district != null) {
+      data['district'] = this.district;
+    }
+    if (this.state != null) {
+      data['state'] = this.state;
+    }
+    if (this.location != null) {
+      data['location'] = this.location!.toJson();
+    }
     return data;
   }
 }

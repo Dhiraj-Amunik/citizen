@@ -10,7 +10,6 @@ class RequestVolunteerModel {
   String availability;
   String preferredTimeSlot;
   String hoursPerWeek;
-  String mlaId;
 
   RequestVolunteerModel({
     required this.name,
@@ -24,7 +23,6 @@ class RequestVolunteerModel {
     required this.availability,
     required this.preferredTimeSlot,
     required this.hoursPerWeek,
-    required this.mlaId,
   });
 
   Map<String, dynamic> toJson() {
@@ -40,7 +38,6 @@ class RequestVolunteerModel {
       'availability': availability,
       'preferredTimeSlot': preferredTimeSlot,
       'hoursPerWeek': hoursPerWeek,
-      'mlaId': mlaId,
     };
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
@@ -7,6 +8,7 @@ import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/extensions/string_extension.dart';
 import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/helpers/translation_helper.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
@@ -18,6 +20,7 @@ import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/read_more_widget.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/core/utils/urls.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
 
@@ -75,6 +78,7 @@ class PartyHelpCard extends StatelessWidget {
                             Expanded(
                               child: TranslatedText(
                                 text: helpRequest.name.isNull(localization.not_found),
+                                disableTranslation: true,
                                 style: textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -82,21 +86,32 @@ class PartyHelpCard extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            SizeBox.sizeWX2,
-                            CommonHelpers.buildStatus(
-                              _getStatusText(helpRequest.status, localization),
-                              textColor: AppPalettes.blackColor,
-                              statusColor: helpRequest.status == "rejected"
-                                  ? AppPalettes.liteRedColor
-                                  : helpRequest.status == "pending"
-                                  ? AppPalettes.liteOrangeColor
-                                  : helpRequest.status == "closed"
-                                  ? AppPalettes.liteGreyColor
-                                  : AppPalettes.yellowColor,
-                            ),
+                            // Don't show status if it's "approved"
+                            if (helpRequest.status?.toLowerCase() != "approved") ...[
+                              SizeBox.sizeWX2,
+                              CommonHelpers.buildStatus(
+                                _getStatusText(helpRequest.status, localization),
+                                textColor: AppPalettes.blackColor,
+                                statusColor: helpRequest.status == "rejected"
+                                    ? AppPalettes.liteRedColor
+                                    : helpRequest.status == "pending"
+                                    ? AppPalettes.liteOrangeColor
+                                    : helpRequest.status == "closed"
+                                    ? AppPalettes.liteGreyColor
+                                    : AppPalettes.yellowColor,
+                              ),
+                            ],
                           ],
                         ),
-                        Row(
+                      
+                           ReadMoreWidget(
+                             text: 'Requested for ${helpRequest.description.isNull(localization.not_found)}',
+                             style: AppStyles.bodySmall.copyWith(
+                               fontWeight: FontWeight.w500,
+                               color: AppPalettes.lightTextColor,
+                             ),
+                           ),
+                             Row(
                           spacing: Dimens.gapX1,
                           children: [
                             CommonHelpers.buildIcons(
@@ -104,12 +119,9 @@ class PartyHelpCard extends StatelessWidget {
                               iconSize: Dimens.scaleX1B,
                               iconColor: AppPalettes.blackColor,
                             ),
-                            Text(
-                              helpRequest.createdAt?.toDdMmmYyyy() ?? "",
-                              style: textTheme.labelMedium?.copyWith(
+                            TranslatedText(text: "Submitted on : ${helpRequest.createdAt?.toDdMmmYyyy() ?? ""}", style: textTheme.labelMedium?.copyWith(
                                 color: AppPalettes.lightTextColor,
-                              ),
-                            ),
+                              ),)
                           ],
                         ),
                       ],
@@ -119,55 +131,46 @@ class PartyHelpCard extends StatelessWidget {
               ),
             ],
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TranslatedText(
-                text: "${localization.requested} : ",
-                style: textTheme.bodySmall?.copyWith(
-                  color: AppPalettes.blackColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Expanded(
-                child: isFinancialHelp
-                    ? Text(
-                        "₹ ${helpRequest.amountRequested}",
-                        style: textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: AppPalettes.lightTextColor,
-                        ),
-                      )
-                    : TranslatedText(
-                        text: helpRequest.typeOfHelp?.name ?? "",
-                        style: textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: AppPalettes.lightTextColor,
-                        ),
-                      ),
-              ),
-            ],
-          ),
+          // Row(
+          //   crossAxisAlignment: CrossAxisAlignment.start,
+          //   children: [
+          //     TranslatedText(
+          //       text: "${localization.requested} : ",
+          //       style: textTheme.bodySmall?.copyWith(
+          //         color: AppPalettes.blackColor,
+          //         fontWeight: FontWeight.w500,
+          //       ),
+          //     ),
+          //     Expanded(
+          //       child: isFinancialHelp
+          //           ? Text(
+          //               "₹ ${helpRequest.amountRequested}",
+          //               style: textTheme.bodySmall?.copyWith(
+          //                 fontWeight: FontWeight.w500,
+          //                 color: AppPalettes.lightTextColor,
+          //               ),
+          //             )
+          //           : TranslatedText(
+          //               text: helpRequest.typeOfHelp?.name ?? "",
+          //               style: textTheme.bodySmall?.copyWith(
+          //                 fontWeight: FontWeight.w500,
+          //                 color: AppPalettes.lightTextColor,
+          //               ),
+          //             ),
+          //     ),
+          //   ],
+          // ),
           
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TranslatedText(
-                text: "${localization.description} : ",
-                style: textTheme.bodySmall?.copyWith(
-                  color: AppPalettes.blackColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Expanded(
-                child: ReadMoreWidget(
-                  text: helpRequest.description.isNull(localization.not_found),
-                  style: AppStyles.bodySmall.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: AppPalettes.lightTextColor,
-                  ),
-                ),
-              ),
+              // TranslatedText(
+              //   text: "${localization.description} : ",
+              //   style: textTheme.bodySmall?.copyWith(
+              //     color: AppPalettes.blackColor,
+              //     fontWeight: FontWeight.w500,
+              //   ),
+              // ),
             ],
           ),
           SizeBox.size,
@@ -194,94 +197,119 @@ class PartyHelpCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (helpRequest.status != "closed")
+              if (!isEditable)
+                // For wall of help view (not my requests), always show chat for all cards
                 Expanded(
-                  flex: isEditable ? 10 : 1,
+                  child: CommonButton(
+                    onTap: () {
+                      RouteManager.pushNamed(
+                        Routes.chatContributePage,
+                        arguments: helpRequest,
+                      );
+                    },
+                    text: localization.chat,
+                    height: 30.height(),
+                    radius: Dimens.radiusX4,
+                    padding: EdgeInsets.symmetric(
+                      vertical: Dimens.paddingX1,
+                      horizontal: Dimens.paddingX2,
+                    ),
+                    fullWidth: false,
+                  ),
+                ),
+              if (!isEditable && isFinancialHelp && helpRequest.status != "closed")
+                // For financial help, show contribute button in addition to chat
+                Expanded(
+                  child: CommonButton(
+                    onTap: () {
+                      if (helpRequest.isActive == true &&
+                          (helpRequest.amountCollected !=
+                              helpRequest.amountRequested)) {
+                        RouteManager.pushNamed(
+                          Routes.contributePage,
+                          arguments: helpRequest,
+                        );
+                      } else {
+                        CommonSnackbar(
+                          text: "Amount has been raised successfully",
+                        ).showToast();
+                      }
+                    },
+                    text: localization.contribute,
+                    isEnable: helpRequest.isActive == true &&
+                        (helpRequest.amountCollected !=
+                            helpRequest.amountRequested),
+                    disabledColor: AppPalettes.greyColor,
+                    height: 30.height(),
+                    radius: Dimens.radiusX4,
+                    padding: EdgeInsets.symmetric(
+                      vertical: Dimens.paddingX1,
+                      horizontal: Dimens.paddingX2,
+                    ),
+                    fullWidth: false,
+                  ),
+                ),
+              if (isEditable && helpRequest.status != "closed")
+                // For my requests view, show chat and edit buttons
+                Expanded(
+                  flex: 10,
                   child: Row(
                     spacing: Dimens.gapX2,
                     children: [
-                      if (isEditable == false || isFinancialHelp == false)
-                        Expanded(
-                          child: CommonButton(
-                            borderColor:
-                                isEditable && helpRequest.status != "rejected"
-                                ? AppPalettes.primaryColor
-                                : null,
-                            color: isEditable ? AppPalettes.whiteColor : null,
-                            textColor:
-                                isEditable && helpRequest.status != "rejected"
-                                ? AppPalettes.primaryColor
-                                : null,
-                            onTap: () {
-                              if (isFinancialHelp) {
-                                if (helpRequest.isActive == true &&
-                                    (helpRequest.amountCollected !=
-                                        helpRequest.amountRequested)) {
-                                  RouteManager.pushNamed(
-                                    Routes.contributePage,
-                                    arguments: helpRequest,
-                                  );
-                                } else {
-                                  CommonSnackbar(
-                                    text: "Amount has been raised successfully",
-                                  ).showToast();
-                                }
-                              } else {
-                                if (helpRequest.isActive == true) {
-                                  if (isEditable) {
-                                    RouteManager.pushNamed(
-                                      Routes.myHelpMessagesListPage,
-                                      arguments: helpRequest,
-                                    );
-                                  } else {
-                                    RouteManager.pushNamed(
-                                      Routes.chatContributePage,
-                                      arguments: helpRequest,
-                                    );
-                                  }
-                                }
-                              }
-                            },
-                            text: isFinancialHelp
-                                ? localization.contribute
-                                : localization.chat,
-                            isEnable: helpRequest.status == "rejected"
-                                ? false
-                                : true,
-                            disabledColor: AppPalettes.greyColor,
-                            height: 30.height(),
-                            radius: Dimens.radiusX4,
-                            padding: EdgeInsets.symmetric(
-                              vertical: Dimens.paddingX1,
-                              horizontal: Dimens.paddingX2,
-                            ),
-                            fullWidth: false,
+                      Expanded(
+                        child: CommonButton(
+                          borderColor: helpRequest.status != "rejected"
+                              ? AppPalettes.primaryColor
+                              : null,
+                          color: AppPalettes.whiteColor,
+                          textColor: helpRequest.status != "rejected"
+                              ? AppPalettes.primaryColor
+                              : null,
+                          onTap: () {
+                            if (helpRequest.isActive == true) {
+                              RouteManager.pushNamed(
+                                Routes.myHelpMessagesListPage,
+                                arguments: helpRequest,
+                              );
+                            }
+                          },
+                          text: localization.chat,
+                          isEnable: helpRequest.status == "rejected"
+                              ? false
+                              : true,
+                          disabledColor: AppPalettes.greyColor,
+                          height: 30.height(),
+                          radius: Dimens.radiusX4,
+                          padding: EdgeInsets.symmetric(
+                            vertical: Dimens.paddingX1,
+                            horizontal: Dimens.paddingX2,
+                          ),
+                          fullWidth: false,
+                        ),
+                      ),
+                      Expanded(
+                        child: CommonButton(
+                          onTap: () => RouteManager.pushNamed(
+                            Routes.myHelpRequestEditPage,
+                            arguments: helpRequest,
+                          ),
+                          isEnable: helpRequest.status == "rejected"
+                              ? false
+                              : true,
+                          disabledColor: AppPalettes.greyColor,
+                          color: helpRequest.status == "rejected"
+                              ? AppPalettes.greyColor
+                              : null,
+                          text: localization.edit,
+                          height: 30.height(),
+                          fullWidth: false,
+                          radius: Dimens.radiusX4,
+                          padding: EdgeInsets.symmetric(
+                            vertical: Dimens.paddingX1,
+                            horizontal: Dimens.paddingX2,
                           ),
                         ),
-                      if (isEditable && helpRequest.status != "closed")
-                        Expanded(
-                          child: CommonButton(
-                            onTap: () => RouteManager.pushNamed(
-                              Routes.myHelpRequestEditPage,
-                              arguments: helpRequest,
-                            ),
-                            isEnable: helpRequest.status == "rejected"
-                                ? false
-                                : true,
-                            disabledColor: AppPalettes.greyColor,
-                            color: helpRequest.status == "rejected"
-                                ? AppPalettes.greyColor
-                                : null,
-                            text: localization.edit,
-                            height: 30.height(),
-                            fullWidth: false,
-                            radius: Dimens.radiusX4,
-                            padding: EdgeInsets.symmetric(
-                              vertical: Dimens.paddingX1,
-                              horizontal: Dimens.paddingX2,
-                            ),
-                          ),
-                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -333,12 +361,10 @@ class PartyHelpCard extends StatelessWidget {
     final fallbackText = helpRequest.title?.trim().isNotEmpty == true
         ? helpRequest.title!.trim()
         : helpRequest.name ?? "";
-    final initials = fallbackText.isNotEmpty
-        ? CommonHelpers.getInitials(fallbackText)
-        : "A";
-    final double radius = Dimens.scaleX3;
+    final double radius = Dimens.scaleX2;
 
-    if (avatarUrl != null) {
+    // Check if avatarUrl is not null and not empty to prevent invalid URL errors
+    if (avatarUrl != null && avatarUrl.trim().isNotEmpty) {
       return CircleAvatar(
         radius: radius,
         backgroundImage: CachedNetworkImageProvider(avatarUrl),
@@ -346,16 +372,10 @@ class PartyHelpCard extends StatelessWidget {
       );
     }
 
-    return CircleAvatar(
+    return _InitialsAvatar(
+      text: fallbackText,
       radius: radius,
-      backgroundColor: AppPalettes.primaryColor.withOpacityExt(0.1),
-      child: Text(
-        initials,
-        style: textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: AppPalettes.primaryColor,
-        ),
-      ),
+      textTheme: textTheme,
     );
   }
 
@@ -381,8 +401,129 @@ class PartyHelpCard extends StatelessWidget {
     }
     final rawStatus = status.trim().toLowerCase();
     if (rawStatus == 'approved') {
-      return localization.solved;
+      return 'Approved';
+    }
+    if (rawStatus == 'closed') {
+      return 'Solved';
     }
     return status.capitalize();
+  }
+}
+
+/// Widget that displays initials from text, translating it first if needed
+class _InitialsAvatar extends StatefulWidget {
+  final String text;
+  final double radius;
+  final TextTheme textTheme;
+
+  const _InitialsAvatar({
+    required this.text,
+    required this.radius,
+    required this.textTheme,
+  });
+
+  @override
+  State<_InitialsAvatar> createState() => _InitialsAvatarState();
+}
+
+class _InitialsAvatarState extends State<_InitialsAvatar> {
+  String _initials = "A";
+  StreamSubscription<dynamic>? _languageSubscription;
+  bool _isTranslating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateInitials();
+    // Listen to language changes for instant retranslation
+    _languageSubscription = GeneralStream.instance.language.listen((_) {
+      if (mounted) {
+        _updateInitials();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(_InitialsAvatar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text) {
+      _updateInitials();
+    }
+  }
+
+  Future<void> _updateInitials() async {
+    if (widget.text.isEmpty) {
+      setState(() {
+        _initials = "A";
+        _isTranslating = false;
+      });
+      return;
+    }
+
+    // Check if translation is needed
+    final needsTranslation = TranslationHelper.needsTranslation(widget.text);
+    
+    if (!needsTranslation) {
+      // No translation needed, extract initials directly
+      setState(() {
+        _initials = CommonHelpers.getInitials(widget.text);
+        _isTranslating = false;
+      });
+      return;
+    }
+
+    // Translation is needed
+    setState(() {
+      _isTranslating = true;
+    });
+
+    try {
+      final translated = await TranslationHelper.translateText(widget.text);
+      if (mounted) {
+        setState(() {
+          _initials = CommonHelpers.getInitials(translated);
+          _isTranslating = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _initials = CommonHelpers.getInitials(widget.text);
+          _isTranslating = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: widget.radius,
+      backgroundColor: AppPalettes.primaryColor.withOpacityExt(0.1),
+      child: _isTranslating
+          ? SizedBox(
+              width: widget.radius * 0.6,
+              height: widget.radius * 0.6,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppPalettes.primaryColor,
+                ),
+              ),
+            )
+          : Text(
+              _initials,
+              style: widget.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppPalettes.primaryColor,
+              ),
+            ),
+    );
   }
 }

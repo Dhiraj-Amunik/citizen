@@ -11,10 +11,12 @@ import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/core/widgets/upload_multi_files.dart';
 import 'package:inldsevak/features/common_fields/widget/assembly_constituency_drop_down.dart';
 import 'package:inldsevak/features/party_member/view_model/become_party_mem_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
 
 class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
@@ -30,12 +32,31 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
         final provider = context.read<BecomePartyMemViewModel>();
         provider.autoFillData(profile.profile);
 
+        // Check if Hindi keyboard might be shown (Hindi language)
+        final isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+        // Hindi keyboard height is approximately 300px
+        const hindiKeyboardHeight = 300.0;
+        
         return Consumer<BecomePartyMemViewModel>(
           builder: (context, value, _) {
             return Scaffold(
               appBar: commonAppBar(title: localization.become_part_mem),
-              body: SingleChildScrollView(
-                child: Form(
+              body: Builder(
+                builder: (context) {
+                  // Check if any text field has focus (which would show Hindi keyboard)
+                  final hasFocus = FocusScope.of(context).hasFocus;
+                  final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+                  // Show padding if system keyboard is showing OR if Hindi keyboard might be showing (Hindi mode + focus)
+                  final shouldShowKeyboardPadding = isHindiLanguage && hasFocus && viewInsets == 0;
+                  
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      // Only add extra padding for Hindi locale, not for English
+                      bottom: shouldShowKeyboardPadding 
+                          ? hindiKeyboardHeight 
+                          : viewInsets,
+                    ),
+                    child: Form(
                   key: value.formKey,
                   autovalidateMode: provider.autoValidateMode,
                   child:
@@ -57,7 +78,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   enableSpeechInput: true,
                                   keyboardType: TextInputType.name,
                                   validator: (text) => text?.validateName(
-                                    argument: "Please enter your name",
+                                    argument: localization.name_validator,
                                   ),
                                 ),
                                 FormTextFormField(
@@ -72,7 +93,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   enableSpeechInput: true,
                                   keyboardType: TextInputType.name,
                                   validator: (text) => text?.validateName(
-                                    argument: "Please enter parent name",
+                                    argument: localization.enter_parent_name,
                                   ),
                                 ),
                               ],
@@ -93,7 +114,7 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                             enforceFirstLetterUppercase: true,
                             keyboardType: TextInputType.phone,
                             validator: (value) => value?.validateNumber(
-                              argument: "Enter valid 10 digits number",
+                              argument: localization.phone_validator,
                             ),
                             onChanged: (text) {
                               if (profile.profile?.phone != null &&
@@ -102,7 +123,6 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                               }
                             },
                           ),
-
                           SizedBox(height: Dimens.textFromSpacing),
                           Visibility(
                             visible: provider.visibility,
@@ -137,9 +157,23 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   controller: provider.genderController,
                                   items: provider.gendersList,
                                   hintText: localization.select_gender,
+                                  listItemBuilder: (context, item, _, __) {
+                                    return TranslatedText(
+                                      text: item,
+                                      style: context.textTheme.bodySmall,
+                                      disableTranslation: true,
+                                    );
+                                  },
+                                  headerBuilder: (context, item, _) {
+                                    return TranslatedText(
+                                      text: item,
+                                      style: context.textTheme.bodySmall,
+                                      disableTranslation: true,
+                                    );
+                                  },
                                   validator: (text) =>
                                       text.toString().validateDropDown(
-                                        argument: "Select your Gender",
+                                        argument: localization.gender_validator,
                                       ),
                                 ),
                                 FormCommonDropDown<String>(
@@ -148,9 +182,23 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   controller: provider.maritalStatusController,
                                   items: provider.maritalStatusList,
                                   hintText: localization.select_status,
+                                  listItemBuilder: (context, item, _, __) {
+                                    return TranslatedText(
+                                      text: item,
+                                      style: context.textTheme.bodySmall,
+                                      disableTranslation: true,
+                                    );
+                                  },
+                                  headerBuilder: (context, item, _) {
+                                    return TranslatedText(
+                                      text: item,
+                                      style: context.textTheme.bodySmall,
+                                      disableTranslation: true,
+                                    );
+                                  },
                                   validator: (text) =>
                                       text.toString().validateDropDown(
-                                        argument: "Select your marital status",
+                                        argument: localization.select_status,
                                       ),
                                 ),
                                 AssemblyConstituencyDropDownWidget(
@@ -163,14 +211,17 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                                   builder: (contextP, value, _) {
                                     return UploadMultiFilesWidget(
                                       onTap: () {
+                                        // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
                                         showModalBottomSheet(
                                           context: context,
-                                          builder: (context) =>
-                                              DraggableSheetWidget(
-                                                size: 0.5,
-                                                child: value
-                                                    .selectMultipleImages(),
-                                              ),
+                                          isScrollControlled: false,
+                                          useRootNavigator: true,
+                                          builder: (context) => Padding(
+                                            padding: EdgeInsets.only(
+                                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                                            ),
+                                            child: value.selectMultipleImages(context: context),
+                                          ),
                                         );
                                       },
                                       onRemove: (int index) =>
@@ -220,8 +271,8 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                         horizontal: Dimens.horizontalspacing,
                         vertical: Dimens.paddingX2,
                       ),
-                ),
-              ),
+                    ),
+                );}),
               bottomNavigationBar:
                   Row(
                         spacing: Dimens.gapX3,

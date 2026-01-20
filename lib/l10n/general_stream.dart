@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:inldsevak/core/helpers/translation_helper.dart';
 
 class GeneralStream {
   GeneralStream._internal() {
+    // Initialize with default locale immediately to avoid late initialization errors
+    _locale = const Locale("en");
     _init();
   }
 
@@ -11,7 +14,7 @@ class GeneralStream {
 
   static GeneralStream get instance => _instance;
 
-  late Locale _locale;
+  Locale _locale = const Locale("en");
   Locale get locale => _locale;
 
   static final StreamController<Locale> _languageStream =
@@ -34,7 +37,14 @@ class GeneralStream {
     try {
       final SharedPreferences sp = await SharedPreferences.getInstance();
       await sp.setString("language_code", code);
+      final oldLocale = _locale;
       _locale = Locale(code);
+      
+      // Clear translation cache when language changes for better performance
+      if (oldLocale.languageCode != code) {
+        await TranslationHelper.clearCache();
+      }
+      
       _languageStream.add(_locale);
     } catch (e) {
       throw Exception("Failed to set locale: $e");

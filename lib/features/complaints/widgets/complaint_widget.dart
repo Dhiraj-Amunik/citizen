@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
@@ -49,7 +51,9 @@ class ComplaintThreadWidget extends StatelessWidget {
                 runSpacing: Dimens.gapX1,
                 children: [
                   CommonHelpers.buildStatus(
-                    thread.messages?.first.date?.toDdMmmYyyy() ?? "",
+                    (thread.messages?.isNotEmpty == true) 
+                        ? thread.messages!.first.date?.toDdMmmYyyy() ?? ""
+                        : "",
                     statusColor: AppPalettes.liteGreenColor,
                   ),
                   CommonHelpers.buildStatus(
@@ -80,16 +84,24 @@ class ComplaintThreadWidget extends StatelessWidget {
                     spacing: Dimens.gapX1,
                     children: [
                       ReadMoreWidget(
-                        text: thread.messages?.first.subject?.capitalize() ??
-                            "No Subject found !",
+                        text: _decodeUtf8(
+                          (thread.messages?.isNotEmpty == true)
+                              ? thread.messages!.first.subject
+                              : null
+                        ) ?? "No Subject found !",
                         maxLines: 2,
                         style: textTheme.bodyMedium,
+                        forceTranslation: true, // Force translation for Hindi locale
                       ),
                       ReadMoreWidget(
-                        text: thread.messages?.first.snippet ??
-                            "Unknown Description",
+                        text: (thread.messages?.isNotEmpty == true)
+                            ? (thread.messages!.first.normalizedBody ?? 
+                               thread.messages!.first.body ?? 
+                               thread.messages!.first.snippet ?? 
+                               "Unknown Description")
+                            : "Unknown Description",
                         maxLines: 2,
-                       
+                        forceTranslation: true, // Force translation for Hindi locale
                       ),
                       if (showCompaint)
                         Row(
@@ -102,6 +114,7 @@ class ComplaintThreadWidget extends StatelessWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
+
                             Text(
                               thread.threadId ?? "",
                               maxLines: 2,
@@ -110,18 +123,22 @@ class ComplaintThreadWidget extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
+
                           ],
                         ),
                       if (showAuthority)
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+
                             TranslatedText(
                               text: "Submitted To : ",
                               maxLines: 2,
                               style: textTheme.labelMedium,
                             ),
+
                             Expanded(
+
                               child: TranslatedText(
                                 text: '${thread.department?.name ?? "Department"} - ${thread.authorityName ?? "Authority"}',
                                 maxLines: 2,
@@ -129,7 +146,9 @@ class ComplaintThreadWidget extends StatelessWidget {
                                   color: AppPalettes.lightTextColor,
                                   fontWeight: FontWeight.w500,
                                 ),
+                                disableTranslation: true, // Authority names are in English/Hinglish from admin panel
                               ),
+                              
                             ),
                           ],
                         ),
@@ -142,5 +161,17 @@ class ComplaintThreadWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Attempt to fix subjects returned as double-encoded UTF-8 (e.g. "Ã Â¤Â…")
+  String? _decodeUtf8(String? value) {
+    if (value == null) return null;
+    if (!value.contains('Ã')) return value;
+    try {
+      final bytes = latin1.encode(value);
+      return utf8.decode(bytes, allowMalformed: false);
+    } catch (_) {
+      return value;
+    }
   }
 }

@@ -25,12 +25,16 @@ PreferredSize commonAppBar({
   double? scrollElevation,
   Color? iconColor,
   Widget? leading,
+  bool? showBackButton,
 }) {
   final navigatorContext = RouteManager.navigatorKey.currentContext;
   final bool canPop =
       navigatorContext != null ? Navigator.canPop(navigatorContext) : false;
+  
+  // If showBackButton is explicitly set, use that value; otherwise use canPop
+  final bool shouldShowBack = showBackButton ?? canPop;
 
-  final Widget? effectiveLeading = canPop
+  final Widget? effectiveLeading = shouldShowBack
       ? leading ??
           Padding(
             padding: EdgeInsets.only(
@@ -90,7 +94,7 @@ PreferredSize commonAppBar({
       bottom: bottom,
       titleSpacing: 0,
       leading: effectiveLeading,
-      leadingWidth: canPop ? 60.r : 0,
+      leadingWidth: shouldShowBack ? 60.r : 0,
       iconTheme: iconColor != null ? IconThemeData(color: iconColor) : null,
       title: child?.horizontalPadding(Dimens.horizontalspacing) ??
           TranslatedText(

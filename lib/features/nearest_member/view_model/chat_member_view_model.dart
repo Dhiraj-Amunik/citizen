@@ -31,7 +31,8 @@ class ChatMemberViewModel extends BaseViewModel with UploadFilesMixin {
   List<File> multipleFiles = [];
 
   Future<void> addFiles(Future<dynamic> future) async {
-    RouteManager.pop();
+    // Note: Bottom sheet is already closed in handle_multiple_files_sheet.dart
+    // No need to pop here as it would close the form page
     try {
       final data = await future;
       if (data != null) {
@@ -59,6 +60,7 @@ class ChatMemberViewModel extends BaseViewModel with UploadFilesMixin {
   Future<void> getAllMessages() async {
     try {
       isLoading = true;
+      notifyListeners();
       final response = await repository.getMessages(
         token: token,
         id: id,
@@ -72,18 +74,18 @@ class ChatMemberViewModel extends BaseViewModel with UploadFilesMixin {
         List<message.MessagesDetails> tempList = [];
         tempList.addAll(List.from(data as List));
         messages.addAll(tempList.reversed);
+        notifyListeners();
       } else {
         await CommonSnackbar(
           text: response.data?.message ?? "Something went wrong",
         ).showAnimatedDialog(type: QuickAlertType.error);
-
-        return;
       }
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
       isLoading = false;
+      notifyListeners();
     }
   }
 

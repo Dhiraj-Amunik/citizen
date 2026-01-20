@@ -17,7 +17,7 @@ class RequestAppointmentModel {
     required this.name,
     required this.phone,
     required this.date,
-    this.timeSlot = "00:00",
+    this.timeSlot = "",
     required this.purpose,
     required this.reason,
     required this.documents,

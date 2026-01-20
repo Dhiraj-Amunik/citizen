@@ -36,10 +36,12 @@ class VideoPlayerWidget extends StatelessWidget {
       return LokvartaHelpers.lokVartaPlaceholder(
         type: LokVartaFilter.Videos,
         onRefresh: onRefresh,
+        context: context,
       );
     }
     return RefreshIndicator(
       onRefresh: onRefresh,
+      color: AppPalettes.primaryColor,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX3),
 

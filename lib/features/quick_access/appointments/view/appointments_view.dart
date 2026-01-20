@@ -19,10 +19,64 @@ import 'package:inldsevak/core/widgets/form_text_form_field.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/appointments/viewmodel/appointments_view_model.dart';
 import 'package:inldsevak/features/quick_access/appointments/widget/appointment_card.dart';
+import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
 import 'package:provider/provider.dart';
 
-class AppointmentsView extends StatelessWidget {
+class AppointmentsView extends StatefulWidget {
   const AppointmentsView({super.key});
+
+  @override
+  State<AppointmentsView> createState() => _AppointmentsViewState();
+}
+
+class _AppointmentsViewState extends State<AppointmentsView> {
+  DateTime? _lastRefreshTime;
+  bool _isInitialLoad = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Always reload appointments when view is opened to get latest status changes
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<AppointmentsViewModel>();
+      // Always reload appointments list to ensure status changes are reflected
+      await provider.getAppointmentsList();
+      // Always call complaints list API when landing on appointments view
+      context.read<ComplaintsViewModel>().getComplaints();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh appointments and complaints when returning to this route (e.g., after navigating back)
+    final route = ModalRoute.of(context);
+    if (route != null && route.isCurrent) {
+      // Skip the initial load since initState() already handles it
+      if (_isInitialLoad) {
+        _isInitialLoad = false;
+        _lastRefreshTime = DateTime.now();
+        return;
+      }
+      
+      final now = DateTime.now();
+      // Only refresh if it's been more than 1 second since last refresh
+      // This prevents excessive refreshes while allowing refresh on return
+      if (_lastRefreshTime == null || 
+          now.difference(_lastRefreshTime!) > const Duration(seconds: 1)) {
+        _lastRefreshTime = now;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            // Reload appointments list to get latest status changes
+            final provider = context.read<AppointmentsViewModel>();
+            provider.getAppointmentsList();
+            // Also refresh complaints
+            context.read<ComplaintsViewModel>().getComplaints();
+          }
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +85,20 @@ class AppointmentsView extends StatelessWidget {
     final localization = context.localizations;
     final textTheme = context.textTheme;
     final provider = context.read<AppointmentsViewModel>();
-    return Scaffold(
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          provider.searchController.clear();
+          provider.statusKey = null;
+          provider.dateKey = null;
+          provider.filterList();
+        }
+      },
+      child: Scaffold(
       appBar: commonAppBar(title: localization.appointments),
       body: RefreshIndicator(
         onRefresh: () => provider.getAppointmentsList(),
+        color: AppPalettes.primaryColor,
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: Dimens.horizontalspacing,
@@ -117,6 +181,7 @@ class AppointmentsView extends StatelessWidget {
                       },
                     ),
                   ),
+                  
                   CommonHelpers.buildIcons(
                     path: AppImages.filterIcon,
                     color: AppPalettes.primaryColor,
@@ -329,51 +394,116 @@ class AppointmentsView extends StatelessWidget {
               Expanded(
                 child: Consumer<AppointmentsViewModel>(
                   builder: (context, value, _) {
-                    if (provider.isLoading) {
+                    // Show loading only if initial load hasn't completed
+                    if (provider.isLoading && !provider.hasInitialLoadCompleted) {
                       return Center(child: CustomAnimatedLoading());
                     }
 
-                    if (value.filteredAppointmentsList.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CommonHelpers.buildIcons(
-                              path: AppImages.placeholderEmpty,
-                              iconSize: 0.3.screenWidth,
+                    // Show empty state only if initial load has completed and list is empty
+                    if (provider.hasInitialLoadCompleted && value.filteredAppointmentsList.isEmpty) {
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          return SingleChildScrollView(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight,
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: Dimens.paddingX4,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CommonHelpers.buildIcons(
+                                        path: AppImages.placeholderEmpty,
+                                        iconSize: constraints.maxHeight < 200
+                                            ? 0.2.screenWidth
+                                            : 0.3.screenWidth,
+                                      ),
+                                      SizedBox(height: Dimens.gapX2),
+                                      TranslatedText(
+                                        text: "No Appointments found",
+                                        style: textTheme.titleSmall,
+                                        maxLines: 2,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                            TranslatedText(
-                              text: "No Appointments found",
-                              style: textTheme.titleSmall,
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                            ),
-                            SizeBox.sizeHX6,
-                          ],
-                        ),
+                          );
+                        },
                       );
                     }
-                    return ListView.separated(
-                      itemBuilder: (_, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            RouteManager.pushNamed(
-                              Routes.appointmentDetailsPage,
-                              arguments: value.filteredAppointmentsList[index],
-                            );
-                          },
-                          child: AppointmentCard(
-                            appointment: value.filteredAppointmentsList[index],
+                    
+                    // Show list if we have data or if still loading (preserve existing data during refresh)
+                    if (value.filteredAppointmentsList.isNotEmpty || !provider.hasInitialLoadCompleted) {
+                      return ListView.separated(
+                        itemBuilder: (_, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              RouteManager.pushNamed(
+                                Routes.appointmentDetailsPage,
+                                arguments: value.filteredAppointmentsList[index],
+                              );
+                            },
+                            child: AppointmentCard(
+                              appointment: value.filteredAppointmentsList[index],
+                            ),
+                          );
+                        },
+                        separatorBuilder: (_, _) => SizeBox.widgetSpacing,
+                        itemCount: value.filteredAppointmentsList.length,
+                      );
+                    }
+                    
+                    // Fallback to empty state
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: Dimens.paddingX4,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CommonHelpers.buildIcons(
+                                      path: AppImages.placeholderEmpty,
+                                      iconSize: constraints.maxHeight < 200
+                                          ? 0.2.screenWidth
+                                          : 0.3.screenWidth,
+                                    ),
+                                    SizedBox(height: Dimens.gapX2),
+                                    TranslatedText(
+                                      text: "No Appointments found",
+                                      style: textTheme.titleSmall,
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         );
                       },
-                      separatorBuilder: (_, _) => SizeBox.widgetSpacing,
-                      itemCount: value.filteredAppointmentsList.length,
                     );
                   },
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),

@@ -478,7 +478,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get appointment_note =>
-      'ध्यान दें: सहयोगी की उपलब्धता के अनुसार आपकी पसंदीदा तिथि बदली जा सकती है';
+      'ध्यान दें: सहयोगी की उपलब्धता के अनुसार आपकी पसंदीदा तिथि और समय बदले जा सकते हैं';
 
   @override
   String get appointment_list => 'अपॉइंटमेंट सूची';
@@ -494,6 +494,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get book_for => 'के लिए बुक करें';
+
+  @override
+  String get my_self => 'मेरे लिए';
+
+  @override
+  String get others => 'दूसरों के लिए';
 
   @override
   String get membership_id => 'सदस्यता आईडी';
@@ -539,10 +545,21 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enter_your_appointment_reason => 'अपना अपॉइंटमेंट कारण दर्ज करें';
 
   @override
+  String get appointment_purpose_validator =>
+      'कृपया अपने अपॉइंटमेंट का उद्देश्य चुनें';
+
+  @override
+  String get appointment_description_validator =>
+      'कृपया अपॉइंटमेंट के लिए विवरण दर्ज करें';
+
+  @override
   String get upload_documents => 'दस्तावेज़ अपलोड करें';
 
   @override
   String get description_info => 'अपॉइंटमेंट के लिए विस्तृत विवरण दर्ज करें';
+
+  @override
+  String get department_validator => 'कृपया एक विभाग चुनें';
 
   @override
   String get clear => 'साफ़ करें';
@@ -582,6 +599,18 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get solved => 'समाधान हुआ';
+
+  @override
+  String get all => 'सभी';
+
+  @override
+  String get approved => 'अनुमोदित';
+
+  @override
+  String get partially_funded => 'आंशिक रूप से वित्तपोषित';
+
+  @override
+  String get fully_funded => 'पूर्ण रूप से वित्तपोषित';
 
   @override
   String get description => 'विवरण';
@@ -738,7 +767,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get active_since => 'सक्रिय तब से';
 
   @override
-  String get refered_users => 'लोग जुड़े';
+  String get refered_users => 'आपके संदर्भ के माध्यम से जुड़े उपयोगकर्ता';
 
   @override
   String get events_attended_volunteer => 'कार्यक्रम में भाग लिया';
@@ -797,7 +826,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get time_slot_validator => 'कृपया अपना पसंदीदा समय स्लॉट चुनें';
 
   @override
-  String get hours_per_week => 'प्रति सप्ताह घंटे';
+  String get hours_per_week => 'समय उपलब्धता ( प्रति सप्ताह घंटे)';
 
   @override
   String get select_hours => 'घंटे चुनें';
@@ -903,6 +932,18 @@ class AppLocalizationsHi extends AppLocalizations {
   String get close_request => 'अनुरोध बंद करें';
 
   @override
+  String get delete_confirmation =>
+      'क्या आप वाकई इस अनुरोध को हटाना चाहते हैं?';
+
+  @override
+  String get close_confirmation =>
+      'क्या आप वाकई इस अनुरोध को बंद करना चाहते हैं?';
+
+  @override
+  String get survey_submit_confirmation =>
+      'क्या आप वाकई अपना उत्तर जमा करना चाहते हैं?';
+
+  @override
   String get notify_representative => 'प्रतिनिधि को सूचित करें';
 
   @override
@@ -922,6 +963,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get past => 'पूर्व';
 
   @override
+  String get no_recent_notified_events_found =>
+      'कोई हाल की सूचित घटनाएं नहीं मिलीं';
+
+  @override
+  String get no_past_notified_events_found =>
+      'कोई पिछली सूचित घटनाएं नहीं मिलीं';
+
+  @override
   String get view_how_member_notified => 'देखें सदस्यों को कैसे सूचित किया गया';
 
   @override
@@ -938,7 +987,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get notify_description_validatore =>
-      'Enter detail description to notify';
+      'सूचित करने के लिए विस्तृत विवरण दर्ज करें';
 
   @override
   String get event_title_validatore => 'कृपया कार्यक्रम का नाम दर्ज करें';
@@ -977,14 +1026,150 @@ class AppLocalizationsHi extends AppLocalizations {
   String get filters => 'फ़िल्टर';
 
   @override
+  String get distance => 'दूरी';
+
+  @override
+  String get km => 'किमी';
+
+  @override
   String get status => 'स्थिति';
 
   @override
-  String get search => 'Search...';
+  String get pending => 'लंबित';
+
+  @override
+  String get in_progress => 'प्रगति में';
+
+  @override
+  String get resolved => 'हल हो गया';
+
+  @override
+  String get your_complaint_has_been_resolved => 'आपकी शिकायत हल हो गई है';
+
+  @override
+  String get search => 'खोजें...';
 
   @override
   String get message => 'संदेश';
 
   @override
   String get images => 'चित्र';
+
+  @override
+  String get important_notice => 'महत्वपूर्ण सूचना';
+
+  @override
+  String get disclaimer_description =>
+      'यह ऐप नागरिकों के लिए विकसित किया गया है और यह एक आधिकारिक सरकारी ऐप नहीं है। यह केवल सार्वजनिक शिकायत रिपोर्टिंग और नागरिक जुड़ाव उद्देश्यों के लिए है।';
+
+  @override
+  String resend_otp_to(String phoneNumber) {
+    return '$phoneNumber पर OTP पुनः भेजें';
+  }
+
+  @override
+  String get invalid_otp => 'अमान्य OTP';
+
+  @override
+  String get invalid_otp_please_try_again =>
+      'अमान्य OTP कृपया बाद में पुनः प्रयास करें';
+
+  @override
+  String get please_check_your_contact_number =>
+      'कृपया अपना संपर्क नंबर जांचें';
+
+  @override
+  String get please_check_your_otp => 'कृपया अपना OTP जांचें';
+
+  @override
+  String get please_enter_a_password => 'कृपया एक पासवर्ड दर्ज करें';
+
+  @override
+  String get please_enter_min_8_digit => 'कृपया न्यूनतम 8 अंक दर्ज करें';
+
+  @override
+  String get voter_id_cannot_be_empty => 'मतदाता आईडी खाली नहीं हो सकती';
+
+  @override
+  String get invalid_voter_id => 'अमान्य मतदाता आईडी';
+
+  @override
+  String get aadhar_no_cannot_be_empty => 'आधार नंबर खाली नहीं हो सकता';
+
+  @override
+  String get invalid_aadhar_id => 'अमान्य आधार आईडी';
+
+  @override
+  String get something_went_wrong => 'कुछ गलत हो गया !';
+
+  @override
+  String get ok => 'ठीक है';
+
+  @override
+  String get warning => 'चेतावनी';
+
+  @override
+  String get error => 'त्रुटि';
+
+  @override
+  String get success => 'सफलता';
+
+  @override
+  String get info => 'जानकारी';
+
+  @override
+  String get use_my_location => 'मेरा स्थान उपयोग करें';
+
+  @override
+  String get flat_house_no_apartment => 'फ्लैट, मकान नंबर, अपार्टमेंट';
+
+  @override
+  String get house_number => 'मकान नंबर';
+
+  @override
+  String get house_number_validator => 'कृपया अपना मकान नंबर दर्ज करें';
+
+  @override
+  String get area_street => 'क्षेत्र, गली';
+
+  @override
+  String get area => 'क्षेत्र';
+
+  @override
+  String get area_validator => 'कृपया अपना क्षेत्र दर्ज करें';
+
+  @override
+  String get enter_pincode => 'पिनकोड दर्ज करें';
+
+  @override
+  String get find => 'खोजें';
+
+  @override
+  String get do_you_want_to_change_pincode => 'क्या आप पिनकोड बदलना चाहते हैं?';
+
+  @override
+  String get tehsil => 'तहसील';
+
+  @override
+  String get tehsil_validator => 'तहसील दर्ज करें';
+
+  @override
+  String get city_town => 'शहर / कस्बा';
+
+  @override
+  String get city_validator => 'शहर दर्ज करें';
+
+  @override
+  String get district_validator => 'जिला दर्ज करें';
+
+  @override
+  String get state_validator => 'राज्य दर्ज करें';
+
+  @override
+  String get unknown_subject => 'अज्ञात विषय';
+
+  @override
+  String please_enter_at_least_characters(int count) {
+    return 'कृपया कम से कम $count अक्षर दर्ज करें';
+  }
 }

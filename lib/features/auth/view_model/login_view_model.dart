@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/cupertino.dart';
+import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
@@ -16,20 +17,27 @@ class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
 
   final numberController = TextEditingController();
   final otpController = TextEditingController();
+  String? receivedOtp; // Store the OTP received from API
 
   Future<void> generateOTP(GlobalKey<FormState> loginFormKey) async {
     try {
-      if (loginFormKey.currentState!.validate()) {
-        autoValidateMode = AutovalidateMode.disabled;
-      } else {
-        autoValidateMode = AutovalidateMode.onUserInteraction;
+      // Validate only on button click
+      if (!loginFormKey.currentState!.validate()) {
+        // Enable validation mode to show errors, but they only update on next button click
+        autoValidateMode = AutovalidateMode.always;
+        notifyListeners();
         return;
       }
+      // Reset to disabled if validation passes
+      autoValidateMode = AutovalidateMode.disabled;
+      notifyListeners();
       isLoading = true;
       final data = OtpRequestModel(phoneNo: numberController.text);
       final response = await AuthRepository().generateOTP(data);
 
       if (response.data?.responseCode == 200) {
+        // Store the OTP received from API
+        receivedOtp = response.data?.data?.otp;
         RouteManager.pushNamed(Routes.verifyOTPPage);
         CommonSnackbar(text: "OTP Requested Successfully").showToast();
       } else {
@@ -50,6 +58,8 @@ class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
       final response = await AuthRepository().generateOTP(data);
 
       if (response.data?.responseCode == 200) {
+        // Store the OTP received from API
+        receivedOtp = response.data?.data?.otp;
         CommonSnackbar(text: "OTP Resended successfully").showSnackbar();
       } else {
         CommonSnackbar(text: response.error?.message).showToast();
@@ -115,13 +125,17 @@ class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
         ).showToast();
         clear();
       } else {
+        final localization =
+            RouteManager.navigatorKey.currentState!.context.localizations;
         CommonSnackbar(
-          text: 'Invalid OTP Please try again later',
+          text: localization.invalid_otp_please_try_again,
         ).showAnimatedDialog(type: QuickAlertType.warning);
       }
     } catch (err, stackTrace) {
+      final localization =
+          RouteManager.navigatorKey.currentState!.context.localizations;
       CommonSnackbar(
-        text: "Something went wrong !",
+        text: localization.something_went_wrong,
       ).showAnimatedDialog(type: QuickAlertType.error);
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
@@ -133,6 +147,7 @@ class LoginViewModel extends BaseViewModel with CupertinoDialogMixin {
   clear() {
     otpController.clear();
     numberController.clear();
+    receivedOtp = null;
     autoValidateMode = AutovalidateMode.disabled;
   }
 }

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class NotifyListModel {
   int? responseCode;
   String? message;
@@ -41,7 +43,17 @@ class Data {
     if (json['notifyRepresentative'] != null) {
       notifyRepresentative = <NotifyRepresentative>[];
       json['notifyRepresentative'].forEach((v) {
-        notifyRepresentative!.add(new NotifyRepresentative.fromJson(v));
+        // Handle case where v might be a String or other type instead of Map
+        if (v is Map<String, dynamic>) {
+          try {
+            notifyRepresentative!.add(new NotifyRepresentative.fromJson(v));
+          } catch (e) {
+            debugPrint("Error parsing NotifyRepresentative: $e");
+            // Skip invalid entries
+          }
+        } else {
+          debugPrint("Skipping invalid NotifyRepresentative entry (not a Map): $v");
+        }
       });
     }
   }
@@ -81,6 +93,10 @@ class NotifyRepresentative {
   String? district;
   String? mandal;
   String? village;
+  String? area;
+  String? state;
+  String? assemblyConstituency;
+  String? parliamentaryConstituency;
 
   NotifyRepresentative(
       {this.location,
@@ -103,7 +119,11 @@ class NotifyRepresentative {
       this.pincode,
       this.district,
       this.mandal,
-      this.village});
+      this.village,
+      this.area,
+      this.state,
+      this.assemblyConstituency,
+      this.parliamentaryConstituency});
 
   NotifyRepresentative.fromJson(Map<String, dynamic> json) {
     // Handle location - it might be a string or an object {lat, lng}
@@ -131,7 +151,17 @@ class NotifyRepresentative {
     if (json['specialInvites'] != null) {
       specialInvites = <SpecialInvite>[];
       json['specialInvites'].forEach((v) {
-        specialInvites!.add(SpecialInvite.fromJson(v));
+        // Handle case where v might be a String or other type instead of Map
+        if (v is Map<String, dynamic>) {
+          try {
+            specialInvites!.add(SpecialInvite.fromJson(v));
+          } catch (e) {
+            debugPrint("Error parsing SpecialInvite: $e");
+            // Skip invalid entries
+          }
+        } else {
+          debugPrint("Skipping invalid SpecialInvite entry (not a Map): $v");
+        }
       });
     } else {
       specialInvites = <SpecialInvite>[];
@@ -142,7 +172,17 @@ class NotifyRepresentative {
     if (json['responses'] != null) {
       responses = <ResponseItem>[];
       json['responses'].forEach((v) {
-        responses!.add(ResponseItem.fromJson(v));
+        // Handle case where v might be a String or other type instead of Map
+        if (v is Map<String, dynamic>) {
+          try {
+            responses!.add(ResponseItem.fromJson(v));
+          } catch (e) {
+            debugPrint("Error parsing ResponseItem: $e");
+            // Skip invalid entries
+          }
+        } else {
+          debugPrint("Skipping invalid ResponseItem entry (not a Map): $v");
+        }
       });
     } else {
       responses = <ResponseItem>[];
@@ -150,14 +190,49 @@ class NotifyRepresentative {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
-    partyMember = json['partyMember'] != null
-        ? new PartyMember.fromJson(json['partyMember'])
-        : null;
+    // Handle partyMember - it can be a string ID or a full object
+    if (json['partyMember'] != null) {
+      if (json['partyMember'] is String) {
+        // If it's just a string ID, create a PartyMember with only the ID
+        partyMember = PartyMember(sId: json['partyMember']);
+      } else if (json['partyMember'] is Map) {
+        // If it's a full object, parse it normally
+        partyMember = PartyMember.fromJson(json['partyMember']);
+      } else {
+        partyMember = null;
+      }
+    } else {
+      partyMember = null;
+    }
     street = json['street'];
     pincode = json['pincode'];
     district = json['district'];
     mandal = json['mandal'];
     village = json['village'];
+    area = json['area'];
+    state = json['state'];
+    // API returns 'constituency' for assembly and 'parliamentary' for parliamentary
+    // Try both field names for backward compatibility
+    // Handle null values - if constituency is explicitly null, try assemblyConstituency
+    final constituencyValue = json['constituency'];
+    final assemblyConstituencyValue = json['assemblyConstituency'];
+    assemblyConstituency = (constituencyValue != null && constituencyValue.toString().isNotEmpty) 
+        ? constituencyValue.toString() 
+        : ((assemblyConstituencyValue != null && assemblyConstituencyValue.toString().isNotEmpty) 
+            ? assemblyConstituencyValue.toString() 
+            : null);
+    
+    final parliamentaryValue = json['parliamentary'];
+    final parliamentaryConstituencyValue = json['parliamentaryConstituency'];
+    parliamentaryConstituency = (parliamentaryValue != null && parliamentaryValue.toString().isNotEmpty) 
+        ? parliamentaryValue.toString() 
+        : ((parliamentaryConstituencyValue != null && parliamentaryConstituencyValue.toString().isNotEmpty) 
+            ? parliamentaryConstituencyValue.toString() 
+            : null);
+    
+    // Debug logging
+    debugPrint("Parsing NotifyRepresentative - constituency: $constituencyValue, assemblyConstituency: $assemblyConstituencyValue, result: $assemblyConstituency");
+    debugPrint("Parsing NotifyRepresentative - parliamentary: $parliamentaryValue, parliamentaryConstituency: $parliamentaryConstituencyValue, result: $parliamentaryConstituency");
   }
 
   Map<String, dynamic> toJson() {
@@ -191,6 +266,10 @@ class NotifyRepresentative {
     data['district'] = this.district;
     data['mandal'] = this.mandal;
     data['village'] = this.village;
+    data['area'] = this.area;
+    data['state'] = this.state;
+    data['assemblyConstituency'] = this.assemblyConstituency;
+    data['parliamentaryConstituency'] = this.parliamentaryConstituency;
     return data;
   }
 }

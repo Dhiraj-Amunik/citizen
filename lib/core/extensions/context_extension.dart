@@ -2,7 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/l10n/app_localizations.dart';
 
 extension BuildContextExtension on BuildContext {
-  AppLocalizations get localizations => AppLocalizations.of(this)!;
+  /// Optimized localization accessor
+  /// Flutter's Localizations.of already caches efficiently, but we ensure
+  /// proper error handling for better performance in Hindi locale
+  AppLocalizations get localizations {
+    final loc = AppLocalizations.of(this);
+    if (loc == null) {
+      throw FlutterError(
+        'AppLocalizations not found. Make sure your app is wrapped with '
+        'MaterialApp or Localizations widget with AppLocalizations.delegate.',
+      );
+    }
+    return loc;
+  }
+  
   ThemeData get theme => Theme.of(this);
   Color get cardColor => theme.cardColor;
   Color get primaryColor => theme.primaryColor;

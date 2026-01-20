@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/hindi_keyboard.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 
 class AnimatedSearchBar extends StatefulWidget {
   final TextEditingController controller;
@@ -18,10 +23,179 @@ class AnimatedSearchBar extends StatefulWidget {
 
 class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
   bool showSearchField = true;
+  bool _showHindiKeyboard = false;
+  bool _isHindiLanguage = false;
+  OverlayEntry? _keyboardOverlayEntry;
+  StreamSubscription<Locale>? _languageSubscription;
+  final FocusNode _focusNode = FocusNode();
+  bool _isHandlingKeyboard = false; // Flag to prevent multiple simultaneous operations
 
   static final Color searchButtonColor = AppPalettes.liteGreenColor;
 
   Color get primaryColor => AppPalettes.liteGreenColor;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize language check
+    _isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+    
+    // Listen to language changes
+    _languageSubscription = GeneralStream.instance.language.listen((locale) {
+      if (mounted) {
+        final wasHindi = _isHindiLanguage;
+        _isHindiLanguage = locale.languageCode == 'hi';
+        
+        // If language changed from Hindi to non-Hindi, hide keyboard
+        if (wasHindi && !_isHindiLanguage) {
+          _hideKeyboardOverlay();
+          _focusNode.unfocus();
+        }
+      }
+    });
+
+    // Listen to focus changes
+    _focusNode.addListener(_onFocusChange);
+    
+    // Listen to controller changes to trigger onChanged callback when Hindi keyboard updates text
+    widget.controller.addListener(() {
+      if (mounted && _showHindiKeyboard) {
+        widget.onChanged(widget.controller.text);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _languageSubscription?.cancel();
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+    _hideKeyboardOverlay();
+    super.dispose();
+  }
+
+  void _showKeyboardOverlay() {
+    if (_keyboardOverlayEntry != null || !mounted) return;
+    
+    final overlay = Overlay.of(context);
+    
+    _keyboardOverlayEntry = OverlayEntry(
+      builder: (context) {
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) {
+            if (!didPop) {
+              // Back button pressed - close keyboard instead of navigating
+              _hideKeyboardOverlay();
+              _focusNode.unfocus();
+            }
+          },
+          child: Stack(
+            children: [
+              // Transparent barrier to catch taps outside keyboard
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () {
+                    _hideKeyboardOverlay();
+                    _focusNode.unfocus();
+                  },
+                  behavior: HitTestBehavior.translucent,
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                ),
+              ),
+              // Keyboard at bottom
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Material(
+                  elevation: 8,
+                  child: GestureDetector(
+                    onTap: () {
+                      // Prevent closing when tapping on keyboard itself
+                    },
+                    child: HindiKeyboard(
+                      controller: widget.controller,
+                      onDismiss: () {
+                        _isHandlingKeyboard = true;
+                        // Hide system keyboard first to prevent it from showing
+                        SystemChannels.textInput.invokeMethod('TextInput.hide');
+                        _hideKeyboardOverlay();
+                        // Unfocus after a small delay to ensure keyboard is hidden
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          if (mounted) {
+                            _focusNode.unfocus();
+                            _isHandlingKeyboard = false;
+                          }
+                        });
+                      },
+                      onEnter: () {
+                        _isHandlingKeyboard = true;
+                        // Hide system keyboard and dismiss Hindi keyboard first
+                        SystemChannels.textInput.invokeMethod('TextInput.hide');
+                        _hideKeyboardOverlay();
+                        // Unfocus the current field
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          if (mounted) {
+                            _focusNode.unfocus();
+                            _isHandlingKeyboard = false;
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    overlay.insert(_keyboardOverlayEntry!);
+  }
+
+  void _hideKeyboardOverlay({bool skipSetState = false}) {
+    _keyboardOverlayEntry?.remove();
+    _keyboardOverlayEntry = null;
+    if (!skipSetState && mounted) {
+      setState(() {
+        _showHindiKeyboard = false;
+      });
+    } else {
+      // If widget is disposed or skipSetState is true, just update the flag without setState
+      _showHindiKeyboard = false;
+    }
+  }
+
+  void _onFocusChange() {
+    if (mounted && !_isHandlingKeyboard) {
+      final hasFocus = _focusNode.hasFocus;
+      
+      if (hasFocus && _isHindiLanguage && !_showHindiKeyboard) {
+        _isHandlingKeyboard = true;
+        // Hide system keyboard first
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        // Wait a bit for system keyboard to hide before showing Hindi keyboard
+        Future.delayed(const Duration(milliseconds: 150), () {
+          if (mounted && _focusNode.hasFocus && !_showHindiKeyboard) {
+            setState(() {
+              _showHindiKeyboard = true;
+            });
+            _showKeyboardOverlay();
+            _isHandlingKeyboard = false;
+          } else {
+            _isHandlingKeyboard = false;
+          }
+        });
+      } else if (!hasFocus && _showHindiKeyboard) {
+        // Close keyboard when focus is lost (e.g., tapping outside)
+        _hideKeyboardOverlay();
+        _isHandlingKeyboard = false;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,19 +241,29 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
 
   Widget searchField() {
     return Expanded(
-      child: opacity(
-        child: TextField(
-          controller: widget.controller,
-          autofocus: true,
-          onChanged: widget.onChanged,
-          style: AppStyles.bodyMedium,
-          cursorColor: AppPalettes.blackColor,
-          decoration: InputDecoration(
-            hintText: 'Search...',
-            hintStyle: AppStyles.bodyMedium,
-            border: InputBorder.none,
-          ),
-        ),
+      child: Builder(
+        builder: (context) {
+          final localization = context.localizations;
+          return opacity(
+            child: TextField(
+              controller: widget.controller,
+              focusNode: _focusNode,
+              autofocus: true,
+              onChanged: widget.onChanged,
+              // Remove onTap - let _onFocusChange handle it to avoid conflicts
+              // Use keyboardType to prevent system keyboard when Hindi is active
+              keyboardType: _isHindiLanguage ? TextInputType.none : TextInputType.text,
+              readOnly: _isHindiLanguage && _showHindiKeyboard,
+              style: AppStyles.bodyMedium,
+              cursorColor: AppPalettes.blackColor,
+              decoration: InputDecoration(
+                hintText: localization.search,
+                hintStyle: AppStyles.bodyMedium,
+                border: InputBorder.none,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -112,13 +296,15 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
           borderRadius: BorderRadius.circular(360),
         ),
         child: GestureDetector(
-          onTap: widget.onClear,
-          
-          // () {
-          //   if (mounted) setState(() => showSearchField = false);
-          //   widget.onChanged('');
-          //   FocusScope.of(context).unfocus();
-          // },
+          onTap: () {
+            widget.controller.clear();
+            widget.onChanged('');
+            if (_showHindiKeyboard) {
+              _hideKeyboardOverlay();
+              _focusNode.unfocus();
+            }
+            widget.onClear?.call();
+          },
           child: Icon(
             CupertinoIcons.clear,
             color: AppPalettes.whiteColor,

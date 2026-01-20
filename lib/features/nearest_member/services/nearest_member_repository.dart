@@ -27,14 +27,35 @@ class NearestMemberRepository {
     }
     
     // Debug: Print raw response
-    print("Raw API Response: $response");
+    print("═══════════════════════════════════════");
+    print("📡 Nearest Member API Response:");
     print("Response type: ${response.runtimeType}");
+    
+    // Log location data from first member if available
+    if (response is Map && response.containsKey('data')) {
+      final data = response['data'];
+      if (data is Map && data.containsKey('partyMember')) {
+        final members = data['partyMember'];
+        if (members is List && members.isNotEmpty) {
+          print("First member location data: ${members[0]['location']}");
+          print("First member address fields: address=${members[0]['address']}, city=${members[0]['city']}, district=${members[0]['district']}, state=${members[0]['state']}");
+        }
+      }
+    }
+    print("═══════════════════════════════════════");
     
     try {
       final parsedModel = NearestMembersModel.fromJson(response);
       print("Parsed model - responseCode: ${parsedModel.responseCode}");
-      print("Parsed model - data: ${parsedModel.data}");
       print("Parsed model - partyMember count: ${parsedModel.data?.partyMember?.length ?? 0}");
+      
+      // Log location data for each parsed member
+      if (parsedModel.data?.partyMember != null) {
+        for (var member in parsedModel.data!.partyMember!) {
+          print("Member ${member.sId} - hasLocation: ${member.location != null}, hasAddress: ${member.address != null && member.address!.isNotEmpty}, hasCity: ${member.city != null && member.city!.isNotEmpty}");
+        }
+      }
+      
       return RepoResponse(data: parsedModel);
     } catch (e, stackTrace) {
       print("Error parsing NearestMembersModel: $e");
@@ -79,6 +100,27 @@ class NearestMemberRepository {
       path: URLs.getMyMembersChats,
       token: token,
     );
+    
+    // Print raw response for debugging
+    print("═══════════════════════════════════════");
+    print("📬 getAllChats API Response:");
+    print("Response type: ${response.runtimeType}");
+    if (response is! APIException && response is Map) {
+      print("Raw response: $response");
+      print("Response keys: ${response.keys}");
+      if (response.containsKey('data')) {
+        final dataField = response['data'];
+        print("Data field: $dataField");
+        print("Data type: ${dataField.runtimeType}");
+        if (dataField is List) {
+          print("Data list length: ${dataField.length}");
+        }
+      }
+    } else if (response is APIException) {
+      print("Error response: $response");
+    }
+    print("═══════════════════════════════════════");
+    
     return response is APIException
         ? RepoResponse(error: response)
         : RepoResponse(data: MyMembersChatModel.fromJson(response));

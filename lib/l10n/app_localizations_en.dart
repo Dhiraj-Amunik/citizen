@@ -327,7 +327,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phone => 'Phone';
 
   @override
-  String get phone_validator => 'Please enter you mobile number';
+  String get phone_validator => 'Please enter your mobile number';
 
   @override
   String get support_24_7 => '24/7 Support';
@@ -479,7 +479,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appointment_note =>
-      'Note: As per the availability of Associate can rescheduled ur preferred date in appointment';
+      'Note: As per the availability of Associate can rescheduled ur preferred date and time in appointment';
 
   @override
   String get appointment_list => 'Appointment List';
@@ -495,6 +495,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get book_for => 'Book for';
+
+  @override
+  String get my_self => 'My Self';
+
+  @override
+  String get others => 'Others';
 
   @override
   String get membership_id => 'Membership ID';
@@ -540,10 +546,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enter_your_appointment_reason => 'Enter your appointment reason';
 
   @override
+  String get appointment_purpose_validator =>
+      'Please select your appointment purpose';
+
+  @override
+  String get appointment_description_validator =>
+      'Please enter description for appointment';
+
+  @override
   String get upload_documents => 'Upload Documents';
 
   @override
   String get description_info => 'Enter detail description for an appointment';
+
+  @override
+  String get department_validator => 'Please select one department';
 
   @override
   String get clear => 'Clear';
@@ -583,6 +600,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get solved => 'Solved';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get approved => 'Approved';
+
+  @override
+  String get partially_funded => 'Partially-Funded';
+
+  @override
+  String get fully_funded => 'Fully-Funded';
 
   @override
   String get description => 'Description';
@@ -738,7 +767,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get active_since => 'Active Since';
 
   @override
-  String get refered_users => 'People Joined';
+  String get refered_users => 'Users Joined Through Your Referral';
 
   @override
   String get events_attended_volunteer => 'Events Attended';
@@ -797,7 +826,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get time_slot_validator => 'Please select your preferred time slot';
 
   @override
-  String get hours_per_week => 'Hours Per Week';
+  String get hours_per_week => 'Time Availability ( Hours Per Week)';
 
   @override
   String get select_hours => 'Select Hours';
@@ -902,6 +931,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close_request => 'Close Request';
 
   @override
+  String get delete_confirmation =>
+      'Are you sure you want to delete this request?';
+
+  @override
+  String get close_confirmation =>
+      'Are you sure you want to close this request?';
+
+  @override
+  String get survey_submit_confirmation =>
+      'Are you sure you want to submit your response?';
+
+  @override
   String get notify_representative => 'Notify Representative';
 
   @override
@@ -919,6 +960,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get past => 'Past';
+
+  @override
+  String get no_recent_notified_events_found =>
+      'No recent notified events found';
+
+  @override
+  String get no_past_notified_events_found => 'No past notified events found';
 
   @override
   String get view_how_member_notified => 'View how members Notified';
@@ -976,14 +1024,152 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filters => 'Filters';
 
   @override
+  String get distance => 'Distance';
+
+  @override
+  String get km => 'km';
+
+  @override
   String get status => 'Status';
 
   @override
-  String get search => 'Search...';
+  String get pending => 'Pending';
+
+  @override
+  String get in_progress => 'In Progress';
+
+  @override
+  String get resolved => 'Resolved';
+
+  @override
+  String get your_complaint_has_been_resolved =>
+      'Your complaint has been resolved';
+
+  @override
+  String get search => 'Search';
 
   @override
   String get message => 'Message';
 
   @override
   String get images => 'Images';
+
+  @override
+  String get important_notice => 'Important Notice';
+
+  @override
+  String get disclaimer_description =>
+      'This app is developed for the Citizens and is not an official government app. It is intended for public grievance reporting and citizen engagement purposes only.';
+
+  @override
+  String resend_otp_to(String phoneNumber) {
+    return 'Resend Otp to $phoneNumber';
+  }
+
+  @override
+  String get invalid_otp => 'Invalid OTP';
+
+  @override
+  String get invalid_otp_please_try_again =>
+      'Invalid OTP Please try again later';
+
+  @override
+  String get please_check_your_contact_number =>
+      'Please check your contact number';
+
+  @override
+  String get please_check_your_otp => 'Please check your OTP';
+
+  @override
+  String get please_enter_a_password => 'Please enter a password';
+
+  @override
+  String get please_enter_min_8_digit => 'Please enter min 8 digit';
+
+  @override
+  String get voter_id_cannot_be_empty => 'Voter ID cannot be empty';
+
+  @override
+  String get invalid_voter_id => 'Invalid Voter ID';
+
+  @override
+  String get aadhar_no_cannot_be_empty => 'Aadhar No cannot be empty';
+
+  @override
+  String get invalid_aadhar_id => 'Invalid Aadhar ID';
+
+  @override
+  String get something_went_wrong => 'Something went wrong !';
+
+  @override
+  String get ok => 'Ok';
+
+  @override
+  String get warning => 'Warning';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get success => 'Success';
+
+  @override
+  String get info => 'Info';
+
+  @override
+  String get use_my_location => 'Use my location';
+
+  @override
+  String get flat_house_no_apartment => 'Flat, House no, Apartment';
+
+  @override
+  String get house_number => 'House Number';
+
+  @override
+  String get house_number_validator => 'Please enter your house number';
+
+  @override
+  String get area_street => 'Area, Street';
+
+  @override
+  String get area => 'Area';
+
+  @override
+  String get area_validator => 'Please enter your area';
+
+  @override
+  String get enter_pincode => 'Enter Pincode';
+
+  @override
+  String get find => 'Find';
+
+  @override
+  String get do_you_want_to_change_pincode =>
+      'Do you want to change the pincode?';
+
+  @override
+  String get tehsil => 'Tehsil';
+
+  @override
+  String get tehsil_validator => 'Enter Tehsil';
+
+  @override
+  String get city_town => 'City / Town';
+
+  @override
+  String get city_validator => 'Enter City';
+
+  @override
+  String get district_validator => 'Enter District';
+
+  @override
+  String get state_validator => 'Enter State';
+
+  @override
+  String get unknown_subject => 'Unknown subject';
+
+  @override
+  String please_enter_at_least_characters(int count) {
+    return 'Please enter at least $count characters';
+  }
 }

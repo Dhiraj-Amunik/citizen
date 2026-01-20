@@ -20,7 +20,12 @@ class ChatContributeHelpViewModel extends BaseViewModel with UploadFilesMixin {
 
   @override
   Future<void> onInit() {
-    getChats();
+    // Only fetch chats if messageId exists (not empty)
+    // On first visit, messageId will be empty, so skip fetching
+    // After first message is sent, messageId will be populated and we'll fetch
+    if (arguments.isNotEmpty) {
+      getChats();
+    }
     return super.onInit();
   }
 
@@ -32,7 +37,8 @@ class ChatContributeHelpViewModel extends BaseViewModel with UploadFilesMixin {
   List<File> multipleFiles = [];
 
   Future<void> addFiles(Future<dynamic> future) async {
-    RouteManager.pop();
+    // Note: Bottom sheet is already closed in handle_multiple_files_sheet.dart
+    // No need to pop here as it would close the form page
     try {
       final data = await future;
       if (data != null) {
@@ -59,6 +65,12 @@ class ChatContributeHelpViewModel extends BaseViewModel with UploadFilesMixin {
 
   Future<void> getChats() async {
     try {
+      // Don't fetch if messageId is empty (no conversation yet)
+      if (arguments.isEmpty) {
+        debugPrint("No messageId yet, skipping getChats");
+        return;
+      }
+
       isLoading = true;
       final response = await repository.getMessages(
         token: token,
@@ -114,8 +126,11 @@ class ChatContributeHelpViewModel extends BaseViewModel with UploadFilesMixin {
         if (arguments.isEmpty) {
           RouteManager.context.read<WallOfHelpViewModel>().onRefresh();
         }
+        // Update messageId after first message is sent
         arguments = response.data?.data?.sId ?? "";
-        getChats();
+        notifyListeners();
+        // Now fetch all messages including the one we just sent
+        await getChats();
       } else {
         CommonSnackbar(
           text: response.data?.message ?? 'Something went wrong',

@@ -5,7 +5,9 @@ import 'package:inldsevak/core/extensions/validation_extension.dart';
 import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
 
 class ParliamentaryConstituencyDropDownWidget extends StatefulWidget {
@@ -48,31 +50,38 @@ class _ParliamentaryConstituencyDropDownWidgetState
   Widget build(BuildContext context) {
     final localization = context.localizations;
 
-    return Consumer<ConstituencyViewModel>(
-      builder: (context, value, child) {
-        return FormCommonDropDown<Constituency?>(
-          isRequired: true,
-    
-          heading: localization.parliamentary_constituency,
-          controller: widget.constituencyController,
-          items: value.parliamentaryConstituencyLists,
-          hintText: localization.select_your_constituency,
-          listItemBuilder: (p0, constituency, p2, p3) {
-            return Text(
-              "${constituency?.name}",
-              style: context.textTheme.bodySmall,
+    return StreamBuilder(
+      stream: GeneralStream.instance.language,
+      builder: (context, languageSnapshot) {
+        return Consumer<ConstituencyViewModel>(
+          builder: (context, value, child) {
+            return FormCommonDropDown<Constituency?>(
+              isRequired: true,
+        
+              heading: localization.parliamentary_constituency,
+              controller: widget.constituencyController,
+              items: value.parliamentaryConstituencyLists,
+              hintText: localization.select_your_constituency,
+              listItemBuilder: (p0, constituency, p2, p3) {
+                return TranslatedText(
+                  text: constituency?.name ?? "",
+                  style: context.textTheme.bodySmall,
+                  disableTranslation: false,
+                );
+              },
+              headerBuilder: (p0, constituency, p2) {
+                return TranslatedText(
+                  text: constituency?.name ?? "",
+                  style: context.textTheme.bodySmall,
+                  disableTranslation: false,
+                );
+              },
+              validator: (text) => text.toString().validateDropDown(
+                argument: localization.select_your_constituency,
+              ),
+              onChanged: widget.onChange,
             );
           },
-          headerBuilder: (p0, constituency, p2) {
-            return Text(
-              "${constituency?.name}",
-              style: context.textTheme.bodySmall,
-            );
-          },
-          validator: (text) => text.toString().validateDropDown(
-            argument: "Select your constituency",
-          ),
-          onChanged: widget.onChange,
         );
       },
     );

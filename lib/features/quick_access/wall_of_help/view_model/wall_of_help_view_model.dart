@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/widgets.dart';
+import 'package:inldsevak/core/helpers/translation_helper.dart';
 import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
@@ -8,6 +9,7 @@ import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/request_finanical_help_model.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/woh_pagination_model.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/services/wall_of_help_repository.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
@@ -44,6 +46,7 @@ class WallOfHelpViewModel extends BaseViewModel with UploadFilesMixin {
     "approved",
     "Partially-Funded",
     "Fully-Funded",
+    "closed",
   ];
   List<String> dateItems = ["Recent", "One Month", "Six Months"];
 
@@ -77,7 +80,8 @@ class WallOfHelpViewModel extends BaseViewModel with UploadFilesMixin {
   List<File> multipleFiles = [];
 
   Future<void> addFiles(Future<dynamic> future) async {
-    RouteManager.pop();
+    // Note: Bottom sheet is already closed in handle_multiple_files_sheet.dart
+    // No need to pop here as it would close the form page
     try {
       final data = await future;
       if (data != null) {
@@ -165,9 +169,14 @@ class WallOfHelpViewModel extends BaseViewModel with UploadFilesMixin {
       isScrollLoading = true;
     }
     try {
+      // Convert Hindi search to English before sending to API
+      String? searchQuery = searchController.text.isEmpty 
+          ? null 
+          : _convertHindiToEnglishForSearch(searchController.text);
+      
       final paginationModel = WOHPaginationModel(
         page: _currentPage,
-        search: searchController.text.isEmpty ? null : searchController.text,
+        search: searchQuery,
         status: statusKey == "all" || statusKey == null ? null : statusKey,
         date: dateKey == "Recent"
             ? 7
@@ -190,7 +199,15 @@ class WallOfHelpViewModel extends BaseViewModel with UploadFilesMixin {
           return;
         }
         if (data?.isNotEmpty == true) {
-          wallOFHelpLists.addAll(List.from(data as List));
+          final rawItems = List<model.FinancialRequest>.from(data as List);
+          
+          // Translate items if app is in Hindi
+          final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+          final translatedItems = isHindiLocale 
+              ? await _translateFinancialRequests(rawItems)
+              : rawItems;
+          
+          wallOFHelpLists.addAll(translatedItems);
         }
       }
     } catch (err, stackTrace) {
@@ -202,7 +219,7 @@ class WallOfHelpViewModel extends BaseViewModel with UploadFilesMixin {
     }
   }
 
-  Future<void> createFinancialHelp({
+  Future<bool> createFinancialHelp({
     String? urgency,
     String? typeOFHelp,
     String? preferredWay,
@@ -212,7 +229,7 @@ class WallOfHelpViewModel extends BaseViewModel with UploadFilesMixin {
         autoValidateMode = AutovalidateMode.disabled;
       } else {
         autoValidateMode = AutovalidateMode.onUserInteraction;
-        return;
+        return false;
       }
       isLoading = true;
 
@@ -242,15 +259,21 @@ class WallOfHelpViewModel extends BaseViewModel with UploadFilesMixin {
         await CommonSnackbar(
           text: response.data?.message ?? "Request sended successfully",
         ).showAnimatedDialog(type: QuickAlertType.success);
-        RouteManager.pop();
+        // Clear form before returning success
+        clear();
+        // Refresh wall of help list cache to show the new request
+        onRefresh();
+        return true;
       } else {
         await CommonSnackbar(
           text: response.data?.message ?? "Something went wrong",
         ).showAnimatedDialog(type: QuickAlertType.warning);
+        return false;
       }
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
+      return false;
     } finally {
       isLoading = false;
     }
@@ -293,15 +316,174 @@ class WallOfHelpViewModel extends BaseViewModel with UploadFilesMixin {
   }
 
   clear() {
+    // Reset form validation state first
+    if (formKey.currentState != null) {
+      formKey.currentState!.reset();
+    }
+    autoValidateMode = AutovalidateMode.disabled;
+    
+    // Clear all text controllers
     nameController.clear();
     phoneController.clear();
     addressController.clear();
     descriptionController.clear();
-    searchController.clear();
-    phoneController.clear();
     amountController.clear();
+    upiIdController.clear();
+    otherTypeController.clear();
+    otherPreferredController.clear();
+    // Note: Don't clear searchController here as it's used in list view
+    
+    // Clear file list
     multipleFiles.clear();
+    
+    // Reset focus nodes
+    if (nameFocus.hasFocus) nameFocus.unfocus();
+    if (phoneFocus.hasFocus) phoneFocus.unfocus();
+    if (addressFocus.hasFocus) addressFocus.unfocus();
 
+    // Force notify listeners to update UI
     notifyListeners();
+  }
+
+  /// Convert Hindi search query to English for API search
+  String _convertHindiToEnglishForSearch(String hindiText) {
+    if (hindiText.isEmpty) return hindiText;
+    
+    // Check if text contains Hindi characters
+    if (!_isHindi(hindiText)) {
+      return hindiText; // Already in English, return as is
+    }
+
+    // Use transliteration mapping for common Hindi to English conversions
+    return _transliterateHindiToEnglish(hindiText);
+  }
+
+  /// Transliterate Hindi to English using phonetic conversion
+  String _transliterateHindiToEnglish(String hindiText) {
+    // Common Hindi to English transliteration mapping
+    final Map<String, String> hindiToEnglish = {
+      'सहायता': 'help',
+      'अनुरोध': 'request',
+      'शीर्षक': 'title',
+      'विवरण': 'description',
+      'स्थिति': 'status',
+    };
+
+    // Check if entire word matches
+    final lowerHindi = hindiText.toLowerCase().trim();
+    if (hindiToEnglish.containsKey(lowerHindi)) {
+      return hindiToEnglish[lowerHindi]!;
+    }
+
+    // For partial matches or unknown words, try character-by-character transliteration
+    return _phoneticTransliteration(hindiText);
+  }
+
+  /// Phonetic transliteration for Hindi to English
+  String _phoneticTransliteration(String hindiText) {
+    // Basic phonetic mapping for common Hindi characters to English
+    final Map<String, String> charMap = {
+      'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo',
+      'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au',
+      'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ng',
+      'च': 'ch', 'छ': 'chh', 'ज': 'j', 'झ': 'jh', 'ञ': 'ny',
+      'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n',
+      'त': 't', 'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n',
+      'प': 'p', 'फ': 'ph', 'ब': 'b', 'भ': 'bh', 'म': 'm',
+      'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v',
+      'श': 'sh', 'ष': 'sh', 'स': 's', 'ह': 'h',
+    };
+
+    String result = '';
+    for (int i = 0; i < hindiText.length; i++) {
+      final char = hindiText[i];
+      if (charMap.containsKey(char)) {
+        result += charMap[char]!;
+      } else if (RegExp(r'[a-zA-Z0-9\s]').hasMatch(char)) {
+        result += char; // Keep English characters and numbers
+      }
+    }
+    
+    return result.isNotEmpty ? result : hindiText;
+  }
+
+  /// Check if text contains Hindi/Devanagari characters
+  bool _isHindi(String text) {
+    final hindiRegex = RegExp(r'[\u0900-\u097F]');
+    return hindiRegex.hasMatch(text);
+  }
+
+  /// Translate financial requests based on app language
+  /// Translates title, description, and typeOfHelp.name fields when app is in Hindi
+  Future<List<model.FinancialRequest>> _translateFinancialRequests(
+    List<model.FinancialRequest> rawItems,
+  ) async {
+    final translatedItems = <model.FinancialRequest>[];
+    
+    // Translate all items in parallel for better performance
+    final translationFutures = rawItems.map((item) async {
+      // Translate title and description
+      final translatedTitle = await TranslationHelper.translateText(
+        item.title,
+        force: true, // Force translation based on locale (English -> Hindi)
+      );
+      
+      final translatedDescription = await TranslationHelper.translateText(
+        item.description,
+        force: true,
+      );
+      
+      // Translate typeOfHelp.name if it exists
+      String? translatedTypeOfHelpName;
+      if (item.typeOfHelp?.name != null) {
+        translatedTypeOfHelpName = await TranslationHelper.translateText(
+          item.typeOfHelp!.name,
+          force: true,
+        );
+      }
+      
+      // Create new TypeOfHelp with translated name if needed
+      model.TypeOfHelp? translatedTypeOfHelp;
+      if (item.typeOfHelp != null) {
+        translatedTypeOfHelp = model.TypeOfHelp(
+          sId: item.typeOfHelp!.sId,
+          name: translatedTypeOfHelpName ?? item.typeOfHelp!.name,
+        );
+      }
+      
+      // Create new FinancialRequest with translated fields
+      return model.FinancialRequest(
+        sId: item.sId,
+        partyMember: item.partyMember,
+        name: item.name,
+        phone: item.phone,
+        amountRequested: item.amountRequested,
+        urgency: item.urgency,
+        description: translatedDescription,
+        documents: item.documents,
+        status: item.status,
+        isActive: item.isActive,
+        isDeleted: item.isDeleted,
+        amountCollected: item.amountCollected,
+        address: item.address,
+        uPI: item.uPI,
+        typeOfHelp: translatedTypeOfHelp,
+        preferredWayForHelp: item.preferredWayForHelp,
+        othersWayForHelp: item.othersWayForHelp,
+        othersTypeOfHelp: item.othersTypeOfHelp,
+        transactions: item.transactions,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        iV: item.iV,
+        messageDetails: item.messageDetails,
+        messageId: item.messageId,
+        title: translatedTitle,
+      );
+    }).toList();
+    
+    // Wait for all translations to complete
+    translatedItems.addAll(await Future.wait(translationFutures));
+    
+    return translatedItems;
   }
 }

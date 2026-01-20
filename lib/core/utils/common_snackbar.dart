@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/app_styles.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:quickalert/quickalert.dart';
 
 class CommonSnackbar {
@@ -38,7 +40,6 @@ class CommonSnackbar {
       msg: text ?? 'Please try again',
       toastLength: Toast.LENGTH_LONG,
       timeInSecForIosWeb: 3,
-      gravity: ToastGravity.BOTTOM,
     ).then((_) {
       _isToastShowing = false;
     });
@@ -48,11 +49,34 @@ class CommonSnackbar {
     if (_isDialogShowing) return;
     
     _isDialogShowing = true;
+    final context = RouteManager.navigatorKey.currentState!.context;
+    final localization = context.localizations;
+    
+    // Get localized title based on alert type
+    String? title;
+    switch (type) {
+      case QuickAlertType.warning:
+        title = localization.warning;
+        break;
+      case QuickAlertType.error:
+        title = localization.error;
+        break;
+      case QuickAlertType.success:
+        title = localization.success;
+        break;
+      case QuickAlertType.info:
+        title = localization.info;
+        break;
+      default:
+        title = null;
+    }
+    
     await QuickAlert.show(
-      context: RouteManager.navigatorKey.currentState!.context,
+      context: context,
       type: type,
-      widget: Text(
-        "$text",
+      title: title,
+      widget: TranslatedText(
+        text: "$text",
         style: AppStyles.bodyMedium,
         textAlign: TextAlign.center,
       ),
@@ -61,7 +85,7 @@ class CommonSnackbar {
       ),
       onConfirmBtnTap: onTap,
       borderRadius: Dimens.radiusX2,
-      confirmBtnText: 'Ok',
+      confirmBtnText: localization.ok,
       confirmBtnColor: AppPalettes.primaryColor,
     ).then((_) {
       _isDialogShowing = false;

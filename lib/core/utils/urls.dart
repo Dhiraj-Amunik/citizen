@@ -23,7 +23,6 @@ class URLs {
   static const uploadMultipleImage = "/api/image/multipleUpload"; /*Post*/
 
   //Party Member
-
   static const getUserDetails = "/api/user/get-user-details-by-phone"; /*Post*/
   static const becomePartyMember = "/api/user/become-party-member"; /*Post*/
   static const getParties = "/api/user/list-of-parties-dropdown";
@@ -47,15 +46,17 @@ class URLs {
   static const lokVartaDetails = "/api/user/getSinglelokVarta"; /*Post*/
 
   //complaints
-
-  static const addComplaint = "/api/complaint/sendmail"; /*Post*/
+  static const addComplaint = "/api/complaint/raiseComplaint"; /*Post*/
   static const getComplaintByThreadID =
       "/api/complaint/getchatbythreadId"; /*Post*/
+  static const getComplaintByThreadId =
+      "/api/complaint/getComplaintByThreadId"; /*Post*/
   static const replyToComplaintByThreadID =
-      "/api/complaint/replythread"; /*Post*/
+      "/api/complaint/raiseComplaint"; /*Post*/
   static const getComplaintByUserID = "/api/complaint/getComplaints"; /*Get*/
+  static const complaintCase = "/api/complaint/complaintCase"; /*Post*/
   static const getDepartments = "/api/user/list-of-department-dropdown"; /*Get*/
-  static const getAuthority = "/api/user/list-of-authorities-dropdown"; /*Get*/
+  static const getAuthority = "/api/user/list-of-authorities-dropdown"; /*Post*/
   static const getConstituencies =
       "/api/user/list-of-constituencies-dropdown"; /*Get*/
  
@@ -86,7 +87,8 @@ class URLs {
       "/api/user/reply-financial-help-request-message"; /*Post*/
   static const completeMyFinancialHelp =
       "/api/user/completeMyFinancialHelpRequests"; /*Post*/
-      
+  static const getMyFinacialhelpRequestMessages =
+      "/api/user/getMyFinacialhelpRequestMessages"; /*Post*/
 
   //notifications
   static const notifications = "/api/user/notificationList"; /*Get*/
@@ -98,7 +100,6 @@ class URLs {
   static const getMyMembersChats = "/api/user/get-All-Chats"; /*Get*/
 
   // Notify representative
-
   static const getNotifyEventTypes = "/api/user/list-of-event-type-dropdown";
   static const getNotifyFilters = "/api/user/getNotifyFilters"; /*Get*/
   static const postNotifyRepresentative =

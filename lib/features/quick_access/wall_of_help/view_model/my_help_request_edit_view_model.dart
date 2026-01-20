@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/capitalise_string.dart';
+import 'package:inldsevak/core/mixin/upload_files_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
@@ -16,7 +18,7 @@ import 'package:inldsevak/features/quick_access/wall_of_help/view_model/my_help_
 import 'package:provider/provider.dart';
 import 'package:quickalert/quickalert.dart';
 
-class MyHelpRequestEditViewModel extends BaseViewModel {
+class MyHelpRequestEditViewModel extends BaseViewModel with UploadFilesMixin {
   MyHelpRequestEditViewModel({
     required model.FinancialRequest data,
     required List<preferred.Data> preferredData,
@@ -54,6 +56,9 @@ class MyHelpRequestEditViewModel extends BaseViewModel {
     'Not Urgent (whenever possible)',
   ];
   List<String> documents = [];
+  List<File> multipleFiles = [];
+  final List<String> _existingDocuments = [];
+  List<String> get existingDocuments => List.unmodifiable(_existingDocuments);
 
   Future<void> updateFinancialHelp(String? id) async {
     try {
@@ -64,6 +69,27 @@ class MyHelpRequestEditViewModel extends BaseViewModel {
         return;
       }
       isLoading = true;
+      notifyListeners();
+
+      // Upload new files if any
+      List<String> uploadedDocuments = [];
+      if (multipleFiles.isNotEmpty) {
+        uploadedDocuments = await uploadMultipleImage(multipleFiles);
+        if (uploadedDocuments.isEmpty) {
+          isLoading = false;
+          notifyListeners();
+          await CommonSnackbar(
+            text: "Failed to upload images. Please try again.",
+          ).showAnimatedDialog(type: QuickAlertType.warning);
+          return;
+        }
+      }
+      
+      // Combine existing documents (that weren't removed) and newly uploaded documents
+      final allDocuments = [
+        ..._existingDocuments,
+        ...uploadedDocuments,
+      ];
 
       final model = RequestFinancialHelpModel(
         financialHelpRequestId: id,
@@ -72,7 +98,7 @@ class MyHelpRequestEditViewModel extends BaseViewModel {
         amountRequested: int.tryParse(amountController.text) ?? 0,
         urgency: urgencyController.value,
         description: descriptionController.text,
-        documents: documents,
+        documents: allDocuments,
         typeOfHelpId: typeOfHelpController.value?.sId,
         otherTypeOfHelp: otherTypeController.text,
         preferredWayForHelpId: preferredWayController.value?.sId,
@@ -87,11 +113,25 @@ class MyHelpRequestEditViewModel extends BaseViewModel {
       );
 
       if (response.data?.responseCode == 200) {
-        await RouteManager.context.read<MyHelpRequestsViewModel>().onRefresh();
+        // Show success popup first
         await CommonSnackbar(
           text: response.data?.message ?? "Updated successfully",
         ).showAnimatedDialog(type: QuickAlertType.success);
-        RouteManager.pop();
+        
+        // Try to refresh the list - attempt to get from RouteManager context
+        try {
+          final context = RouteManager.context;
+          if (context.mounted) {
+            final myRequestsViewModel = context.read<MyHelpRequestsViewModel>();
+            // Await the refresh to ensure data is updated before navigating back
+            await myRequestsViewModel.onRefresh();
+          }
+        } catch (e) {
+          debugPrint("Could not refresh MyHelpRequestsViewModel: $e");
+        }
+        
+        // Pop with success result to indicate update was successful
+        RouteManager.pop(true);
       } else {
         await CommonSnackbar(
           text: response.data?.message ?? "Something went wrong",
@@ -111,6 +151,11 @@ class MyHelpRequestEditViewModel extends BaseViewModel {
     required List<types.Data> typeList,
   }) {
     try {
+      // Clear and populate existing documents
+      _existingDocuments.clear();
+      _existingDocuments.addAll(data.documents ?? []);
+      // Keep documents list in sync for backward compatibility
+      documents.clear();
       documents.addAll(data.documents ?? []);
       preferredWaysList.addAll(preferredList);
       typeOfHelpsList.addAll(typeList);
@@ -132,6 +177,43 @@ class MyHelpRequestEditViewModel extends BaseViewModel {
     } catch (err) {
       CommonSnackbar(text: "Something went wrong").showToast();
     }
+  }
+
+  Future<void> addFiles(Future<dynamic> future) async {
+    // Note: Bottom sheet is already closed in handle_multiple_files_sheet.dart
+    // No need to pop here as it would close the form page
+    try {
+      final data = await future;
+      if (data != null) {
+        List<File> tempFiles = [...multipleFiles];
+        tempFiles.addAll(data);
+        if (tempFiles.length >= 6) {
+          return CommonSnackbar(
+            text: "Max 5 Files are accepted",
+          ).showAnimatedDialog(type: QuickAlertType.warning);
+        } else {
+          multipleFiles.addAll(data);
+          notifyListeners();
+        }
+      }
+    } catch (err) {
+      debugPrint("-------->$err");
+    }
+  }
+
+  void removeImage(int index) {
+    multipleFiles.removeAt(index);
+    notifyListeners();
+  }
+
+  void removeExistingDocument(int index) {
+    if (index < 0 || index >= _existingDocuments.length) return;
+    _existingDocuments.removeAt(index);
+    // Also remove from documents list to keep them in sync
+    if (index < documents.length) {
+      documents.removeAt(index);
+    }
+    notifyListeners();
   }
 
   clear() {

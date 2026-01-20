@@ -6,6 +6,7 @@ import 'package:inldsevak/features/auth/view/login_view.dart';
 import 'package:inldsevak/features/auth/view/user_register_view.dart';
 import 'package:inldsevak/features/auth/view/verify_otp_view.dart';
 import 'package:inldsevak/features/chat/view/chat_view.dart';
+import 'package:inldsevak/features/chat/view/all_chats_view.dart';
 import 'package:inldsevak/features/complaints/view/complaints_view.dart';
 import 'package:inldsevak/features/complaints/view/lodge_complaint_view.dart';
 import 'package:inldsevak/features/complaints/view/thread_complaint_view.dart';
@@ -83,6 +84,14 @@ class RouteManager {
     );
   }
 
+  static Future<T?> pushReplacementNamed<T extends Object?>(Routes route, {Object? arguments, Object? result}) {
+    return navigatorKey.currentState!.pushReplacementNamed<T, Object?>(
+      route.path,
+      arguments: arguments,
+      result: result,
+    );
+  }
+
   static Future<T?> pushNamedAndRemoveAll<T>(
     Routes route, {
     Object? arguments,
@@ -113,7 +122,12 @@ class RouteManager {
     return navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 
-  static void pop<T>([T? result]) => navigatorKey.currentState!.pop<T>(result);
+  static void pop<T>([T? result]) {
+    final navigator = navigatorKey.currentState;
+    if (navigator != null && navigator.canPop()) {
+      navigator.pop<T>(result);
+    }
+  }
 }
 
 abstract class RouteFactory {

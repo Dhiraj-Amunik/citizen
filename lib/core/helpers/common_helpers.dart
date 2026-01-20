@@ -51,8 +51,20 @@ class CommonHelpers {
     Widget? placeholder,
     BoxFit? fit,
   }) {
+    // Return placeholder if image is null or empty to prevent invalid URL errors
+    if (image == null || image.trim().isEmpty) {
+      return placeholder ??
+          Container(
+            color: AppPalettes.imageholderColor,
+            child: Image.asset(
+              AppImages.imagePlaceholder,
+              fit: BoxFit.contain,
+            ),
+          );
+    }
+    
     return CachedNetworkImage(
-      imageUrl: image ?? "",
+      imageUrl: image,
       fit: fit ?? BoxFit.contain,
       progressIndicatorBuilder: (context, child, progress) {
         return shimmer();
@@ -430,92 +442,112 @@ class CommonHelpers {
           // Continue with sharing even if API call fails
         }
       }
+      
+      // Filter out empty or invalid image URLs
+      debugPrint("📤 Raw images from API: ${images?.length ?? 0}");
+      if (images != null) {
+        for (int i = 0; i < images.length; i++) {
+          debugPrint("📤 Image $i: ${images[i]} (valid: ${images[i].trim().isNotEmpty && images[i].showDataNull})");
+        }
+      }
+      
+      final validImages = images != null 
+          ? images.where((img) => img.trim().isNotEmpty && img.showDataNull).toList()
+          : <String>[];
+      
+      debugPrint("📤 Valid images after filtering: ${validImages.length}");
+      
+      // Resolve first image URL for sharing as file
+      String? firstImageUrl;
+      if (validImages.isNotEmpty) {
+        String imageUrl = validImages[0].trim();
+        if (!imageUrl.startsWith('http')) {
+          if (imageUrl.startsWith('/')) {
+            imageUrl = "${URLs.baseURL}$imageUrl";
+          } else {
+            imageUrl = "${URLs.baseURL}/$imageUrl";
+          }
+        }
+        firstImageUrl = imageUrl;
+      }
+      
+      debugPrint("📤 First image URL: ${firstImageUrl ?? 'none'}");
+      
+      // Build text content with complete information
       final StringBuffer shareText = StringBuffer();
       
-      // Header with bold styling
-      shareText.writeln('━━━━━━━━━━━━━━━━━━━━');
-      shareText.writeln('📰 ${_toBoldText('LOK VARTA')}');
-      shareText.writeln('━━━━━━━━━━━━━━━━━━━━');
-      shareText.writeln('');
-      
+      // Add TITLE heading and title (always include title when sharing)
       if (title != null && title.isNotEmpty) {
-        shareText.writeln(' ${_toBoldText('TITLE:')}');
+        shareText.writeln('${_toBoldText('TITLE:')}');
         shareText.writeln(title);
         shareText.writeln('');
       }
       
-      if (date != null && date.isNotEmpty) {
-        try {
-          final formattedDate = date.toDdMmYyyy();
-          shareText.writeln(' ${_toBoldText('DATE:')}');
-          shareText.writeln(formattedDate);
-          shareText.writeln('');
-        } catch (e) {
-          shareText.writeln(' ${_toBoldText('DATE:')}');
-          shareText.writeln(date);
-          shareText.writeln('');
-        }
-      }
-      
+      // Add CONTENT heading and complete content
       if (content != null && content.isNotEmpty) {
-        shareText.writeln(' ${_toBoldText('CONTENT:')}');
+        shareText.writeln('${_toBoldText('CONTENT:')}');
         shareText.writeln(content);
         shareText.writeln('');
       }
       
+      // Add URL if available
       if (url != null && url.isNotEmpty) {
-        shareText.writeln(' ${_toBoldText('MORE INFO:')}');
+        shareText.writeln('${_toBoldText('MORE INFO:')}');
         shareText.writeln(url);
+        shareText.writeln('');
       }
       
-      // If images are available, add as links in text
-      if (images != null && images.isNotEmpty) {
-        // Filter out empty or invalid image URLs
-        final validImages = images.where((img) => 
-          img.trim().isNotEmpty && img.showDataNull
-        ).toList();
-        
-        if (validImages.isNotEmpty) {
-          shareText.writeln('');
-          if (validImages.length == 1) {
-            // Single image
-            String imageUrl = validImages[0].trim();
-            // Resolve URL - handle both full URLs and relative paths
-            if (!imageUrl.startsWith('http')) {
-              if (imageUrl.startsWith('/')) {
-                imageUrl = "${URLs.baseURL}$imageUrl";
-              } else {
-                imageUrl = "${URLs.baseURL}/$imageUrl";
-              }
-            }
-            shareText.writeln('🖼️ ${_toBoldText('IMAGE:')}');
-            shareText.writeln(imageUrl);
-          } else {
-            // Multiple images
-            shareText.writeln('🖼️ ${_toBoldText('IMAGES:')}');
-            for (int i = 0; i < validImages.length; i++) {
-              String imageUrl = validImages[i].trim();
-              // Resolve URL - handle both full URLs and relative paths
-              if (!imageUrl.startsWith('http')) {
-                if (imageUrl.startsWith('/')) {
-                  imageUrl = "${URLs.baseURL}$imageUrl";
-                } else {
-                  imageUrl = "${URLs.baseURL}/$imageUrl";
-                }
-              }
-              shareText.writeln('${i + 1}. $imageUrl');
+      // Build final share text
+      final finalShareText = shareText.toString().trim();
+      debugPrint("📤 Share text content: ${finalShareText.isNotEmpty ? 'Yes' : 'No'}");
+      debugPrint("📤 Share text length: ${finalShareText.length}");
+      debugPrint("📤 Title: ${title ?? 'null'}");
+      debugPrint("📤 Content: ${content != null && content.isNotEmpty ? 'Yes (${content.length} chars)' : 'null or empty'}");
+      
+      // Ensure text is always non-empty
+      final textToShare = finalShareText.isNotEmpty 
+          ? finalShareText 
+          : (title != null && title.isNotEmpty 
+              ? '${_toBoldText('TITLE:')}\n$title' 
+              : 'Lok Varta');
+      
+      debugPrint("📤 Sharing with first image as file: ${firstImageUrl != null}");
+      
+      // Download and share first image as file if available
+      XFile? imageFile;
+      if (firstImageUrl != null && firstImageUrl.isNotEmpty) {
+        try {
+          final network = NetworkRequester();
+          final tempDir = await getTempPath();
+          if (tempDir != null && tempDir.isNotEmpty) {
+            final fileName = 'lok_varta_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            final temp = "$tempDir/$fileName";
+            final response = await network.download(url: firstImageUrl);
+            if (response != null) {
+              File file = File(temp);
+              var raf = file.openSync(mode: FileMode.write);
+              raf.writeFromSync(response);
+              await raf.close();
+              imageFile = XFile(temp);
+              debugPrint("📤 Image downloaded successfully: $temp");
             }
           }
+        } catch (err) {
+          debugPrint("📤 Error downloading image: $err");
+          // Continue with text-only sharing if image download fails
         }
       }
       
-      // Share text with image links
+      // Share with image file if available, otherwise text only
       await SharePlus.instance.share(
         ShareParams(
-          text: shareText.toString(),
+          files: imageFile != null ? [imageFile] : null,
+          text: textToShare,
           subject: title ?? 'Lok Varta',
         ),
       );
+      
+      debugPrint("📤 Share completed - ${imageFile != null ? 'with image file' : 'text only'}");
     } catch (e) {
       debugPrint("Error in shareLokVartaDetails: $e");
       CommonSnackbar(

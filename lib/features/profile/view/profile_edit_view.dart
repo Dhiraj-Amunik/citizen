@@ -20,6 +20,7 @@ import 'package:inldsevak/features/common_fields/widget/parliamentary_constituen
 import 'package:inldsevak/features/profile/view_model/avatar_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/features/profile/widget/profile_avatar.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
 import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 
@@ -100,9 +101,28 @@ class _ProfileEditViewState extends State<ProfileEditView>
               return Center(child: CustomAnimatedLoading());
             }
 
-            return SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
+            return Builder(
+              builder: (context) {
+                // Check if Hindi keyboard might be shown (Hindi language)
+                final isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+                // Hindi keyboard height is approximately 300px
+                const hindiKeyboardHeight = 300.0;
+                
+                // Check if any text field has focus (which would show Hindi keyboard)
+                final hasFocus = FocusScope.of(context).hasFocus;
+                final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+                // Show padding if system keyboard is showing OR if Hindi keyboard might be showing (Hindi mode + focus)
+                final shouldShowKeyboardPadding = isHindiLanguage && hasFocus && viewInsets == 0;
+                
+                return SingleChildScrollView(
+                  controller: _scrollController,
+                  padding: EdgeInsets.only(
+                    // Only add extra padding for Hindi locale, not for English
+                    bottom: isHindiLanguage && shouldShowKeyboardPadding
+                        ? hindiKeyboardHeight 
+                        : (viewInsets > 0 ? viewInsets : 0),
+                  ),
+                  child: Column(
                 spacing: Dimens.widgetSpacing,
                 children: [
                   Consumer2<AvatarViewModel, ProfileViewModel>(
@@ -141,6 +161,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           controller: provider.emailController,
                           prefixIcon: AppImages.emailIcon,
                           headingText: localization.email,
+                          useEnglishKeyboard: true,
                         textCapitalization: TextCapitalization.sentences,
                         enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
@@ -155,20 +176,37 @@ class _ProfileEditViewState extends State<ProfileEditView>
                           controller: provider.phoneNumberController,
                          showDefaultSuffix: false,
                           keyboardType: TextInputType.none,
+
                           maxLength: 10,
                           enabled: false,
                         ),
                         MapSearchLocation(
                           findPincode: (text) async {
-                            if (text.length == 6) {
+                            try {
+                              // Validate pincode before processing
+                              final trimmedPincode = text.trim();
+                              
+                              // Check if pincode is valid (6 digits and numeric)
+                              if (trimmedPincode.length == 6) {
+                                final pincodeInt = int.tryParse(trimmedPincode);
+                                if (pincodeInt != null) {
+                                  // Valid numeric pincode - proceed with API call
                               mapsProvider.districtController.text =
                                   await constituencyProvider
                                       .getParliamentaryConstituencies(
-                                        pincode: text,
+                                            pincode: trimmedPincode,
                                         parlimentController:
                                             parliamentaryconstituencyController,
                                       ) ??
                                   "";
+                                } else {
+                                  // Invalid format - show error
+                                  debugPrint("⚠️ Invalid pincode format: $text");
+                                }
+                              }
+                            } catch (e) {
+                              debugPrint("❌ Error in findPincode callback: $e");
+                              // Error is already handled in getParliamentaryConstituencies
                             }
                           },
                         ),
@@ -196,6 +234,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                                     .isEmpty) {
                               context
                                   .read<ConstituencyViewModel>()
+                                  
                                   .getAssemblyConstituencies(
                                     id: constituency.sId,
                                   );
@@ -269,21 +308,41 @@ class _ProfileEditViewState extends State<ProfileEditView>
                             );
                           },
                         ),
-                        FormTextFormField(
-                          isRequired: true,
-                          headingText: localization.voter_id,
-                          hintText: "ABC1234567",
-                          maxLength: 10,
-                          controller: provider.voterIdController,
-                          prefixIcon: AppImages.aadharIcon,
-                          keyboardType: TextInputType.text,
-                        textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                          enableSpeechInput: true,
-                          validator: (text) => text?.validateVoterID(
-                            argument: localization.voter_id_validator,
-                          ),
-                          onChanged: (value) => provider.generateVoter(value),
+                        Consumer<ProfileViewModel>(
+                          builder: (context, viewModel, _) {
+                            return FormTextFormField(
+                              isRequired: false,
+                              headingText: localization.voter_id,
+                              hintText: "ABC1234567",
+                              maxLength: 10,
+                              controller: viewModel.voterIdController,
+                              prefixIcon: AppImages.aadharIcon,
+                              keyboardType: TextInputType.text,
+                            textCapitalization: TextCapitalization.sentences,
+                            disableHindiKeyboardOverlay:  true,
+                            enforceFirstLetterUppercase: true,
+                              enableSpeechInput: true,
+                              validator: (text) {
+                                // Don't validate at all if autoValidateMode is disabled (while typing)
+                                if (viewModel.autoValidateMode == AutovalidateMode.disabled) {
+                                  return null; // No validation while typing - only validate when tap on update profile
+                                }
+                                
+                                // Since voter ID is optional, only validate if text is provided
+                                // Validation only happens when tap on update profile button
+                                if (text == null || text.isEmpty || text.trim().isEmpty) {
+                                  return null; // No error for empty optional field
+                                }
+                                
+                                // When form is submitted (autoValidateMode is onUserInteraction), validate the format
+                                final trimmedText = text.trim();
+                                return trimmedText.validateVoterID(
+                                  argument: localization.voter_id_validator,
+                                );
+                              },
+                              onChanged: (value) => viewModel.generateVoter(value),
+                            );
+                          },
                         ),
                         Consumer<ProfileViewModel>(
                           builder: (_, _, _) {
@@ -303,10 +362,11 @@ class _ProfileEditViewState extends State<ProfileEditView>
                   ),
                 ],
               ),
+                );
+              },
             );
           },
         ),
-
         bottomNavigationBar: Padding(
           padding: EdgeInsetsGeometry.symmetric(
             horizontal: Dimens.horizontalspacing,

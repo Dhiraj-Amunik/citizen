@@ -4,6 +4,7 @@ import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/common_fields/view_model/mla_view_model.dart';
 import 'package:inldsevak/features/quick_access/appointments/model/mla_dropdown_model.dart'
     as mla;
@@ -46,15 +47,17 @@ class MlaDropDownWidget extends StatelessWidget {
           controller: mlaController,
           items: value.mlaLists,
           listItemBuilder: (p0, mlaItem, p2, p3) {
-            return Text(
-              mlaItem?.user?.name ?? localization.choose_your_associate,
+            return TranslatedText(
+              text: mlaItem?.user?.name ?? localization.choose_your_associate,
               style: textTheme.bodySmall,
+              disableTranslation: false,
             );
           },
           headerBuilder: (p0, mlaItem, p2) {
-            return Text(
-              mlaItem?.user?.name ?? localization.choose_your_associate,
+            return TranslatedText(
+              text: mlaItem?.user?.name ?? localization.choose_your_associate,
               style: textTheme.bodySmall,
+              disableTranslation: false,
             );
           },
           validator: (data) {

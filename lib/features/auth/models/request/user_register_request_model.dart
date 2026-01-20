@@ -44,6 +44,12 @@ class RequestRegisterModel {
   });
 
   Map<String, dynamic> toJson() {
+    // Filter out documents with empty documentNumber - completely remove the document object if empty
+    final filteredDocuments = document
+        ?.where((doc) => doc.documentNumber.trim().isNotEmpty)
+        .map((doc) => doc.toJson())
+        .toList();
+    
     return {
       'name': name,
       'fatherName': fatherName,
@@ -60,7 +66,7 @@ class RequestRegisterModel {
       "pincode": pincode,
       "whatsapp": whatsappNo,
       'location': location?.toJson(),
-      'document': document?.map((doc) => doc.toJson()).toList(),
+      'document': filteredDocuments,
       "area": area,
       "flatNumber": flatNo,
       "teshil": tehsil,

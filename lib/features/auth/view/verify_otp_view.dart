@@ -20,6 +20,7 @@ class VerifyOtpView extends StatelessWidget with CupertinoDialogMixin {
     final provider = context.read<LoginViewModel>();
     final localization = context.localizations;
     final textTheme = context.textTheme;
+    
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         provider.otpController.clear();
@@ -50,7 +51,7 @@ class VerifyOtpView extends StatelessWidget with CupertinoDialogMixin {
               length: 4,
               margin: EdgeInsets.symmetric(horizontal: Dimens.marginX2),
               validator: (value) =>
-                  value?.validateOTP(4, argument: "Invalid otp"),
+                  value?.validateOTP(4, argument: localization.invalid_otp),
             ),
             SizeBox.sizeHX1,
             Consumer<LoginViewModel>(
@@ -80,8 +81,8 @@ class VerifyOtpView extends StatelessWidget with CupertinoDialogMixin {
                   onTap: () {
                     customRightCupertinoDialog(
                       content:
-                          "Resend Otp to ${provider.numberController.text}",
-                      rightButton: "Resend Otp",
+                          localization.resend_otp_to(provider.numberController.text),
+                      rightButton: localization.resend_otp,
                       onTap: () => provider.resendOTP(),
                     );
                   },

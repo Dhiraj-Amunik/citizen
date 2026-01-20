@@ -7,14 +7,12 @@ Widget getHelpDetails({required String text, String? desc}) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      TranslatedText(
-        text: "$text : ",
+      Text(
+        "$text : ",
         style: AppStyles.bodySmall.copyWith(
           fontWeight: FontWeight.w500,
-          color: AppPalettes.blackColor,
+          color: AppPalettes.blackColor
         ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
       ),
       Expanded(
         child: TranslatedText(

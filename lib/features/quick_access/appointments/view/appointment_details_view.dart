@@ -124,12 +124,30 @@ class AppointmentDetailsView extends StatelessWidget {
                     TranslatedText(
                       text: () {
                         final hasRescheduledDate = (appointment.rescheduledDate ?? '').trim().isNotEmpty;
+                        final appointmentStatus = appointment.status?.toLowerCase() ?? '';
+                        
+                        // Simple logic based on status:
+                        // - pending: don't show time
+                        // - approved: show timeslot
+                        // - rescheduled: show timeslot in rescheduled date
+                        // - cancelled: don't show timeslot
+                        final isPending = appointmentStatus == 'pending';
+                        final isApproved = appointmentStatus == 'approved';
+                        final isRescheduled = appointmentStatus == 'rescheduled';
+                        final isCancelled = appointmentStatus == 'cancelled';
+                        
+                        final shouldShowTime = (isApproved || isRescheduled) && 
+                                             !isPending && 
+                                             !isCancelled && 
+                                             appointment.timeSlot != null && 
+                                             appointment.timeSlot!.isNotEmpty;
+                        
                         // If rescheduled, show only date (no timeSlot) for scheduled date
                         if (hasRescheduledDate) {
                           return appointment.date?.toDdMmmYyyy() ?? "";
                         } else {
-                          // If not rescheduled, show date + timeSlot
-                          return appointment.timeSlot != null && appointment.timeSlot!.isNotEmpty
+                          // If not rescheduled, show date + timeSlot based on status
+                          return shouldShowTime
                               ? "${appointment.date?.toDdMmmYyyy() ?? ""} at ${appointment.timeSlot!.to12HourTimeFormat()}"
                               : appointment.date?.toDdMmmYyyy() ?? "";
                         }
@@ -154,9 +172,29 @@ class AppointmentDetailsView extends StatelessWidget {
                             ),
                           ),
                           TranslatedText(
-                            text: appointment.timeSlot != null && appointment.timeSlot!.isNotEmpty
-                                ? "${appointment.rescheduledDate?.toDdMmmYyyy() ?? ""} at ${appointment.timeSlot!.to12HourTimeFormat()}"
-                                : appointment.rescheduledDate?.toDdMmmYyyy() ?? "",
+                            text: () {
+                              final appointmentStatus = appointment.status?.toLowerCase() ?? '';
+                              
+                              // Simple logic based on status:
+                              // - pending: don't show time
+                              // - approved: show timeslot
+                              // - rescheduled: show timeslot in rescheduled date
+                              // - cancelled: don't show timeslot
+                              final isPending = appointmentStatus == 'pending';
+                              final isApproved = appointmentStatus == 'approved';
+                              final isRescheduled = appointmentStatus == 'rescheduled';
+                              final isCancelled = appointmentStatus == 'cancelled';
+                              
+                              final shouldShowTime = (isApproved || isRescheduled) && 
+                                                   !isPending && 
+                                                   !isCancelled && 
+                                                   appointment.timeSlot != null && 
+                                                   appointment.timeSlot!.isNotEmpty;
+                              
+                              return shouldShowTime
+                                  ? "${appointment.rescheduledDate?.toDdMmmYyyy() ?? ""} at ${appointment.timeSlot!.to12HourTimeFormat()}"
+                                  : appointment.rescheduledDate?.toDdMmmYyyy() ?? "";
+                            }(),
                      
                             style: textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w500,

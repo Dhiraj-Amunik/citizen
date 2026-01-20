@@ -74,6 +74,7 @@ class CommonDropDown<T> extends StatelessWidget {
             vertical: Dimens.paddingX3B,
           ),
           decoration: CustomDropdownDecoration(
+          
             headerStyle: context.textTheme.bodyMedium,
             listItemStyle: context.textTheme.bodyMedium,
             hintStyle: context.textTheme.bodyMedium,

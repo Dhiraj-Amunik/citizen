@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/features/common_fields/widget/assembly_constituency_drop_down.dart';
 import 'package:inldsevak/features/common_fields/widget/map_search_location.dart';
 import 'package:inldsevak/features/common_fields/widget/parliamentary_constituency_drop_down.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
 import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 
@@ -60,14 +61,33 @@ class _UserRegisterViewState extends State<UserRegisterView>
           return Scaffold(
             appBar: AuthUtils.appbar(title: localization.complete_your_profile),
             backgroundColor: context.cardColor,
-            body: SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
-              controller: _scrollController,
-              padding: EdgeInsets.symmetric(
-                horizontal: Dimens.horizontalspacing,
-              ),
-              child: Consumer<UserRegisterViewModel>(
-                builder: (_, _, _) {
+            body: Builder(
+              builder: (context) {
+                // Check if Hindi keyboard might be shown (Hindi language)
+                final isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+                // Hindi keyboard height is approximately 300px
+                const hindiKeyboardHeight = 300.0;
+                
+                // Check if any text field has focus (which would show Hindi keyboard)
+                final hasFocus = FocusScope.of(context).hasFocus;
+                final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+                // Show padding if system keyboard is showing OR if Hindi keyboard might be showing (Hindi mode + focus)
+                final shouldShowKeyboardPadding = isHindiLanguage && hasFocus && viewInsets == 0;
+                
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  controller: _scrollController,
+                  padding: EdgeInsets.only(
+                    left: Dimens.horizontalspacing,
+                    right: Dimens.horizontalspacing,
+                    // Only add extra padding for Hindi locale, not for English
+                    bottom: isHindiLanguage && shouldShowKeyboardPadding
+                        ? hindiKeyboardHeight 
+                        : (viewInsets > 0 ? viewInsets : 0),
+                  ),
+                  child: Consumer<UserRegisterViewModel>(
+                builder: (context, provider, _) {
+                  debugPrint("🟡 [UserRegisterView] Consumer rebuild - aadharImage: ${provider.aadharImage?.path}, voterIdImage: ${provider.voterIdImage?.path}");
                   return Form(
                     key: provider.userDetailsFormKey,
                     autovalidateMode: provider.autoValidateMode,
@@ -78,6 +98,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           isRequired: true,
                           headingText: localization.name,
                           hintText: localization.name,
+                        
                           focus: provider.nameFocus,
                           nextFocus: provider.emailFocus,
                           prefixIcon: AppImages.userIcon,
@@ -111,6 +132,7 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           // nextFocus: provider.wathsappFocus,
                           controller: provider.emailController,
                           prefixIcon: AppImages.emailIcon,
+                           useEnglishKeyboard: true,
                         textCapitalization: TextCapitalization.sentences,
                         enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
@@ -131,6 +153,37 @@ class _UserRegisterViewState extends State<UserRegisterView>
                         //     argument: localization.phone_validator,
                         //   ),
                         // ),
+
+                        MapSearchLocation(
+                          findPincode: (text) async {
+                            try {
+                              // Validate pincode before processing
+                              final trimmedPincode = text.trim();
+                              
+                              // Check if pincode is valid (6 digits and numeric)
+                              if (trimmedPincode.length == 6) {
+                                final pincodeInt = int.tryParse(trimmedPincode);
+                                if (pincodeInt != null) {
+                                  // Valid numeric pincode - proceed with API call
+                              mapsProvider.districtController.text =
+                                  await constituencyProvider
+                                      .getParliamentaryConstituencies(
+                                            pincode: trimmedPincode,
+                                        parlimentController:
+                                            parliamentaryconstituencyController,
+                                      ) ??
+                                  "";
+                                } else {
+                                  // Invalid format - show error
+                                  debugPrint("⚠️ Invalid pincode format: $text");
+                                }
+                              }
+                            } catch (e) {
+                              debugPrint("❌ Error in findPincode callback: $e");
+                              // Error is already handled in getParliamentaryConstituencies
+                            }
+                          },
+                        ),
                         FormTextFormField(
                           isRequired: true,
                           headingText: localization.date_of_birth,
@@ -165,18 +218,6 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           validator: (text) => text.toString().validateDropDown(
                             argument: localization.gender_validator,
                           ),
-                        ),
-                        MapSearchLocation(
-                          findPincode: (text) async {
-                            mapsProvider.districtController.text =
-                                await constituencyProvider
-                                    .getParliamentaryConstituencies(
-                                      pincode: text,
-                                      parlimentController:
-                                          parliamentaryconstituencyController,
-                                    ) ??
-                                "";
-                          },
                         ),
                         ParliamentaryConstituencyDropDownWidget(
                           constituencyController:
@@ -218,19 +259,18 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           imageFile: provider.aadharImage,
                         ),
                         FormTextFormField(
-                          isRequired: true,
+                          isRequired: false,
                           headingText: localization.voter_id,
                           hintText: "ABC1234567",
                           maxLength: 10,
                           controller: provider.voterIdController,
                           enableSpeechInput: true,
+                          disableHindiKeyboardOverlay:  true,
                           prefixIcon: AppImages.aadharIcon,
                           keyboardType: TextInputType.text,
                         textCapitalization: TextCapitalization.sentences,
                         enforceFirstLetterUppercase: true,
-                          validator: (text) => text?.validateVoterID(
-                            argument: localization.voter_id_validator,
-                          ),
+                         
                           onChanged: (value) => provider.generateVoter(value),
                         ),
                         UploadImageWidget(
@@ -247,13 +287,19 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           controller: provider.invitedByController,
                           prefixIcon: AppImages.userIcon,
                           keyboardType: TextInputType.text,
+                          disableHindiKeyboardOverlay:  true,
                           textCapitalization: TextCapitalization.sentences,
+                          enableSpeechInput: true,
+                          enforceFirstLetterUppercase: true,
+
                         ),
                       ],
                     ),
                   );
                 },
               ),
+                );
+              },
             ),
             bottomNavigationBar:
                 Consumer2<UserRegisterViewModel, MapSearchViewModel>(
@@ -275,7 +321,6 @@ class _UserRegisterViewState extends State<UserRegisterView>
                           debugPrint('Assembly Constituency ID: $assemblyId');
                           debugPrint('Parliamentary Constituency ID: $parliamentaryId');
                           debugPrint('Assembly Constituency Value: ${assemblyconstituencyController.value}');
-                          
                           await provider.registerUserDetails(
                             searchProvider: searchProvider,
                             assemblyConstituenciesID: assemblyId,

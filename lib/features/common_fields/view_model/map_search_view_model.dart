@@ -78,6 +78,36 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
 
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+        
+        // If still denied after request, ask again
+        if (permission == LocationPermission.denied) {
+          await customRightCupertinoDialog(
+            content: "Location permission is required to fetch your location. Please grant permission.",
+            rightButton: "Grant Permission",
+            onTap: () async {
+              RouteManager.pop();
+              // Request permission again
+              permission = await Geolocator.requestPermission();
+              if (permission == LocationPermission.deniedForever) {
+                await customRightCupertinoDialog(
+                  content:
+                      "Location permission is denied permanently. Please enable it in settings.",
+                  rightButton: "Open Settings",
+                  onTap: () async {
+                    RouteManager.pop();
+                    await Geolocator.openAppSettings();
+                  },
+                );
+                return;
+              }
+            },
+          );
+          // If permission is still denied, return early
+          if (permission == LocationPermission.denied) {
+            _restoreControllers(cachedValues);
+            return;
+          }
+        }
       }
 
       if (permission == LocationPermission.deniedForever) {
@@ -95,7 +125,47 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
 
       if (permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always) {
-        currentPosition = await Geolocator.getCurrentPosition();
+        try {
+          currentPosition = await Geolocator.getCurrentPosition();
+        } catch (e) {
+          debugPrint("⚠️ Error getting current position: $e");
+          // Check if error is due to permission
+          if (e.toString().contains('permission') || e.toString().contains('denied')) {
+            // Re-check permission and retry
+            permission = await Geolocator.checkPermission();
+            if (permission == LocationPermission.denied) {
+              permission = await Geolocator.requestPermission();
+              if (permission == LocationPermission.whileInUse ||
+                  permission == LocationPermission.always) {
+                try {
+                  currentPosition = await Geolocator.getCurrentPosition();
+                } catch (e2) {
+                  debugPrint("⚠️ Error getting position after permission retry: $e2");
+                }
+              } else if (permission == LocationPermission.deniedForever) {
+                await customRightCupertinoDialog(
+                  content:
+                      "Location permission is denied permanently. Please enable it in settings.",
+                  rightButton: "Open Settings",
+                  onTap: () async {
+                    RouteManager.pop();
+                    await Geolocator.openAppSettings();
+                  },
+                );
+                _restoreControllers(cachedValues);
+                return;
+              }
+            }
+          }
+          // Try last known position as fallback
+          if (currentPosition == null) {
+            try {
+              currentPosition = await Geolocator.getLastKnownPosition();
+            } catch (e2) {
+              debugPrint("⚠️ Error getting last known position: $e2");
+            }
+          }
+        }
       }
 
       if (currentPosition == null) {
@@ -113,6 +183,33 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
     } catch (err, stackTrace) {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
+      // Check if error is due to permission
+      if (err.toString().contains('permission') || err.toString().contains('denied')) {
+        // Re-check permission and retry
+        try {
+          LocationPermission permission = await Geolocator.checkPermission();
+          if (permission == LocationPermission.denied) {
+            permission = await Geolocator.requestPermission();
+            if (permission == LocationPermission.whileInUse ||
+                permission == LocationPermission.always) {
+              try {
+                currentPosition = await Geolocator.getCurrentPosition();
+                if (currentPosition != null) {
+                  await getLoactionByCoordinates(parlimentController);
+                  if (address == null) {
+                    _restoreControllers(cachedValues);
+                  }
+                  return;
+                }
+              } catch (e) {
+                debugPrint("⚠️ Error getting position after permission retry in catch: $e");
+              }
+            }
+          }
+        } catch (e) {
+          debugPrint("⚠️ Error checking permission in catch: $e");
+        }
+      }
       await CommonSnackbar(
         text: "Something went wrong while fetching your location.",
       ).showAnimatedDialog(type: QuickAlertType.error);
@@ -136,7 +233,17 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
       }
       if (address != null) {
         loadAddress(model: address);
+        // Add a delay to ensure controllers are updated and listeners are triggered
+        await Future.delayed(const Duration(milliseconds: 200));
+        
+        // Debug: Print address details to verify parsing
+        debugPrint("📍 Address loaded - District: ${address?.district ?? 'null'}, Area: ${address?.area ?? 'null'}, City: ${address?.city ?? 'null'}, Tehsil: ${address?.tehsil ?? 'null'}");
+        debugPrint("📍 Controllers - District: ${districtController.text}, Area: ${areaController.text}, City: ${cityController.text}");
+        
         await parlimentController(pincodeController.text);
+        // Trigger listeners again to ensure sync happens after all updates
+        await Future.delayed(const Duration(milliseconds: 100));
+        notifyListeners();
         return;
       }
 
@@ -234,6 +341,7 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
     flatNoController.text = model?.houseNo ?? model?.flatNo ?? "";
     areaController.text = model?.area ?? model?.subLocality ?? "";
     _shouldValidate = true;
+    notifyListeners(); // Trigger listeners to sync with other view models
   }
 }
 

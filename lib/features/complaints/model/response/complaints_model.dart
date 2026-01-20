@@ -2,17 +2,73 @@ class ComplaintsModel {
   int? responseCode;
   String? message;
   List<Data>? data;
+  int? unreadMessageCount;
 
-  ComplaintsModel({this.responseCode, this.message, this.data});
+  ComplaintsModel({this.responseCode, this.message, this.data, this.unreadMessageCount});
 
   ComplaintsModel.fromJson(Map<String, dynamic> json) {
     responseCode = json['responseCode'];
     message = json['message'];
+    unreadMessageCount = json['unreadMessageCount'];
     if (json['data'] != null) {
-      data = <Data>[];
-      json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
-      });
+      // Handle changed API response structure
+      final dataValue = json['data'];
+      
+      if (dataValue is List) {
+        // Original structure: data is a list
+        data = <Data>[];
+        dataValue.forEach((v) {
+          try {
+            if (v is Map<String, dynamic>) {
+              data!.add(new Data.fromJson(v));
+            } else if (v is Data) {
+              data!.add(v);
+            }
+          } catch (e) {
+            // Skip invalid items
+            print("Error parsing complaint item: $e");
+          }
+        });
+      } else if (dataValue is Map<String, dynamic>) {
+        // New structure: data might be wrapped in an object
+        // Check for common keys
+        final possibleKeys = ['complaints', 'data', 'items', 'results', 'list'];
+        List<dynamic>? listData;
+        
+        for (final key in possibleKeys) {
+          if (dataValue.containsKey(key) && dataValue[key] is List) {
+            listData = dataValue[key] as List;
+            break;
+          }
+        }
+        
+        if (listData != null) {
+          data = <Data>[];
+          listData.forEach((v) {
+            try {
+              if (v is Map<String, dynamic>) {
+                data!.add(new Data.fromJson(v));
+              } else if (v is Data) {
+                data!.add(v);
+              }
+            } catch (e) {
+              // Skip invalid items
+              print("Error parsing complaint item: $e");
+            }
+          });
+        } else {
+          // Try to parse the entire map as a single complaint
+          try {
+            data = [Data.fromJson(dataValue)];
+          } catch (e) {
+            print("Error parsing complaint from data object: $e");
+            data = <Data>[];
+          }
+        }
+      } else {
+        // Unknown structure, set to empty list
+        data = <Data>[];
+      }
     }
   }
 
@@ -22,6 +78,9 @@ class ComplaintsModel {
     data['message'] = this.message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
+    }
+    if (this.unreadMessageCount != null) {
+      data['unreadMessageCount'] = this.unreadMessageCount;
     }
     return data;
   }
@@ -43,6 +102,9 @@ class Data {
   String? updatedAt;
   int? iV;
   bool? isFollowUpDue;
+  String? followUpQuestion;
+  List<String>? followUpOptions;
+  int? unreadMessageCount;
 
   Data(
       {this.sId,
@@ -58,7 +120,10 @@ class Data {
       this.createdAt,
       this.updatedAt,
       this.iV,
-      this.isFollowUpDue});
+      this.isFollowUpDue,
+      this.followUpQuestion,
+      this.followUpOptions,
+      this.unreadMessageCount});
 
   Data.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -84,6 +149,11 @@ class Data {
     updatedAt = json['updatedAt'];
     iV = json['__v'];
     isFollowUpDue = json['isFollowUpDue'];
+    followUpQuestion = json['followUpQuestion'];
+    followUpOptions = json['followUpOptions'] != null
+        ? List<String>.from(json['followUpOptions'])
+        : null;
+    unreadMessageCount = json['unreadMessageCount'];
   }
 
   Map<String, dynamic> toJson() {
@@ -111,6 +181,15 @@ class Data {
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
     data['isFollowUpDue'] = this.isFollowUpDue;
+    if (this.followUpQuestion != null) {
+      data['followUpQuestion'] = this.followUpQuestion;
+    }
+    if (this.followUpOptions != null) {
+      data['followUpOptions'] = this.followUpOptions;
+    }
+    if (this.unreadMessageCount != null) {
+      data['unreadMessageCount'] = this.unreadMessageCount;
+    }
     return data;
   }
 }
@@ -172,11 +251,14 @@ class Messages {
   String? snippet;
   String? date;
   String? body;
+  String? normalizedBody;
   List<Attachments>? attachments;
   String? sId;
   String? profileImage;
   String? senderName;
   String? userImage;
+  bool? isRead;
+  String? readAt;
 
   Messages(
       {this.from,
@@ -185,8 +267,11 @@ class Messages {
       this.snippet,
       this.date,
       this.body,
+      this.normalizedBody,
       this.attachments,
-      this.sId});
+      this.sId,
+      this.isRead,
+      this.readAt});
 
   Messages.fromJson(Map<String, dynamic> json) {
     from = json['from'];
@@ -195,9 +280,12 @@ class Messages {
     snippet = json['snippet'];
     date = json['date'];
     body = json['body'];
+    normalizedBody = json['normalizedBody'];
     profileImage = json['profileImage'] ?? json['profilePic'];
     senderName = json['senderName'] ?? json['fromName'];
     userImage = json['userImage'] ?? json['memberImage'];
+    isRead = json['isRead'];
+    readAt = json['readAt'];
     if (json['attachments'] != null) {
       attachments = <Attachments>[];
       json['attachments'].forEach((v) {
@@ -228,6 +316,12 @@ class Messages {
       data['attachments'] = this.attachments!.map((v) => v.toJson()).toList();
     }
     data['_id'] = this.sId;
+    if (this.isRead != null) {
+      data['isRead'] = this.isRead;
+    }
+    if (this.readAt != null) {
+      data['readAt'] = this.readAt;
+    }
     return data;
   }
 }

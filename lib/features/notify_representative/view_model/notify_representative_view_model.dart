@@ -1,21 +1,27 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:inldsevak/core/extensions/context_extension.dart';
+import 'package:inldsevak/core/helpers/translation_helper.dart';
+import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
+import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/notify_representative/model/request/nr_pagination_model.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_filters_model.dart';
 import 'package:inldsevak/features/notify_representative/model/response/notify_lists_model.dart';
 import 'package:inldsevak/features/notify_representative/services/notify_repository.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
+import 'package:quickalert/quickalert.dart';
 
-class NotifyRepresentativeViewModel extends BaseViewModel {
+class NotifyRepresentativeViewModel extends BaseViewModel with CupertinoDialogMixin {
   final _repository = NotifyRepository();
 
   @override
-  Future<void> onInit() {
+  Future<void> onInit() async {
     recentScrollController.addListener(_recentScrollListener);
     pastScrollController.addListener(_pastScrollListener);
-    Future.wait([
+    await Future.wait([
       getNotifyFilters(),
       getAllNotifyData(),
     ]);
@@ -24,13 +30,16 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
 
   // Filters
   NotifyFiltersData? filtersData;
-  ConstituencyFilter? selectedConstituency;
   MlaFilter? selectedMla;
   String? selectedDistrict;
   String? selectedMandal;
   String? selectedVillage;
+  bool _isFiltersLoading = false;
+  bool get isFiltersLoading => _isFiltersLoading;
 
   Future<void> getNotifyFilters() async {
+    _isFiltersLoading = true;
+    notifyListeners();
     try {
       final response = await _repository.getNotifyFilters(token: token);
       if (response.data?.responseCode == 200) {
@@ -44,14 +53,10 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
     } catch (err, stackTrace) {
       debugPrint("Error fetching filters: $err");
       debugPrint("Stack Trace: $stackTrace");
+    } finally {
+      _isFiltersLoading = false;
+      notifyListeners();
     }
-  }
-
-  void setConstituency(ConstituencyFilter? constituency) {
-    selectedConstituency = constituency;
-    selectedMla = null; // Reset MLA when constituency changes
-    notifyListeners();
-    _applyFilters();
   }
 
   void setMla(MlaFilter? mla) {
@@ -79,7 +84,6 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
   }
 
   void clearFilters() {
-    selectedConstituency = null;
     selectedMla = null;
     selectedDistrict = null;
     selectedMandal = null;
@@ -213,16 +217,19 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
     }
 
     try {
+      // Convert Hindi search to English before sending to API
+      String? searchQuery = searchController.text.isEmpty 
+          ? null 
+          : _convertHindiToEnglishForSearch(searchController.text);
+      
       // Convert single selections to arrays as API expects
       final paginationModel = NotifyReprPaginationModel(
         filter: filter,
         page: NotifyReprFilter.recent == filter
             ? _recentCurrentPage
             : _pastCurrentPage,
-        search: searchController.text.isEmpty ? null : searchController.text,
-        constituencies: selectedConstituency?.sId != null 
-            ? [selectedConstituency!.sId!] 
-            : null,
+        search: searchQuery,
+        constituencies: null,
         mlaIds: selectedMla?.sId != null 
             ? [selectedMla!.sId!] 
             : null,
@@ -256,8 +263,14 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
         }
         if (data?.isNotEmpty == true) {
           // Convert to list and filter out duplicates
-          final newItems = List<NotifyRepresentative>.from(data as List);
+          final rawItems = List<NotifyRepresentative>.from(data as List);
           final pageSize = response.data?.data?.pageSize ?? 20;
+          
+          // Translate items if app is in Hindi
+          final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+          final newItems = isHindiLocale 
+              ? await _translateNotifyItems(rawItems)
+              : rawItems;
           
           switch (filter) {
             case NotifyReprFilter.recent:
@@ -294,22 +307,174 @@ class NotifyRepresentativeViewModel extends BaseViewModel {
   }
 
   Future<void> deleteNotify(NotifyRepresentative? data) async {
-    try {
-      final response = await _repository.deleteNotify(
-        token: token,
-        id: data?.sId ?? "",
-      );
+    final context = RouteManager.navigatorKey.currentState!.context;
+    final localization = context.localizations;
+    
+    // Show confirmation dialog
+    await customRightCupertinoDialog(
+      content: localization.delete_confirmation,
+      rightButton: localization.delete,
+      onTap: () async {
+        RouteManager.pop(); // Close dialog
+        try {
+          isLoading = true;
+          final response = await _repository.deleteNotify(
+            token: token,
+            id: data?.sId ?? "",
+          );
 
-      if (response.data?.responseCode == 200) {
-        recentNotifyLists.remove(data);
-      }
-    } catch (err, stackTrace) {
-      debugPrint("Error: $err");
-      debugPrint("Stack Trace: $stackTrace");
-    } finally {
-      isScrollLoading = false;
-      isLoading = false;
+          if (response.data?.responseCode == 200) {
+            recentNotifyLists.remove(data);
+            pastNotifyLists.remove(data);
+            notifyListeners();
+            await CommonSnackbar(
+              text: response.data?.message ?? "Request deleted successfully",
+            ).showAnimatedDialog(type: QuickAlertType.success);
+          } else {
+            await CommonSnackbar(
+              text: response.data?.message ?? "Failed to delete request",
+            ).showAnimatedDialog(type: QuickAlertType.error);
+          }
+        } catch (err, stackTrace) {
+          debugPrint("Error: $err");
+          debugPrint("Stack Trace: $stackTrace");
+          await CommonSnackbar(
+            text: "Failed to delete request",
+          ).showAnimatedDialog(type: QuickAlertType.error);
+        } finally {
+          isScrollLoading = false;
+          isLoading = false;
+        }
+      },
+    );
+  }
+
+  /// Convert Hindi search query to English for API search
+  String _convertHindiToEnglishForSearch(String hindiText) {
+    if (hindiText.isEmpty) return hindiText;
+    
+    // Check if text contains Hindi characters
+    if (!_isHindi(hindiText)) {
+      return hindiText; // Already in English, return as is
     }
+
+    // Use transliteration mapping for common Hindi to English conversions
+    return _transliterateHindiToEnglish(hindiText);
+  }
+
+  /// Transliterate Hindi to English using phonetic conversion
+  String _transliterateHindiToEnglish(String hindiText) {
+    // Common Hindi to English transliteration mapping
+    final Map<String, String> hindiToEnglish = {
+      'अधिसूचना': 'notification',
+      'प्रतिनिधि': 'representative',
+      'घटना': 'event',
+      'शीर्षक': 'title',
+      'विवरण': 'description',
+      'स्थान': 'location',
+    };
+
+    // Check if entire word matches
+    final lowerHindi = hindiText.toLowerCase().trim();
+    if (hindiToEnglish.containsKey(lowerHindi)) {
+      return hindiToEnglish[lowerHindi]!;
+    }
+
+    // For partial matches or unknown words, try character-by-character transliteration
+    return _phoneticTransliteration(hindiText);
+  }
+
+  /// Phonetic transliteration for Hindi to English
+  String _phoneticTransliteration(String hindiText) {
+    // Basic phonetic mapping for common Hindi characters to English
+    final Map<String, String> charMap = {
+      'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo',
+      'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au',
+      'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ng',
+      'च': 'ch', 'छ': 'chh', 'ज': 'j', 'झ': 'jh', 'ञ': 'ny',
+      'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n',
+      'त': 't', 'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n',
+      'प': 'p', 'फ': 'ph', 'ब': 'b', 'भ': 'bh', 'म': 'm',
+      'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v',
+      'श': 'sh', 'ष': 'sh', 'स': 's', 'ह': 'h',
+    };
+
+    String result = '';
+    for (int i = 0; i < hindiText.length; i++) {
+      final char = hindiText[i];
+      if (charMap.containsKey(char)) {
+        result += charMap[char]!;
+      } else if (RegExp(r'[a-zA-Z0-9\s]').hasMatch(char)) {
+        result += char; // Keep English characters and numbers
+      }
+    }
+    
+    return result.isNotEmpty ? result : hindiText;
+  }
+
+  /// Check if text contains Hindi/Devanagari characters
+  bool _isHindi(String text) {
+    final hindiRegex = RegExp(r'[\u0900-\u097F]');
+    return hindiRegex.hasMatch(text);
+  }
+
+  /// Translate notify items based on app language
+  /// Translates title, eventType, and description fields when app is in Hindi
+  Future<List<NotifyRepresentative>> _translateNotifyItems(List<NotifyRepresentative> rawItems) async {
+    final translatedItems = <NotifyRepresentative>[];
+    
+    // Translate all items in parallel for better performance
+    final translationFutures = rawItems.map((item) async {
+      // Translate title, eventType, and description fields
+      final translatedTitle = await TranslationHelper.translateText(
+        item.title,
+        force: true, // Force translation based on locale (English -> Hindi)
+      );
+      
+      final translatedEventType = await TranslationHelper.translateText(
+        item.eventType,
+        force: true,
+      );
+      
+      final translatedDescription = await TranslationHelper.translateText(
+        item.description,
+        force: true,
+      );
+      
+      // Create new NotifyRepresentative with translated fields
+      return NotifyRepresentative(
+        location: item.location,
+        sId: item.sId,
+        title: translatedTitle,
+        eventType: translatedEventType,
+        description: translatedDescription,
+        dateAndTime: item.dateAndTime,
+        documents: item.documents,
+        specialInvites: item.specialInvites,
+        isActive: item.isActive,
+        isDeleted: item.isDeleted,
+        status: item.status,
+        responses: item.responses,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        iV: item.iV,
+        partyMember: item.partyMember,
+        street: item.street,
+        pincode: item.pincode,
+        district: item.district,
+        mandal: item.mandal,
+        village: item.village,
+        area: item.area,
+        state: item.state,
+        assemblyConstituency: item.assemblyConstituency,
+        parliamentaryConstituency: item.parliamentaryConstituency,
+      );
+    }).toList();
+    
+    // Wait for all translations to complete
+    translatedItems.addAll(await Future.wait(translationFutures));
+    
+    return translatedItems;
   }
 }
 

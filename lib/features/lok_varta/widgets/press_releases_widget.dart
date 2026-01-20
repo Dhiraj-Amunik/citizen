@@ -33,10 +33,12 @@ class PressReleasesWidget extends StatelessWidget {
       return LokvartaHelpers.lokVartaPlaceholder(
         type: LokVartaFilter.PressRelease,
         onRefresh: onRefresh,
+        context: context,
       );
     }
     return RefreshIndicator(
       onRefresh: onRefresh,
+      color: AppPalettes.primaryColor,
       child: ListView.separated(
         padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX2B).copyWith(bottom: Dimens.paddingX15),
         shrinkWrap: true,

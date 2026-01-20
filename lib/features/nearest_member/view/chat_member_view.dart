@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
@@ -12,15 +13,17 @@ import 'package:inldsevak/core/utils/app_images.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
-import 'package:inldsevak/core/widgets/commom_text_form_field.dart';
+import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/hindi_keyboard.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
-import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/nearest_member/model/nearest_members_model.dart';
 import 'package:inldsevak/features/nearest_member/view_model/chat_member_view_model.dart';
 import 'package:inldsevak/features/nearest_member/widgets/member_widget.dart';
 import 'package:inldsevak/features/party_member/model/request/request_member_details.dart';
 import 'package:inldsevak/features/party_member/services/party_member_repository.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/party/widgets/handle_chat_contribute_images_ui.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
 
 class ChatMemberView extends StatefulWidget {
@@ -35,6 +38,8 @@ class ChatMemberView extends StatefulWidget {
 class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFilesSheet {
   late PartyMember _member;
   bool _isLoadingMemberDetails = false;
+  final FocusNode _messageFocusNode = FocusNode();
+  bool _isHindiKeyboardVisible = false;
 
   @override
   void initState() {
@@ -42,6 +47,62 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
     _member = widget.member;
     // Fetch member details if location is missing
     _fetchMemberDetailsIfNeeded();
+    // Listen to focus changes to detect Hindi keyboard visibility
+    _messageFocusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _messageFocusNode.removeListener(_onFocusChange);
+    _messageFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    if (!mounted) return;
+    
+    final isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+    final hasFocus = _messageFocusNode.hasFocus;
+    final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+    
+    // Hindi keyboard is showing if: Hindi language + has focus + system keyboard not showing
+    final shouldShowHindiKeyboard = isHindiLanguage && hasFocus && viewInsets == 0;
+    
+    if (_isHindiKeyboardVisible != shouldShowHindiKeyboard) {
+      setState(() {
+        _isHindiKeyboardVisible = shouldShowHindiKeyboard;
+      });
+      
+      // Hide system keyboard when Hindi keyboard is shown
+      if (shouldShowHindiKeyboard) {
+        // Hide immediately
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        
+        // Hide again after a short delay to ensure it stays hidden
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted && _messageFocusNode.hasFocus) {
+            SystemChannels.textInput.invokeMethod('TextInput.hide');
+          }
+        });
+        
+        // Hide again after another delay to catch any late-appearing keyboard
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted && _messageFocusNode.hasFocus) {
+            SystemChannels.textInput.invokeMethod('TextInput.hide');
+          }
+        });
+      }
+    } else if (shouldShowHindiKeyboard) {
+      // Continuously hide system keyboard if it keeps appearing
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted && _messageFocusNode.hasFocus) {
+          final currentViewInsets = MediaQuery.of(context).viewInsets.bottom;
+          if (currentViewInsets == 0) {
+            SystemChannels.textInput.invokeMethod('TextInput.hide');
+          }
+        }
+      });
+    }
   }
 
   Future<void> _fetchMemberDetailsIfNeeded() async {
@@ -102,8 +163,13 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
                 email: _member.email ?? user.email,
                 phone: _member.phone ?? user.phone,
                 address: newAddress,
+                flatNumber: _member.flatNumber ?? user.flatNumber,
+                area: _member.area ?? user.area,
+                city: _member.city ?? user.city,
+                district: _member.district ?? user.district,
+                state: _member.state ?? user.state,
                 avatar: _member.avatar ?? user.avatar,
-                location: _member.location, // User details don't have location coordinates
+                location: _member.location ?? user.location, // Use location from user details if available
                 distance: _member.distance,
                 partyMemberDetails: _member.partyMemberDetails,
               );
@@ -148,12 +214,15 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
         final provider = contextP.watch<ChatMemberViewModel>();
         
         return Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: commonAppBar(
             title: localization.contribute,
             scrollElevation: 0,
           ),
-          body: Column(
+          body: Stack(
             children: [
+              Column(
+                children: [
               if (_isLoadingMemberDetails)
                 Container(
                   padding: EdgeInsets.all(Dimens.paddingX3),
@@ -250,8 +319,8 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
                                                 ? Dimens.screenWidth
                                                 : Dimens.scale50,
                                           ),
-                                          child: Text(
-                                            message.message ?? "",
+                                          child: TranslatedText(
+                                            text: message.message ?? "",
                                             style: textTheme.bodyMedium
                                                 ?.copyWith(
                                                   color: AppPalettes
@@ -290,16 +359,23 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
                         ),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Dimens.paddingX2,
-                  vertical: Dimens.paddingX4,
+              Padding(
+                padding: EdgeInsets.only(
+                  // Add padding when Hindi keyboard is visible to push input above keyboard
+                  bottom: _isHindiKeyboardVisible 
+                      ? (MediaQuery.of(context).size.height * 0.45).clamp(350.0, 550.0)
+                      : 0,
                 ),
-                decoration: boxDecorationRoundedWithShadow(
-                  Dimens.radius,
-                  backgroundColor: AppPalettes.liteGreenColor,
-                ),
-                child: Row(
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Dimens.paddingX2,
+                    vertical: Dimens.paddingX4,
+                  ),
+                  decoration: boxDecorationRoundedWithShadow(
+                    Dimens.radius,
+                    backgroundColor: AppPalettes.liteGreenColor,
+                  ),
+                  child: Row(
                   spacing: Dimens.gapX2,
                   children: [
                     Padding(
@@ -313,12 +389,18 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
                         iconSize: Dimens.scaleX3,
                         iconColor: AppPalettes.primaryColor,
                         onTap: () {
+                          // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
                           showModalBottomSheet(
                             context: context,
-                            builder: (context) => DraggableSheetWidget(
-                              size: 0.5,
+                            isScrollControlled: false,
+                            useRootNavigator: false,
+                            builder: (bottomSheetContext) => Padding(
+                              padding: EdgeInsets.only(
+                                bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
+                              ),
                               child: selectMultipleFiles(
                                 onTap: provider.addFiles,
+                                context: bottomSheetContext,
                               ),
                             ),
                           );
@@ -326,7 +408,7 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
                       ),
                     ),
                     Expanded(
-                      child: CommonTextFormField(
+                      child: FormTextFormField(
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: Dimens.paddingX3,
                           vertical: Dimens.paddingX3B,
@@ -334,7 +416,11 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
                         radius: Dimens.radius100,
                         hintText: "Message",
                         controller: provider.messageController,
+                        focus: _messageFocusNode,
                         maxLines: 1,
+                        keyboardType: TextInputType.text,
+                        enableSpeechInput: true,
+                        disableHindiKeyboardOverlay: true, // Parent will handle keyboard display
                         suffixWidget: provider.multipleFiles.isNotEmpty
                             ? Padding(
                                 padding: EdgeInsets.only(
@@ -359,7 +445,6 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
                             : null,
                       ),
                     ),
-
                     Consumer<ChatMemberViewModel>(
                       builder: (context, value, _) {
                         return Container(
@@ -401,7 +486,39 @@ class _ChatMemberViewState extends State<ChatMemberView> with HandleMultipleFile
                     ),
                   ],
                 ),
+                ),
               ),
+                ],
+              ),
+              // Hindi keyboard widget - shown when Hindi keyboard is visible (overlay at bottom)
+              if (_isHindiKeyboardVisible)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Calculate responsive height: 45% of screen height, with min 350 and max 550
+                      final screenHeight = MediaQuery.of(context).size.height;
+                      final keyboardHeight = (screenHeight * 0.45).clamp(350.0, 550.0);
+                      return SizedBox(
+                        height: keyboardHeight,
+                        child: Material(
+                          elevation: 8,
+                          child: HindiKeyboard(
+                            controller: provider.messageController,
+                            onDismiss: () {
+                              _messageFocusNode.unfocus();
+                            },
+                            onEnter: () {
+                              _messageFocusNode.unfocus();
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
             ],
           ),
         );

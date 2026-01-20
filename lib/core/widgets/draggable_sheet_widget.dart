@@ -73,11 +73,13 @@ class _DraggableSheetWidgetState extends State<DraggableSheetWidget> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (builder, constraints) {
+        // Ensure maxChildSize is at least as large as initialChildSize, but not more than 1.0
+        final maxSize = (widget.size > 0.5 ? widget.size : 0.5).clamp(0.0, 1.0);
         return DraggableScrollableSheet(
           controller: controller,
           key: sheet,
-          initialChildSize: widget.size,
-          maxChildSize: 0.7,
+          initialChildSize: widget.size.clamp(0.0, 0.65),
+          maxChildSize: maxSize,
           minChildSize: 0,
           expand: false,
           snap: true,

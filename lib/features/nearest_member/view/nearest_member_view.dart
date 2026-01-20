@@ -73,38 +73,65 @@ class NearestMemberView extends StatelessWidget {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {
-                              RouteManager.pushNamed(
+                            onTap: () async {
+                              await RouteManager.pushNamed(
                                 Routes.myMembersMessagesListPage,
                               );
+                              // Refresh unread count when returning from messages page
+                              if (contextConsumer.mounted) {
+                                value.getUnreadChatCount();
+                              }
                             },
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: Dimens.paddingX2,
-                                vertical: Dimens.paddingX1,
-                              ),
-                              decoration: boxDecorationRoundedWithShadow(
-                                Dimens.radius100,
-                                border: Border.all(width: 1),
-                              ),
-                              child: Row(
-                                spacing: Dimens.gapX1B,
-                                children: [
-                                  CommonHelpers.buildIcons(
-                                    path: AppImages.notificationIcon,
-                                    iconSize: Dimens.scaleX1B,
-                                    iconColor: AppPalettes.blackColor,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: Dimens.paddingX2,
+                                    vertical: Dimens.paddingX1,
                                   ),
-                                  Text(
-                                    localization.inbox,
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: AppPalettes.lightTextColor,
-                                      fontWeight: FontWeight.w500,
-                                      height: 1,
+                                  decoration: boxDecorationRoundedWithShadow(
+                                    Dimens.radius100,
+                                    border: Border.all(width: 1),
+                                  ),
+                                  child: Row(
+                                    spacing: Dimens.gapX1B,
+                                    children: [
+                                      CommonHelpers.buildIcons(
+                                        path: AppImages.notificationIcon,
+                                        iconSize: Dimens.scaleX1B,
+                                        iconColor: AppPalettes.blackColor,
+                                      ),
+                                      Text(
+                                        localization.inbox,
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: AppPalettes.lightTextColor,
+                                          fontWeight: FontWeight.w500,
+                                          height: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Green dot indicator for unread messages
+                                if (value.totalUnreadCount > 0)
+                                  Positioned(
+                                    left: -2,
+                                    top: -4,
+                                    child: Container(
+                                      width: 15,
+                                      height: 15,
+                                      decoration: BoxDecoration(
+                                        color: AppPalettes.greenColor,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: AppPalettes.whiteColor,
+                                          width: 1.5,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ],
-                              ),
+                              ],
                             ),
                           ),
                         ],
@@ -141,11 +168,12 @@ class NearestMemberView extends StatelessWidget {
                                     arguments: data,
                                   ),
                                   showIcon: true,
+                                  isUsingSearchedLocation: value.searchedPosition != null,
                                 );
                               },
                               separatorBuilder: (_, _) => SizeBox.sizeHX3,
                             ),
-                    ], 
+                    ],
                   ),
                 ),
               );

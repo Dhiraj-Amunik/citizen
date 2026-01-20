@@ -11,6 +11,7 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/user/widgets/user_card_help_widget.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_view_model.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,7 @@ class WallOfHelpUserView extends StatelessWidget {
         onRefresh: () async {
           provider.onRefresh();
         },
+        color: AppPalettes.primaryColor,
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: Dimens.horizontalspacing,
@@ -39,6 +41,7 @@ class WallOfHelpUserView extends StatelessWidget {
             spacing: Dimens.gapX4,
             children: [
               Container(
+                width: double.infinity,
                 padding: EdgeInsets.symmetric(
                   horizontal: Dimens.paddingX3,
                   vertical: Dimens.paddingX3,
@@ -50,18 +53,18 @@ class WallOfHelpUserView extends StatelessWidget {
                   blurRadius: 2,
                 ),
                 child: Stack(
-                  alignment: Alignment.bottomRight,
+                  alignment: Alignment.topLeft,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "A Family That Cares",
+                        TranslatedText(
+                          text: "A Family That Cares",
                           style: textTheme.bodyMedium,
                         ),
                         SizedBox(height: Dimens.gapX2),
-                        Text(
-                          "Beyond politics, we build trust and support. With the Wall of Help, you are never alone assistance is always near.",
+                        TranslatedText(
+                          text: "Beyond politics, we build trust and support. With the Wall of Help, you are never alone assistance is always near.",
                           style: textTheme.labelMedium?.copyWith(
                             color: AppPalettes.lightTextColor,
                           ),
@@ -69,23 +72,27 @@ class WallOfHelpUserView extends StatelessWidget {
                         SizeBox.sizeHX8,
                       ],
                     ).onlyPadding(bottom: Dimens.paddingX2),
-                    CommonButton(
-                      fullWidth: false,
-                      height: 30,
-                      padding: EdgeInsets.symmetric(
-                        vertical: Dimens.paddingX1,
-                        horizontal: Dimens.paddingX3,
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: CommonButton(
+                        fullWidth: false,
+                        height: 30,
+                        padding: EdgeInsets.symmetric(
+                          vertical: Dimens.paddingX1,
+                          horizontal: Dimens.paddingX3,
+                        ),
+                        onTap: () =>
+                            RouteManager.pushNamed(Routes.becomePartMemberPage),
+                        text: 'Join Party Member',
+                        color: AppPalettes.buttonColor,
                       ),
-                      onTap: () =>
-                          RouteManager.pushNamed(Routes.becomePartMemberPage),
-                      text: 'Join Party Member',
-                      color: AppPalettes.buttonColor,
                     ),
                   ],
                 ),
               ),
-              Text(
-                'View how members Benefited ',
+              TranslatedText(
+                text: 'View how members Benefited ',
                 style: textTheme.headlineSmall,
               ),
               Row(
@@ -119,8 +126,8 @@ class WallOfHelpUserView extends StatelessWidget {
 
                     if (value.wallOFHelpLists.isEmpty) {
                       return Center(
-                        child: Text(
-                          "No Helps found",
+                        child: TranslatedText(
+                          text: "No Helps found",
                           style: textTheme.bodyMedium,
                         ),
                       );

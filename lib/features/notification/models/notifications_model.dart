@@ -32,6 +32,11 @@ class Data {
   String? userId;
   String? mlaId;
   String? adminId;
+  String? module;
+  String? moduleId;
+  String? userType;
+  dynamic appointmentId; // Can be null, String (ID), or AppointmentId object
+  AppointmentId? appointmentIdObject; // Parsed appointment object
   String? type;
   String? title;
   String? message;
@@ -48,6 +53,8 @@ class Data {
       this.userId,
       this.mlaId,
       this.adminId,
+      this.appointmentId,
+      this.appointmentIdObject,
       this.type,
       this.title,
       this.message,
@@ -64,6 +71,22 @@ class Data {
     userId = json['userId'];
     mlaId = json['mlaId'];
     adminId = json['adminId'];
+    module = json['module'];
+    moduleId = json['moduleId'];
+    userType = json['userType'];
+    // Handle appointmentId - can be null, String (ID), or Object (populated)
+    if (json['appointmentId'] != null) {
+      if (json['appointmentId'] is String) {
+        appointmentId = json['appointmentId'];
+        appointmentIdObject = null;
+      } else if (json['appointmentId'] is Map) {
+        appointmentIdObject = AppointmentId.fromJson(json['appointmentId']);
+        appointmentId = appointmentIdObject?.sId;
+      }
+    } else {
+      appointmentId = null;
+      appointmentIdObject = null;
+    }
     type = json['type'];
     title = json['title'];
     message = json['message'];
@@ -84,9 +107,17 @@ class Data {
     data['userId'] = this.userId;
     data['mlaId'] = this.mlaId;
     data['adminId'] = this.adminId;
+    data['module'] = this.module;
+    data['moduleId'] = this.moduleId;
+    data['userType'] = this.userType;
     data['type'] = this.type;
     data['title'] = this.title;
     data['message'] = this.message;
+    if (this.appointmentIdObject != null) {
+      data['appointmentId'] = this.appointmentIdObject!.toJson();
+    } else if (this.appointmentId != null) {
+      data['appointmentId'] = this.appointmentId;
+    }
     if (this.metadata != null) {
       data['metadata'] = this.metadata!.toJson();
     }
@@ -102,16 +133,59 @@ class Data {
 
 class Metadata {
   String? userName;
+  String? date;
+  String? timeSlot;
+  String? rescheduledDate;
 
-  Metadata({this.userName});
+  Metadata({this.userName, this.date, this.timeSlot, this.rescheduledDate});
 
   Metadata.fromJson(Map<String, dynamic> json) {
     userName = json['userName'];
+    date = json['date'];
+    timeSlot = json['timeSlot'];
+    rescheduledDate = json['rescheduledDate'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['userName'] = this.userName;
+    data['date'] = this.date;
+    data['timeSlot'] = this.timeSlot;
+    data['rescheduledDate'] = this.rescheduledDate;
+    return data;
+  }
+}
+
+class AppointmentId {
+  String? sId;
+  String? date;
+  String? rescheduledDate;
+  String? timeSlot;
+  String? status;
+
+  AppointmentId({
+    this.sId,
+    this.date,
+    this.rescheduledDate,
+    this.timeSlot,
+    this.status,
+  });
+
+  AppointmentId.fromJson(Map<String, dynamic> json) {
+    sId = json['_id'];
+    date = json['date'];
+    rescheduledDate = json['resheduledDate'] ?? json['rescheduledDate'] ?? json['reScheduledDate'];
+    timeSlot = json['timeSlot'];
+    status = json['status'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['_id'] = this.sId;
+    data['date'] = this.date;
+    data['rescheduledDate'] = this.rescheduledDate;
+    data['timeSlot'] = this.timeSlot;
+    data['status'] = this.status;
     return data;
   }
 }

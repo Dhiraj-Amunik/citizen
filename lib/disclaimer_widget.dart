@@ -3,6 +3,7 @@ import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class DisclaimerNotice extends StatelessWidget {
   final Function()? onDismiss;
@@ -11,6 +12,7 @@ class DisclaimerNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localization = context.localizations;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX4),
@@ -29,19 +31,21 @@ class DisclaimerNotice extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Important Notice",
+                TranslatedText(
+                  text: 
+                  localization.important_notice,
                   style: context.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.amber[900],
                   ),
                 ),
                 SizeBox.sizeHX2,
-                Text(
-                  "This app is developed for the Citizens and is not an official government app. It is intended for public grievance reporting and citizen engagement purposes only.",
+                TranslatedText(
+                  text: 
+                  localization.disclaimer_description,
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: Colors.amber[800],
-                  ),
+                  ), 
                 ),
               ],
             ),

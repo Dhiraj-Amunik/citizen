@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
-import 'package:inldsevak/core/extensions/capitalise_string.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
 import 'package:inldsevak/core/extensions/responsive_extension.dart';
@@ -25,19 +24,23 @@ import 'package:provider/provider.dart';
 class WallOfHelpPartyView extends StatelessWidget {
   const WallOfHelpPartyView({super.key});
 
-  String _getFilterStatusText(String status) {
-    // For filter buttons, show the actual status name, not translated
+  String _getFilterStatusKey(String status, dynamic localization) {
+    // Return translation key or status for TranslatedText widget
     switch (status.toLowerCase()) {
       case 'all':
-        return 'All';
+        return 'all';
       case 'approved':
-        return 'Approved';
+        return 'approved';
+      case 'solved':
+        return 'solved';
+      case 'closed':
+        return 'solved'; // Map closed to solved
       case 'partially-funded':
-        return 'Partially-Funded';
+        return 'partially funded';
       case 'fully-funded':
-        return 'Fully-Funded';
+        return 'fully funded';
       default:
-        return status.capitalize();
+        return status.toLowerCase().replaceAll('-', '_');
     }
   }
 
@@ -50,6 +53,7 @@ class WallOfHelpPartyView extends StatelessWidget {
       onRefresh: () async {
         provider.onRefresh();
       },
+      color: AppPalettes.primaryColor,
       child: Scaffold(
         appBar: commonAppBar(
           center: true,
@@ -170,7 +174,6 @@ class WallOfHelpPartyView extends StatelessWidget {
                                   ],
                                 ),
                                 SizeBox.sizeHX2,
-
                                 Consumer<WallOfHelpViewModel>(
                                   builder: (context, viewModel, _) {
                                     return Column(
@@ -220,8 +223,8 @@ class WallOfHelpPartyView extends StatelessWidget {
                                                           viewModel
                                                               .statusItems[index],
                                                         ),
-                                                    child: Text(
-                                                      _getFilterStatusText(viewModel.statusItems[index]),
+                                                    child: TranslatedText(
+                                                      text: _getFilterStatusKey(viewModel.statusItems[index], localization),
                                                       style: context.textTheme.labelMedium?.copyWith(
                                                         color: isSelected
                                                             ? AppPalettes.whiteColor
@@ -303,7 +306,7 @@ class WallOfHelpPartyView extends StatelessWidget {
                   ),
                 ],
               ),
-            
+              
                 Consumer<WallOfHelpViewModel>(
                   builder: (context, value, _) {
                     if (value.isLoading) {

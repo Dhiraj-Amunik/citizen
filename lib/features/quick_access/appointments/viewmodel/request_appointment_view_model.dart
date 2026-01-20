@@ -59,36 +59,28 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
   // }
   //image
   List<File> multipleFiles = [];
+  // Camera lock to prevent double-tap crashes on low-RAM devices
+  bool _isCameraOpening = false;
 
-  Widget selectMultipleImages() {
+  Widget selectMultipleImages({BuildContext? context}) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
           leading: Icon(Icons.camera),
           title: TranslatedText(text: 'Take a Picture'),
-          onTap: () async {
-            RouteManager.pop();
-            await Future.delayed(const Duration(milliseconds: 300));
-            try {
-              final file = await createCameraImage();
-              if (file != null && await file.exists()) {
-                final fileSize = await file.length();
-                if (fileSize > 0) {
-                  multipleFiles.add(file);
-                  notifyListeners();
-                } else {
-                  CommonSnackbar(
-                    text: "Image file is invalid. Please try again.",
-                  ).showAnimatedDialog(type: QuickAlertType.error);
-                }
-              }
-            } catch (err, stackTrace) {
-              debugPrint("Error capturing image: $err");
-              debugPrint("Stack trace: $stackTrace");
-              CommonSnackbar(
-                text: "Failed to capture image. Please try again.",
-              ).showAnimatedDialog(type: QuickAlertType.error);
+          onTap: () {
+            // 🔥 SAFE: Close bottom sheet first, then wait for next frame
+            final navContext = context ?? RouteManager.navigatorKey.currentState?.context;
+            if (navContext != null) {
+              Navigator.of(navContext, rootNavigator: true).pop();
+              // Wait for bottom sheet to fully dispose before opening camera
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _openCameraSafely();
+              });
+            } else {
+              _openCameraSafely();
             }
           },
         ),
@@ -96,9 +88,12 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
           leading: Icon(Icons.photo_library),
           title: TranslatedText(text: 'Choose from Gallery'),
           onTap: () async {
-            RouteManager.pop();
+            final navContext = context ?? RouteManager.navigatorKey.currentState?.context;
+            if (navContext != null) {
+              Navigator.of(navContext, rootNavigator: true).pop();
+            }
             try {
-              multipleFiles.addAll(await pickMultipleImages() ?? []);
+              multipleFiles.addAll(await pickMultipleImages());
               notifyListeners();
             } catch (err) {
               debugPrint("-------->$err");
@@ -109,9 +104,15 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
           leading: Icon(Icons.file_open),
           title: TranslatedText(text: 'Choose from Files'),
           onTap: () async {
-            RouteManager.pop();
+            final navContext = context ?? RouteManager.navigatorKey.currentState?.context;
+            if (navContext != null) {
+              Navigator.of(navContext, rootNavigator: true).pop();
+            }
             try {
-              multipleFiles.addAll(await pickFiles() ?? []);
+              final files = await pickFiles();
+              if (files.isNotEmpty) {
+                multipleFiles.addAll(files);
+              }
               notifyListeners();
             } catch (err) {
               debugPrint("-------->$err");
@@ -120,6 +121,40 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
         ),
       ],
     );
+  }
+
+  /// 🔥 SAFE CAMERA OPEN - Prevents crashes on low-RAM devices
+  /// Uses lock to prevent double-tap, waits for bottom sheet disposal
+  Future<void> _openCameraSafely() async {
+    // Prevent double-tap camera launch (causes crash on low-RAM devices)
+    if (_isCameraOpening) return;
+    _isCameraOpening = true;
+
+    try {
+      // Extra delay for low-RAM devices to ensure widget tree is stable
+      await Future.delayed(const Duration(milliseconds: 400));
+
+      final file = await createCameraImage();
+      if (file != null && await file.exists()) {
+        final fileSize = await file.length();
+        if (fileSize > 0) {
+          multipleFiles.add(file);
+          notifyListeners();
+        } else {
+          CommonSnackbar(
+            text: "Image file is invalid. Please try again.",
+          ).showAnimatedDialog(type: QuickAlertType.error);
+        }
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error capturing image: $err");
+      debugPrint("Stack trace: $stackTrace");
+      CommonSnackbar(
+        text: "Failed to capture image. Please try again.",
+      ).showAnimatedDialog(type: QuickAlertType.error);
+    } finally {
+      _isCameraOpening = false;
+    }
   }
 
   void removeImage(int index) {
@@ -147,7 +182,7 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
         name: nameController.text,
         phone: phoneNumberController.text,
         date: companyDateFormat ?? "",
-        timeSlot: timeSlotController.text.isEmpty ? "00:00" : timeSlotController.text,
+        timeSlot: timeSlotController.text.isEmpty ? "" : timeSlotController.text,
         purpose: purposeOfAppointmentController.text,
         reason: descriptionController.text,
         documents: multipleFiles.isEmpty

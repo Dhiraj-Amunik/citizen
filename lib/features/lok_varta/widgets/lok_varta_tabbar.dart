@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/animated_widgets.dart/animated_search_widget.dart';
@@ -56,85 +55,67 @@ class LokVartaTabbar extends StatelessWidget {
           Dimens.radiusX7,
           disableBottomRadius: true,
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final double available = constraints.maxHeight;
-            final double topSpacing = Dimens.gapX2.toDouble();
-            // approximate title height measured previously
-            const double titleApprox = 40.5;
-            final double midGap = Dimens.gapX.toDouble();
-            const double tabbarApprox = 31.8;
-            final double desiredSearch = showSearch ? 44.sp : 0;
-
-            // Allow the search bar to shrink when available space is tight
-            final double remaining = available - topSpacing - titleApprox - midGap - tabbarApprox;
-            final double searchHeight = showSearch ? math.max(0, math.min(desiredSearch, remaining)) : 0;
-
-            return ClipRect(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                SizedBox(height: topSpacing),
-                Stack(
-                  alignment: AlignmentDirectional.centerEnd,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: Dimens.gapX2.toDouble()),
+            Stack(
+              alignment: AlignmentDirectional.centerEnd,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          localization.lok_varta,
-                          style: context.textTheme.headlineSmall,
-                        ),
-                      ],
+                    Text(
+                      localization.lok_varta,
+                      style: context.textTheme.headlineSmall,
                     ),
-                    if (!showSearch)
-                      CommonHelpers.buildIcons(
-                        color: AppPalettes.liteGreenColor,
-                        padding: Dimens.paddingX2,
-                        path: AppImages.searchIcon,
-                        iconColor: AppPalettes.blackColor,
-                        onTap: onTap,
-                      ).onlyPadding(right: Dimens.horizontalspacing),
                   ],
                 ),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeInOut,
-                  height: searchHeight,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: Dimens.horizontalspacing,
-                  ),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: searchHeight > 0
-                        ? AnimatedSearchBar(
-                            key: const ValueKey('search_bar'),
-                            controller: searchController,
-                            onChanged: onSearchChanged,
-                            onClear: onClear,
-                          )
-                        : const SizedBox.shrink(key: ValueKey('empty_search')),
-                  ),
-                ),
-                SizedBox(height: midGap),
-                DefaultTabBar(
-                  isScrollable: true,
-                  controller: controller,
-                  tabLabels: const [
-                    "Upcoming Events",
-                    "Ongoing Events",
-                    "Press Releases",
-                    "Interviews & Articles",
-                    "Videos",
-                    "Photos",
-                  ],
-                ),
+                if (!showSearch)
+                  CommonHelpers.buildIcons(
+                    color: AppPalettes.liteGreenColor,
+                    padding: Dimens.paddingX2,
+                    path: AppImages.searchIcon,
+                    iconColor: AppPalettes.blackColor,
+                    onTap: onTap,
+                  ).onlyPadding(right: Dimens.horizontalspacing),
               ],
             ),
-          );
-          },
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              height: showSearch ? 44.sp : 0,
+              padding: EdgeInsets.symmetric(
+                horizontal: Dimens.horizontalspacing,
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: showSearch
+                    ? AnimatedSearchBar(
+                        key: const ValueKey('search_bar'),
+                        controller: searchController,
+                        onChanged: onSearchChanged,
+                        onClear: onClear,
+                      )
+                    : const SizedBox.shrink(key: ValueKey('empty_search')),
+              ),
+            ),
+            SizedBox(height: Dimens.gapX.toDouble()),
+            DefaultTabBar(
+              isScrollable: true,
+              controller: controller,
+              tabLabels: const [
+                "Upcoming Events",
+                "Ongoing Events",
+                "Press Releases",
+                "Interviews & Articles",
+                "Videos",
+                "Photos",
+              ],
+            ),
+          ],
         ),
       ),
       pinned: true,

@@ -46,7 +46,7 @@ class MlaDetailsSilverAppbar extends StatelessWidget {
             ),
             Expanded(
               child: Column(
-                spacing: Dimens.gapX1B,
+                spacing: Dimens.gapX1,
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -62,58 +62,93 @@ class MlaDetailsSilverAppbar extends StatelessWidget {
                     ),
                   ),
                   Row(
-                    spacing: Dimens.gapX1B,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (mlaModel?.socialMediaLinks?.length ==4) {
-                            UrlLauncher().launchURL(
-                              mlaModel?.socialMediaLinks?[0].url ?? "",
-                            );
-                          }
-                        },
-                        child: SvgPicture.asset(
-                          "assets/lok_varta/ii.svg",
-                          height: Dimens.scaleX2B,
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            final links = mlaModel?.socialMediaLinks;
+                            if (links != null && links.length > 0) {
+                              final url = links[0].url;
+                              if (url != null && url.isNotEmpty) {
+                                UrlLauncher().launchURL(url);
+                              }
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(Dimens.radiusX2),
+                          child: Padding(
+                            padding: EdgeInsets.all(Dimens.paddingX1),
+                            child: SvgPicture.asset(
+                              "assets/lok_varta/ii.svg",
+                              height: Dimens.scaleX2B,
+                            ),
+                          ),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          if (mlaModel?.socialMediaLinks?.length == 4) {
-                            UrlLauncher().launchURL(
-                              mlaModel?.socialMediaLinks?[1].url ?? "",
-                            );
-                          }
-                        },
-                        child: SvgPicture.asset(
-                          "assets/lok_varta/fi.svg",
-                          height: Dimens.scaleX2B,
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            final links = mlaModel?.socialMediaLinks;
+                            if (links != null && links.length > 1) {
+                              final url = links[1].url;
+                              if (url != null && url.isNotEmpty) {
+                                UrlLauncher().launchURL(url);
+                              }
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(Dimens.radiusX2),
+                          child: Padding(
+                            padding: EdgeInsets.all(Dimens.paddingX1),
+                            child: SvgPicture.asset(
+                              "assets/lok_varta/fi.svg",
+                              height: Dimens.scaleX2B,
+                            ),
+                          ),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          if (mlaModel?.socialMediaLinks?.length == 4) {
-                            UrlLauncher().launchURL(
-                              mlaModel?.socialMediaLinks?[2].url ?? "",
-                            );
-                          }
-                        },
-                        child: SvgPicture.asset(
-                          "assets/lok_varta/ti.svg",
-                          height: Dimens.scaleX2B,
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            final links = mlaModel?.socialMediaLinks;
+                            if (links != null && links.length > 2) {
+                              final url = links[2].url;
+                              if (url != null && url.isNotEmpty) {
+                                UrlLauncher().launchURL(url);
+                              }
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(Dimens.radiusX2),
+                          child: Padding(
+                            padding: EdgeInsets.all(Dimens.paddingX1),
+                            child: SvgPicture.asset(
+                              "assets/lok_varta/ti.svg",
+                              height: Dimens.scaleX2B,
+                            ),
+                          ),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          if (mlaModel?.socialMediaLinks?.length == 4) {
-                            UrlLauncher().launchURL(
-                              mlaModel?.socialMediaLinks?[3].url ?? "",
-                            );
-                          }
-                        },
-                        child: SvgPicture.asset(
-                          "assets/lok_varta/yi.svg",
-                          height: Dimens.scaleX2B,
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            final links = mlaModel?.socialMediaLinks;
+                            if (links != null && links.length > 3) {
+                              final url = links[3].url;
+                              if (url != null && url.isNotEmpty) {
+                                UrlLauncher().launchURL(url);
+                              }
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(Dimens.radiusX2),
+                          child: Padding(
+                            padding: EdgeInsets.all(Dimens.paddingX1),
+                            child: SvgPicture.asset(
+                              "assets/lok_varta/yi.svg",
+                              height: Dimens.scaleX2B,
+                            ),
+                          ),
                         ),
                       ),
                     ],

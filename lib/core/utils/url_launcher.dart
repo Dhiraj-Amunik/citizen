@@ -10,7 +10,6 @@ class UrlLauncher {
       Fluttertoast.showToast(
         msg: "Invalid URL",
         toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
       );
     }
   }
@@ -27,7 +26,6 @@ class UrlLauncher {
       Fluttertoast.showToast(
         msg: "Unable to Re-Direct to mail",
         toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
       );
     }
   }
@@ -41,7 +39,6 @@ class UrlLauncher {
       Fluttertoast.showToast(
         msg: "Unable to Re-Direct",
         toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
       );
     }
   }
@@ -50,7 +47,6 @@ class UrlLauncher {
     Fluttertoast.showToast(
       msg: "Long Press to open link",
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
     );
   }
 }

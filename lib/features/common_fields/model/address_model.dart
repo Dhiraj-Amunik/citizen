@@ -37,7 +37,7 @@ class AddressModel {
       return AddressModel();
     }
 
-    // Use the first result as it's the most specific
+    // Start with first result as it's usually the most specific
     final firstResult = model.results!.first;
 
     String? houseNo;
@@ -49,10 +49,10 @@ class AddressModel {
     String? postalCode;
     String? tehsil;
     String? district;
+    String? route; // Street name
 
     // Extract address components from first result
-    String? route; // Street name
-    for (var component in firstResult.addressComponents!) {
+    for (var component in firstResult.addressComponents ?? []) {
       final types = component.types ?? [];
       
       if (types.contains('premise') || types.contains('subpremise')) {
@@ -81,6 +81,66 @@ class AddressModel {
         state = component.longName ?? component.shortName;
       } else if (types.contains('postal_code')) {
         postalCode = component.longName ?? component.shortName;
+      }
+    }
+    
+    // If district or other critical fields are missing, search through other results
+    // This is important because the first result might be a specific place (like a bakery)
+    // that doesn't have administrative area information
+    if (district == null || district.isEmpty || 
+        tehsil == null || tehsil.isEmpty ||
+        city == null || city.isEmpty) {
+      for (var result in model.results!) {
+        if (result.addressComponents == null) continue;
+        
+        for (var component in result.addressComponents!) {
+          final types = component.types ?? [];
+          
+          // Fill in missing fields from other results
+          if (district == null || district.isEmpty) {
+            if (types.contains('administrative_area_level_2')) {
+              district = component.longName ?? component.shortName;
+            }
+          }
+          if (tehsil == null || tehsil.isEmpty) {
+            if (types.contains('administrative_area_level_3')) {
+              tehsil = component.longName ?? component.shortName;
+            }
+          }
+          if (city == null || city.isEmpty) {
+            if (types.contains('locality')) {
+              city = component.longName ?? component.shortName;
+            }
+          }
+          if (state == null || state.isEmpty) {
+            if (types.contains('administrative_area_level_1')) {
+              state = component.longName ?? component.shortName;
+            }
+          }
+          if (postalCode == null || postalCode.isEmpty) {
+            if (types.contains('postal_code')) {
+              postalCode = component.longName ?? component.shortName;
+            }
+          }
+          if (route == null || route.isEmpty) {
+            if (types.contains('route')) {
+              route = component.longName ?? component.shortName;
+            }
+          }
+          if (area == null || area.isEmpty) {
+            if (types.contains('sublocality_level_2') || 
+                types.contains('neighborhood')) {
+              area = component.longName ?? component.shortName;
+            }
+          }
+        }
+        
+        // If we found all critical fields, we can break early
+        if (district != null && district.isNotEmpty &&
+            tehsil != null && tehsil.isNotEmpty &&
+            city != null && city.isNotEmpty) {
+          break;
+        }
       }
     }
     

@@ -6,6 +6,7 @@ import 'package:inldsevak/core/extensions/responsive_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:flutter/material.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 /// Default App Button
 class CommonButton extends StatefulWidget {
@@ -190,8 +191,8 @@ class _CommonButtonState extends State<CommonButton>
                       strokeWidth: 2.height(),
                     )
                   : widget.child ??
-                        Text(
-                          widget.text ?? "",
+                        TranslatedText(
+                          text: widget.text ?? "",
                           style:
                               widget.textStyle ??
                               context.textTheme.bodyLarge?.copyWith(

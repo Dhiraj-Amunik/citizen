@@ -160,9 +160,11 @@ class EventsBuildWidget extends StatelessWidget {
     }
     return RefreshIndicator(
       onRefresh: onRefresh,
+      color: AppPalettes.primaryColor,
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX2),
-
+        padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX2).copyWith(
+          bottom: Dimens.scaleX9 + Dimens.paddingX4,
+        ),
         shrinkWrap: true,
         itemBuilder: (_, index) {
           return EventWidget(event: data[index]);

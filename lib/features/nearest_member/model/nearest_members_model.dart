@@ -78,6 +78,11 @@ class PartyMember {
   String? email;
   String? phone;
   String? address;
+  String? flatNumber;
+  String? area;
+  String? city;
+  String? district;
+  String? state;
   String? avatar;
   Location? location;
   double? distance;
@@ -89,6 +94,11 @@ class PartyMember {
       this.email,
       this.phone,
       this.address,
+      this.flatNumber,
+      this.area,
+      this.city,
+      this.district,
+      this.state,
       this.avatar,
       this.location,
       this.distance,
@@ -100,14 +110,57 @@ class PartyMember {
     email = json['email'];
     phone = json['phone'];
     address = json['address'];
+    flatNumber = json['flatNumber'];
+    area = json['area'];
+    city = json['city'];
+    district = json['district'];
+    state = json['state'];
     avatar = json['avatar'];
-    location = json['location'] != null
-        ? new Location.fromJson(json['location'])
-        : null;
+    
+    // Parse location - try multiple possible field names and formats
+    if (json['location'] != null) {
+      try {
+        location = new Location.fromJson(json['location']);
+        print("✓ Successfully parsed location for member ${sId}: ${location?.coordinates}");
+      } catch (e) {
+        print("Error parsing location object: $e");
+        print("Location data: ${json['location']}");
+        location = null;
+      }
+    } else {
+      // Try alternative field names
+      if (json['Location'] != null) {
+        try {
+          location = new Location.fromJson(json['Location']);
+        } catch (e) {
+          print("Error parsing Location (capitalized): $e");
+          location = null;
+        }
+      } else if (json['coordinates'] != null) {
+        // If coordinates are directly in the member object
+        try {
+          location = Location(
+            type: 'Point',
+            coordinates: (json['coordinates'] as List).map((e) => (e as num).toDouble()).toList(),
+          );
+        } catch (e) {
+          print("Error parsing direct coordinates: $e");
+          location = null;
+        }
+      } else {
+        location = null;
+      }
+    }
+    
     distance = json['distance'];
     partyMemberDetails = json['partyMemberDetails'] != null
         ? new PartyMemberDetails.fromJson(json['partyMemberDetails'])
         : null;
+    
+    // Debug: Log location data for troubleshooting
+    if (sId != null) {
+      print("Member ${sId} location parsed - hasLocation: ${location != null}, coordinates: ${location?.coordinates}");
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -117,6 +170,11 @@ class PartyMember {
     data['email'] = this.email;
     data['phone'] = this.phone;
     data['address'] = this.address;
+    data['flatNumber'] = this.flatNumber;
+    data['area'] = this.area;
+    data['city'] = this.city;
+    data['district'] = this.district;
+    data['state'] = this.state;
     data['avatar'] = this.avatar;
     if (this.location != null) {
       data['location'] = this.location!.toJson();

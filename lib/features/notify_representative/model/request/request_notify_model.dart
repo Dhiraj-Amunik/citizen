@@ -13,6 +13,10 @@ class RequestNotifytModel {
   String? village;
   String? street;
   String? pincode;
+  String? area;
+  String? state;
+  String? assemblyConstituency;
+  String? parliamentaryConstituency;
 
   RequestNotifytModel({
     required this.title,
@@ -29,6 +33,10 @@ class RequestNotifytModel {
     this.village,
     this.street,
     this.pincode,
+    this.area,
+    this.state,
+    this.assemblyConstituency,
+    this.parliamentaryConstituency,
   });
 
   Map<String, dynamic> toJson() {
@@ -59,6 +67,16 @@ class RequestNotifytModel {
     data['village'] = village ?? "";
     data['street'] = street ?? "";
     data['pincode'] = pincode ?? "";
+    data['area'] = area ?? "";
+    data['state'] = state ?? "";
+    
+    if (assemblyConstituency != null && assemblyConstituency!.isNotEmpty) {
+      data['assemblyConstituency'] = assemblyConstituency;
+    }
+    
+    if (parliamentaryConstituency != null && parliamentaryConstituency!.isNotEmpty) {
+      data['parliamentaryConstituency'] = parliamentaryConstituency;
+    }
 
     return data;
   }

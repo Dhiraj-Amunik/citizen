@@ -14,6 +14,7 @@ import 'package:inldsevak/features/quick_access/wall_of_help/model/type_of_help_
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/woh_pagination_model.dart';
 import 'package:inldsevak/features/surveys/model/success_model.dart';
+import 'package:inldsevak/features/quick_access/wall_of_help/model/financial_help_messages_model.dart';
 
 class WallOfHelpRepository {
   final _network = NetworkRequester();
@@ -153,5 +154,23 @@ class WallOfHelpRepository {
     return response is APIException
         ? RepoResponse(error: response)
         : RepoResponse(data: SuccessModel.fromJson(response));
+  }
+
+  Future<RepoResponse<FinancialHelpMessagesModel>> getMyFinancialHelpRequestMessages({
+    String? token,
+    String? page,
+    String? pageSize,
+  }) async {
+    final response = await _network.post(
+      path: URLs.getMyFinacialhelpRequestMessages,
+      token: token,
+      data: {
+        "page": page ?? "1",
+        "pageSize": pageSize ?? "124",
+      },
+    );
+    return response is APIException
+        ? RepoResponse(error: response)
+        : RepoResponse(data: FinancialHelpMessagesModel.fromJson(response));
   }
 }

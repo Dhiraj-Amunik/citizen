@@ -66,6 +66,17 @@ class SurveyViewModel extends BaseViewModel {
     List<String>? option,
   }) async {
     try {
+      // Check if question is already answered
+      final questionIndex = surveysList.indexWhere((q) => q.sId == questionID);
+      if (questionIndex != -1) {
+        final question = surveysList[questionIndex];
+        if (question.userAnswer != null) {
+          return CommonSnackbar(
+            text: "This survey has already been submitted",
+          ).showToast();
+        }
+      }
+      
       final selectedOptions = _selectedOptionsMap[questionID] ?? option ?? [];
       if (selectedOptions.isEmpty) {
         return CommonSnackbar(

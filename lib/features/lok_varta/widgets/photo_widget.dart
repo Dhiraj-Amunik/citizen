@@ -50,15 +50,17 @@ class PhotoWidget extends StatelessWidget {
       return LokvartaHelpers.lokVartaPlaceholder(
         type: LokVartaFilter.PhotoGallery,
         onRefresh: onRefresh,
+        context: context,
       );
     }
     return RefreshIndicator(
       onRefresh: onRefresh,
+      color: AppPalettes.primaryColor,
       child: GridView.builder(
         cacheExtent: 0,
         padding: EdgeInsets.symmetric(
           horizontal: Dimens.paddingX2B,
-        ).copyWith(bottom: Dimens.paddingX15),
+        ).copyWith(bottom: Dimens.scaleX9 + Dimens.paddingX4),
          gridDelegate: SliverQuiltedGridDelegate(
         crossAxisCount: 4,
         crossAxisSpacing: 8,

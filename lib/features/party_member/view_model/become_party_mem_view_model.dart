@@ -13,10 +13,13 @@ import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/party_member/model/request/party_member_request_model.dart';
 import 'package:inldsevak/features/party_member/services/party_member_repository.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 import 'package:inldsevak/features/profile/models/response/user_profile_model.dart'
     as profile;
+import 'package:inldsevak/features/notification/view_model/notification_view_model.dart';
+import 'package:provider/provider.dart';
 
 class BecomePartyMemViewModel extends BaseViewModel
     with  TransparentCircular, UploadFilesMixin {
@@ -39,8 +42,9 @@ class BecomePartyMemViewModel extends BaseViewModel
   // File? photographyPicture;
   final reasonController = TextEditingController();
 
-  List<String> gendersList = ["Male", "Female", "Others"];
-  List<String> maritalStatusList = [
+  // Original English lists (for API submission)
+  final List<String> _gendersList = ["Male", "Female", "Others"];
+  final List<String> _maritalStatusList = [
     "Married",
     "Un-married",
     "Divorced",
@@ -48,37 +52,114 @@ class BecomePartyMemViewModel extends BaseViewModel
     "Seperated",
   ];
 
-  List<File> multipleFiles = [];
+  // Translated lists (for UI display)
+  List<String> get gendersList {
+    final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+    if (!isHindiLocale) return _gendersList;
+    
+    // Return translated versions
+    return _gendersList.map((gender) {
+      switch (gender.toLowerCase()) {
+        case 'male':
+          return 'पुरुष';
+        case 'female':
+          return 'महिला';
+        case 'others':
+          return 'अन्य';
+        default:
+          return gender;
+      }
+    }).toList();
+  }
 
-  Widget selectMultipleImages() {
+  List<String> get maritalStatusList {
+    final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+    if (!isHindiLocale) return _maritalStatusList;
+    
+    // Return translated versions
+    return _maritalStatusList.map((status) {
+      switch (status.toLowerCase()) {
+        case 'married':
+          return 'विवाहित';
+        case 'un-married':
+          return 'अविवाहित';
+        case 'divorced':
+          return 'तलाकशुदा';
+        case 'widow':
+          return 'विधवा';
+        case 'seperated':
+          return 'अलग';
+        default:
+          return status;
+      }
+    }).toList();
+  }
+
+  // Helper method to get original English value from translated value
+  String? _getOriginalGenderValue(String? translatedValue) {
+    if (translatedValue == null) return null;
+    final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+    if (!isHindiLocale) return translatedValue;
+    
+    // Map Hindi back to English
+    switch (translatedValue) {
+      case 'पुरुष':
+        return 'Male';
+      case 'महिला':
+        return 'Female';
+      case 'अन्य':
+        return 'Others';
+      default:
+        return translatedValue;
+    }
+  }
+
+  // Helper method to get original English value from translated marital status
+  String? _getOriginalMaritalStatusValue(String? translatedValue) {
+    if (translatedValue == null) return null;
+    final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+    if (!isHindiLocale) return translatedValue;
+    
+    // Map Hindi back to English
+    switch (translatedValue) {
+      case 'विवाहित':
+        return 'Married';
+      case 'अविवाहित':
+        return 'Un-married';
+      case 'तलाकशुदा':
+        return 'Divorced';
+      case 'विधवा':
+        return 'Widow';
+      case 'अलग':
+        return 'Seperated';
+      default:
+        return translatedValue;
+    }
+  }
+
+  List<File> multipleFiles = [];
+  // Camera lock to prevent double-tap crashes on low-RAM devices
+  bool _isCameraOpening = false;
+
+  Widget selectMultipleImages({BuildContext? context}) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
           leading: Icon(Icons.camera),
           title: TranslatedText(text: 'Take a Picture'),
-          onTap: () async {
-            RouteManager.pop();
-            await Future.delayed(const Duration(milliseconds: 300));
-            try {
-              final file = await createCameraImage();
-              if (file != null && await file.exists()) {
-                final fileSize = await file.length();
-                if (fileSize > 0) {
-                  multipleFiles.add(file);
-                  notifyListeners();
-                } else {
-                  CommonSnackbar(
-                    text: "Image file is invalid. Please try again.",
-                  ).showAnimatedDialog(type: QuickAlertType.error);
-                }
-              }
-            } catch (err, stackTrace) {
-              debugPrint("Error capturing image: $err");
-              debugPrint("Stack trace: $stackTrace");
-              CommonSnackbar(
-                text: "Failed to capture image. Please try again.",
-              ).showAnimatedDialog(type: QuickAlertType.error);
+          onTap: () {
+            // 🔥 SAFE: Close bottom sheet first, then wait for next frame
+            final navContext = context ?? RouteManager.navigatorKey.currentState?.context;
+            if (navContext != null) {
+              Navigator.of(navContext, rootNavigator: true).pop();
+              // Wait for bottom sheet to fully dispose before opening camera
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _openCameraSafely();
+              });
+            } else {
+              _openCameraSafely();
             }
           },
         ),
@@ -86,7 +167,10 @@ class BecomePartyMemViewModel extends BaseViewModel
           leading: Icon(Icons.photo_library),
           title: TranslatedText(text: 'Choose from Gallery'),
           onTap: () async {
-            RouteManager.pop();
+            final navContext = context ?? RouteManager.navigatorKey.currentState?.context;
+            if (navContext != null) {
+              Navigator.of(navContext, rootNavigator: true).pop();
+            }
             try {
               multipleFiles.addAll(await pickMultipleImages() ?? []);
               notifyListeners();
@@ -99,7 +183,10 @@ class BecomePartyMemViewModel extends BaseViewModel
           leading: Icon(Icons.file_open),
           title: TranslatedText(text: 'Choose from Files'),
           onTap: () async {
-            RouteManager.pop();
+            final navContext = context ?? RouteManager.navigatorKey.currentState?.context;
+            if (navContext != null) {
+              Navigator.of(navContext, rootNavigator: true).pop();
+            }
             try {
               multipleFiles.addAll(await pickFiles() ?? []);
               notifyListeners();
@@ -110,6 +197,40 @@ class BecomePartyMemViewModel extends BaseViewModel
         ),
       ],
     );
+  }
+
+  /// 🔥 SAFE CAMERA OPEN - Prevents crashes on low-RAM devices
+  /// Uses lock to prevent double-tap, waits for bottom sheet disposal
+  Future<void> _openCameraSafely() async {
+    // Prevent double-tap camera launch (causes crash on low-RAM devices)
+    if (_isCameraOpening) return;
+    _isCameraOpening = true;
+
+    try {
+      // Extra delay for low-RAM devices to ensure widget tree is stable
+      await Future.delayed(const Duration(milliseconds: 400));
+
+      final file = await createCameraImage();
+      if (file != null && await file.exists()) {
+        final fileSize = await file.length();
+        if (fileSize > 0) {
+          multipleFiles.add(file);
+          notifyListeners();
+        } else {
+          CommonSnackbar(
+            text: "Image file is invalid. Please try again.",
+          ).showAnimatedDialog(type: QuickAlertType.error);
+        }
+      }
+    } catch (err, stackTrace) {
+      debugPrint("Error capturing image: $err");
+      debugPrint("Stack trace: $stackTrace");
+      CommonSnackbar(
+        text: "Failed to capture image. Please try again.",
+      ).showAnimatedDialog(type: QuickAlertType.error);
+    } finally {
+      _isCameraOpening = false;
+    }
   }
 
   void removeImage(int index) {
@@ -132,6 +253,16 @@ class BecomePartyMemViewModel extends BaseViewModel
         return;
       }
       isLoading = true;
+      // Convert translated values back to English for API
+      final originalGender = _getOriginalGenderValue(genderController.value);
+      final originalMaritalStatus = _getOriginalMaritalStatusValue(maritalStatusController.value);
+      
+      if (originalGender == null || originalMaritalStatus == null) {
+        autoValidateMode = AutovalidateMode.onUserInteraction;
+        notifyListeners();
+        return;
+      }
+      
       final data = PartyMemberRequestModel(
         documents: [],
         phone: mobileNumberController.text,
@@ -140,8 +271,8 @@ class BecomePartyMemViewModel extends BaseViewModel
         userName: fullNameController.text,
         parentName: parentNameController.text,
         dateOfBirth: companyDateFormat,
-        gender: genderController.value,
-        maritalStatus: maritalStatusController.value,
+        gender: originalGender,
+        maritalStatus: originalMaritalStatus,
         reason: "Request to Join Party",
         images: multipleFiles.isEmpty
             ? []
@@ -153,6 +284,19 @@ class BecomePartyMemViewModel extends BaseViewModel
         token: token!,
       );
       if (response.data!.responseCode == 200) {
+        // Refresh notifications after successful party member join
+        try {
+          final navigatorContext = RouteManager.navigatorKey.currentContext;
+          if (navigatorContext != null && navigatorContext.mounted) {
+            // Refresh notifications to show the new party member notification
+            final notificationViewModel = navigatorContext.read<NotificationViewModel>();
+            await notificationViewModel.getNotifications();
+            debugPrint("✅ Notifications refreshed after party member join");
+          }
+        } catch (e) {
+          debugPrint("Could not refresh notifications: $e");
+        }
+        
         await CommonSnackbar(
           text: response.data?.message ?? "Request sended successfully",
         ).showAnimatedDialog(type: QuickAlertType.success);
@@ -179,7 +323,30 @@ class BecomePartyMemViewModel extends BaseViewModel
     mobileNumberController.text = profile?.phone ?? "";
     dobController.text = profile?.dateOfBirth?.toDdMmYyyy() ?? "";
     companyDateFormat = profile?.dateOfBirth ?? "";
-    genderController.value = profile?.gender?.capitalize();
+    
+    // Map profile gender to translated value if needed
+    final profileGender = profile?.gender?.capitalize();
+    if (profileGender != null) {
+      final isHindiLocale = GeneralStream.instance.locale.languageCode == 'hi';
+      if (isHindiLocale) {
+        // Convert English to Hindi for display
+        switch (profileGender.toLowerCase()) {
+          case 'male':
+            genderController.value = 'पुरुष';
+            break;
+          case 'female':
+            genderController.value = 'महिला';
+            break;
+          case 'others':
+            genderController.value = 'अन्य';
+            break;
+          default:
+            genderController.value = profileGender;
+        }
+      } else {
+        genderController.value = profileGender;
+      }
+    }
   }
 
   void clear() {

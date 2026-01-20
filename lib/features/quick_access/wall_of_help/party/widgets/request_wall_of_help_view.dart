@@ -11,7 +11,9 @@ import 'package:inldsevak/core/widgets/common_button.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
 import 'package:inldsevak/core/widgets/form_text_form_field.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/core/widgets/upload_multi_files.dart';
+import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/type_of_help_model.dart'
@@ -19,29 +21,123 @@ import 'package:inldsevak/features/quick_access/wall_of_help/model/type_of_help_
 import 'package:inldsevak/features/quick_access/wall_of_help/model/preferred_way_model.dart'
     as preferred;
 
-class RequestWallOfHelpView extends StatelessWidget
-    with HandleMultipleFilesSheet {
+class RequestWallOfHelpView extends StatefulWidget {
   const RequestWallOfHelpView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final typeOfHelpController = SingleSelectController<types.Data?>(null);
-    final urgencyController = SingleSelectController<String?>(null);
-    final preferredWayController = SingleSelectController<preferred.Data?>(
-      null,
+  State<RequestWallOfHelpView> createState() => _RequestWallOfHelpViewState();
+}
+
+class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
+    with HandleMultipleFilesSheet {
+  late final SingleSelectController<types.Data?> typeOfHelpController;
+  late final SingleSelectController<String?> urgencyController;
+  late final SingleSelectController<preferred.Data?> preferredWayController;
+
+  @override
+  void initState() {
+    super.initState();
+    typeOfHelpController = SingleSelectController<types.Data?>(null);
+    urgencyController = SingleSelectController<String?>(null);
+    preferredWayController = SingleSelectController<preferred.Data?>(null);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Clear form data every time the screen is accessed
+    // This ensures fresh form when navigating to/back to this screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _resetForm();
+      }
+    });
+  }
+
+  void _resetForm() {
+    if (!mounted) return;
+    
+    final provider = context.read<WallOfHelpViewModel>();
+    
+    // Clear dropdown controllers
+    urgencyController.clear();
+    typeOfHelpController.clear();
+    preferredWayController.clear();
+    
+    // Clear all ViewModel form data (controllers, files, form state)
+    provider.clear();
+    
+    // Force a rebuild to ensure UI updates immediately
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    typeOfHelpController.dispose();
+    urgencyController.dispose();
+    preferredWayController.dispose();
+    super.dispose();
+  }
+
+  void _clearForm() {
+    if (mounted) {
+      _resetForm();
+    }
+  }
+
+  Future<void> _handleSubmit(WallOfHelpViewModel provider) async {
+    if (!provider.formKey.currentState!.validate()) {
+      provider.autoValidateMode = AutovalidateMode.onUserInteraction;
+      return;
+    }
+
+    final success = await provider.createFinancialHelp(
+      urgency: urgencyController.value,
+      typeOFHelp: typeOfHelpController.value?.sId,
+      preferredWay: preferredWayController.value?.sId,
     );
+
+    // Handle success: clear dropdown controllers and navigate back
+    if (mounted && success) {
+      // Clear dropdown controllers
+      urgencyController.clear();
+      typeOfHelpController.clear();
+      preferredWayController.clear();
+      // Navigate back after successful submission
+      RouteManager.pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final localization = context.localizations;
     final textTheme = context.textTheme;
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
-        context.read<WallOfHelpViewModel>().clear();
+        if (didPop) {
+          _resetForm();
+        }
       },
-      child: Scaffold(
+      child: Builder(
+        builder: (context) {
+          // Check if Hindi keyboard might be shown (Hindi language)
+          final isHindiLanguage = Localizations.localeOf(context).languageCode == 'hi';
+          // Hindi keyboard height is approximately 300px
+          const hindiKeyboardHeight = 300.0;
+          
+          return Scaffold(
         appBar: commonAppBar(title: localization.wall_of_help),
         body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: Dimens.horizontalspacing,
-            vertical: Dimens.appBarSpacing,
+              padding: EdgeInsets.only(
+                left: Dimens.horizontalspacing,
+                right: Dimens.horizontalspacing,
+                top: Dimens.appBarSpacing,
+                // Only add extra padding for Hindi locale, not for English
+                bottom: isHindiLanguage
+                    ? hindiKeyboardHeight + MediaQuery.of(context).viewInsets.bottom + Dimens.appBarSpacing
+                    : MediaQuery.of(context).viewInsets.bottom + Dimens.appBarSpacing,
           ),
           child: Consumer<WallOfHelpViewModel>(
             builder: (context, provider, _) {
@@ -102,15 +198,17 @@ class RequestWallOfHelpView extends StatelessWidget
                       hintText: localization.choose_the_options,
                     
                       headerBuilder: (_, text, _) {
-                        return Text(
-                          text?.name?.capitalize() ?? "",
+                        return TranslatedText(
+                          text: text?.name?.capitalize() ?? "",
                           style: textTheme.bodySmall,
+                          disableTranslation: false,
                         );
                       },
                       listItemBuilder: (_, text, _, _) {
-                        return Text(
-                          text?.name?.capitalize() ?? "",
+                        return TranslatedText(
+                          text: text?.name?.capitalize() ?? "",
                           style: textTheme.bodySmall,
+                          disableTranslation: false,
                         );
                       },
                       validator: (text) => text.toString().validateDropDown(
@@ -154,6 +252,20 @@ class RequestWallOfHelpView extends StatelessWidget
                       items: provider.urgencyList,
                       heading: localization.urgency_level,
                       hintText: localization.choose_the_options,
+                      headerBuilder: (_, text, _) {
+                        return TranslatedText(
+                          text: text ?? "",
+                          style: textTheme.bodySmall,
+                          disableTranslation: false,
+                        );
+                      },
+                      listItemBuilder: (_, text, _, _) {
+                        return TranslatedText(
+                          text: text ?? "",
+                          style: textTheme.bodySmall,
+                          disableTranslation: false,
+                        );
+                      },
                       validator: (text) => text.toString().validateDropDown(
                         argument: localization.dropdown_validator,
                       ),
@@ -165,15 +277,17 @@ class RequestWallOfHelpView extends StatelessWidget
                       heading: localization.preferred_way_to_receive_help,
                       hintText: localization.choose_the_options,
                       headerBuilder: (_, text, _) {
-                        return Text(
-                          text?.name?.capitalize() ?? "",
+                        return TranslatedText(
+                          text: text?.name?.capitalize() ?? "",
                           style: textTheme.bodySmall,
+                          disableTranslation: false,
                         );
                       },
                       listItemBuilder: (_, text, _, _) {
-                        return Text(
-                          text?.name?.capitalize() ?? "",
+                        return TranslatedText(
+                          text: text?.name?.capitalize() ?? "",
                           style: textTheme.bodySmall,
+                          disableTranslation: false,
                         );
                       },
                       validator: (text) => text.toString().validateDropDown(
@@ -212,6 +326,9 @@ class RequestWallOfHelpView extends StatelessWidget
                             controller: provider.amountController,
                             hintText: localization.enter_amount,
                             headingText: '${localization.raise_amount} (₹)',
+                            maxLength: 10,
+                            enableSpeechInput: true,
+                            enforceFirstLetterUppercase: true,
                             validator: (text) => text?.validateAmount(
                               argument: localization.raise_amount_validator,
                               argument2: localization.less_amount_validator,
@@ -222,23 +339,32 @@ class RequestWallOfHelpView extends StatelessWidget
                             isRequired: true,
                             controller: provider.upiIdController,
                             hintText: "Enter UPI Id",
-                            headingText: "UPI",
+                            headingText: "U P I",
+                            enableSpeechInput: true,
+                            enforceFirstLetterUppercase: true,
+                            disableHindiKeyboardOverlay: true,
                             validator: (text) => text?.validateUPI(
                               argument: "Enter valid UPI ID",
                             ),
                           ),
                         ],
                       ),
-
+                      
                     UploadMultiFilesWidget(
                       title: localization.supporting_documents,
                       onTap: () {
+                        // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
                         showModalBottomSheet(
                           context: context,
-                          builder: (context) => DraggableSheetWidget(
-                            size: 0.5,
+                          isScrollControlled: false,
+                          useRootNavigator: false,
+                          builder: (bottomSheetContext) => Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
+                            ),
                             child: selectMultipleFiles(
                               onTap: provider.addFiles,
+                              context: bottomSheetContext,
                             ),
                           ),
                         );
@@ -263,12 +389,7 @@ class RequestWallOfHelpView extends StatelessWidget
                 spacing: Dimens.gapX3,
                 children: [
                   CommonButton(
-                    onTap: () {
-                      urgencyController.clear();
-                      typeOfHelpController.clear();
-                      preferredWayController.clear();
-                      value.clear();
-                    },
+                    onTap: _clearForm,
                     color: AppPalettes.whiteColor,
                     borderColor: AppPalettes.primaryColor,
                     textColor: AppPalettes.primaryColor,
@@ -280,11 +401,7 @@ class RequestWallOfHelpView extends StatelessWidget
                       isLoading: value.isLoading,
                       isEnable: !value.isLoading,
                       text: localization.submit,
-                      onTap: () => value.createFinancialHelp(
-                        urgency: urgencyController.value,
-                        typeOFHelp: typeOfHelpController.value?.sId,
-                        preferredWay: preferredWayController.value?.sId,
-                      ),
+                      onTap: () => _handleSubmit(value),
                     ),
                   ),
                 ],
@@ -292,6 +409,8 @@ class RequestWallOfHelpView extends StatelessWidget
             },
           ),
         ),
+          );
+        },
       ),
     );
   }

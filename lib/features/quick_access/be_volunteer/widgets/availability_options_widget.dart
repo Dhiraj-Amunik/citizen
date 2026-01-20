@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 
 class AvailabilityOptionsWidgets extends StatefulWidget {
   final List<String> options;
@@ -92,7 +93,11 @@ Widget _buildRadioOption({
               : null,
         ),
         8.horizontalSpace,
-        Text(label, style: context.textTheme.labelMedium),
+        TranslatedText(
+          text: label,
+          style: context.textTheme.labelMedium,
+          disableTranslation: true, // Already translated in view model
+        ),
       ],
     ),
   );

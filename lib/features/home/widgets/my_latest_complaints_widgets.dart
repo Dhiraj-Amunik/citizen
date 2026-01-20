@@ -11,7 +11,12 @@ import 'package:inldsevak/features/complaints/model/response/complaints_model.da
 
 class MyLatestComplaintsWidgets extends StatelessWidget {
   final List<Data> complaintList;
-  const MyLatestComplaintsWidgets({super.key, required this.complaintList});
+  final int totalCount;
+  const MyLatestComplaintsWidgets({
+    super.key, 
+    required this.complaintList,
+    required this.totalCount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +29,10 @@ class MyLatestComplaintsWidgets extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+           Row(
+            spacing: Dimens.gapX2B,
+            children: [
+               Text(
               localization.my_complaints,
               style: textTheme.headlineSmall?.copyWith(
                 color: AppPalettes.primaryColor,
@@ -32,11 +40,21 @@ class MyLatestComplaintsWidgets extends StatelessWidget {
               ),
             ),
             TranslatedText(
-              text: "${complaintList.length} total",
+              text: "$totalCount total",
               style: textTheme.titleMedium?.copyWith(
                 color: AppPalettes.lightTextColor,
               ),
             ),
+            ],
+           ),
+   
+            GestureDetector(
+              onTap: () => RouteManager.pushNamed(Routes.complaintsPage),
+              child: TranslatedText(text: 'see all', style: textTheme.titleMedium?.copyWith(
+                color: AppPalettes.lightTextColor,
+                fontWeight: FontWeight.w400,
+              ),),
+            )
           ],
         ).horizontalPadding(Dimens.horizontalspacing),
         ListView.separated(

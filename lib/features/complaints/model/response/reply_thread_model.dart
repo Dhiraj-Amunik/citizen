@@ -8,7 +8,11 @@ class ReplyThreadModel {
   ReplyThreadModel.fromJson(Map<String, dynamic> json) {
     responseCode = json['responseCode'];
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    if (json['data'] != null && json['data'] is Map<String, dynamic>) {
+      data = Data.fromJson(json['data'] as Map<String, dynamic>);
+    } else {
+      data = null;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -32,7 +36,11 @@ class Data {
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     threadId = json['threadId'];
-    labelIds = json['labelIds'].cast<String>();
+    if (json['labelIds'] != null && json['labelIds'] is List) {
+      labelIds = (json['labelIds'] as List).map((e) => e.toString()).toList();
+    } else {
+      labelIds = null;
+    }
   }
 
   Map<String, dynamic> toJson() {

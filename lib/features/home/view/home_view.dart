@@ -4,7 +4,6 @@ import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/navigation/view/navigation_view.dart';
 import 'package:inldsevak/features/navigation/view_model/navigation_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/widgets/draggable_sheet_widget.dart';
 import 'package:inldsevak/disclaimer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,19 +23,24 @@ class _HomeViewState extends State<HomeView> {
       final prefs = await SharedPreferences.getInstance();
       isVisible = prefs.getBool('disclaimer_dismissed') ?? true;
 
-      Future<void> dismissNotice() async {
-        RouteManager.pop();
-        isVisible = await prefs.setBool('disclaimer_dismissed', false);
-      }
-
       if (isVisible) {
         // Mark as shown so other screens do not re-display the same notice
         // (prevents duplicate display when navigating immediately).
         await prefs.setBool('disclaimer_dismissed', false);
+        if (!mounted) return;
+        
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          builder: (context) {
+          builder: (modalContext) {
+            Future<void> dismissNotice() async {
+              // Pop the modal bottom sheet using its own context
+              if (Navigator.of(modalContext).canPop()) {
+                Navigator.of(modalContext).pop();
+              }
+              await prefs.setBool('disclaimer_dismissed', false);
+            }
+            
             return DraggableSheetWidget(
               onCompleted: dismissNotice,
               radius: Dimens.radiusX4,

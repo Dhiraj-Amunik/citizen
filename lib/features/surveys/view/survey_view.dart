@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/animated_widgets.dart/custom_animated_loading.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/helpers/decoration.dart';
+import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
+import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/utils/sizedBox.dart';
@@ -12,7 +14,7 @@ import 'package:inldsevak/features/surveys/view_model/survey_view_model.dart';
 import 'package:inldsevak/features/surveys/widgets/survey_type.dart';
 import 'package:provider/provider.dart';
 
-class SurveyView extends StatelessWidget {
+class SurveyView extends StatelessWidget with CupertinoDialogMixin {
   const SurveyView({super.key});
 
   @override
@@ -26,6 +28,7 @@ class SurveyView extends StatelessWidget {
         onRefresh: () async {
           provider.getSurveysList();
         },
+        color: AppPalettes.primaryColor,
         child: Consumer<SurveyViewModel>(
           builder: (context, survey, _) {
             if (survey.isLoading) {
@@ -113,12 +116,25 @@ class SurveyView extends StatelessWidget {
                                     vertical: Dimens.paddingX2,
                                   ),
                                   text: localization.apply,
-                                  onTap: () {
-                                    survey.submitSurvey(
-                                      surveyID: data.surveyID ?? "",
-                                      questionID: data.sId ?? "",
-                                      type: data.type ?? "",
-                                      option: multiChoiceSelected,
+                                  onTap: () async {
+                                    // Prevent showing dialog if survey is already submitted
+                                    if (data.userAnswer != null) {
+                                      return;
+                                    }
+                                    await customRightCupertinoDialog(
+                                      content: localization.survey_submit_confirmation,
+                                      rightButton: localization.submit,
+                                      onTap: () async {
+                                        // Close the dialog first
+                                        RouteManager.pop();
+                                        // Then submit the survey
+                                        await survey.submitSurvey(
+                                          surveyID: data.surveyID ?? "",
+                                          questionID: data.sId ?? "",
+                                          type: data.type ?? "",
+                                          option: multiChoiceSelected,
+                                        );
+                                      },
                                     );
                                   },
                                 ),

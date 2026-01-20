@@ -4,7 +4,9 @@ import 'package:inldsevak/core/helpers/common_helpers.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
+import 'package:inldsevak/core/widgets/transliterated_text.dart';
 import 'package:inldsevak/features/profile/models/response/user_profile_model.dart';
+import 'package:inldsevak/l10n/general_stream.dart';
 
 class UserDetailWidget extends StatelessWidget {
   final double scale;
@@ -21,6 +23,9 @@ class UserDetailWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final localization = context.localizations;
     final textTheme = context.textTheme;
+    return StreamBuilder<dynamic>(
+      stream: GeneralStream.instance.language,
+      builder: (context, snapshot) {
     return Flexible(
       child: Row(
         spacing: Dimens.gapX4,
@@ -49,15 +54,16 @@ class UserDetailWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TranslatedText(
-                  text: "${profile?.name}",
-             
+                  text: profile?.name ?? "",
+                  disableTranslation: true,
                   style: heading?.copyWith(fontWeight: FontWeight.w500),
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  "${localization.membership_id} : ${profile?.membershipId}",
+                TranslatedText(
+                  text: "${localization.membership_id} : ${profile?.membershipId}",
                   style: textTheme.bodySmall,
                   overflow: TextOverflow.ellipsis,
+                  disableTranslation: false,
                 ),
                 Text(
                   "${profile?.phone}",
@@ -69,6 +75,8 @@ class UserDetailWidget extends StatelessWidget {
           ),
         ],
       ),
+        );
+      },
     );
   }
 }

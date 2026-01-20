@@ -26,6 +26,12 @@ class UploadImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("🟢 [UploadImageWidget] build() called - title: $title");
+    debugPrint("🟢 [UploadImageWidget] imageFile: ${imageFile?.path}");
+    debugPrint("🟢 [UploadImageWidget] imageFile is null: ${imageFile == null}");
+    debugPrint("🟢 [UploadImageWidget] url: $url");
+    debugPrint("🟢 [UploadImageWidget] Showing ${url != null && url != "" ? 'URL image' : imageFile == null ? 'upload placeholder' : 'file image'}");
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -58,7 +64,10 @@ class UploadImageWidget extends StatelessWidget {
                 ).allPadding(Dimens.widgetSpacing)
               : imageFile == null
               ? GestureDetector(
-                  onTap: onTap,
+                  onTap: () {
+                    debugPrint("🟢 [UploadImageWidget] onTap called");
+                    onTap();
+                  },
                   child: Container(
                     padding: EdgeInsets.all(Dimens.paddingX6),
                     width: double.infinity,
@@ -92,7 +101,20 @@ class UploadImageWidget extends StatelessWidget {
                   child: Stack(
                     alignment: Alignment.topRight,
                     children: [
-                      Image.file(imageFile!, fit: BoxFit.cover),
+                      Builder(
+                        builder: (context) {
+                          debugPrint("🟢 [UploadImageWidget] Rendering Image.file with path: ${imageFile!.path}");
+                          try {
+                            return Image.file(imageFile!, fit: BoxFit.cover);
+                          } catch (e) {
+                            debugPrint("🔴 [UploadImageWidget] Error rendering image: $e");
+                            return Container(
+                              color: Colors.red,
+                              child: Center(child: Text("Error: $e")),
+                            );
+                          }
+                        },
+                      ),
                       GestureDetector(
                         onTap: onRemoveTap,
                         child: CircleAvatar(

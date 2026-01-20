@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
 import 'package:inldsevak/core/extensions/padding_extension.dart';
@@ -31,6 +32,7 @@ class InterviewWidget extends StatelessWidget {
       return LokvartaHelpers.lokVartaPlaceholder(
         type: LokVartaFilter.Interview,
         onRefresh: onRefresh,
+        context: context,
       );
     }
     return Column(
@@ -38,6 +40,7 @@ class InterviewWidget extends StatelessWidget {
         Expanded(
           child: RefreshIndicator(
             onRefresh: onRefresh,
+            color: AppPalettes.primaryColor,
             child: ListView.separated(
               padding: EdgeInsets.zero,
               shrinkWrap: true,
@@ -106,15 +109,15 @@ class InterviewWidget extends StatelessWidget {
                           ),
                           if ((media.title?.isNotEmpty == true) || (media.content?.isNotEmpty == true))
                             Positioned(
-                              right: Dimens.paddingX1,
+                              right: Dimens.paddingX2,
                               bottom: Dimens.paddingX1,
                               child: CommonHelpers.buildIcons(
                                 path: AppImages.shareIcon,
-                                color: AppPalettes.whiteColor.withOpacityExt(0.5),
+                                color: AppPalettes.blackColor,
                                 iconColor: AppPalettes.whiteColor,
-                                padding: Dimens.paddingX1,
-                                radius: Dimens.radiusX2,
-                                iconSize: Dimens.scaleX1B,
+                                padding: Dimens.paddingX1B,
+                                radius: Dimens.radius100,
+                                iconSize: 12.sp,
                                 onTap: () => CommonHelpers.shareArticleDetails(
                                   title: media.title,
                                   summary: media.content,

@@ -27,7 +27,6 @@ class MyCurrentLocationRequestModel {
     if (radius != null) {
       data['radius'] = radius;
     }
-    
     return data;
   }
 }

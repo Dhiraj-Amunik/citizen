@@ -5,6 +5,7 @@ import 'package:inldsevak/core/extensions/validation_extension.dart';
 import 'package:inldsevak/core/models/response/constituency/constituency_model.dart';
 
 import 'package:inldsevak/core/widgets/form_CommonDropDown.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/common_fields/view_model/constituency_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -31,38 +32,63 @@ class _AssemblyConstituencyDropDownWidgetState
       if (!mounted) return;
       
       try {
+        final lists =
+            context.read<ConstituencyViewModel>().assemblyConstituencyLists;
+        final currentValue = widget.constituencyController.value;
+        
+        // If items list is empty, clear controller to avoid assertion errors
+        if (lists.isEmpty) {
+          if (currentValue != null) {
+            widget.constituencyController.clear();
+          }
+          return;
+        }
+        
         // Only set initial data if it exists and doesn't match current value
         if (widget.initialData != null) {
-          final lists =
-              context.read<ConstituencyViewModel>().assemblyConstituencyLists;
           // Use where().firstOrNull pattern to avoid type error
           final matched = lists.where(
             (constituency) => constituency?.sId == widget.initialData?.sId,
           ).firstOrNull;
           
           if (matched != null && mounted) {
-            final currentValue = widget.constituencyController.value;
             // Only update if the value is different
             if (currentValue?.sId != matched.sId) {
               widget.constituencyController.value = matched;
             }
           } else if (mounted) {
             // If initial data exists but not in list, clear to avoid stale data
-            final currentValue = widget.constituencyController.value;
             if (currentValue?.sId == widget.initialData?.sId) {
               widget.constituencyController.clear();
             }
           }
-        } else if (mounted) {
-          // If no initial data, ensure controller is cleared
-          final currentValue = widget.constituencyController.value;
-          if (currentValue != null) {
+        } else if (mounted && currentValue != null) {
+          // If no initial data but controller has value, validate it exists in list
+          final existsInList = lists.any(
+            (item) => item?.sId == currentValue.sId,
+          );
+          
+          if (!existsInList) {
+            // Value not in list, clear it
             widget.constituencyController.clear();
+          } else {
+            // Value exists, but ensure we use the instance from the list
+            final matchedItem = lists.where(
+              (item) => item?.sId == currentValue.sId,
+            ).firstOrNull;
+            
+            if (matchedItem != null && matchedItem != currentValue) {
+              widget.constituencyController.value = matchedItem;
+            }
           }
         }
       } catch (e) {
         // Silently handle any errors if widget is disposed
         debugPrint('Error in assembly constituency initState: $e');
+        // Clear controller on error to prevent assertion
+        if (mounted) {
+          widget.constituencyController.clear();
+        }
       }
     });
   }
@@ -140,26 +166,41 @@ class _AssemblyConstituencyDropDownWidgetState
 
     return Consumer<ConstituencyViewModel>(
       builder: (context, value, child) {
-        // Validate controller value is in the items list
-        final currentValue = widget.constituencyController.value;
-        final items = value.assemblyConstituencyLists;
-        
-        // If controller has a value but it's not in the items list, clear it immediately
-        if (currentValue != null) {
-          if (items.isEmpty) {
-            // List is empty, clear controller
-            widget.constituencyController.clear();
-          } else {
-            final existsInList = items.any(
-              (item) => item?.sId == currentValue.sId,
-            );
-            
-            if (!existsInList) {
-              // Value not in list, clear it immediately to avoid assertion error
+        // Schedule validation and updates for after the build phase to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          
+          final currentVal = widget.constituencyController.value;
+          final currentItems = value.assemblyConstituencyLists;
+          
+          if (currentVal != null) {
+            if (currentItems.isEmpty) {
+              // List is empty, clear controller
               widget.constituencyController.clear();
+            } else {
+              // Check if value exists in list by comparing sId
+              final existsInList = currentItems.any(
+                (item) => item?.sId == currentVal.sId,
+              );
+              
+              if (!existsInList) {
+                // Value not in list, clear it
+                widget.constituencyController.clear();
+              } else {
+                // Value exists in list, but might be a different instance
+                // Find the matching item from the list and use that instance
+                final matchedItem = currentItems.where(
+                  (item) => item?.sId == currentVal.sId,
+                ).firstOrNull;
+                
+                // Only update if it's a different instance (to avoid unnecessary updates)
+                if (matchedItem != null && matchedItem != currentVal) {
+                  widget.constituencyController.value = matchedItem;
+                }
+              }
             }
           }
-        }
+        });
         
         return FormCommonDropDown<Constituency?>(
           isRequired: true,
@@ -174,19 +215,21 @@ class _AssemblyConstituencyDropDownWidgetState
             }
           },
           listItemBuilder: (p0, constituency, p2, p3) {
-            return Text(
-              "${constituency?.name}",
+            return TranslatedText(
+              text: constituency?.name ?? "",
               style: context.textTheme.bodySmall,
+              disableTranslation: false,
             );
           },
           headerBuilder: (p0, constituency, p2) {
-            return Text(
-              "${constituency?.name}",
+            return TranslatedText(
+              text: constituency?.name ?? "",
               style: context.textTheme.bodySmall,
+              disableTranslation: false,
             );
           },
           validator: (text) => text.toString().validateDropDown(
-            argument: "Select your constituency",
+            argument: localization.select_your_constituency,
           ),
         );
       },

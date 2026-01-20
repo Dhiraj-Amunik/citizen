@@ -9,9 +9,9 @@ class DashboardRequestModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {
-      // Coordinates format: [longitude, latitude]
-      'coordinates': longitude != null && latitude != null
-          ? [longitude, latitude]
+      // Coordinates format: [latitude, longitude] - matches GeoJSON and API response format
+      'coordinates': latitude != null && longitude != null
+          ? [latitude, longitude]
           : [],
     };
     return data;

@@ -14,8 +14,10 @@ import 'package:inldsevak/core/widgets/responisve_image_widget.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
     as model;
+import 'package:inldsevak/features/quick_access/wall_of_help/view_model/my_help_requests_view_model.dart';
+import 'package:provider/provider.dart';
 
-class WallOfHelpDetailsView extends StatelessWidget {
+class WallOfHelpDetailsView extends StatefulWidget {
   final model.FinancialRequest helpRequest;
   final bool isEditable;
   const WallOfHelpDetailsView({
@@ -25,14 +27,117 @@ class WallOfHelpDetailsView extends StatelessWidget {
   });
 
   @override
+  State<WallOfHelpDetailsView> createState() => _WallOfHelpDetailsViewState();
+}
+
+class _WallOfHelpDetailsViewState extends State<WallOfHelpDetailsView> {
+  late model.FinancialRequest _currentRequest;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentRequest = widget.helpRequest;
+    // Check for updated data when view is resumed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRequestData();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update data when dependencies change (e.g., ViewModel updates)
+    if (widget.isEditable) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _updateRequestData();
+      });
+    }
+  }
+
+  void _updateRequestData() async {
+    if (!widget.isEditable || !mounted) return;
+    
+    try {
+      final viewModel = context.read<MyHelpRequestsViewModel>();
+      
+      // If list is empty or request not found, trigger a refresh first
+      if (viewModel.myWallOFHelpLists.isEmpty || 
+          !viewModel.myWallOFHelpLists.any((req) => req.sId == widget.helpRequest.sId)) {
+        // Refresh the list to get updated data
+        await viewModel.onRefresh();
+        // Wait a bit for the refresh to complete
+        await Future.delayed(const Duration(milliseconds: 200));
+      }
+      
+      // Find the updated request in the list by ID
+      final updatedRequest = viewModel.myWallOFHelpLists.firstWhere(
+        (request) => request.sId == widget.helpRequest.sId,
+        orElse: () => _currentRequest,
+      );
+      
+      if (updatedRequest.sId == null || updatedRequest.sId != widget.helpRequest.sId) {
+        // Request not found or ID mismatch, keep current
+        return;
+      }
+      
+      // Always update if we found the request (even if fields appear unchanged)
+      // This ensures we get the latest data from the server
+      if (mounted) {
+        setState(() {
+          _currentRequest = updatedRequest;
+        });
+      }
+    } catch (e) {
+      // ViewModel not available, ignore
+      debugPrint("Error updating request data: $e");
+    }
+  }
+
+  bool _hasRequestChanged(model.FinancialRequest updated) {
+    return updated.name != _currentRequest.name ||
+        updated.address != _currentRequest.address ||
+        updated.description != _currentRequest.description ||
+        updated.amountRequested != _currentRequest.amountRequested ||
+        updated.urgency != _currentRequest.urgency ||
+        updated.typeOfHelp?.sId != _currentRequest.typeOfHelp?.sId ||
+        updated.preferredWayForHelp?.sId != _currentRequest.preferredWayForHelp?.sId ||
+        updated.uPI != _currentRequest.uPI ||
+        updated.othersTypeOfHelp != _currentRequest.othersTypeOfHelp ||
+        updated.othersWayForHelp != _currentRequest.othersWayForHelp ||
+        (updated.documents?.length ?? 0) != (_currentRequest.documents?.length ?? 0);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
     final localization = context.localizations;
     final bool isFinancialHelp =
         [
           "Financial",
-        ].contains(helpRequest.preferredWayForHelp?.name?.split(" ")[0]) ==
+        ].contains(_currentRequest.preferredWayForHelp?.name?.split(" ")[0]) ==
         true;
+    
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        // Update data when returning from edit screen
+        if (didPop && widget.isEditable) {
+          // Wait a bit to ensure ViewModel refresh is complete
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              _updateRequestData();
+            }
+          });
+        }
+      },
+      child: _buildScaffold(context, textTheme, localization, isFinancialHelp),
+    );
+  }
+  Widget _buildScaffold(
+    BuildContext context,
+    TextTheme? textTheme,
+    dynamic localization,
+    bool isFinancialHelp,
+  ) {
     return Scaffold(
       appBar: commonAppBar(),
       body: SingleChildScrollView(
@@ -44,8 +149,8 @@ class WallOfHelpDetailsView extends StatelessWidget {
               SizedBox(
                 width: 0.8.screenWidth,
                 child: TranslatedText(
-                  text: helpRequest.typeOfHelp?.name?.capitalize() ?? "",
-                  style: textTheme.titleMedium?.copyWith(
+                  text: _currentRequest.typeOfHelp?.name?.capitalize() ?? "",
+                  style: textTheme?.titleMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                   textAlign: TextAlign.center,
@@ -53,7 +158,7 @@ class WallOfHelpDetailsView extends StatelessWidget {
                 ),
               ),
               SizeBox.sizeHX,
-              ReadMoreWidget(maxLines: 4, text: helpRequest.description ?? ""),
+              ReadMoreWidget(maxLines: 4, text: _currentRequest.description ?? ""),
               SizeBox.sizeHX2,
 
               Container(
@@ -71,43 +176,43 @@ class WallOfHelpDetailsView extends StatelessWidget {
                   children: [
                     TranslatedText(
                       text: localization.urgency_level,
-                      style: textTheme.bodySmall?.copyWith(
+                      style: textTheme?.bodySmall?.copyWith(
                         color: AppPalettes.blackColor,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
                     ),
                     TranslatedText(
-                      text: helpRequest.urgency ?? "",
-                      style: textTheme.bodyMedium?.copyWith(
+                      text: _currentRequest.urgency ?? "",
+                      style: textTheme?.bodyMedium?.copyWith(
                         color: AppPalettes.lightTextColor,
                       ),
                     ),
                     SizeBox.sizeHX1,
                     TranslatedText(
                       text: localization.preferred_way_to_receive_help,
-                      style: textTheme.bodySmall?.copyWith(
+                      style: textTheme?.bodySmall?.copyWith(
                         color: AppPalettes.blackColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     TranslatedText(
-                      text: helpRequest.preferredWayForHelp?.name ?? "",
-                      style: textTheme.bodyMedium?.copyWith(
+                      text: _currentRequest.preferredWayForHelp?.name ?? "",
+                      style: textTheme?.bodyMedium?.copyWith(
                         color: AppPalettes.lightTextColor,
                       ),
                     ),
                     SizeBox.sizeHX1,
                     TranslatedText(
                       text: localization.name,
-                      style: textTheme.bodySmall?.copyWith(
+                      style: textTheme?.bodySmall?.copyWith(
                         color: AppPalettes.blackColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     TranslatedText(
-                      text: helpRequest.name ?? "",
-                      style: textTheme.bodyMedium?.copyWith(
+                      text: _currentRequest.name ?? "",
+                      style: textTheme?.bodyMedium?.copyWith(
                         color: AppPalettes.lightTextColor,
                       ),
                     ),
@@ -115,14 +220,14 @@ class WallOfHelpDetailsView extends StatelessWidget {
 
                     TranslatedText(
                       text: localization.address,
-                      style: textTheme.bodySmall?.copyWith(
+                      style: textTheme?.bodySmall?.copyWith(
                         color: AppPalettes.blackColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     TranslatedText(
-                      text: helpRequest.address ?? "",
-                      style: textTheme.bodyMedium?.copyWith(
+                      text: _currentRequest.address ?? "",
+                      style: textTheme?.bodyMedium?.copyWith(
                         color: AppPalettes.lightTextColor,
                       ),
                     ),
@@ -131,26 +236,26 @@ class WallOfHelpDetailsView extends StatelessWidget {
                 ),
               ),
               SizeBox.sizeHX2,
-              if (helpRequest.documents?.isNotEmpty == true)
+              if (_currentRequest.documents?.isNotEmpty == true)
                 Row(
                   children: [
                     Text(
                       localization.supporting_documents,
-                      style: textTheme.titleMedium?.copyWith(
+                      style: textTheme?.titleMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               SizeBox.sizeHX2,
-              if (helpRequest.documents?.isNotEmpty == true)
-                ResponisveImageWidget(images: helpRequest.documents ?? []),
+              if (_currentRequest.documents?.isNotEmpty == true)
+                ResponisveImageWidget(images: _currentRequest.documents ?? []),
               SizeBox.sizeHX6,
             ],
           ),
         ),
       ),
-      bottomNavigationBar: helpRequest.status == "closed"
+      bottomNavigationBar: _currentRequest.status == "closed"
           ? SizedBox()
           : Padding(
               padding: EdgeInsetsGeometry.symmetric(
@@ -158,24 +263,33 @@ class WallOfHelpDetailsView extends StatelessWidget {
                 vertical: Dimens.verticalspacing,
               ),
               child: CommonButton(
-                isEnable: helpRequest.status == "rejected" ? false : true,
+                isEnable: _currentRequest.status == "rejected" ? false : true,
                 disabledColor: AppPalettes.greyColor,
-                color: helpRequest.status == "rejected"
+                color: _currentRequest.status == "rejected"
                     ? AppPalettes.greyColor
                     : null,
-                text: isEditable
+                text: widget.isEditable
                     ? localization.edit_details
                     : isFinancialHelp
                     ? localization.contribute
                     : localization.chat,
-                onTap: () => RouteManager.pushNamed(
-                  isEditable
-                      ? Routes.myHelpRequestEditPage
-                      : isFinancialHelp
-                      ? Routes.contributePage
-                      : Routes.chatContributePage,
-                  arguments: helpRequest,
-                ),
+                onTap: () async {
+                  final result = await RouteManager.pushNamed(
+                    widget.isEditable
+                        ? Routes.myHelpRequestEditPage
+                        : isFinancialHelp
+                        ? Routes.contributePage
+                        : Routes.chatContributePage,
+                    arguments: _currentRequest,
+                  );
+                  // Update data when returning from edit screen
+                  // If result is true, it means update was successful
+                  if (result == true || widget.isEditable) {
+                    // Wait a bit for the ViewModel to finish refreshing
+                    await Future.delayed(const Duration(milliseconds: 300));
+                    _updateRequestData();
+                  }
+                },
               ),
             ),
     );

@@ -55,10 +55,13 @@ class NotifyContainer extends StatelessWidget {
       }
     }
     
+    // Add address parts in a logical order
     addIfNotDuplicate(model.street);
+    addIfNotDuplicate(model.area);
     addIfNotDuplicate(model.village);
     addIfNotDuplicate(model.mandal);
     addIfNotDuplicate(model.district);
+    addIfNotDuplicate(model.state);
     addIfNotDuplicate(model.pincode);
     
     if (addressParts.isNotEmpty) {
@@ -208,7 +211,7 @@ class NotifyContainer extends StatelessWidget {
                     child: TranslatedText(
                       text: _getLocationText(model, localization),
                       style: textTheme.bodySmall,
-                      maxLines: 2,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

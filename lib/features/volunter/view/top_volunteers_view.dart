@@ -10,6 +10,7 @@ import 'package:inldsevak/core/utils/sizedBox.dart';
 import 'package:inldsevak/core/utils/urls.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
+import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/volunter/models/response/volunteer_analytics_response_model.dart';
 import 'package:inldsevak/features/volunter/view_model/volunteer_analytics_view_model.dart';
 import 'package:inldsevak/features/volunter/widgets/top_volunteers_leaderboard.dart';
@@ -25,7 +26,7 @@ class TopVolunteersViewArgs {
   final String? statusMessage;
 }
 
-class TopVolunteersView extends StatelessWidget {
+class TopVolunteersView extends StatefulWidget {
   const TopVolunteersView({
     super.key,
     this.canApply = true,
@@ -36,33 +37,126 @@ class TopVolunteersView extends StatelessWidget {
   final String? statusMessage;
 
   @override
+  State<TopVolunteersView> createState() => _TopVolunteersViewState();
+}
+
+class _TopVolunteersViewState extends State<TopVolunteersView> {
+  bool _hasCheckedInitialStatus = false;
+  bool _isNavigating = false;
+
+  void _checkAndNavigateIfApproved(VolunteerAnalyticsViewModel viewModel) {
+    if (!mounted || !viewModel.hasFetchedStatus || _hasCheckedInitialStatus || _isNavigating) {
+      return;
+    }
+    
+    _hasCheckedInitialStatus = true;
+    
+    // Check if volunteer is approved - only navigate if actually approved
+    // Use the view model's isVolunteerApproved property which checks the actual status
+    final isApproved = viewModel.isVolunteerApproved;
+    
+    if (isApproved) {
+      _isNavigating = true;
+      // Navigate immediately to analytics view - replace current route
+      // Use microtask to ensure it happens after the current build cycle
+      Future.microtask(() {
+        if (mounted) {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop(); // Remove current top volunteers view
+          }
+          if (mounted) {
+            RouteManager.pushNamed(Routes.volunteerAnalyticsPage);
+          }
+        }
+      });
+    }
+  }
+
+  Future<void> _handleRefresh(BuildContext context, VolunteerAnalyticsViewModel viewModel) async {
+    // Refresh the data
+    await viewModel.refresh();
+    
+    // Check if volunteer request was approved after refresh
+    if (mounted && viewModel.hasFetchedStatus) {
+      // Use the view model's isVolunteerApproved property which checks the actual status
+      final isApproved = viewModel.isVolunteerApproved;
+      
+      if (isApproved) {
+        // Navigate immediately to analytics view - replace current route
+        if (mounted) {
+          // Use a small delay to ensure refresh completes, then replace route
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted && Navigator.of(context).canPop()) {
+              Navigator.of(context).pop(); // Remove current top volunteers view
+            }
+            if (mounted) {
+              RouteManager.pushNamed(Routes.volunteerAnalyticsPage);
+            }
+          });
+        }
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => VolunteerAnalyticsViewModel(),
       builder: (context, _) {
-        return Scaffold(
-          appBar: commonAppBar(title: "Be a Volunteer"),
-          body: Consumer<VolunteerAnalyticsViewModel>(
-            builder: (context, viewModel, __) {
-              final topVolunteers = viewModel.topVolunteers
-                  .where(
-                    (volunteer) =>
-                        volunteer.rank != null &&
-                        (volunteer.name?.isNotEmpty ?? false),
-                  )
-                  .toList()
-                ..sort((a, b) => (a.rank ?? 0).compareTo(b.rank ?? 0));
-
-              if (viewModel.isLoading && topVolunteers.isEmpty) {
-                return const Center(
+        return Consumer<VolunteerAnalyticsViewModel>(
+          builder: (context, viewModel, __) {
+            // Check and navigate if approved after data is loaded
+            // Do this check first before building any UI
+            if (!viewModel.isLoading && viewModel.hasFetchedStatus) {
+              _checkAndNavigateIfApproved(viewModel);
+            }
+            
+            // If navigating away, show loading to prevent flash
+            if (_isNavigating) {
+              return Scaffold(
+                appBar: commonAppBar(
+                  title: "Be a Volunteer",
+                  showBackButton: true,
+                ),
+                body: const Center(
                   child: CircularProgressIndicator(
                     color: AppPalettes.primaryColor,
                   ),
-                );
-              }
+                ),
+              );
+            }
+            
+            final topVolunteers = viewModel.topVolunteers
+                .where(
+                  (volunteer) =>
+                      volunteer.rank != null &&
+                      (volunteer.name?.isNotEmpty ?? false),
+                )
+                .toList()
+              ..sort((a, b) => (a.rank ?? 0).compareTo(b.rank ?? 0));
 
-              return RefreshIndicator(
-                onRefresh: viewModel.fetchVolunteerAnalytics,
+            if (viewModel.isLoading && topVolunteers.isEmpty) {
+              return Scaffold(
+                appBar: commonAppBar(
+                  title: "Be a Volunteer",
+                  showBackButton: true,
+                ),
+                body: const Center(
+                  child: CircularProgressIndicator(
+                    color: AppPalettes.primaryColor,
+                  ),
+                ),
+              );
+            }
+
+            return Scaffold(
+              appBar: commonAppBar(
+                title: "Be a Volunteer",
+                showBackButton: true,
+              ),
+              body: RefreshIndicator(
+                onRefresh: () => _handleRefresh(context, viewModel),
+                color: AppPalettes.primaryColor,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.symmetric(
@@ -73,7 +167,10 @@ class TopVolunteersView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: Dimens.widgetSpacing,
                     children: [
-                      _buildHeroSection(context),
+                      _buildHeroSection(
+                        context: context,
+                        viewModel: viewModel,
+                      ),
                       _buildLeaderboardSection(
                         context: context,
                         viewModel: viewModel,
@@ -82,15 +179,19 @@ class TopVolunteersView extends StatelessWidget {
                     ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+
+          },
         );
       },
     );
   }
 
-  Widget _buildHeroSection(BuildContext context) {
+  Widget _buildHeroSection({
+    required BuildContext context,
+    required VolunteerAnalyticsViewModel viewModel,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: Dimens.paddingX3,
@@ -105,52 +206,100 @@ class TopVolunteersView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Together for a stronger Community",
+          TranslatedText(
+            text: "Together for a stronger Community",
             style: context.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w500,
             ),
           ),
           SizedBox(height: Dimens.gapX2),
-          Text(
-            "Volunteer with local programs, connect with others, and make your contribution count.",
+          TranslatedText(
+            text: "Volunteer with local programs, connect with others, and make your contribution count.",
             style: context.textTheme.labelMedium?.copyWith(
               color: AppPalettes.lightTextColor,
             ),
           ),
           SizeBox.sizeHX4,
-          if (canApply)
-            CommonButton(
-              text: "+ Become a Volunteer",
-              height: 40.height(),
-              onTap: () {
-                RouteManager.pushNamed(Routes.beVolunteerPage);
-              },
-              textColor: AppPalettes.whiteColor,
-              radius: Dimens.radius100,
-            )
-          else
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: Dimens.paddingX3,
-                vertical: Dimens.paddingX2,
-              ),
-              decoration: boxDecorationRoundedWithShadow(
-                Dimens.radiusX3,
-                backgroundColor: AppPalettes.gradientFirstColor,
-              ),
-              child: Center(
-                child: Text(
-                  statusMessage ?? "Volunteer request is pending",
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    color: AppPalettes.whiteColor,
-                    fontWeight: FontWeight.w600,
+          Builder(
+            builder: (builderContext) {
+              // Capture widget properties before Builder scope
+              final widgetCanApply = widget.canApply;
+              final widgetStatusMessage = widget.statusMessage;
+              
+              // Use view model status if it has been fetched, otherwise fall back to constructor parameters
+              final effectiveCanApply = viewModel.hasFetchedStatus 
+                  ? viewModel.canApply 
+                  : widgetCanApply;
+              final effectiveStatusMessage = viewModel.hasFetchedStatus 
+                  ? viewModel.statusMessage 
+                  : widgetStatusMessage;
+              
+              if (effectiveCanApply) {
+                return CommonButton(
+                  text: "+ Become a Volunteer",
+                  height: 40.height(),
+                  onTap: () async {
+                    // Check status before navigating to form
+                    await viewModel.fetchVolunteerStatus();
+                    if (mounted && viewModel.hasFetchedStatus) {
+                      // Use the view model's isVolunteerApproved property which checks the actual status
+                      final isApproved = viewModel.isVolunteerApproved;
+                      
+                      if (isApproved) {
+                        // If approved, navigate to analytics instead
+                        RouteManager.pushNamed(Routes.volunteerAnalyticsPage);
+                      } else {
+                        // Otherwise, navigate to volunteer form
+                        RouteManager.pushNamed(Routes.beVolunteerPage);
+                      }
+                    } else {
+                      // If status check fails, navigate to form anyway
+                      RouteManager.pushNamed(Routes.beVolunteerPage);
+                    }
+                  },
+                  textColor: AppPalettes.whiteColor,
+                  radius: Dimens.radius100,
+                );
+              } else {
+                // Determine container color based on status message
+                final isPending = effectiveStatusMessage?.toLowerCase().contains('pending') ?? false;
+                final isRejected = effectiveStatusMessage?.toLowerCase().contains('rejected') ?? false;
+                
+                final containerColor = isPending 
+                    ? AppPalettes.liteGreenColor 
+                    : isRejected 
+                        ? AppPalettes.liteRedColor 
+                        : AppPalettes.gradientFirstColor;
+                
+                final textColor = isPending || isRejected 
+                    ? AppPalettes.blackColor 
+                    : AppPalettes.whiteColor;
+                
+                return Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Dimens.paddingX3,
+                    vertical: Dimens.paddingX2,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
+                  decoration: boxDecorationRoundedWithShadow(
+                    Dimens.radiusX3,
+                    backgroundColor: containerColor,
+                  ),
+                  child: Center(
+                    child: TranslatedText(
+                      text:
+                      effectiveStatusMessage ?? "Volunteer request is pending",
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
         ],
       ).onlyPadding(bottom: Dimens.paddingX2),
     );
@@ -168,8 +317,9 @@ class TopVolunteersView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "Top Volunteers",
+            TranslatedText(
+              text: "Top Volunteers",
+          
               style: context.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -179,8 +329,8 @@ class TopVolunteersView extends StatelessWidget {
                 Dimens.paddingX1,
                 border: Border.all(color: AppPalettes.blackColor),
               ),
-              child: Text(
-                viewModel.lastMonthLabel,
+              child: TranslatedText(
+                text: viewModel.lastMonthLabel,
                 style: context.textTheme.labelSmall?.copyWith(
                   color: AppPalettes.blackColor,
                 ),
@@ -191,6 +341,7 @@ class TopVolunteersView extends StatelessWidget {
             )
           ],
         ),
+
         if (volunteers.length >= 3)
           TopVolunteersLeaderboard(
             entries: volunteers
@@ -214,8 +365,8 @@ class TopVolunteersView extends StatelessWidget {
               Dimens.radiusX4,
               backgroundColor: AppPalettes.liteGreyColor,
             ),
-            child: Text(
-              viewModel.isLoading
+            child: TranslatedText(
+              text: viewModel.isLoading
                   ? "Loading volunteer leaderboard..."
                   : "Not enough data to display the leaderboard yet.",
               style: context.textTheme.bodyMedium,
@@ -227,13 +378,14 @@ class TopVolunteersView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: Dimens.gapX2,
             children: [
-              Text(
-                "More Volunteers",
+              TranslatedText(
+                text: "More Volunteers",
+               
                 style: context.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              ...volunteers.skip(3).map(_VolunteerListTile.new).toList(),
+              ...volunteers.skip(3).map(_VolunteerListTile.new),
             ],
           ),
       ],

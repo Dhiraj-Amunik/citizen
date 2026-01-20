@@ -38,9 +38,19 @@ class VolunteerAnalyticsData {
     this.myAnalytics,
     List<VolunteerEvent>? attendedEvents,
     List<VolunteerEvent>? upcomingEvents,
+    this.highestInviteReward,
+    List<TopReferralUser>? topReferralUsers,
+    List<ReferralGraphItem>? referralGraph,
+    this.highestShareEvent,
+    List<TopShareEventUser>? topShareEventUsers,
+    List<ShareEventGraphItem>? shareEventGraph,
   })  : topVolunteers = topVolunteers ?? const <TopVolunteer>[],
         attendedEvents = attendedEvents ?? const <VolunteerEvent>[],
-        upcomingEvents = upcomingEvents ?? const <VolunteerEvent>[];
+        upcomingEvents = upcomingEvents ?? const <VolunteerEvent>[],
+        topReferralUsers = topReferralUsers ?? const <TopReferralUser>[],
+        referralGraph = referralGraph ?? const <ReferralGraphItem>[],
+        topShareEventUsers = topShareEventUsers ?? const <TopShareEventUser>[],
+        shareEventGraph = shareEventGraph ?? const <ShareEventGraphItem>[];
 
   factory VolunteerAnalyticsData.fromJson(Map<String, dynamic> json) {
     return VolunteerAnalyticsData(
@@ -67,6 +77,32 @@ class VolunteerAnalyticsData {
                 VolunteerEvent.fromJson(item as Map<String, dynamic>),
           )
           .toList(),
+      highestInviteReward: (json['highestInviteReward'] as num?)?.toInt(),
+      topReferralUsers: (json['topReferralUsers'] as List<dynamic>?)
+          ?.map(
+            (dynamic item) =>
+                TopReferralUser.fromJson(item as Map<String, dynamic>),
+          )
+          .toList(),
+      referralGraph: (json['referralGraph'] as List<dynamic>?)
+          ?.map(
+            (dynamic item) =>
+                ReferralGraphItem.fromJson(item as Map<String, dynamic>),
+          )
+          .toList(),
+      highestShareEvent: (json['highestShareEvent'] as num?)?.toInt(),
+      topShareEventUsers: (json['topShareEventUsers'] as List<dynamic>?)
+          ?.map(
+            (dynamic item) =>
+                TopShareEventUser.fromJson(item as Map<String, dynamic>),
+          )
+          .toList(),
+      shareEventGraph: (json['shareEventGraph'] as List<dynamic>?)
+          ?.map(
+            (dynamic item) =>
+                ShareEventGraphItem.fromJson(item as Map<String, dynamic>),
+          )
+          .toList(),
     );
   }
 
@@ -74,6 +110,12 @@ class VolunteerAnalyticsData {
   final MyVolunteerAnalytics? myAnalytics;
   final List<VolunteerEvent> attendedEvents;
   final List<VolunteerEvent> upcomingEvents;
+  final int? highestInviteReward;
+  final List<TopReferralUser> topReferralUsers;
+  final List<ReferralGraphItem> referralGraph;
+  final int? highestShareEvent;
+  final List<TopShareEventUser> topShareEventUsers;
+  final List<ShareEventGraphItem> shareEventGraph;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -83,6 +125,182 @@ class VolunteerAnalyticsData {
           attendedEvents.map((VolunteerEvent e) => e.toJson()).toList(),
       'upcomingEvents':
           upcomingEvents.map((VolunteerEvent e) => e.toJson()).toList(),
+      'highestInviteReward': highestInviteReward,
+      'topReferralUsers': topReferralUsers.map((TopReferralUser u) => u.toJson()).toList(),
+      'referralGraph': referralGraph.map((ReferralGraphItem g) => g.toJson()).toList(),
+      'highestShareEvent': highestShareEvent,
+      'topShareEventUsers': topShareEventUsers.map((TopShareEventUser u) => u.toJson()).toList(),
+      'shareEventGraph': shareEventGraph.map((ShareEventGraphItem g) => g.toJson()).toList(),
+    };
+  }
+}
+
+class TopShareEventUser {
+  TopShareEventUser({
+    this.rank,
+    this.userId,
+    this.name,
+    this.profileImage,
+    this.shareEventCoins,
+  });
+
+  factory TopShareEventUser.fromJson(Map<String, dynamic> json) {
+    int? parseRank(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    int? parseCoins(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    return TopShareEventUser(
+      rank: parseRank(json['rank']),
+      userId: json['userId'] as String?,
+      name: json['name'] as String?,
+      profileImage: json['profileImage'] as String?,
+      shareEventCoins: parseCoins(json['shareEventCoins']),
+    );
+  }
+
+  final int? rank;
+  final String? userId;
+  final String? name;
+  final String? profileImage;
+  final int? shareEventCoins;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'rank': rank,
+      'userId': userId,
+      'name': name,
+      'profileImage': profileImage,
+      'shareEventCoins': shareEventCoins,
+    };
+  }
+}
+
+class ShareEventGraphItem {
+  ShareEventGraphItem({
+    this.name,
+    this.coins,
+    this.percentage,
+  });
+
+  factory ShareEventGraphItem.fromJson(Map<String, dynamic> json) {
+    int? parseCoins(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    return ShareEventGraphItem(
+      name: json['name'] as String?,
+      coins: parseCoins(json['coins']),
+      percentage: json['percentage'] as String?,
+    );
+  }
+
+  final String? name;
+  final int? coins;
+  final String? percentage;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'name': name,
+      'coins': coins,
+      'percentage': percentage,
+    };
+  }
+}
+
+class TopReferralUser {
+  TopReferralUser({
+    this.rank,
+    this.userId,
+    this.name,
+    this.profileImage,
+    this.inviteRewardCoins,
+  });
+
+  factory TopReferralUser.fromJson(Map<String, dynamic> json) {
+    int? parseRank(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    int? parseCoins(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    return TopReferralUser(
+      rank: parseRank(json['rank']),
+      userId: json['userId'] as String?,
+      name: json['name'] as String?,
+      profileImage: json['profileImage'] as String?,
+      inviteRewardCoins: parseCoins(json['inviteRewardCoins']),
+    );
+  }
+
+  final int? rank;
+  final String? userId;
+  final String? name;
+  final String? profileImage;
+  final int? inviteRewardCoins;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'rank': rank,
+      'userId': userId,
+      'name': name,
+      'profileImage': profileImage,
+      'inviteRewardCoins': inviteRewardCoins,
+    };
+  }
+}
+
+class ReferralGraphItem {
+  ReferralGraphItem({
+    this.name,
+    this.coins,
+    this.percentage,
+  });
+
+  factory ReferralGraphItem.fromJson(Map<String, dynamic> json) {
+    int? parseCoins(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    return ReferralGraphItem(
+      name: json['name'] as String?,
+      coins: parseCoins(json['coins']),
+      percentage: json['percentage'] as String?,
+    );
+  }
+
+  final String? name;
+  final int? coins;
+  final String? percentage;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'name': name,
+      'coins': coins,
+      'percentage': percentage,
     };
   }
 }
@@ -128,17 +346,28 @@ class MyVolunteerAnalytics {
     this.lastMonth,
     this.referedUsers,
     this.sharedEvents,
+    this.totalCoins,
+    this.totalTransactions,
   });
 
   factory MyVolunteerAnalytics.fromJson(Map<String, dynamic> json) {
+    int? parseInt(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
     return MyVolunteerAnalytics(
-      totalEvents: (json['totalEvents'] as num?)?.toInt(),
-      attendedEvents: (json['attendedEvents'] as num?)?.toInt(),
-      totalShares: (json['totalShares'] as num?)?.toInt(),
+      totalEvents: parseInt(json['totalEvents']),
+      attendedEvents: parseInt(json['attendedEvents']),
+      totalShares: parseInt(json['totalShares']),
       activeSince: json['activeSince'] as String?,
       lastMonth: json['lastMonth'] as String?,
-      referedUsers: (json['referedUsers'] as num?)?.toInt(),
-      sharedEvents: (json['sharedEvents'] as num?)?.toInt(),
+      referedUsers: parseInt(json['referedUsers']),
+      sharedEvents: parseInt(json['sharedEvents']),
+      totalCoins: parseInt(json['totalCoins']),
+      totalTransactions: parseInt(json['totalTransactions']),
     );
   }
 
@@ -149,6 +378,8 @@ class MyVolunteerAnalytics {
   final String? lastMonth;
   final int? referedUsers;
   final int? sharedEvents;
+  final int? totalCoins;
+  final int? totalTransactions;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -159,6 +390,8 @@ class MyVolunteerAnalytics {
       'lastMonth': lastMonth,
       'referedUsers': referedUsers,
       'sharedEvents': sharedEvents,
+      'totalCoins': totalCoins,
+      'totalTransactions': totalTransactions,
     };
   }
 }

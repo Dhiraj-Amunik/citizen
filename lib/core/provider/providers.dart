@@ -21,6 +21,9 @@ import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/features/quick_access/appointments/viewmodel/appointments_view_model.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/my_help_requests_view_model.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_view_model.dart';
+import 'package:inldsevak/features/quick_access/wall_of_help/view_model/financial_help_messages_view_model.dart';
+import 'package:inldsevak/features/nearest_member/view_model/nearest_member_view_model.dart';
+import 'package:inldsevak/features/nearest_member/view_model/my_member_message_view_model.dart';
 import 'package:inldsevak/features/surveys/view_model/survey_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -56,6 +59,9 @@ class AppProviders {
     ChangeNotifierProvider(create: (_) => SurveyViewModel()),
     ChangeNotifierProvider(create: (_) => ThreadIndexBuilder()),
     ChangeNotifierProvider(create: (_) => MyHelpRequestsViewModel()),
+    ChangeNotifierProvider(create: (_) => FinancialHelpMessagesViewModel()),
+    ChangeNotifierProvider(create: (_) => NearestMemberViewModel()),
+    ChangeNotifierProvider(create: (_) => MyMemberMessageViewModel()),
 
 
     //Notify
