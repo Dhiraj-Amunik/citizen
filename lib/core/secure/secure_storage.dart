@@ -114,6 +114,8 @@ class SessionController {
     RestartApp.restartApp();
   }
 
+  SecureModel? get session => _model;
+
   Stream<SecureModel?> get userAuthChange => _authController.stream;
 
   Future<String?> getToken() async {

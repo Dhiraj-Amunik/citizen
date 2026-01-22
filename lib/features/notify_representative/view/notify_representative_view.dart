@@ -54,9 +54,9 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
         return PopScope(
           onPopInvokedWithResult: (didPop, result) {
             if (didPop) {
-            provider.searchController.clear();
+              provider.searchController.clear();
               provider.clearFilters();
-            provider.onSearchChanged(tabController.index);
+              provider.onSearchChanged(tabController.index);
             }
           },
           child: Scaffold(
@@ -119,7 +119,7 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                       padding: Dimens.paddingX2,
                       radius: Dimens.radiusX3,
                       path: AppImages.filterIcon,
-                
+
                       onTap: () => _showFilterSheet(context, provider),
                     ),
                   ],
@@ -132,10 +132,7 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                           SizeBox.sizeHX3,
                           DefaultTabBar(
                             controller: tabController,
-                            tabLabels: [
-                              localization.recent,
-                              localization.past,
-                            ],
+                            tabLabels: [localization.recent, localization.past],
                           ),
                         ],
                       );
@@ -231,7 +228,7 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
     // Fetch fresh filters data every time the sheet opens
     provider.getNotifyFilters();
     final localization = context.localizations;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -302,7 +299,7 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                       ),
                     ],
                   ).verticalPadding(Dimens.paddingX2),
-                  
+
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: Dimens.gapX3,
@@ -311,7 +308,7 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                       if (value.filtersData?.mlas != null &&
                           value.filtersData!.mlas!.isNotEmpty)
                         FormCommonDropDown<MlaFilter>(
-                          heading: 'MLA',
+                          heading: 'Associate',
                           hintText: localization.select_mla,
                           initialData: value.selectedMla,
                           items: value.filtersData?.mlas,
@@ -364,7 +361,8 @@ class _NotifyRepresentativeViewState extends State<NotifyRepresentativeView>
                           value.filtersData!.mandals!.isNotEmpty)
                         FormCommonDropDown<String>(
                           heading: 'Tehsil',
-                          hintText: 'Select Tehsil', // TODO: Add tehsil localization key
+                          hintText:
+                              'Select Tehsil', // TODO: Add tehsil localization key
                           initialData: value.selectedMandal,
                           items: value.filtersData?.mandals,
                           listItemBuilder: (context, mandal, _, __) {

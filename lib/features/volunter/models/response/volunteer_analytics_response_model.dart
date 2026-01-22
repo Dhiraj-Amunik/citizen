@@ -44,6 +44,7 @@ class VolunteerAnalyticsData {
     this.highestShareEvent,
     List<TopShareEventUser>? topShareEventUsers,
     List<ShareEventGraphItem>? shareEventGraph,
+    this.myVolunteerRank,
   })  : topVolunteers = topVolunteers ?? const <TopVolunteer>[],
         attendedEvents = attendedEvents ?? const <VolunteerEvent>[],
         upcomingEvents = upcomingEvents ?? const <VolunteerEvent>[],
@@ -103,6 +104,11 @@ class VolunteerAnalyticsData {
                 ShareEventGraphItem.fromJson(item as Map<String, dynamic>),
           )
           .toList(),
+      myVolunteerRank: json['myVolunteerRank'] == null
+          ? null
+          : MyVolunteerRank.fromJson(
+              json['myVolunteerRank'] as Map<String, dynamic>,
+            ),
     );
   }
 
@@ -116,6 +122,7 @@ class VolunteerAnalyticsData {
   final int? highestShareEvent;
   final List<TopShareEventUser> topShareEventUsers;
   final List<ShareEventGraphItem> shareEventGraph;
+  final MyVolunteerRank? myVolunteerRank;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -131,6 +138,7 @@ class VolunteerAnalyticsData {
       'highestShareEvent': highestShareEvent,
       'topShareEventUsers': topShareEventUsers.map((TopShareEventUser u) => u.toJson()).toList(),
       'shareEventGraph': shareEventGraph.map((ShareEventGraphItem g) => g.toJson()).toList(),
+      'myVolunteerRank': myVolunteerRank?.toJson(),
     };
   }
 }
@@ -330,6 +338,53 @@ class TopVolunteer {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'rank': rank,
+      'name': name,
+      'profileImage': profileImage,
+      'coins': coins,
+    };
+  }
+}
+
+class MyVolunteerRank {
+  MyVolunteerRank({
+    this.rank,
+    this.userId,
+    this.name,
+    this.profileImage,
+    this.coins,
+  });
+
+  factory MyVolunteerRank.fromJson(Map<String, dynamic> json) {
+    int? parseRank(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toInt();
+      if (value is String) {
+        // Handle "-" as null
+        if (value == "-") return null;
+        return int.tryParse(value);
+      }
+      return null;
+    }
+
+    return MyVolunteerRank(
+      rank: parseRank(json['rank']),
+      userId: json['userId'] as String?,
+      name: json['name'] as String?,
+      profileImage: json['profileImage'] as String?,
+      coins: (json['coins'] as num?)?.toInt(),
+    );
+  }
+
+  final int? rank;
+  final String? userId;
+  final String? name;
+  final String? profileImage;
+  final int? coins;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'rank': rank,
+      'userId': userId,
       'name': name,
       'profileImage': profileImage,
       'coins': coins,

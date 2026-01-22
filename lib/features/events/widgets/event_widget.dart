@@ -104,31 +104,33 @@ class EventWidget extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               spacing: Dimens.gapX2,
               children: [
-                Column(
-                  spacing: Dimens.gapX,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TranslatedText(
-                      text: event.title ?? "Unknown title",
-                      style: textTheme.bodyMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    TranslatedText(
-                      text: event.location ?? "Unknown Location",
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppPalettes.lightTextColor,
+                Expanded(
+                  child: Column(
+                    spacing: Dimens.gapX,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TranslatedText(
+                        text: event.title ?? "Unknown title",
+                        style: textTheme.bodyMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      TranslatedText(
+                        text: event.location ?? "Unknown Location",
+                        style: textTheme.bodySmall?.copyWith(
+                          color: AppPalettes.lightTextColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
                 Container(
                   color: Colors.white,

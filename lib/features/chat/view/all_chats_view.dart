@@ -21,8 +21,10 @@ import 'package:inldsevak/features/nearest_member/view_model/my_member_message_v
 import 'package:inldsevak/features/quick_access/wall_of_help/party/widgets/wall_of_help_helpers.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/financial_help_messages_view_model.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_help_view_model.dart';
-import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart' as woh;
+import 'package:inldsevak/features/quick_access/wall_of_help/model/wall_of_help_model.dart'
+    as woh;
 import 'package:inldsevak/features/complaints/view_model/complaints_view_model.dart';
+import 'package:inldsevak/features/complaints/widgets/complaint_helpers.dart';
 import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/l10n/general_stream.dart';
 import 'package:provider/provider.dart';
@@ -35,19 +37,23 @@ class AllChatsView extends StatefulWidget {
 }
 
 class _AllChatsViewState extends State<AllChatsView> {
-  int _selectedTab = 0; // 0 = Wall of Help, 1 = Nearest Member (if party member), 2 = Complaints
+  int _selectedTab =
+      0; // 0 = Wall of Help, 1 = Nearest Member (if party member), 2 = Complaints
   final TextEditingController _searchController = TextEditingController();
   DateTime? _lastRefreshTime;
   DateTime? _lastComplaintsCallTime; // Track last time getComplaints was called
   StreamSubscription<RemoteMessage>? _messageSubscription;
-  StreamSubscription<Locale>? _languageSubscription; // Listen to language changes
+  StreamSubscription<Locale>?
+  _languageSubscription; // Listen to language changes
   bool _complaintsTabInitialized = false;
-  bool _complaintsLoadAttempted = false; // Track if we've attempted to load complaints at least once
-  DateTime? _pageOpenedTime; // Track when page was opened to show loading on initial load
-  
+  bool _complaintsLoadAttempted =
+      false; // Track if we've attempted to load complaints at least once
+  DateTime?
+  _pageOpenedTime; // Track when page was opened to show loading on initial load
+
   // Search provider
   late ShowSearchChatProvider _searchProvider;
-  
+
   // Callbacks to refresh each tab's view model
   VoidCallback? _refreshWallOfHelpCallback;
   VoidCallback? _refreshNearestMemberCallback;
@@ -78,7 +84,7 @@ class _AllChatsViewState extends State<AllChatsView> {
     _setupLanguageListener();
     // Track when page was opened
     _pageOpenedTime = DateTime.now();
-    
+
     // Initialize view models to ensure unread counts are loaded
     // Always refresh when opening the chats view to get latest counts
     // Use microtask to avoid blocking UI initialization
@@ -94,53 +100,52 @@ class _AllChatsViewState extends State<AllChatsView> {
   /// Refresh all unread counts
   void _refreshUnreadCounts() {
     if (!mounted) return;
-    
-        try {
-          // Always call all three APIs when landing on all_chats_view
-          final financialHelpVm = context.read<FinancialHelpMessagesViewModel>();
-          // Always refresh to get latest unread count
-          financialHelpVm.getMyFinancialHelpRequestMessages();
-          
-          // Load wall of help list to get request names for display
-          try {
-            final wallOfHelpVm = context.read<WallOfHelpViewModel>();
-            if (wallOfHelpVm.wallOFHelpLists.isEmpty) {
-              wallOfHelpVm.getWallOfHelpList();
-            }
-          } catch (e) {
-            debugPrint("Error loading wall of help list: $e");
-          }
-          
-          final nearestMemberVm = context.read<MyMemberMessageViewModel>();
-          // Always refresh if token is available
-          if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
-            nearestMemberVm.getAllChats();
-          }
-          
-          // Always call getComplaints API when landing on all_chats_view
-          // This ensures isFollowUpDue is checked every time the page is opened
-          final complaintsVm = context.read<ComplaintsViewModel>();
-          complaintsVm.getComplaints(showLoader: false, preserveSearch: true);
-          _lastComplaintsCallTime = DateTime.now();
-      debugPrint("🔄 Called getComplaints to check isFollowUpDue");
-        } catch (e) {
-      debugPrint("Error refreshing unread counts: $e");
+
+    try {
+      // Always call all three APIs when landing on all_chats_view
+      final financialHelpVm = context.read<FinancialHelpMessagesViewModel>();
+      // Always refresh to get latest unread count
+      financialHelpVm.getMyFinancialHelpRequestMessages();
+
+      // Load wall of help list to get request names for display
+      try {
+        final wallOfHelpVm = context.read<WallOfHelpViewModel>();
+        if (wallOfHelpVm.wallOFHelpLists.isEmpty) {
+          wallOfHelpVm.getWallOfHelpList();
         }
+      } catch (e) {
+        debugPrint("Error loading wall of help list: $e");
       }
+
+      final nearestMemberVm = context.read<MyMemberMessageViewModel>();
+      // Always refresh if token is available
+      if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
+        nearestMemberVm.getAllChats();
+      }
+
+      // Always call getComplaints API when landing on all_chats_view
+      // This ensures isFollowUpDue is checked every time the page is opened
+      final complaintsVm = context.read<ComplaintsViewModel>();
+      complaintsVm.getComplaints(showLoader: false, preserveSearch: true);
+      _lastComplaintsCallTime = DateTime.now();
+      debugPrint("🔄 Called getComplaints to check isFollowUpDue");
+    } catch (e) {
+      debugPrint("Error refreshing unread counts: $e");
+    }
+  }
 
   /// Start periodic timer to refresh unread counts every 30 seconds
   void _startUnreadCountRefreshTimer() {
     _unreadCountRefreshTimer?.cancel();
-    _unreadCountRefreshTimer = Timer.periodic(
-      const Duration(seconds: 30),
-      (timer) {
-        if (!mounted) {
-          timer.cancel();
-          return;
-        }
-        _refreshUnreadCounts();
-      },
-    );
+    _unreadCountRefreshTimer = Timer.periodic(const Duration(seconds: 30), (
+      timer,
+    ) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      _refreshUnreadCounts();
+    });
   }
 
   @override
@@ -158,28 +163,36 @@ class _AllChatsViewState extends State<AllChatsView> {
   void _setupLanguageListener() {
     // Listen to language changes and refresh all data
     _languageSubscription = GeneralStream.instance.language.listen((locale) {
-      debugPrint("🌐 Language changed to: ${locale.languageCode}, refreshing all chat data...");
+      debugPrint(
+        "🌐 Language changed to: ${locale.languageCode}, refreshing all chat data...",
+      );
       if (mounted) {
         // Refresh all view models when language changes to ensure correct unread counts
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             try {
               // Refresh Wall of Help
-              final financialHelpVm = context.read<FinancialHelpMessagesViewModel>();
+              final financialHelpVm = context
+                  .read<FinancialHelpMessagesViewModel>();
               financialHelpVm.getMyFinancialHelpRequestMessages();
-              
+
               // Refresh Nearest Member if party member
               final roleProvider = context.read<RoleViewModel>();
               if (roleProvider.isPartyMember) {
-                final nearestMemberVm = context.read<MyMemberMessageViewModel>();
-                if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
+                final nearestMemberVm = context
+                    .read<MyMemberMessageViewModel>();
+                if (nearestMemberVm.token != null &&
+                    nearestMemberVm.token!.isNotEmpty) {
                   nearestMemberVm.getAllChats();
                 }
               }
-              
+
               // Refresh Complaints - this will re-translate and recalculate unread count
               final complaintsVm = context.read<ComplaintsViewModel>();
-              complaintsVm.getComplaints(showLoader: false, preserveSearch: true);
+              complaintsVm.getComplaints(
+                showLoader: false,
+                preserveSearch: true,
+              );
               _lastComplaintsCallTime = DateTime.now();
               debugPrint("🔄 Refreshed all chat data after language change");
             } catch (e) {
@@ -193,67 +206,93 @@ class _AllChatsViewState extends State<AllChatsView> {
 
   void _setupMessageListener() {
     // Listen to foreground messages
-    _messageSubscription = FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    _messageSubscription = FirebaseMessaging.onMessage.listen((
+      RemoteMessage message,
+    ) {
       debugPrint("=== FCM Message Received ===");
       debugPrint("Notification Title: ${message.notification?.title}");
       debugPrint("Notification Body: ${message.notification?.body}");
       debugPrint("Data: ${message.data}");
-      
+
       // Check if notification is related to complaints
       final messageData = message.data;
-      final isComplaintNotification = messageData.containsKey('complaintId') || 
-                                      messageData.containsKey('complaint_id') ||
-                                      messageData.containsKey('type') && 
-                                      (messageData['type']?.toString().toLowerCase().contains('complaint') == true ||
-                                       messageData['type']?.toString().toLowerCase().contains('complaint') == true);
-      
+      final isComplaintNotification =
+          messageData.containsKey('complaintId') ||
+          messageData.containsKey('complaint_id') ||
+          messageData.containsKey('type') &&
+              (messageData['type']?.toString().toLowerCase().contains(
+                        'complaint',
+                      ) ==
+                      true ||
+                  messageData['type']?.toString().toLowerCase().contains(
+                        'complaint',
+                      ) ==
+                      true);
+
       // Check if notification is related to wall of help
-      final isWallOfHelpNotification = messageData.containsKey('financialHelpRequest') ||
-                                        messageData.containsKey('financial_help_request') ||
-                                        messageData.containsKey('type') && 
-                                        messageData['type']?.toString().toLowerCase().contains('wall') == true;
-      
+      final isWallOfHelpNotification =
+          messageData.containsKey('financialHelpRequest') ||
+          messageData.containsKey('financial_help_request') ||
+          messageData.containsKey('type') &&
+              messageData['type']?.toString().toLowerCase().contains('wall') ==
+                  true;
+
       // Check if notification is related to nearest member
-      final isNearestMemberNotification = messageData.containsKey('chatId') ||
-                                          messageData.containsKey('chat_id') ||
-                                          messageData.containsKey('type') && 
-                                          messageData['type']?.toString().toLowerCase().contains('member') == true;
-      
+      final isNearestMemberNotification =
+          messageData.containsKey('chatId') ||
+          messageData.containsKey('chat_id') ||
+          messageData.containsKey('type') &&
+              messageData['type']?.toString().toLowerCase().contains(
+                    'member',
+                  ) ==
+                  true;
+
       // Refresh on ANY notification when on the chats page
       // This ensures we catch all message notifications
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _refreshCurrentTabOnMessage();
-          
+
           // If complaint notification, refresh complaints list
           if (isComplaintNotification) {
             try {
               final complaintsVm = context.read<ComplaintsViewModel>();
-              complaintsVm.getComplaints(showLoader: false, preserveSearch: true);
-              debugPrint("📬 Complaint notification received - refreshing complaints list");
+              complaintsVm.getComplaints(
+                showLoader: false,
+                preserveSearch: true,
+              );
+              debugPrint(
+                "📬 Complaint notification received - refreshing complaints list",
+              );
             } catch (e) {
               debugPrint("Error refreshing complaints on notification: $e");
             }
           }
-          
+
           // If wall of help notification, refresh wall of help list
           if (isWallOfHelpNotification) {
             try {
-              final financialHelpVm = context.read<FinancialHelpMessagesViewModel>();
+              final financialHelpVm = context
+                  .read<FinancialHelpMessagesViewModel>();
               financialHelpVm.getMyFinancialHelpRequestMessages();
-              debugPrint("📬 Wall of Help notification received - refreshing wall of help list");
+              debugPrint(
+                "📬 Wall of Help notification received - refreshing wall of help list",
+              );
             } catch (e) {
               debugPrint("Error refreshing wall of help on notification: $e");
             }
           }
-          
+
           // If nearest member notification, refresh nearest member list
           if (isNearestMemberNotification) {
             try {
               final nearestMemberVm = context.read<MyMemberMessageViewModel>();
-              if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
+              if (nearestMemberVm.token != null &&
+                  nearestMemberVm.token!.isNotEmpty) {
                 nearestMemberVm.getAllChats();
-                debugPrint("📬 Nearest Member notification received - refreshing nearest member list");
+                debugPrint(
+                  "📬 Nearest Member notification received - refreshing nearest member list",
+                );
               }
             } catch (e) {
               debugPrint("Error refreshing nearest member on notification: $e");
@@ -266,46 +305,49 @@ class _AllChatsViewState extends State<AllChatsView> {
 
   void _refreshCurrentTabOnMessage() {
     if (!mounted) return;
-    
+
     debugPrint("=== Refreshing chat list on message ===");
     debugPrint("Current tab: $_selectedTab");
-    
+
     // Always refresh unread counts for all tabs when a message is received
     try {
       // Refresh Wall of Help unread count
       final financialHelpVm = context.read<FinancialHelpMessagesViewModel>();
       financialHelpVm.getMyFinancialHelpRequestMessages();
-      
+
       // Refresh Nearest Member unread count if user is party member
       final roleProvider = context.read<RoleViewModel>();
       if (roleProvider.isPartyMember) {
         final nearestMemberVm = context.read<MyMemberMessageViewModel>();
-        if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
+        if (nearestMemberVm.token != null &&
+            nearestMemberVm.token!.isNotEmpty) {
           nearestMemberVm.getAllChats();
         }
       }
-      
+
       // Refresh Complaints unread count
       final complaintsVm = context.read<ComplaintsViewModel>();
       complaintsVm.getComplaints(showLoader: false, preserveSearch: true);
     } catch (e) {
       debugPrint("Error refreshing unread count: $e");
     }
-    
-      // Use a small delay to ensure the backend has processed the message
+
+    // Use a small delay to ensure the backend has processed the message
     Future.delayed(const Duration(milliseconds: 800), () {
       if (!mounted) return;
-      
+
       // Use the registered callbacks to refresh
       if (_selectedTab == 0 && _refreshWallOfHelpCallback != null) {
         debugPrint("Refreshing Wall of Help chats");
         _refreshWallOfHelpCallback!();
       } else if (_selectedTab == 1) {
         final roleProvider = context.read<RoleViewModel>();
-        if (roleProvider.isPartyMember && _refreshNearestMemberCallback != null) {
+        if (roleProvider.isPartyMember &&
+            _refreshNearestMemberCallback != null) {
           debugPrint("Refreshing Nearest Member chats");
           _refreshNearestMemberCallback!();
-        } else if (!roleProvider.isPartyMember && _refreshComplaintsCallback != null) {
+        } else if (!roleProvider.isPartyMember &&
+            _refreshComplaintsCallback != null) {
           debugPrint("Refreshing Complaints chats");
           _refreshComplaintsCallback!();
         }
@@ -313,7 +355,9 @@ class _AllChatsViewState extends State<AllChatsView> {
         debugPrint("Refreshing Complaints chats");
         _refreshComplaintsCallback!();
       } else {
-        debugPrint("No refresh callback available for tab $_selectedTab, using setState");
+        debugPrint(
+          "No refresh callback available for tab $_selectedTab, using setState",
+        );
         // Fallback: trigger setState to rebuild
         setState(() {});
       }
@@ -328,21 +372,25 @@ class _AllChatsViewState extends State<AllChatsView> {
       if (mounted) {
         try {
           // Always refresh Wall of Help unread count to ensure it's up to date
-          final financialHelpVm = context.read<FinancialHelpMessagesViewModel>();
+          final financialHelpVm = context
+              .read<FinancialHelpMessagesViewModel>();
           financialHelpVm.getMyFinancialHelpRequestMessages();
-          
+
           // Always refresh Nearest Member chats if token is available
           final nearestMemberVm = context.read<MyMemberMessageViewModel>();
-          if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
+          if (nearestMemberVm.token != null &&
+              nearestMemberVm.token!.isNotEmpty) {
             nearestMemberVm.getAllChats();
           }
-          
+
           // Always call getComplaints API when landing on all_chats_view
           // This ensures isFollowUpDue is checked every time
           final complaintsVm = context.read<ComplaintsViewModel>();
           complaintsVm.getComplaints(showLoader: false, preserveSearch: true);
           _lastComplaintsCallTime = DateTime.now();
-          debugPrint("🔄 Called getComplaints on didChangeDependencies to check isFollowUpDue");
+          debugPrint(
+            "🔄 Called getComplaints on didChangeDependencies to check isFollowUpDue",
+          );
         } catch (e) {
           debugPrint("Error accessing view models: $e");
         }
@@ -354,7 +402,7 @@ class _AllChatsViewState extends State<AllChatsView> {
       final now = DateTime.now();
       // Only refresh if it's been more than 1 second since last refresh
       // This prevents excessive refreshes while allowing refresh on return
-      if (_lastRefreshTime == null || 
+      if (_lastRefreshTime == null ||
           now.difference(_lastRefreshTime!) > const Duration(seconds: 1)) {
         _lastRefreshTime = now;
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -363,20 +411,27 @@ class _AllChatsViewState extends State<AllChatsView> {
             // Also refresh all three APIs when returning to ensure counts are up to date
             try {
               // Refresh Wall of Help
-              final financialHelpVm = context.read<FinancialHelpMessagesViewModel>();
+              final financialHelpVm = context
+                  .read<FinancialHelpMessagesViewModel>();
               financialHelpVm.getMyFinancialHelpRequestMessages();
-              
+
               // Refresh Nearest Member
               final nearestMemberVm = context.read<MyMemberMessageViewModel>();
-              if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
+              if (nearestMemberVm.token != null &&
+                  nearestMemberVm.token!.isNotEmpty) {
                 nearestMemberVm.getAllChats();
               }
 
               // Refresh Complaints - always check isFollowUpDue
-              final complaintsVm = context.read<ComplaintsViewModel>(); 
-              complaintsVm.getComplaints(showLoader: false, preserveSearch: true);
+              final complaintsVm = context.read<ComplaintsViewModel>();
+              complaintsVm.getComplaints(
+                showLoader: false,
+                preserveSearch: true,
+              );
               _lastComplaintsCallTime = DateTime.now();
-              debugPrint("🔄 Called getComplaints on route return to check isFollowUpDue");
+              debugPrint(
+                "🔄 Called getComplaints on route return to check isFollowUpDue",
+              );
             } catch (e) {
               debugPrint("Error refreshing unread counts: $e");
             }
@@ -388,7 +443,7 @@ class _AllChatsViewState extends State<AllChatsView> {
 
   void _refreshCurrentTab() {
     if (!mounted) return;
-    
+
     // Use setState to trigger a rebuild, which will cause the providers to refresh
     // The providers will call their init methods when rebuilt
     setState(() {
@@ -402,7 +457,7 @@ class _AllChatsViewState extends State<AllChatsView> {
     final textTheme = context.textTheme;
     final roleProvider = context.read<RoleViewModel>();
     final isPartyMember = roleProvider.isPartyMember;
-    
+
     // Always call getComplaints when build is called to ensure isFollowUpDue is checked
     // This ensures it's called every time the page is shown/rendered
     // Use debounce to prevent excessive calls (max once per second)
@@ -410,20 +465,23 @@ class _AllChatsViewState extends State<AllChatsView> {
       if (mounted) {
         final now = DateTime.now();
         // Only call if it's been more than 1 second since last call
-        if (_lastComplaintsCallTime == null || 
-            now.difference(_lastComplaintsCallTime!) > const Duration(seconds: 1)) {
+        if (_lastComplaintsCallTime == null ||
+            now.difference(_lastComplaintsCallTime!) >
+                const Duration(seconds: 1)) {
           _lastComplaintsCallTime = now;
           try {
             final complaintsVm = context.read<ComplaintsViewModel>();
             complaintsVm.getComplaints(showLoader: false, preserveSearch: true);
-            debugPrint("🔄 Called getComplaints in build() to check isFollowUpDue");
+            debugPrint(
+              "🔄 Called getComplaints in build() to check isFollowUpDue",
+            );
           } catch (e) {
             debugPrint("Error calling getComplaints in build: $e");
           }
         }
       }
     });
-    
+
     // Reset tab if out of bounds when party member status changes
     // For non-party members: tab 0 = Wall of Help, tab 1 = Complaints (valid)
     // For party members: tab 0 = Wall of Help, tab 1 = Nearest Member, tab 2 = Complaints
@@ -437,7 +495,7 @@ class _AllChatsViewState extends State<AllChatsView> {
       });
     }
     // Note: For non-party members, tab 1 is Complaints, so we don't reset it
-    
+
     return ChangeNotifierProvider.value(
       value: _searchProvider,
       child: Scaffold(
@@ -478,7 +536,10 @@ class _AllChatsViewState extends State<AllChatsView> {
                             search.showSearchWidget = false;
                           },
                         )
-                      : Consumer2<FinancialHelpMessagesViewModel, MyMemberMessageViewModel>(
+                      : Consumer2<
+                          FinancialHelpMessagesViewModel,
+                          MyMemberMessageViewModel
+                        >(
                           key: ValueKey('tabs'),
                           builder: (context, financialHelpVm, nearestMemberVm, _) {
                             final roleProvider = context.read<RoleViewModel>();
@@ -487,8 +548,11 @@ class _AllChatsViewState extends State<AllChatsView> {
                               height: 25.height(),
                               child: ListView(
                                 scrollDirection: Axis.horizontal,
-                                clipBehavior: Clip.none, // Allow badges to overflow
-                                padding: EdgeInsets.symmetric(horizontal: Dimens.horizontalspacing),
+                                clipBehavior:
+                                    Clip.none, // Allow badges to overflow
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: Dimens.horizontalspacing,
+                                ),
                                 children: [
                                   _buildFilterChip(
                                     label: TranslatedText(
@@ -497,7 +561,9 @@ class _AllChatsViewState extends State<AllChatsView> {
                                         color: _selectedTab == 0
                                             ? AppPalettes.primaryColor
                                             : AppPalettes.blackColor,
-                                        fontWeight: _selectedTab == 0 ? FontWeight.w600 : FontWeight.normal,
+                                        fontWeight: _selectedTab == 0
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
                                         fontSize: 14,
                                       ),
                                     ),
@@ -505,7 +571,10 @@ class _AllChatsViewState extends State<AllChatsView> {
                                     onTap: () {
                                       setState(() => _selectedTab = 0);
                                     },
-                                    badgeCount: financialHelpVm.totalUnreadCount > 0 ? financialHelpVm.totalUnreadCount : null,
+                                    badgeCount:
+                                        financialHelpVm.totalUnreadCount > 0
+                                        ? financialHelpVm.totalUnreadCount
+                                        : null,
                                   ),
                                   SizeBox.sizeWX2,
                                   if (isPartyMember) ...[
@@ -516,7 +585,9 @@ class _AllChatsViewState extends State<AllChatsView> {
                                           color: _selectedTab == 1
                                               ? AppPalettes.primaryColor
                                               : AppPalettes.blackColor,
-                                          fontWeight: _selectedTab == 1 ? FontWeight.w600 : FontWeight.normal,
+                                          fontWeight: _selectedTab == 1
+                                              ? FontWeight.w600
+                                              : FontWeight.normal,
                                           fontSize: 14,
                                         ),
                                       ),
@@ -524,51 +595,83 @@ class _AllChatsViewState extends State<AllChatsView> {
                                       onTap: () {
                                         setState(() => _selectedTab = 1);
                                       },
-                                      badgeCount: nearestMemberVm.totalUnreadCount > 0 ? nearestMemberVm.totalUnreadCount : null,
+                                      badgeCount:
+                                          nearestMemberVm.totalUnreadCount > 0
+                                          ? nearestMemberVm.totalUnreadCount
+                                          : null,
                                     ),
                                     SizeBox.sizeWX2,
                                   ],
                                   Consumer<ComplaintsViewModel>(
                                     builder: (context, complaintsVm, _) {
                                       // totalUnreadCount already includes followUpDueCount
-                                      final totalBadgeCount = complaintsVm.totalUnreadCount > 0 ? complaintsVm.totalUnreadCount : null;
+                                      final totalBadgeCount =
+                                          complaintsVm.totalUnreadCount > 0
+                                          ? complaintsVm.totalUnreadCount
+                                          : null;
                                       return _buildFilterChip(
-                                    label: TranslatedText(
-                                      text: localization.my_complaints,
-                                      style: TextStyle(
-                                        color: (isPartyMember ? _selectedTab == 2 : _selectedTab == 1)
-                                            ? AppPalettes.primaryColor
-                                            : AppPalettes.blackColor,
-                                        fontWeight: (isPartyMember ? _selectedTab == 2 : _selectedTab == 1) ? FontWeight.w600 : FontWeight.normal,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    isSelected: isPartyMember ? _selectedTab == 2 : _selectedTab == 1,
-                                    onTap: () {
-                                      final complaintsTabIndex = isPartyMember ? 2 : 1;
-                                      // Reset initialization flag when switching to complaints tab
-                                      _complaintsTabInitialized = false;
-                                      _complaintsLoadAttempted = false;
-                                      setState(() {
-                                        _selectedTab = complaintsTabIndex;
-                                      });
-                                      // Load complaints when tab is selected - do it immediately
-                                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                                        if (mounted) {
-                                          try {
-                                            final complaintsVm = context.read<ComplaintsViewModel>();
-                                            debugPrint("Complaints tab selected - loading complaints...");
-                                            _complaintsLoadAttempted = true;
-                                            complaintsVm.loadComplaintsIfNeeded().catchError((error) {
-                                              debugPrint("Error loading complaints on tab select: $error");
-                                              _complaintsTabInitialized = false; // Allow retry on error
-                                            });
-                                          } catch (e) {
-                                            debugPrint("Error accessing ComplaintsViewModel: $e");
-                                            _complaintsTabInitialized = false;
-                                          }
-                                        }
-                                      });
+                                        label: TranslatedText(
+                                          text: localization.my_complaints,
+                                          style: TextStyle(
+                                            color:
+                                                (isPartyMember
+                                                    ? _selectedTab == 2
+                                                    : _selectedTab == 1)
+                                                ? AppPalettes.primaryColor
+                                                : AppPalettes.blackColor,
+                                            fontWeight:
+                                                (isPartyMember
+                                                    ? _selectedTab == 2
+                                                    : _selectedTab == 1)
+                                                ? FontWeight.w600
+                                                : FontWeight.normal,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        isSelected: isPartyMember
+                                            ? _selectedTab == 2
+                                            : _selectedTab == 1,
+                                        onTap: () {
+                                          final complaintsTabIndex =
+                                              isPartyMember ? 2 : 1;
+                                          // Reset initialization flag when switching to complaints tab
+                                          _complaintsTabInitialized = false;
+                                          _complaintsLoadAttempted = false;
+                                          setState(() {
+                                            _selectedTab = complaintsTabIndex;
+                                          });
+                                          // Load complaints when tab is selected - do it immediately
+                                          WidgetsBinding.instance.addPostFrameCallback((
+                                            _,
+                                          ) {
+                                            if (mounted) {
+                                              try {
+                                                final complaintsVm = context
+                                                    .read<
+                                                      ComplaintsViewModel
+                                                    >();
+                                                debugPrint(
+                                                  "Complaints tab selected - loading complaints...",
+                                                );
+                                                _complaintsLoadAttempted = true;
+                                                complaintsVm
+                                                    .loadComplaintsIfNeeded()
+                                                    .catchError((error) {
+                                                      debugPrint(
+                                                        "Error loading complaints on tab select: $error",
+                                                      );
+                                                      _complaintsTabInitialized =
+                                                          false; // Allow retry on error
+                                                    });
+                                              } catch (e) {
+                                                debugPrint(
+                                                  "Error accessing ComplaintsViewModel: $e",
+                                                );
+                                                _complaintsTabInitialized =
+                                                    false;
+                                              }
+                                            }
+                                          });
                                         },
                                         badgeCount: totalBadgeCount,
                                       );
@@ -583,32 +686,33 @@ class _AllChatsViewState extends State<AllChatsView> {
               },
             ),
             SizeBox.sizeHX2,
-          // Chat List
-          Expanded(
-            child: Consumer<RoleViewModel>(
-              builder: (context, roleProvider, _) {
-                final isPartyMember = roleProvider.isPartyMember;
-                
-                // Determine which tab to show based on selected tab and party member status
-                if (_selectedTab == 0) {
-                  return _buildWallOfHelpChats(textTheme);
-                } else if (_selectedTab == 1) {
-                  if (isPartyMember) {
-                    return _buildNearestMemberChats(textTheme);
+            // Chat List
+            Expanded(
+              child: Consumer<RoleViewModel>(
+                builder: (context, roleProvider, _) {
+                  final isPartyMember = roleProvider.isPartyMember;
+
+                  // Determine which tab to show based on selected tab and party member status
+                  if (_selectedTab == 0) {
+                    return _buildWallOfHelpChats(textTheme);
+                  } else if (_selectedTab == 1) {
+                    if (isPartyMember) {
+                      return _buildNearestMemberChats(textTheme);
+                    } else {
+                      // Non-party member: tab 1 is Complaints
+                      return _buildComplaintsChats(textTheme);
+                    }
                   } else {
-                    // Non-party member: tab 1 is Complaints
+                    // Tab 2 (only for party members): Complaints
                     return _buildComplaintsChats(textTheme);
                   }
-                } else {
-                  // Tab 2 (only for party members): Complaints
-                  return _buildComplaintsChats(textTheme);
-                }
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildFilterChip({
@@ -626,7 +730,9 @@ class _AllChatsViewState extends State<AllChatsView> {
           top: Dimens.paddingX1,
           bottom: Dimens.paddingX1,
           left: Dimens.paddingX3,
-          right: hasBadge ? Dimens.paddingX5 : Dimens.paddingX3, // Extra right padding for badge
+          right: hasBadge
+              ? Dimens.paddingX5
+              : Dimens.paddingX3, // Extra right padding for badge
         ),
         constraints: BoxConstraints(minWidth: 100),
         decoration: BoxDecoration(
@@ -641,7 +747,9 @@ class _AllChatsViewState extends State<AllChatsView> {
           children: [
             Padding(
               padding: EdgeInsets.only(
-                right: hasBadge ? 10 : 0, // Add right padding to label when badge exists
+                right: hasBadge
+                    ? 10
+                    : 0, // Add right padding to label when badge exists
               ),
               child: label,
             ),
@@ -658,10 +766,7 @@ class _AllChatsViewState extends State<AllChatsView> {
                     color: AppPalettes.primaryColor,
                     shape: BoxShape.circle,
                   ),
-                  constraints: BoxConstraints(
-                    minWidth: 18,
-                    minHeight: 18,
-                  ),
+                  constraints: BoxConstraints(minWidth: 18, minHeight: 18),
                   child: Center(
                     child: Text(
                       badgeCount > 99 ? '99+' : '$badgeCount',
@@ -690,50 +795,58 @@ class _AllChatsViewState extends State<AllChatsView> {
             value.onRefresh();
           }
         };
-        
+
         // Helper function to get the correct name from financial help request
         String? _getRequestName(String? requestId) {
           if (requestId == null || requestId.isEmpty) return null;
-          
+
           try {
             // Try to find the request in WallOfHelpViewModel list
             final request = wallOfHelpVm.wallOFHelpLists.firstWhere(
               (req) => req.sId == requestId,
               orElse: () => woh.FinancialRequest(),
             );
-            
+
             // Return the name from the request if found
-            if (request.sId != null && request.name != null && request.name!.isNotEmpty) {
+            if (request.sId != null &&
+                request.name != null &&
+                request.name!.isNotEmpty) {
               return request.name;
             }
           } catch (e) {
             // Request not found in list, will fall back to relatedUser name
           }
-          
+
           return null;
         }
-        
+
         // Filter chats based on search query with Hindi support
         final searchQuery = _searchController.text.trim();
         final filteredChats = searchQuery.isEmpty
             ? value.myFinancialHelpChats
             : value.myFinancialHelpChats.where((chatData) {
                 // Get the correct name from request API
-                final requestName = _getRequestName(chatData.financialHelpRequest);
-                final displayName = requestName ?? chatData.relatedUser?.userName ?? '';
+                final requestName = _getRequestName(
+                  chatData.financialHelpRequest,
+                );
+                final displayName =
+                    requestName ?? chatData.relatedUser?.userName ?? '';
                 final userName = displayName.toLowerCase();
-                final lastMessage = chatData.lastMessage?.message?.toLowerCase() ?? '';
-                
+                final lastMessage =
+                    chatData.lastMessage?.message?.toLowerCase() ?? '';
+
                 // Convert Hindi search to English for matching
-                final englishQuery = _convertHindiToEnglish(searchQuery).toLowerCase();
+                final englishQuery = _convertHindiToEnglish(
+                  searchQuery,
+                ).toLowerCase();
                 final originalQuery = searchQuery.toLowerCase();
-                
-                return userName.contains(englishQuery) || 
-                       lastMessage.contains(englishQuery) ||
-                       userName.contains(originalQuery) || 
-                       lastMessage.contains(originalQuery);
+
+                return userName.contains(englishQuery) ||
+                    lastMessage.contains(englishQuery) ||
+                    userName.contains(originalQuery) ||
+                    lastMessage.contains(originalQuery);
               }).toList();
-        
+
         return RefreshIndicator(
           color: AppPalettes.primaryColor,
           onRefresh: () async {
@@ -750,64 +863,72 @@ class _AllChatsViewState extends State<AllChatsView> {
           child: value.isLoading && value.myFinancialHelpChats.isEmpty
               ? Center(child: CustomAnimatedLoading())
               : filteredChats.isEmpty
-                  ? SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: 0.6.screenHeight,
-                        child: WallOfHelpHelpers.emptyHelper(
-                          text: searchQuery.isEmpty ? "No Messages found" : "No results found",
-                          onRefresh: () async {
-                            await value.onRefresh();
-                          },
-                        ),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: EdgeInsets.zero,
-                      itemBuilder: (context, index) {
-                        final chatData = filteredChats[index];
-                        final lastMessage = chatData.lastMessage;
-                        final relatedUser = chatData.relatedUser;
-                        final unreadCount = chatData.unreadCount ?? 0;
-                        final isUnread = unreadCount > 0;
-                        // Get the correct name from financial help request API
-                        final requestName = _getRequestName(chatData.financialHelpRequest);
-                        final displayName = requestName ?? relatedUser?.userName ?? "User";
-                        
-                        // Create FinancialRequest object with available data from chat
-                        // Note: Some fields may be missing and will need to be fetched in ChatContributeView
-                        final helpRequest = woh.FinancialRequest(
-                          sId: chatData.financialHelpRequest,
-                          messageId: chatData.messageId,
-                          name: requestName ?? relatedUser?.userName,
-                          updatedAt: chatData.updatedAt,
-                          description: relatedUser?.reason, // Use reason as description if available
-                          // address and typeOfHelp will need to be fetched in ChatContributeView
-                        );
-                        return _buildChatItem(
-                          avatar: null, // Avatar not available in relatedUser
-                          name: displayName.capitalize(),
-                          lastMessage: lastMessage?.message ?? "Open to see new message",
-                          timestamp: chatData.updatedAt ?? lastMessage?.date,
-                          onTap: () async {
-                            await RouteManager.pushNamed(
-                              Routes.chatContributePage,
-                              arguments: helpRequest,
-                            );
-                            // Refresh after returning from chat
-                            if (mounted) {
-                              value.onRefresh();
-                            }
-                          },
-                          textTheme: textTheme,
-                          unreadCount: unreadCount,
-                          isUnread: isUnread,
-                          disableNameTranslation: true, // User names should stay in English
-                        );
+              ? SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: 0.6.screenHeight,
+                    child: WallOfHelpHelpers.emptyHelper(
+                      text: searchQuery.isEmpty
+                          ? "No Messages found"
+                          : "No results found",
+                      onRefresh: () async {
+                        await value.onRefresh();
                       },
-                      itemCount: filteredChats.length,
-                      separatorBuilder: (_, _) => SizeBox.sizeHX4,
                     ),
+                  ),
+                )
+              : ListView.separated(
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, index) {
+                    final chatData = filteredChats[index];
+                    final lastMessage = chatData.lastMessage;
+                    final relatedUser = chatData.relatedUser;
+                    final unreadCount = chatData.unreadCount ?? 0;
+                    final isUnread = unreadCount > 0;
+                    // Get the correct name from financial help request API
+                    final requestName = _getRequestName(
+                      chatData.financialHelpRequest,
+                    );
+                    final displayName =
+                        requestName ?? relatedUser?.userName ?? "User";
+
+                    // Create FinancialRequest object with available data from chat
+                    // Note: Some fields may be missing and will need to be fetched in ChatContributeView
+                    final helpRequest = woh.FinancialRequest(
+                      sId: chatData.financialHelpRequest,
+                      messageId: chatData.messageId,
+                      name: requestName ?? relatedUser?.userName,
+                      updatedAt: chatData.updatedAt,
+                      description: relatedUser
+                          ?.reason, // Use reason as description if available
+                      // address and typeOfHelp will need to be fetched in ChatContributeView
+                    );
+                    return _buildChatItem(
+                      avatar: null, // Avatar not available in relatedUser
+                      name: displayName.capitalize(),
+                      lastMessage:
+                          lastMessage?.message ?? "Open to see new message",
+                      timestamp: chatData.updatedAt ?? lastMessage?.date,
+                      onTap: () async {
+                        await RouteManager.pushNamed(
+                          Routes.chatContributePage,
+                          arguments: helpRequest,
+                        );
+                        // Refresh after returning from chat
+                        if (mounted) {
+                          value.onRefresh();
+                        }
+                      },
+                      textTheme: textTheme,
+                      unreadCount: unreadCount,
+                      isUnread: isUnread,
+                      disableNameTranslation:
+                          true, // User names should stay in English
+                    );
+                  },
+                  itemCount: filteredChats.length,
+                  separatorBuilder: (_, _) => SizeBox.sizeHX4,
+                ),
         );
       },
     );
@@ -822,7 +943,7 @@ class _AllChatsViewState extends State<AllChatsView> {
             value.getAllChats();
           }
         };
-        
+
         // Filter chats based on search query with Hindi support
         final searchQuery = _searchController.text.trim();
         final filteredChats = searchQuery.isEmpty
@@ -830,20 +951,23 @@ class _AllChatsViewState extends State<AllChatsView> {
             : value.myChatsList.where((chatItem) {
                 final name = chatItem.chatWith?.name?.toLowerCase() ?? '';
                 final phone = chatItem.chatWith?.phone?.toLowerCase() ?? '';
-                final lastMessage = chatItem.lastMessage?.text?.toLowerCase() ?? '';
-                
+                final lastMessage =
+                    chatItem.lastMessage?.text?.toLowerCase() ?? '';
+
                 // Convert Hindi search to English for matching
-                final englishQuery = _convertHindiToEnglish(searchQuery).toLowerCase();
+                final englishQuery = _convertHindiToEnglish(
+                  searchQuery,
+                ).toLowerCase();
                 final originalQuery = searchQuery.toLowerCase();
-                
-                return name.contains(englishQuery) || 
-                       phone.contains(englishQuery) || 
-                       lastMessage.contains(englishQuery) ||
-                       name.contains(originalQuery) || 
-                       phone.contains(originalQuery) || 
-                       lastMessage.contains(originalQuery);
+
+                return name.contains(englishQuery) ||
+                    phone.contains(englishQuery) ||
+                    lastMessage.contains(englishQuery) ||
+                    name.contains(originalQuery) ||
+                    phone.contains(originalQuery) ||
+                    lastMessage.contains(originalQuery);
               }).toList();
-        
+
         return RefreshIndicator(
           color: AppPalettes.primaryColor,
           onRefresh: () async {
@@ -852,63 +976,66 @@ class _AllChatsViewState extends State<AllChatsView> {
           child: value.isLoading && value.myChatsList.isEmpty
               ? Center(child: CustomAnimatedLoading())
               : filteredChats.isEmpty
-                  ? SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: 0.6.screenHeight,
-                        child: WallOfHelpHelpers.emptyHelper(
-                          text: searchQuery.isEmpty ? "No Messages found" : "No results found",
-                          onRefresh: () async {
-                            await value.getAllChats();
-                          },
-                        ),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: EdgeInsets.zero,
-                      itemBuilder: (context, index) {
-                        final chatItem = filteredChats[index];
-                        final message = chatItem.lastMessage;
-                        final user = chatItem.chatWith;
-                        final unreadCount = chatItem.unreadMessages ?? 0;
-                        final isUnread = unreadCount > 0;
-                        
-                        final PartyMember partyMember = PartyMember(
-                          sId: user?.sId, // Ensure sId is set for location fetching
-                          name: user?.name,
-                          email: user?.email,
-                          phone: user?.phone,
-                          avatar: user?.avatar,
-                          partyMemberDetails: PartyMemberDetails(
-                            sId: user?.sId,
-                            type: chatItem.chatWithType,
-                          ),
-                        );
-                        
-                        return _buildChatItem(
-                          avatar: user?.avatar,
-                          name: user?.name?.capitalize() ?? "+91 ${user?.phone}",
-                          lastMessage: message?.text ?? "Open to see new message",
-                          timestamp: message?.date,
-                          onTap: () async {
-                            await RouteManager.pushNamed(
-                              Routes.chatMemberPage,
-                              arguments: partyMember,
-                            );
-                            // Refresh after returning from chat to update unread count
-                            if (mounted) {
-                              value.getAllChats();
-                            }
-                          },
-                          textTheme: textTheme,
-                          unreadCount: unreadCount,
-                          isUnread: isUnread,
-                          disableNameTranslation: true, // User names should stay in English
-                        );
+              ? SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: 0.6.screenHeight,
+                    child: WallOfHelpHelpers.emptyHelper(
+                      text: searchQuery.isEmpty
+                          ? "No Messages found"
+                          : "No results found",
+                      onRefresh: () async {
+                        await value.getAllChats();
                       },
-                      itemCount: filteredChats.length,
-                      separatorBuilder: (_, _) => SizeBox.sizeHX4,
                     ),
+                  ),
+                )
+              : ListView.separated(
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, index) {
+                    final chatItem = filteredChats[index];
+                    final message = chatItem.lastMessage;
+                    final user = chatItem.chatWith;
+                    final unreadCount = chatItem.unreadMessages ?? 0;
+                    final isUnread = unreadCount > 0;
+
+                    final PartyMember partyMember = PartyMember(
+                      sId: user?.sId, // Ensure sId is set for location fetching
+                      name: user?.name,
+                      email: user?.email,
+                      phone: user?.phone,
+                      avatar: user?.avatar,
+                      partyMemberDetails: PartyMemberDetails(
+                        sId: user?.sId,
+                        type: chatItem.chatWithType,
+                      ),
+                    );
+
+                    return _buildChatItem(
+                      avatar: user?.avatar,
+                      name: user?.name?.capitalize() ?? "+91 ${user?.phone}",
+                      lastMessage: message?.text ?? "Open to see new message",
+                      timestamp: message?.date,
+                      onTap: () async {
+                        await RouteManager.pushNamed(
+                          Routes.chatMemberPage,
+                          arguments: partyMember,
+                        );
+                        // Refresh after returning from chat to update unread count
+                        if (mounted) {
+                          value.getAllChats();
+                        }
+                      },
+                      textTheme: textTheme,
+                      unreadCount: unreadCount,
+                      isUnread: isUnread,
+                      disableNameTranslation:
+                          true, // User names should stay in English
+                    );
+                  },
+                  itemCount: filteredChats.length,
+                  separatorBuilder: (_, _) => SizeBox.sizeHX4,
+                ),
         );
       },
     );
@@ -923,66 +1050,87 @@ class _AllChatsViewState extends State<AllChatsView> {
             value.getComplaints(showLoader: false, preserveSearch: true);
           }
         };
-        
+
         // Load complaints if not already loaded - ensure initialization happens immediately
         // Only initialize once per tab selection to avoid multiple calls
-        if (!_complaintsTabInitialized || (value.complaintsList.isEmpty && !value.isLoading && !_complaintsLoadAttempted)) {
+        if (!_complaintsTabInitialized ||
+            (value.complaintsList.isEmpty &&
+                !value.isLoading &&
+                !_complaintsLoadAttempted)) {
           _complaintsTabInitialized = true;
           // Load immediately without postFrameCallback to show loading state faster
           if (mounted) {
             debugPrint("Loading complaints for complaints tab...");
-            value.loadComplaintsIfNeeded().then((_) {
-              // Mark as attempted only after load completes (success or failure)
-              if (mounted) {
-                _complaintsLoadAttempted = true;
-              }
-            }).catchError((error) {
-              debugPrint("Error loading complaints: $error");
-              if (mounted) {
-                _complaintsTabInitialized = false; // Allow retry on error
-                _complaintsLoadAttempted = true; // Still mark as attempted to prevent infinite loading
-              }
-            });
+            value
+                .loadComplaintsIfNeeded()
+                .then((_) {
+                  // Mark as attempted only after load completes (success or failure)
+                  if (mounted) {
+                    _complaintsLoadAttempted = true;
+                  }
+                })
+                .catchError((error) {
+                  debugPrint("Error loading complaints: $error");
+                  if (mounted) {
+                    _complaintsTabInitialized = false; // Allow retry on error
+                    _complaintsLoadAttempted =
+                        true; // Still mark as attempted to prevent infinite loading
+                  }
+                });
           }
         }
-        
+
         // Filter complaints based on search query with Hindi support
         final searchQuery = _searchController.text.trim();
         final filteredComplaints = searchQuery.isEmpty
             ? value.complaintsList
             : value.complaintsList.where((complaint) {
-                final departmentName = complaint.department?.name?.toLowerCase() ?? '';
+                final departmentName =
+                    complaint.department?.name?.toLowerCase() ?? '';
+                final subject =
+                    ComplaintHelper.decodeUtf8(
+                      complaint.messages?.first.subject,
+                    )?.toLowerCase() ??
+                    '';
                 final status = complaint.status?.toLowerCase() ?? '';
                 final lastMessage = complaint.messages?.isNotEmpty == true
-                    ? (complaint.messages!.last.snippet ?? 
-                       complaint.messages!.last.subject ?? 
-                       complaint.messages!.last.body ?? '')
+                    ? (complaint.messages!.last.snippet ??
+                          complaint.messages!.last.subject ??
+                          complaint.messages!.last.body ??
+                          '')
                     : '';
                 final lastMessageLower = lastMessage.toLowerCase();
-                
+
                 // Convert Hindi search to English for matching
-                final englishQuery = _convertHindiToEnglish(searchQuery).toLowerCase();
+                final englishQuery = _convertHindiToEnglish(
+                  searchQuery,
+                ).toLowerCase();
                 final originalQuery = searchQuery.toLowerCase();
-                
-                return departmentName.contains(englishQuery) || 
-                       status.contains(englishQuery) || 
-                       lastMessageLower.contains(englishQuery) ||
-                       departmentName.contains(originalQuery) || 
-                       status.contains(originalQuery) || 
-                       lastMessageLower.contains(originalQuery);
+
+                return departmentName.contains(englishQuery) ||
+                    subject.contains(englishQuery) ||
+                    status.contains(englishQuery) ||
+                    lastMessageLower.contains(englishQuery) ||
+                    departmentName.contains(originalQuery) ||
+                    subject.contains(originalQuery) ||
+                    status.contains(originalQuery) ||
+                    lastMessageLower.contains(originalQuery);
               }).toList();
-        
+
         // Show loading state when:
         // 1. Actively loading AND list is empty AND we haven't attempted load yet, OR
         // 2. Actively loading AND list is empty AND page was just opened (within last 5 seconds)
-        final isRecentPageOpen = _pageOpenedTime != null && 
-                                 DateTime.now().difference(_pageOpenedTime!) < const Duration(seconds: 5);
-        final shouldShowLoading = value.isLoading && 
-                                  value.complaintsList.isEmpty && 
-                                  (!_complaintsLoadAttempted || isRecentPageOpen);
-        
+        final isRecentPageOpen =
+            _pageOpenedTime != null &&
+            DateTime.now().difference(_pageOpenedTime!) <
+                const Duration(seconds: 5);
+        final shouldShowLoading =
+            value.isLoading &&
+            value.complaintsList.isEmpty &&
+            (!_complaintsLoadAttempted || isRecentPageOpen);
+
         return RefreshIndicator(
-              color: AppPalettes.primaryColor,
+          color: AppPalettes.primaryColor,
           onRefresh: () async {
             _complaintsLoadAttempted = true;
             await value.getComplaints(showLoader: false, preserveSearch: true);
@@ -1005,65 +1153,86 @@ class _AllChatsViewState extends State<AllChatsView> {
                   ),
                 )
               : filteredComplaints.isEmpty
-                  ? SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: 0.6.screenHeight,
-                        child: WallOfHelpHelpers.emptyHelper(
-                          text: searchQuery.isEmpty ? "No Complaints found" : "No results found",
-                          onRefresh: () async {
-                            await value.getComplaints(showLoader: false, preserveSearch: true);
-                          },
-                        ),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: EdgeInsets.zero,
-                      itemBuilder: (context, index) {
-                        final complaint = filteredComplaints[index];
-                        final lastMessage = complaint.messages?.isNotEmpty == true
-                            ? complaint.messages?.last
-                            : null;
-                        final departmentName = complaint.department?.name ?? "Department";
-                        final status = complaint.status ?? "Pending";
-                        final lastMessageText = lastMessage?.snippet ?? 
-                                               lastMessage?.subject ?? 
-                                               lastMessage?.body ?? 
-                                               "No messages yet";
-                        final timestamp = lastMessage?.date ?? complaint.updatedAt ?? complaint.createdAt;
-                        
-                        final avatarUrl = complaint.user?.avatar;
-                        final departmentInitial = complaint.department?.name?.isNotEmpty == true
-                            ? complaint.department!.name!.substring(0, 1).toUpperCase()
-                            : "C";
-                        
-                        return _buildChatItem(
-                          avatar: avatarUrl,
-                          name: departmentName,
-                          lastMessage: lastMessageText,
-                          timestamp: timestamp,
-                          onTap: () async {
-                            await RouteManager.pushNamed(
-                              Routes.threadComplaintPage,
-                              arguments: complaint,
-                            );
-                            // Refresh after returning from chat
-                            if (mounted) {
-                              value.getComplaints(showLoader: false, preserveSearch: true);
-                            }
-                          },
-                          textTheme: textTheme,
-                          unreadCount: complaint.unreadMessageCount ?? 0,
-                          isUnread: (complaint.unreadMessageCount ?? 0) > 0,
-                          status: status,
-                          fallbackText: departmentInitial,
-                          disableNameTranslation: false, // Department names can be translated to Hindi
-                          isFollowUpDue: complaint.isFollowUpDue == true, // Show notification badge for follow-up due
+              ? SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: 0.6.screenHeight,
+                    child: WallOfHelpHelpers.emptyHelper(
+                      text: searchQuery.isEmpty
+                          ? "No Complaints found"
+                          : "No results found",
+                      onRefresh: () async {
+                        await value.getComplaints(
+                          showLoader: false,
+                          preserveSearch: true,
                         );
                       },
-                      itemCount: filteredComplaints.length,
-                      separatorBuilder: (_, _) => SizeBox.sizeHX4,
                     ),
+                  ),
+                )
+              : ListView.separated(
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, index) {
+                    final complaint = filteredComplaints[index];
+                    final lastMessage = complaint.messages?.isNotEmpty == true
+                        ? complaint.messages?.last
+                        : null;
+                    final subject =
+                        ComplaintHelper.decodeUtf8(
+                          (complaint.messages?.isNotEmpty == true)
+                              ? complaint.messages!.first.subject
+                              : null,
+                        ) ??
+                        "No Subject";
+                    final status = complaint.status ?? "Pending";
+                    final lastMessageText =
+                        lastMessage?.snippet ??
+                        lastMessage?.subject ??
+                        lastMessage?.body ??
+                        "No messages yet";
+                    final timestamp =
+                        lastMessage?.date ??
+                        complaint.updatedAt ??
+                        complaint.createdAt;
+
+                    final avatarUrl = complaint.user?.avatar;
+                    final subjectInitial = subject.isNotEmpty
+                        ? subject.substring(0, 1).toUpperCase()
+                        : "C";
+
+                    return _buildChatItem(
+                      avatar: avatarUrl,
+                      name: subject,
+                      lastMessage: lastMessageText,
+                      timestamp: timestamp,
+                      onTap: () async {
+                        await RouteManager.pushNamed(
+                          Routes.threadComplaintPage,
+                          arguments: complaint,
+                        );
+                        // Refresh after returning from chat
+                        if (mounted) {
+                          value.getComplaints(
+                            showLoader: false,
+                            preserveSearch: true,
+                          );
+                        }
+                      },
+                      textTheme: textTheme,
+                      unreadCount: complaint.unreadMessageCount ?? 0,
+                      isUnread: (complaint.unreadMessageCount ?? 0) > 0,
+                      status: status,
+                      fallbackText: subjectInitial,
+                      disableNameTranslation:
+                          false, // Department names can be translated to Hindi
+                      isFollowUpDue:
+                          complaint.isFollowUpDue ==
+                          true, // Show notification badge for follow-up due
+                    );
+                  },
+                  itemCount: filteredComplaints.length,
+                  separatorBuilder: (_, _) => SizeBox.sizeHX4,
+                ),
         );
       },
     );
@@ -1080,7 +1249,8 @@ class _AllChatsViewState extends State<AllChatsView> {
     bool isUnread = false,
     String? status,
     String? fallbackText,
-    bool disableNameTranslation = false, // Set to true for user names, false for department names
+    bool disableNameTranslation =
+        false, // Set to true for user names, false for department names
     bool isFollowUpDue = false, // Whether this complaint has follow-up due
   }) {
     String formattedTime = "";
@@ -1093,11 +1263,9 @@ class _AllChatsViewState extends State<AllChatsView> {
         formattedTime = "";
       }
     }
-    
+
     return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: Dimens.horizontalspacing,
-      ),
+      margin: EdgeInsets.symmetric(horizontal: Dimens.horizontalspacing),
       padding: EdgeInsets.symmetric(
         vertical: Dimens.padding,
         horizontal: Dimens.paddingX3,
@@ -1129,7 +1297,7 @@ class _AllChatsViewState extends State<AllChatsView> {
                       child: Center(
                         child: Text(
                           fallbackText ?? name.substring(0, 1).toUpperCase(),
-                          
+
                           style: TextStyle(
                             color: AppPalettes.whiteColor,
                             fontWeight: FontWeight.bold,
@@ -1149,10 +1317,7 @@ class _AllChatsViewState extends State<AllChatsView> {
                   decoration: BoxDecoration(
                     color: AppPalettes.redColor,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppPalettes.whiteColor,
-                      width: 2,
-                    ),
+                    border: Border.all(color: AppPalettes.whiteColor, width: 2),
                   ),
                 ),
               ),
@@ -1168,11 +1333,14 @@ class _AllChatsViewState extends State<AllChatsView> {
                   child: TranslatedText(
                     text: name,
                     style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: unreadCount > 0 ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: unreadCount > 0
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    disableTranslation: disableNameTranslation, // User names stay in English, department names can be translated
+                    disableTranslation:
+                        disableNameTranslation, // User names stay in English, department names can be translated
                   ),
                 ),
                 if (formattedTime.isNotEmpty)
@@ -1192,18 +1360,12 @@ class _AllChatsViewState extends State<AllChatsView> {
                 right: 0,
                 top: 22.height(),
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppPalettes.primaryColor,
                     shape: BoxShape.circle,
                   ),
-                  constraints: BoxConstraints(
-                    minWidth: 20,
-                    minHeight: 20,
-                  ),
+                  constraints: BoxConstraints(minWidth: 20, minHeight: 20),
                   child: Center(
                     child: Text(
                       unreadCount > 99 ? "99+" : "$unreadCount",
@@ -1218,7 +1380,7 @@ class _AllChatsViewState extends State<AllChatsView> {
               ),
           ],
         ),
-        
+
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -1227,28 +1389,26 @@ class _AllChatsViewState extends State<AllChatsView> {
               children: [
                 Expanded(
                   child: TranslatedText(
-              text: lastMessage,
-              style: textTheme.bodySmall?.copyWith(
-                color: AppPalettes.lightTextColor,
-                fontWeight: unreadCount > 0 ? FontWeight.w500 : FontWeight.normal,
-              ),
-              maxLines: 1,
+                    text: lastMessage,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppPalettes.lightTextColor,
+                      fontWeight: unreadCount > 0
+                          ? FontWeight.w500
+                          : FontWeight.normal,
+                    ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 // Add spacing to prevent overlap with unread count badge
-                if (unreadCount > 0)
-                  SizedBox(width: 30),
+                if (unreadCount > 0) SizedBox(width: 30),
               ],
             ),
             if (status != null)
               Padding(
                 padding: EdgeInsets.only(top: 4),
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: _getStatusColor(status).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
@@ -1289,7 +1449,7 @@ class _AllChatsViewState extends State<AllChatsView> {
   /// Convert Hindi text to English for search matching
   String _convertHindiToEnglish(String hindiText) {
     if (hindiText.isEmpty) return hindiText;
-    
+
     // Check if text contains Hindi characters
     if (!_isHindi(hindiText)) {
       return hindiText; // Already in English, return as is
@@ -1331,15 +1491,49 @@ class _AllChatsViewState extends State<AllChatsView> {
   String _phoneticTransliteration(String hindiText) {
     // Basic phonetic mapping for common Hindi characters to English
     final Map<String, String> charMap = {
-      'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo',
-      'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au',
-      'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ng',
-      'च': 'ch', 'छ': 'chh', 'ज': 'j', 'झ': 'jh', 'ञ': 'ny',
-      'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n',
-      'त': 't', 'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n',
-      'प': 'p', 'फ': 'ph', 'ब': 'b', 'भ': 'bh', 'म': 'm',
-      'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v',
-      'श': 'sh', 'ष': 'sh', 'स': 's', 'ह': 'h',
+      'अ': 'a',
+      'आ': 'aa',
+      'इ': 'i',
+      'ई': 'ee',
+      'उ': 'u',
+      'ऊ': 'oo',
+      'ए': 'e',
+      'ऐ': 'ai',
+      'ओ': 'o',
+      'औ': 'au',
+      'क': 'k',
+      'ख': 'kh',
+      'ग': 'g',
+      'घ': 'gh',
+      'ङ': 'ng',
+      'च': 'ch',
+      'छ': 'chh',
+      'ज': 'j',
+      'झ': 'jh',
+      'ञ': 'ny',
+      'ट': 't',
+      'ठ': 'th',
+      'ड': 'd',
+      'ढ': 'dh',
+      'ण': 'n',
+      'त': 't',
+      'थ': 'th',
+      'द': 'd',
+      'ध': 'dh',
+      'न': 'n',
+      'प': 'p',
+      'फ': 'ph',
+      'ब': 'b',
+      'भ': 'bh',
+      'म': 'm',
+      'य': 'y',
+      'र': 'r',
+      'ल': 'l',
+      'व': 'v',
+      'श': 'sh',
+      'ष': 'sh',
+      'स': 's',
+      'ह': 'h',
     };
 
     String result = '';
@@ -1351,7 +1545,7 @@ class _AllChatsViewState extends State<AllChatsView> {
         result += char; // Keep English characters and numbers
       }
     }
-    
+
     return result.isNotEmpty ? result : hindiText;
   }
 
@@ -1387,4 +1581,3 @@ class ShowSearchChatProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-

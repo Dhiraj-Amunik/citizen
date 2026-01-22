@@ -35,6 +35,45 @@ void main() async {
   }
 }
 
+/// Generate unique message ID from multiple sources for better deduplication
+String _generateUniqueMessageId(RemoteMessage message) {
+  try {
+    // Try multiple sources in order of reliability
+    final messageId = message.messageId;
+    final data = message.data;
+    
+    // Primary: Use Firebase message ID if available
+    if (messageId != null && messageId.isNotEmpty) {
+      return 'fcm_$messageId';
+    }
+    
+    // Secondary: Use notification ID from data
+    final notificationId = data['_id'] ?? 
+        data['notificationId'] ?? 
+        data['messageId'] ?? 
+        data['id'];
+    
+    if (notificationId != null && notificationId.toString().isNotEmpty) {
+      return 'data_${notificationId.toString()}';
+    }
+    
+    // Tertiary: Create ID from notification content (title + body + timestamp)
+    final title = message.notification?.title ?? data['title'] ?? '';
+    final body = message.notification?.body ?? data['body'] ?? data['message'] ?? '';
+    final module = data['module'] ?? '';
+    final moduleId = data['moduleId'] ?? '';
+    
+    // Create a hash from content (for notifications without IDs)
+    final contentHash = '${title}_${body}_${module}_${moduleId}'.hashCode;
+    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000; // Round to seconds
+    
+    return 'content_${contentHash}_$timestamp';
+  } catch (e) {
+    // Ultimate fallback: timestamp-based ID
+    return 'fallback_${DateTime.now().millisecondsSinceEpoch}';
+  }
+}
+
 /// Note: retrieveLostData() does not prevent Android SIGKILL
 /// It only helps when Activity is paused, not when process is killed
 /// Removed to avoid unnecessary overhead
@@ -50,6 +89,39 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
       kIsWeb || Platform.isAndroid || Platform.isIOS;
   if (!messagingSupported) return;
 
+  // CRITICAL: Check for duplicates IMMEDIATELY before ANY processing
+  // This must happen BEFORE Firebase.initializeApp() to prevent Firebase auto-display
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Generate a unique message ID from multiple sources for better deduplication
+    final messageId = _generateUniqueMessageId(message);
+    
+    // ATOMIC CHECK: Check and mark as processed in one operation
+    final processedMessages = prefs.getStringList('processed_background_messages') ?? [];
+    
+    // Check if this message was already processed
+    if (processedMessages.contains(messageId)) {
+      print("📬 ⚠️ [Background Handler] Duplicate notification detected (ID: $messageId) - SKIPPING ENTIRELY");
+      return; // Exit immediately - don't process at all
+    }
+    
+    // Mark message as processed IMMEDIATELY (before any other processing)
+    processedMessages.add(messageId);
+    
+    // Keep only last 1000 message IDs to prevent storage bloat
+    if (processedMessages.length > 1000) {
+      processedMessages.removeRange(0, processedMessages.length - 1000);
+    }
+    
+    // Save immediately to prevent race conditions
+    await prefs.setStringList('processed_background_messages', processedMessages);
+    print("📬 [Background Handler] Message marked as processed (ID: $messageId) - proceeding");
+  } catch (e) {
+    print("❌ [Background Handler] Error in deduplication check: $e");
+    // If deduplication fails, continue but log the error
+  }
+
   try {
     print("📬 [Background Handler] Starting background message handler");
     print(
@@ -63,34 +135,6 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
 
     await Firebase.initializeApp();
     print("📬 [Background Handler] Firebase initialized");
-
-    // CRITICAL: Check for duplicate notification BEFORE processing
-    // This prevents showing the same notification twice when phone is off/on
-    final prefs = await SharedPreferences.getInstance();
-    final messageId = message.messageId ?? 
-        message.data['_id'] ?? 
-        message.data['notificationId'] ??
-        message.data['messageId'] ??
-        DateTime.now().millisecondsSinceEpoch.toString();
-    
-    final processedMessages = prefs.getStringList('processed_background_messages') ?? [];
-    
-    // Check if this message was already processed
-    if (processedMessages.contains(messageId)) {
-      print("📬 ⚠️ [Background Handler] Duplicate notification detected (ID: $messageId) - skipping");
-      return;
-    }
-    
-    // Mark message as processed
-    processedMessages.add(messageId);
-    
-    // Keep only last 1000 message IDs to prevent storage bloat
-    if (processedMessages.length > 1000) {
-      processedMessages.removeRange(0, processedMessages.length - 1000);
-    }
-    
-    await prefs.setStringList('processed_background_messages', processedMessages);
-    print("📬 [Background Handler] Message marked as processed (ID: $messageId)");
 
     // Initialize local notifications for showing the notification
     await NotificationService.initializeLocalNotificationForBackground();
@@ -107,13 +151,14 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
     // CRITICAL: DO NOT call APIs in background handler
     // Android/iOS Doze mode and App Standby will kill isolates and block HTTP calls
     // Instead, only set flags - APIs will be called when app resumes
-    await prefs.setBool('showNotification', true);
-    await prefs.setBool('needsDataRefresh', true);
+    final prefsForFlags = await SharedPreferences.getInstance();
+    await prefsForFlags.setBool('showNotification', true);
+    await prefsForFlags.setBool('needsDataRefresh', true);
 
     // CRITICAL: Verify the write was successful
     // Reload SharedPreferences to ensure the write is committed
-    await prefs.reload();
-    final verifyFlag = prefs.getBool('showNotification') ?? false;
+    await prefsForFlags.reload();
+    final verifyFlag = prefsForFlags.getBool('showNotification') ?? false;
     if (verifyFlag) {
       print(
         "📬 [Background Handler] ✅ Verified: showNotification flag is TRUE in SharedPreferences",
@@ -123,9 +168,9 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
         "⚠️ [Background Handler] WARNING: showNotification flag verification failed, retrying...",
       );
       // Retry setting the flag
-      await prefs.setBool('showNotification', true);
-      await prefs.reload();
-      final retryVerify = prefs.getBool('showNotification') ?? false;
+      await prefsForFlags.setBool('showNotification', true);
+      await prefsForFlags.reload();
+      final retryVerify = prefsForFlags.getBool('showNotification') ?? false;
       print(
         "📬 [Background Handler] Retry verification: ${retryVerify ? 'SUCCESS' : 'FAILED'}",
       );

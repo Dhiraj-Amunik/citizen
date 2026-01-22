@@ -332,6 +332,7 @@ class UpdateNotificationViewModel extends ChangeNotifier {
   /// Update notification dot based on already loaded notifications list
   /// This is more efficient than calling API again when notifications are already loaded
   /// This should ONLY be called from the notifications view when user opens it
+  /// NOTE: This method should NOT be called if the dot was already cleared on view open
   void updateDotFromNotificationsList(List<Data> notifications) {
     try {
       // Check if there are any unread notifications
@@ -340,18 +341,27 @@ class UpdateNotificationViewModel extends ChangeNotifier {
         return notification.read == false || notification.read == null;
       });
 
-      // Always update flag based on notifications list
-      // This is called from notifications view, so it's safe to update
-      _showNotification = hasUnreadNotifications;
-      notifyListeners();
-      debugPrint(
-        "📬 [UpdateNotificationViewModel] ✅ Updated from list: ${notifications.length} notifications, ${hasUnreadNotifications ? 'HAS' : 'NO'} unread - dot ${hasUnreadNotifications ? 'SHOWN' : 'HIDDEN'}",
-      );
+      // CRITICAL: Only update if the flag is currently true
+      // If it was cleared (false), don't override it - user has seen the notifications
+      // This prevents the dot from reappearing after being cleared on view open
+      if (_showNotification) {
+        // Only update if flag is currently true (hasn't been cleared)
+        _showNotification = hasUnreadNotifications;
+        notifyListeners();
+        debugPrint(
+          "📬 [UpdateNotificationViewModel] ✅ Updated from list: ${notifications.length} notifications, ${hasUnreadNotifications ? 'HAS' : 'NO'} unread - dot ${hasUnreadNotifications ? 'SHOWN' : 'HIDDEN'}",
+        );
 
-      // Also update SharedPreferences to keep it in sync
-      SharedPreferences.getInstance().then((prefs) {
-        prefs.setBool('showNotification', hasUnreadNotifications);
-      });
+        // Also update SharedPreferences to keep it in sync
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setBool('showNotification', hasUnreadNotifications);
+        });
+      } else {
+        // Flag was cleared (false) - don't override it
+        debugPrint(
+          "📬 [UpdateNotificationViewModel] ⚠️ Skipping update - dot was cleared on view open (${notifications.length} notifications, ${hasUnreadNotifications ? 'HAS' : 'NO'} unread)",
+        );
+      }
     } catch (e) {
       debugPrint(
         "❌ [UpdateNotificationViewModel] Error updating dot from notifications list: $e",

@@ -879,25 +879,53 @@ class NotificationService {
     }
   }
 
-  /// Generate unique notification ID from message data
-  static int _generateNotificationId(RemoteMessage message) {
+  /// Generate unique message ID string (same logic as main.dart for consistency)
+  static String _generateUniqueMessageId(RemoteMessage message) {
     try {
+      // Try multiple sources in order of reliability
+      final messageId = message.messageId;
       final data = message.data;
+      
+      // Primary: Use Firebase message ID if available
+      if (messageId != null && messageId.isNotEmpty) {
+        return 'fcm_$messageId';
+      }
+      
+      // Secondary: Use notification ID from data
       final notificationId = data['_id'] ?? 
           data['notificationId'] ?? 
           data['messageId'] ?? 
-          data['id'] ??
-          message.messageId;
+          data['id'];
       
-      if (notificationId != null) {
-        // Use hash of notification ID to create a consistent integer ID
-        final hash = notificationId.hashCode;
-        // Ensure positive ID (Android requires non-negative)
-        return hash.abs() % 2147483647; // Max int32
+      if (notificationId != null && notificationId.toString().isNotEmpty) {
+        return 'data_${notificationId.toString()}';
       }
       
-      // Fallback: use timestamp-based ID
-      return DateTime.now().millisecondsSinceEpoch % 2147483647;
+      // Tertiary: Create ID from notification content (title + body + timestamp)
+      final title = message.notification?.title ?? data['title'] ?? '';
+      final body = message.notification?.body ?? data['body'] ?? data['message'] ?? '';
+      final module = data['module'] ?? '';
+      final moduleId = data['moduleId'] ?? '';
+      
+      // Create a hash from content (for notifications without IDs)
+      final contentHash = '${title}_${body}_${module}_${moduleId}'.hashCode;
+      final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000; // Round to seconds
+      
+      return 'content_${contentHash}_$timestamp';
+    } catch (e) {
+      // Ultimate fallback: timestamp-based ID
+      return 'fallback_${DateTime.now().millisecondsSinceEpoch}';
+    }
+  }
+
+  /// Generate unique notification ID integer from message data (for OS notification ID)
+  static int _generateNotificationId(RemoteMessage message) {
+    try {
+      final messageIdString = _generateUniqueMessageId(message);
+      // Use hash of message ID string to create a consistent integer ID
+      final hash = messageIdString.hashCode;
+      // Ensure positive ID (Android requires non-negative)
+      return hash.abs() % 2147483647; // Max int32
     } catch (e) {
       log("Error generating notification ID: $e");
       return DateTime.now().millisecondsSinceEpoch % 2147483647;
@@ -905,20 +933,26 @@ class NotificationService {
   }
 
   /// Check if notification was already shown (deduplication)
+  /// Uses the same message ID generation as main.dart for consistency
   static Future<bool> _isNotificationAlreadyShown(RemoteMessage message) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final notificationId = _generateNotificationId(message);
+      
+      // Use the same message ID generation as main.dart
+      final messageId = _generateUniqueMessageId(message);
+      
+      // Check BOTH lists: processed_background_messages (from main.dart) and shown_notification_ids
+      final processedMessages = prefs.getStringList('processed_background_messages') ?? [];
       final shownNotifications = prefs.getStringList('shown_notification_ids') ?? [];
       
-      // Check if this notification ID was already shown
-      if (shownNotifications.contains(notificationId.toString())) {
-        log("📬 ⚠️ Notification already shown (ID: $notificationId) - skipping duplicate");
+      // Check if this message was already processed or shown
+      if (processedMessages.contains(messageId) || shownNotifications.contains(messageId)) {
+        log("📬 ⚠️ Notification already shown (ID: $messageId) - skipping duplicate");
         return true;
       }
       
-      // Add to shown list
-      shownNotifications.add(notificationId.toString());
+      // ATOMIC: Mark as shown immediately (before displaying)
+      shownNotifications.add(messageId);
       
       // Keep only last 1000 notification IDs to prevent storage bloat
       if (shownNotifications.length > 1000) {
@@ -926,6 +960,7 @@ class NotificationService {
       }
       
       await prefs.setStringList('shown_notification_ids', shownNotifications);
+      log("📬 ✅ Notification marked as shown (ID: $messageId)");
       return false;
     } catch (e) {
       log("Error checking notification deduplication: $e");
@@ -1020,15 +1055,21 @@ class NotificationService {
 
     // Generate unique notification ID
     final notificationId = _generateNotificationId(message);
+    final messageIdString = _generateUniqueMessageId(message);
 
     AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'org.amunik.sevak',
-      'SEVAK',
+      'org.amunik.sevak', // channel ID
+      'SEVAK', // channel name
       channelDescription: 'Notification channel for SEVAK',
       priority: Priority.high,
       importance: Importance.high,
-      // Use notification ID to prevent duplicates at OS level
-      tag: notificationId.toString(),
+      // CRITICAL: Use message ID string as tag to prevent OS-level duplicates
+      // Android will replace notifications with the same tag
+      tag: messageIdString,
+      // Set auto-cancel to true so tapping removes it
+      autoCancel: true,
+      // Use same ID for notification - Android will replace if same ID
+      ongoing: false,
     );
 
     DarwinNotificationDetails iOSDetails = const DarwinNotificationDetails(

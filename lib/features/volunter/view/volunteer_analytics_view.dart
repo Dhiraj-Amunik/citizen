@@ -113,12 +113,7 @@ class VolunteerAnalyticsView extends StatelessWidget {
                         lastMonth: viewModel.lastMonthLabel,
                         entries: topVolunteers,
                       ),
-                      SizeBox.sizeHX6,
-                      _buildMyCoinsContainer(
-                        context: context,
-                        textTheme: textTheme,
-                        totalCoins: myAnalytics.totalCoins ?? 0,
-                      ),
+                     
                       SizeBox.sizeHX6,
                       _buildMyAnalyticsSection(
                         context: context,
@@ -132,7 +127,8 @@ class VolunteerAnalyticsView extends StatelessWidget {
                         myAnalytics: myAnalytics,
                         shareEventGraph: viewModel.shareEventGraph,
                         topShareEventUsers: viewModel.topShareEventUsers,
-                        topReferralUsers: viewModel.topReferralUsers,
+                        topVolunteers: viewModel.topVolunteers,
+                        myVolunteerRank: viewModel.myVolunteerRank,
                       ),
                       SizeBox.sizeHX6,
                       // _buildReferralGraphSection(
@@ -229,64 +225,6 @@ class VolunteerAnalyticsView extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildMyCoinsContainer({
-    required BuildContext context,
-    required TextTheme textTheme,
-    required int totalCoins,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(Dimens.paddingX4),
-      decoration: boxDecorationRoundedWithShadow(
-        Dimens.radiusX5,
-        backgroundColor: const  Color(0xffE9F8EE),
-        border: Border.all(
-          color: AppPalettes.borderColor.withOpacityExt(0.2),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 16.r,
-                backgroundColor: const Color(0xffC8E2D1),
-                child: Icon(
-                  Icons.monetization_on_outlined,
-                  size: Dimens.scaleX2,
-                  color: AppPalettes.blackColor,
-                ),
-              ),
-              SizeBox.sizeWX3,
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TranslatedText(
-                    text: "My Coins",
-                    style: textTheme.labelSmall?.copyWith(
-                      fontSize: 11.sp,
-                      color: AppPalettes.blackColor,
-                    ),
-                  ),
-                  SizeBox.sizeHX1,
-                  Text(
-                    "$totalCoins",
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppPalettes.blackColor,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -727,6 +665,20 @@ class VolunteerAnalyticsView extends StatelessWidget {
     return normalized.contains(".svg") || normalized.contains("format=svg");
   }
 
+  // Get rank badge color: gold for rank 1, silver for rank 2, bronze for rank 3, primaryColor for others
+  Color _getRankBadgeColor(int rank) {
+    switch (rank) {
+      case 1:
+        return const Color(0xFFFFD700); // Gold
+      case 2:
+        return const Color(0xFFC0C0C0); // Silver
+      case 3:
+        return const Color(0xFFCD7F32); // Bronze
+      default:
+        return AppPalettes.primaryColor;
+    }
+  }
+
   // Calculate user level based on analytics data
   int _calculateUserLevel(MyVolunteerAnalytics analytics) {
     // Calculate level based on multiple factors
@@ -786,7 +738,8 @@ class VolunteerAnalyticsView extends StatelessWidget {
     required MyVolunteerAnalytics? myAnalytics,
     required List<ShareEventGraphItem> shareEventGraph,
     required List<TopShareEventUser> topShareEventUsers,
-    required List<TopReferralUser> topReferralUsers,
+    required List<TopVolunteer> topVolunteers,
+    MyVolunteerRank? myVolunteerRank,
   }) {
     // Calculate user's content share performance percentage based on content shares (Lok Varta)
     double calculateUserPercentage() {
@@ -1064,8 +1017,8 @@ class VolunteerAnalyticsView extends StatelessWidget {
       children: [
         referralPerformanceCard,
         SizeBox.sizeHX6,
-        // Show Top Referral Users in Referral Champion section
-        if (topReferralUsers.isNotEmpty) ...[
+        // Show Top Volunteers in Referral Champion section
+        if (topVolunteers.isNotEmpty) ...[
           TranslatedText(
             text: "Referral Champion",
             style: textTheme.bodyLarge?.copyWith(
@@ -1076,14 +1029,14 @@ class VolunteerAnalyticsView extends StatelessWidget {
           SizeBox.sizeHX4,
           Column(
             spacing: Dimens.gapX2,
-            children: topReferralUsers
-                .where((user) => user.name?.isNotEmpty ?? false)
+            children: topVolunteers
+                .where((volunteer) => volunteer.name?.isNotEmpty ?? false)
                 .take(10) // Limit to top 10
-                .map((user) {
-              final imageUrl = _resolveImageUrl(user.profileImage);
-              final userName = user.name ?? "-";
-              final inviteRewardCoins = user.inviteRewardCoins ?? 0;
-              final rank = user.rank;
+                .map((volunteer) {
+              final imageUrl = _resolveImageUrl(volunteer.profileImage);
+              final userName = volunteer.name ?? "-";
+              final coins = volunteer.coins ?? 0;
+              final rank = volunteer.rank;
               return Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: Dimens.paddingX3,
@@ -1101,12 +1054,13 @@ class VolunteerAnalyticsView extends StatelessWidget {
                 child: Row(
                   children: [
                     // Rank badge (only show if rank is a valid number, not null which means "-" in API)
+                    // Use gold, silver, bronze for top 3 ranks
                     if (rank != null)
                       Container(
                         width: 32.sp,
                         height: 32.sp,
                         decoration: BoxDecoration(
-                          color: AppPalettes.primaryColor,
+                          color: _getRankBadgeColor(rank),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -1184,7 +1138,7 @@ class VolunteerAnalyticsView extends StatelessWidget {
                               ),
                               SizedBox(width: Dimens.paddingX1),
                               TranslatedText(
-                                text: "$inviteRewardCoins Coins",
+                                text: "$coins Coins",
                                 style: textTheme.bodySmall?.copyWith(
                                   color: AppPalettes.primaryColor,
                                   fontSize: 12.sp,
@@ -1202,6 +1156,141 @@ class VolunteerAnalyticsView extends StatelessWidget {
               );
             }).toList(),
           ),
+          // Show user's own rank below the list
+          // If rank is in top 3, use same design as top volunteers; otherwise use highlighted design
+          if (myVolunteerRank != null) ...[
+            SizeBox.sizeHX4,
+            Builder(
+              builder: (context) {
+                final rank = myVolunteerRank!;
+                final imageUrl = _resolveImageUrl(rank.profileImage);
+                final userName = rank.name ?? "-";
+                final coins = rank.coins ?? 0;
+                final rankValue = rank.rank;
+                
+                // Check if user's rank is in top 3
+                final isTopThree = rankValue != null && rankValue >= 1 && rankValue <= 3;
+                
+                // Use same design as top volunteers if rank is in top 3, otherwise use highlighted design
+                return Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Dimens.paddingX3,
+                    vertical: Dimens.paddingX3,
+                  ),
+                  decoration: boxDecorationRoundedWithShadow(
+                    Dimens.radiusX4,
+                    backgroundColor: isTopThree 
+                        ? AppPalettes.whiteColor 
+                        : AppPalettes.liteGreenColor.withOpacity(0.3),
+                    border: Border.all(
+                      color: isTopThree 
+                          ? AppPalettes.borderColor.withOpacityExt(0.4)
+                          : AppPalettes.primaryColor,
+                      width: isTopThree ? 1 : 2,
+                    ),
+                    blurRadius: isTopThree ? 2 : 4,
+                    spreadRadius: isTopThree ? 1 : 2,
+                  ),
+                  child: Row(
+                    children: [
+                      // Rank badge (only show if rank is a valid number)
+                      // Use gold/silver/bronze for top 3, primaryColor for others
+                      if (rankValue != null)
+                        Container(
+                          width: 32.sp,
+                          height: 32.sp,
+                          decoration: BoxDecoration(
+                            color: _getRankBadgeColor(rankValue),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: TranslatedText(
+                              text: "$rankValue",
+                              style: textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppPalettes.whiteColor,
+                                fontSize: 14.sp,
+                              ),
+                              disableTranslation: true,
+                            ),
+                          ),
+                        ),
+                      if (rankValue != null)
+                        SizeBox.sizeWX3,
+                      // Profile image - show initials if no image
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(Dimens.radius100),
+                        child: Container(
+                          width: Dimens.scaleX1B * 2,
+                          height: Dimens.scaleX1B * 2,
+                          color: AppPalettes.liteGreyColor,
+                          child: (imageUrl != null && imageUrl.isNotEmpty)
+                              ? CommonHelpers.getCacheNetworkImage(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: Center(
+                                    child: TranslatedText(
+                                      text: CommonHelpers.getInitials(userName),
+                                      style: textTheme.labelMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: AppPalettes.blackColor,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Center(
+                                  child: TranslatedText(
+                                    text: CommonHelpers.getInitials(userName),
+                                    style: textTheme.labelMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppPalettes.blackColor,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ),
+                      SizeBox.sizeWX3,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: Dimens.gapX * 0.5,
+                          children: [
+                            TranslatedText(
+                              text: userName,
+                              style: textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppPalettes.blackColor,
+                              ),
+                              disableTranslation: true,
+                            ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.monetization_on_outlined,
+                                  size: 14.r,
+                                  color: AppPalettes.primaryColor,
+                                ),
+                                SizedBox(width: Dimens.paddingX1),
+                                TranslatedText(
+                                  text: "$coins Coins",
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: AppPalettes.primaryColor,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  disableTranslation: true,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
         ],
       ],
     );

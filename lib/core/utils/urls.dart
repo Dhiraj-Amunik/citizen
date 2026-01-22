@@ -56,10 +56,10 @@ class URLs {
   static const getComplaintByUserID = "/api/complaint/getComplaints"; /*Get*/
   static const complaintCase = "/api/complaint/complaintCase"; /*Post*/
   static const getDepartments = "/api/user/list-of-department-dropdown"; /*Get*/
-  static const getAuthority = "/api/user/list-of-authorities-dropdown"; /*Post*/
+  static const getAuthority = "/api/user/list-of-level1-authorities-dropdown"; /*Post*/
   static const getConstituencies =
       "/api/user/list-of-constituencies-dropdown"; /*Get*/
- 
+
   static const getPincodeConstituencies =
       "/api/user/get-constituency-by-pincode"; /*Get*/
   static const getParliamentaryConstituency =

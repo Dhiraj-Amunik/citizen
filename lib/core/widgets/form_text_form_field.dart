@@ -295,6 +295,28 @@ class _FormTextFormFieldState extends State<FormTextFormField>
     return true;
   }
 
+  /// Check if the keyboard type is a number field
+  bool _isNumberField(TextInputType? keyboardType) {
+    if (keyboardType == null) return false;
+    
+    // Check standard numeric keyboard types
+    if (keyboardType == TextInputType.number ||
+        keyboardType == TextInputType.phone) {
+      return true;
+    }
+    
+    // Check for numberWithOptions and other numeric variants
+    // by examining the string representation (most reliable cross-platform method)
+    final typeString = keyboardType.toString().toLowerCase();
+    if (typeString.contains('number') || 
+        typeString.contains('phone') ||
+        typeString.contains('numeric')) {
+      return true;
+    }
+    
+    return false;
+  }
+
   void _showKeyboardOverlay() {
     if (_keyboardOverlayEntry != null) {
       developer.log('🟡 [FormTextFormField] _showKeyboardOverlay: Already showing, skipping');
@@ -861,7 +883,13 @@ class _FormTextFormFieldState extends State<FormTextFormField>
       // Handle correction: replace mic session text instead of appending
       if (isCorrection) {
         final baseText = _micSessionBaseText;
-        final trimmedRecognized = recognizedWords.trim();
+        var trimmedRecognized = recognizedWords.trim();
+        
+        // For number fields, remove all spaces from speech input
+        final isNumberField = _isNumberField(widget.keyboardType);
+        if (isNumberField) {
+          trimmedRecognized = trimmedRecognized.replaceAll(RegExp(r'\s+'), ''); // Remove all spaces
+        }
         
         // Edge case #2: Check if baseText already ends with recognizedWords (typed + spoken overlap)
         // Prevents duplication when user types "Hello" then mic says "hello world"
@@ -873,8 +901,8 @@ class _FormTextFormFieldState extends State<FormTextFormField>
         
         var correctedText = baseText;
         
-        // Add space if needed
-        if (baseText.isNotEmpty &&
+        // Add space if needed (only for non-number fields)
+        if (!isNumberField && baseText.isNotEmpty &&
             !_endsWithWhitespace(baseText) &&
             trimmedRecognized.isNotEmpty) {
           correctedText += ' ';
@@ -930,7 +958,10 @@ class _FormTextFormFieldState extends State<FormTextFormField>
         // Show skeleton placeholder: current text + skeleton for new words
         final skeletonText = _generateSkeletonText(newWords);
         var skeletonFullText = currentText;
-        if (skeletonFullText.isNotEmpty && !_endsWithWhitespace(skeletonFullText) && skeletonText.isNotEmpty) {
+        
+        // For number fields, don't add spaces in skeleton text
+        final isNumberField = _isNumberField(widget.keyboardType);
+        if (!isNumberField && skeletonFullText.isNotEmpty && !_endsWithWhitespace(skeletonFullText) && skeletonText.isNotEmpty) {
           skeletonFullText += ' ';
         }
         skeletonFullText += skeletonText;
@@ -956,8 +987,14 @@ class _FormTextFormFieldState extends State<FormTextFormField>
         // Get current controller text (already has previous results + baseText)
         var updatedText = controller.text;
         
-        // Add space if needed before appending new words
-        if (updatedText.isNotEmpty && 
+        // For number fields, remove all spaces from speech input
+        final isNumberField = _isNumberField(widget.keyboardType);
+        if (isNumberField) {
+          newWords = newWords.replaceAll(RegExp(r'\s+'), ''); // Remove all spaces
+        }
+        
+        // Add space if needed before appending new words (only for non-number fields)
+        if (!isNumberField && updatedText.isNotEmpty && 
             !_endsWithWhitespace(updatedText) && 
             newWords.isNotEmpty) {
           updatedText += ' ';
@@ -1015,12 +1052,21 @@ class _FormTextFormFieldState extends State<FormTextFormField>
 
         // Append translated words to current text
         var updatedText = currentText;
-        if (updatedText.isNotEmpty && 
+        
+        // For number fields, remove all spaces from translated words
+        final isNumberField = _isNumberField(widget.keyboardType);
+        var processedTranslatedWords = translatedWords;
+        if (isNumberField) {
+          processedTranslatedWords = translatedWords.replaceAll(RegExp(r'\s+'), ''); // Remove all spaces
+        }
+        
+        // Add space if needed before appending (only for non-number fields)
+        if (!isNumberField && updatedText.isNotEmpty && 
             !_endsWithWhitespace(updatedText) && 
-            translatedWords.isNotEmpty) {
+            processedTranslatedWords.isNotEmpty) {
           updatedText += ' ';
         }
-        updatedText += translatedWords;
+        updatedText += processedTranslatedWords;
 
         if (widget.enforceFirstLetterUppercase &&
             !_containsNonAsciiCharacters(updatedText)) {

@@ -485,7 +485,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appointment_list => 'Appointment List';
 
   @override
-  String get select_mla => 'Select MLA';
+  String get select_mla => 'Select Associate';
 
   @override
   String get select_associate => 'Select Associate';
@@ -516,7 +516,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please select your appointment date';
 
   @override
-  String get mla_validator => 'Please select one MLA';
+  String get mla_validator => 'Please select one Associate';
 
   @override
   String get choose_your_associate => 'Choose your Associate';
@@ -949,7 +949,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notify => 'Notify';
 
   @override
-  String get notify_mla => 'Notify Mla';
+  String get notify_mla => 'Notify Associate';
 
   @override
   String get notify_description =>

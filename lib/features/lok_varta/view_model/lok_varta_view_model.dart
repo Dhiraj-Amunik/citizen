@@ -125,7 +125,21 @@ class LokVartaViewModel extends BaseViewModel {
         final data = response.data?.data?.media;
         
         // Handle null or empty data
-        final mediaList = data != null ? List<model.Media>.from(data as List) : <model.Media>[];
+        var mediaList = data != null ? List<model.Media>.from(data as List) : <model.Media>[];
+
+        // Filter videos to show only published status
+        if (filters == LokVartaFilter.Videos) {
+          mediaList = mediaList.where((media) {
+            return media.status?.toLowerCase() == 'published';
+          }).toList();
+        }
+
+        // Filter photos to show only published status
+        if (filters == LokVartaFilter.PhotoGallery) {
+          mediaList = mediaList.where((media) {
+            return media.status?.toLowerCase() == 'published';
+          }).toList();
+        }
 
         switch (filters) {
           case LokVartaFilter.PressRelease:

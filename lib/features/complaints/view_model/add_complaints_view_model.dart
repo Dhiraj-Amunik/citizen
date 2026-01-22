@@ -37,12 +37,17 @@ class AddComplaintsViewModel extends BaseViewModel
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   final departmentController = SingleSelectController<departments.Data>(null);
-  final authortiyController = SingleSelectController<authorities.Data>(null);
+  final authortiyController = SingleSelectController<authorities.Authority>(
+    null,
+  );
+  String selectedLevel = "Level 1";
+  List<String> escalationLevels = ["Level 1", "Level 2", "Level 3"];
 
   AutovalidateMode autoValidateMode = AutovalidateMode.disabled;
 
   List<departments.Data> departmentLists = [];
-  List<authorities.Data> authoritiesLists = [];
+  List<authorities.Data> allOfficers = [];
+  List<authorities.Authority> filteredAuthorities = [];
   update() {
     notifyListeners();
   }
@@ -79,7 +84,7 @@ class AddComplaintsViewModel extends BaseViewModel
       // From API response: "_id": "68b80817655a85b13fa99124" is the correct field to send
       // authorityId like "AUTH692CDDEC" should NOT be used
       final selectedAuthority = authortiyController.value;
-      
+
       if (selectedAuthority == null) {
         debugPrint("❌ No authority selected");
         CommonSnackbar(text: "Please select an authority").showToast();
@@ -87,18 +92,10 @@ class AddComplaintsViewModel extends BaseViewModel
         notifyListeners();
         return;
       }
-      
-      // Log full authority object for debugging
-      debugPrint("🔍 Selected Authority Object:");
-      debugPrint("   Name: ${selectedAuthority.name}");
-      debugPrint("   sId (_id): ${selectedAuthority.sId}");
-      debugPrint("   authorityId (NOT USED): ${selectedAuthority.authorityId}");
-      debugPrint("   Designation: ${selectedAuthority.designation}");
-      
-      // ONLY use sId (_id) - this is what the API expects
-      // DO NOT use authorityId field
+
+      // Use the selected authority level record ID
       String? authorityId = selectedAuthority.sId;
-      
+
       if (authorityId == null || authorityId.isEmpty) {
         debugPrint("❌ Authority _id (sId) is null or empty");
         debugPrint("   Full authority object: $selectedAuthority");
@@ -107,9 +104,8 @@ class AddComplaintsViewModel extends BaseViewModel
         notifyListeners();
         return;
       }
-      
+
       debugPrint("✅ Using Authority _id (sId): $authorityId");
-      debugPrint("   ⚠️ NOT using authorityId: ${selectedAuthority.authorityId}");
 
       // Build FormData to match Postman format
       // All text fields must be sent as strings, files as list
@@ -119,8 +115,10 @@ class AddComplaintsViewModel extends BaseViewModel
       final Map<String, dynamic> formDataMap = {
         "department": departmentId.toString(),
         "authority": authorityId.toString(),
-        "subject": titleController.text, // From complaint_title field (lines 90-102 in lodge_complaint_view.dart)
-        "message": descriptionController.text, // From description field (lines 156-168 in lodge_complaint_view.dart)
+        "subject": titleController
+            .text, // From complaint_title field (lines 90-102 in lodge_complaint_view.dart)
+        "message": descriptionController
+            .text, // From description field (lines 156-168 in lodge_complaint_view.dart)
       };
 
       // Add attachments as a list (Dio handles multiple files with same key)
@@ -132,7 +130,9 @@ class AddComplaintsViewModel extends BaseViewModel
       // complaintId should only be included when replying
 
       debugPrint("📤 Form data keys: ${formDataMap.keys}");
-      debugPrint("📤 Department: $departmentId (length: ${departmentId.length})");
+      debugPrint(
+        "📤 Department: $departmentId (length: ${departmentId.length})",
+      );
       debugPrint("📤 Authority: $authorityId (length: ${authorityId.length})");
       debugPrint("📤 Subject: ${titleController.text}");
       debugPrint("📤 Message: ${descriptionController.text}");
@@ -141,7 +141,7 @@ class AddComplaintsViewModel extends BaseViewModel
 
       // Create FormData - Dio will handle multipart/form-data encoding
       final FormData form = FormData.fromMap(formDataMap);
-      
+
       // Log FormData fields for debugging
       debugPrint("📤 FormData fields count: ${form.fields.length}");
       debugPrint("📤 FormData files count: ${form.files.length}");
@@ -153,17 +153,18 @@ class AddComplaintsViewModel extends BaseViewModel
         data: form,
         token: token ?? '',
       );
-      
+
       // Check for error first - this must be checked before checking success
       if (response.error != null) {
         debugPrint("❌ API Error: ${response.error}");
-        final errorMessage = response.error?.message ?? "Failed to lodge complaint";
+        final errorMessage =
+            response.error?.message ?? "Failed to lodge complaint";
         CommonSnackbar(text: errorMessage).showToast();
         isLoading = false;
         notifyListeners();
         return;
       }
-      
+
       // Handle response - API returns: {responseCode: 200, message: "...", data: {...}}
       // The repository already checks for responseCode != 200 and returns error
       // So if we get here without error, it means responseCode == 200 (success)
@@ -188,19 +189,19 @@ class AddComplaintsViewModel extends BaseViewModel
         debugPrint("⚠️ No response data");
         isSuccess = false;
       }
-      
+
       if (isSuccess) {
         // Set loading to false before showing dialog
         isLoading = false;
         notifyListeners();
-        
+
         // Clear form data before showing dialog
         clearForm();
-        
+
         // Get context before showing dialog
         final BuildContext? dialogContext =
             RouteManager.navigatorKey.currentState?.context;
-        
+
         // First, refresh the complaints list
         if (dialogContext != null && dialogContext.mounted) {
           try {
@@ -213,18 +214,16 @@ class AddComplaintsViewModel extends BaseViewModel
             debugPrint("Error refreshing complaints: $e");
           }
         }
-        
+
         // Show success dialog and wait for user to tap OK
         await CommonSnackbar(
           text: 'Complaints has been Lodged',
-        ).showAnimatedDialog(
-          type: QuickAlertType.success,
-        );
-        
+        ).showAnimatedDialog(type: QuickAlertType.success);
+
         // After dialog is fully closed (user tapped OK), navigate
         // Wait a bit to ensure dialog is completely dismissed
         await Future.delayed(const Duration(milliseconds: 300));
-        
+
         // Pop the lodge complaint view first, then push complaints view
         // This ensures clean navigation stack: Previous -> Complaints (not Previous -> Lodge -> Complaints)
         final navContext = RouteManager.navigatorKey.currentState?.context;
@@ -266,7 +265,7 @@ class AddComplaintsViewModel extends BaseViewModel
         });
         return;
       }
-      
+
       debugPrint("🔍 Calling GET /api/user/list-of-department-dropdown");
       showCustomDialogTransperent(isShowing: true);
       final response = await ComplaintsRepository().getDepartments(token);
@@ -294,11 +293,15 @@ class AddComplaintsViewModel extends BaseViewModel
           try {
             // Data is already parsed as List<departments.Data> from the model
             departmentLists = data;
-            debugPrint("✅ Successfully loaded ${departmentLists.length} departments");
+            debugPrint(
+              "✅ Successfully loaded ${departmentLists.length} departments",
+            );
             // Log first department for debugging
             if (departmentLists.isNotEmpty) {
               final firstDept = departmentLists.first;
-              debugPrint("   Example department - Name: ${firstDept.name}, sId: ${firstDept.sId}, departmentId: ${firstDept.departmentId}");
+              debugPrint(
+                "   Example department - Name: ${firstDept.name}, sId: ${firstDept.sId}, departmentId: ${firstDept.departmentId}",
+              );
             }
             notifyListeners();
           } catch (e, stackTrace) {
@@ -329,24 +332,15 @@ class AddComplaintsViewModel extends BaseViewModel
 
   Future<void> getAuthorities({required String? id}) async {
     try {
-      // Clear previous authorities and selection when department changes
-      authoritiesLists.clear();
+      allOfficers.clear();
+      filteredAuthorities.clear();
       authortiyController.clear();
       notifyListeners();
-      
-      if (id == null || id.isEmpty) {
-        debugPrint("⚠️ Department ID is null or empty, cannot fetch authorities");
-        return;
-      }
-      
-      // Ensure token is available
-      if (token == null || token!.isEmpty) {
-        debugPrint("⚠️ Token not available for getAuthorities");
-        return;
-      }
-      
-      debugPrint("🔍 Calling POST /api/user/list-of-authorities-dropdown");
-      debugPrint("   Payload: {\"departmentId\": \"$id\"}");
+
+      if (id == null || id.isEmpty) return;
+
+      if (token == null || token!.isEmpty) return;
+
       showCustomDialogTransperent(isShowing: true);
 
       final model = RequestAuthoritiesModel(departemnetID: id);
@@ -355,60 +349,59 @@ class AddComplaintsViewModel extends BaseViewModel
         data: model,
       );
 
-      if (response.error != null) {
-        debugPrint("❌ API Error: ${response.error?.message}");
-        authoritiesLists = [];
-        notifyListeners();
-        showCustomDialogTransperent(isShowing: false);
-        return;
-      }
-
       if (response.data?.responseCode == 200) {
         final data = response.data?.data;
-        if (data == null) {
-          debugPrint("⚠️ Authorities data is null in response");
-          authoritiesLists = [];
-          notifyListeners();
-        } else if (data.isEmpty) {
-          debugPrint("⚠️ No authorities found for department: $id (empty list)");
-          CommonSnackbar(text: "No authorities found for this department").showToast();
-          authoritiesLists = [];
-          notifyListeners();
-        } else {
-          try {
-            // Data is already parsed as List<authorities.Data> from the model
-            authoritiesLists = data;
-            debugPrint("✅ Successfully loaded ${authoritiesLists.length} authorities");
-            // Log first authority for debugging
-            if (authoritiesLists.isNotEmpty) {
-              final firstAuth = authoritiesLists.first;
-              debugPrint("   Example authority - Name: ${firstAuth.name}, sId: ${firstAuth.sId}, authorityId: ${firstAuth.authorityId}");
-            }
-            notifyListeners();
-          } catch (e, stackTrace) {
-            debugPrint("❌ Error assigning authorities: $e");
-            debugPrint("Stack trace: $stackTrace");
-            debugPrint("   Data type: ${data.runtimeType}");
-            debugPrint("   Data content: $data");
-            authoritiesLists = [];
-            notifyListeners();
-          }
+        if (data != null) {
+          allOfficers = data;
+          filterByLevel(selectedLevel);
         }
-      } else {
-        debugPrint("⚠️ Failed to get authorities: ${response.data?.message}");
-        debugPrint("   Response code: ${response.data?.responseCode}");
-        authoritiesLists = [];
-        notifyListeners();
       }
-    } catch (err, stackTrace) {
+    } catch (err) {
       debugPrint("❌ Exception in getAuthorities: $err");
-      debugPrint("Stack Trace: $stackTrace");
-      authoritiesLists = [];
-      notifyListeners();
     } finally {
-      // Always dismiss loading dialog
       showCustomDialogTransperent(isShowing: false);
     }
+  }
+
+  void filterByLevel(String level) {
+    selectedLevel = level;
+    filteredAuthorities = [];
+    
+    for (var officer in allOfficers) {
+      // Handle new API structure (level1Details) - all items are level 1
+      if (officer.level1Details != null) {
+        // New API format: each officer is already a level 1 authority
+        if (level.trim().toLowerCase().contains("level 1") || 
+            level.trim().toLowerCase() == "1" ||
+            officer.level1Details!.level?.trim().toLowerCase().contains("level 1") == true) {
+          // Create Authority object from level1Details
+          // Use root name (officer.name) as primary, as it's the authority's actual name
+          // IMPORTANT: Use officer.sId (main authority _id) not level1Details.sId for API submission
+          final auth = authorities.Authority(
+            level: officer.level1Details!.level ?? "Level 1",
+            email: officer.level1Details!.email ?? (officer.email?.isNotEmpty == true ? officer.email!.first : null),
+            index: officer.level1Details!.index,
+            name: officer.name ?? officer.level1Details!.name, // Prioritize root name (authority name)
+            sId: officer.sId, // Use main authority _id (not level1Details._id) - this is what API expects
+          );
+          filteredAuthorities.add(auth);
+        }
+      }
+      // Handle old API structure (nested authority array) - for backward compatibility
+      else if (officer.authority != null) {
+        for (var auth in officer.authority!) {
+          if (auth.level?.trim() == level.trim()) {
+            if (auth.name == null || auth.name!.isEmpty) {
+              auth.name = officer.name;
+            }
+            filteredAuthorities.add(auth);
+          }
+        }
+      }
+    }
+    
+    authortiyController.clear();
+    notifyListeners();
   }
 
   //image
@@ -426,7 +419,8 @@ class AddComplaintsViewModel extends BaseViewModel
           title: TranslatedText(text: 'Take a Picture'),
           onTap: () {
             // 🔥 SAFE: Close bottom sheet first, then wait for next frame
-            final navContext = context ?? RouteManager.navigatorKey.currentState?.context;
+            final navContext =
+                context ?? RouteManager.navigatorKey.currentState?.context;
             if (navContext != null) {
               Navigator.of(navContext, rootNavigator: true).pop();
               // Wait for bottom sheet to fully dispose before opening camera
@@ -442,7 +436,8 @@ class AddComplaintsViewModel extends BaseViewModel
           leading: Icon(Icons.photo_library),
           title: TranslatedText(text: 'Choose from Gallery'),
           onTap: () async {
-            final navContext = context ?? RouteManager.navigatorKey.currentState?.context;
+            final navContext =
+                context ?? RouteManager.navigatorKey.currentState?.context;
             if (navContext != null) {
               Navigator.of(navContext, rootNavigator: true).pop();
             }
@@ -458,7 +453,8 @@ class AddComplaintsViewModel extends BaseViewModel
           leading: Icon(Icons.file_open),
           title: TranslatedText(text: 'Choose from Files'),
           onTap: () async {
-            final navContext = context ?? RouteManager.navigatorKey.currentState?.context;
+            final navContext =
+                context ?? RouteManager.navigatorKey.currentState?.context;
             if (navContext != null) {
               Navigator.of(navContext, rootNavigator: true).pop();
             }
@@ -486,14 +482,36 @@ class AddComplaintsViewModel extends BaseViewModel
       await Future.delayed(const Duration(milliseconds: 400));
 
       final file = await createCameraImage();
-      if (file != null && await file.exists()) {
-        final fileSize = await file.length();
-        if (fileSize > 0) {
-          multipleFiles.add(file);
-          notifyListeners();
-        } else {
+      
+      // Additional delay after image capture to let system stabilize (critical for older devices)
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      if (file != null) {
+        try {
+          // Validate file exists and is valid
+          if (await file.exists()) {
+            final fileSize = await file.length();
+            // Check file size is reasonable (max 5MB) and greater than 0
+            if (fileSize > 0 && fileSize < 5 * 1024 * 1024) {
+              // Use microtask to ensure UI is ready before processing
+              await Future.microtask(() {
+                multipleFiles.add(file);
+                notifyListeners();
+              });
+            } else {
+              CommonSnackbar(
+                text: "Image file is too large or invalid. Please try again.",
+              ).showAnimatedDialog(type: QuickAlertType.error);
+            }
+          } else {
+            CommonSnackbar(
+              text: "Image file not found. Please try again.",
+            ).showAnimatedDialog(type: QuickAlertType.error);
+          }
+        } catch (fileErr) {
+          debugPrint("Error validating file: $fileErr");
           CommonSnackbar(
-            text: "Image file is invalid. Please try again.",
+            text: "Failed to process image. Please try again.",
           ).showAnimatedDialog(type: QuickAlertType.error);
         }
       }
@@ -504,6 +522,8 @@ class AddComplaintsViewModel extends BaseViewModel
         text: "Failed to capture image. Please try again.",
       ).showAnimatedDialog(type: QuickAlertType.error);
     } finally {
+      // Additional delay before releasing lock to prevent rapid re-triggers
+      await Future.delayed(const Duration(milliseconds: 200));
       _isCameraOpening = false;
     }
   }

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/helpers/image_helper.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
@@ -81,9 +82,43 @@ mixin HandleMultipleFilesSheet {
       // Extra delay for low-RAM devices to ensure widget tree is stable
       await Future.delayed(const Duration(milliseconds: 400));
 
+      // Process image capture with additional error handling
       final files = await createImage();
+      
+      // Additional delay after image capture to let system stabilize (critical for older devices)
+      await Future.delayed(const Duration(milliseconds: 300));
+      
       if (files.isNotEmpty) {
-        onTap(Future.value(files));
+        // Validate files before passing to onTap
+        final validFiles = <File>[];
+        for (final file in files) {
+          try {
+            // Check if file exists and is valid
+            if (await file.exists()) {
+              final fileSize = await file.length();
+              // Only add if file size is reasonable (max 5MB)
+              if (fileSize > 0 && fileSize < 5 * 1024 * 1024) {
+                validFiles.add(file);
+              } else {
+                debugPrint("File size invalid: $fileSize bytes");
+              }
+            }
+          } catch (e) {
+            debugPrint("Error validating file: $e");
+            // Continue with other files even if one fails
+          }
+        }
+        
+        if (validFiles.isNotEmpty) {
+          // Use microtask to ensure UI is ready before processing
+          await Future.microtask(() {
+            onTap(Future.value(validFiles));
+          });
+        } else {
+          CommonSnackbar(
+            text: "Image file is invalid. Please try again.",
+          ).showAnimatedDialog(type: QuickAlertType.error);
+        }
       }
     } catch (err, stackTrace) {
       debugPrint("Error capturing image: $err");
@@ -92,6 +127,8 @@ mixin HandleMultipleFilesSheet {
         text: "Failed to capture image. Please try again.",
       ).showAnimatedDialog(type: QuickAlertType.error);
     } finally {
+      // Additional delay before releasing lock to prevent rapid re-triggers
+      await Future.delayed(const Duration(milliseconds: 200));
       _isCameraOpening = false;
     }
   }

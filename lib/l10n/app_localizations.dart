@@ -1019,7 +1019,7 @@ abstract class AppLocalizations {
   /// No description provided for @select_mla.
   ///
   /// In en, this message translates to:
-  /// **'Select MLA'**
+  /// **'Select Associate'**
   String get select_mla;
 
   /// No description provided for @select_associate.
@@ -1079,7 +1079,7 @@ abstract class AppLocalizations {
   /// No description provided for @mla_validator.
   ///
   /// In en, this message translates to:
-  /// **'Please select one MLA'**
+  /// **'Please select one Associate'**
   String get mla_validator;
 
   /// No description provided for @choose_your_associate.
@@ -1919,7 +1919,7 @@ abstract class AppLocalizations {
   /// No description provided for @notify_mla.
   ///
   /// In en, this message translates to:
-  /// **'Notify Mla'**
+  /// **'Notify Associate'**
   String get notify_mla;
 
   /// No description provided for @notify_description.

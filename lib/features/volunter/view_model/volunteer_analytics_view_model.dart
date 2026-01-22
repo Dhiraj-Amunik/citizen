@@ -55,6 +55,7 @@ class VolunteerAnalyticsViewModel extends BaseViewModel {
   int? get highestShareEvent => _analytics?.highestShareEvent;
   List<TopShareEventUser> get topShareEventUsers => _analytics?.topShareEventUsers ?? [];
   List<ShareEventGraphItem> get shareEventGraph => _analytics?.shareEventGraph ?? [];
+  MyVolunteerRank? get myVolunteerRank => _analytics?.myVolunteerRank;
 
   String get lastMonthLabel =>
       myAnalytics?.lastMonth?.trim().isNotEmpty == true

@@ -181,7 +181,6 @@ class _TopVolunteersViewState extends State<TopVolunteersView> {
                 ),
               ),
             );
-
           },
         );
       },

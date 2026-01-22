@@ -484,7 +484,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get appointment_list => 'अपॉइंटमेंट सूची';
 
   @override
-  String get select_mla => 'MLA चुनें';
+  String get select_mla => 'सहयोगी चुनें';
 
   @override
   String get select_associate => 'सहयोगी चुनें';
@@ -515,7 +515,7 @@ class AppLocalizationsHi extends AppLocalizations {
       'कृपया अपनी अपॉइंटमेंट तिथि चुनें';
 
   @override
-  String get mla_validator => 'कृपया एक MLA चुनें';
+  String get mla_validator => 'कृपया एक सहयोगी चुनें';
 
   @override
   String get choose_your_associate => 'अपने सहयोगी का चयन करें';
@@ -950,7 +950,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get notify => 'सूचित करें';
 
   @override
-  String get notify_mla => 'विधायक को सूचित करें';
+  String get notify_mla => 'सहयोगी को सूचित करें';
 
   @override
   String get notify_description =>

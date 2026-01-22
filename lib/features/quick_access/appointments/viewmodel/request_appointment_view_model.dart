@@ -135,14 +135,36 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
       await Future.delayed(const Duration(milliseconds: 400));
 
       final file = await createCameraImage();
-      if (file != null && await file.exists()) {
-        final fileSize = await file.length();
-        if (fileSize > 0) {
-          multipleFiles.add(file);
-          notifyListeners();
-        } else {
+      
+      // Additional delay after image capture to let system stabilize (critical for older devices)
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      if (file != null) {
+        try {
+          // Validate file exists and is valid
+          if (await file.exists()) {
+            final fileSize = await file.length();
+            // Check file size is reasonable (max 5MB) and greater than 0
+            if (fileSize > 0 && fileSize < 5 * 1024 * 1024) {
+              // Use microtask to ensure UI is ready before processing
+              await Future.microtask(() {
+                multipleFiles.add(file);
+                notifyListeners();
+              });
+            } else {
+              CommonSnackbar(
+                text: "Image file is too large or invalid. Please try again.",
+              ).showAnimatedDialog(type: QuickAlertType.error);
+            }
+          } else {
+            CommonSnackbar(
+              text: "Image file not found. Please try again.",
+            ).showAnimatedDialog(type: QuickAlertType.error);
+          }
+        } catch (fileErr) {
+          debugPrint("Error validating file: $fileErr");
           CommonSnackbar(
-            text: "Image file is invalid. Please try again.",
+            text: "Failed to process image. Please try again.",
           ).showAnimatedDialog(type: QuickAlertType.error);
         }
       }
@@ -153,6 +175,8 @@ class RequestAppointmentViewModel extends BaseViewModel with UploadFilesMixin {
         text: "Failed to capture image. Please try again.",
       ).showAnimatedDialog(type: QuickAlertType.error);
     } finally {
+      // Additional delay before releasing lock to prevent rapid re-triggers
+      await Future.delayed(const Duration(milliseconds: 200));
       _isCameraOpening = false;
     }
   }

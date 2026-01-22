@@ -337,7 +337,7 @@ class BeAVolunteerViewModel extends BaseViewModel {
         age: ageController.text.trim(),
         gender: originalGender!,
         occupation: originalOccupation!,
-        address: "",
+        address: addressController.text.trim(),
         areasOfInterest: originalInterests,
         availability: originalAvailability!,
         preferredTimeSlot: originalTimeSlot!,
@@ -424,6 +424,7 @@ class BeAVolunteerViewModel extends BaseViewModel {
     ageController.clear();
     genderController.clear();
     occupationController.clear();
+    addressController.clear();
     preferredTimeSlotsController.clear();
     hoursPerWeekController.clear();
     _hoursPerWeek = 0;

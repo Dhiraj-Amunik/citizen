@@ -84,14 +84,15 @@ class ComplaintThreadWidget extends StatelessWidget {
                     spacing: Dimens.gapX1,
                     children: [
                       ReadMoreWidget(
-                        text: _decodeUtf8(
+                        text: ComplaintHelper.decodeUtf8(
                           (thread.messages?.isNotEmpty == true)
                               ? thread.messages!.first.subject
                               : null
                         ) ?? "No Subject found !",
                         maxLines: 2,
                         style: textTheme.bodyMedium,
-                        forceTranslation: true, // Force translation for Hindi locale
+                        // Don't force translation - decoded text should display correctly as-is
+                        // forceTranslation can cause issues with already-decoded Hindi text
                       ),
                       ReadMoreWidget(
                         text: (thread.messages?.isNotEmpty == true)
@@ -164,14 +165,4 @@ class ComplaintThreadWidget extends StatelessWidget {
   }
 
   /// Attempt to fix subjects returned as double-encoded UTF-8 (e.g. "Ã Â¤Â…")
-  String? _decodeUtf8(String? value) {
-    if (value == null) return null;
-    if (!value.contains('Ã')) return value;
-    try {
-      final bytes = latin1.encode(value);
-      return utf8.decode(bytes, allowMalformed: false);
-    } catch (_) {
-      return value;
-    }
-  }
 }

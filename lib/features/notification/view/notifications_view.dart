@@ -40,18 +40,36 @@ class _NotificationsViewState extends State<NotificationsView>
       // Always load notifications when view is opened
       _notificationProvider = context.read<NotificationViewModel>();
       
-      // Clear the dot immediately when notifications view is opened (single click/open)
+      // CRITICAL: Clear the dot IMMEDIATELY and PERSISTENTLY when notifications view is opened
       // User has "seen" the notifications by opening the view, so clear the dot
+      // This must happen BEFORE loading notifications to prevent race conditions
       final updateNotificationVm = context.read<UpdateNotificationViewModel>();
       updateNotificationVm.showNotification = false;
-      // Also update SharedPreferences to persist the cleared state
-      SharedPreferences.getInstance().then((sharedPrefs) {
-        sharedPrefs.setBool('showNotification', false);
-      });
-      _hasClearedDotOnOpen = true; // Mark that we've cleared the dot
-      debugPrint("📬 [NotificationsView] ✅ Dot cleared immediately on view open");
       
+      // CRITICAL: Update SharedPreferences IMMEDIATELY and wait for it to complete
+      // This ensures the cleared state persists even if notifications load and try to update the dot
+      final sharedPrefs = await SharedPreferences.getInstance();
+      await sharedPrefs.setBool('showNotification', false);
+      await sharedPrefs.reload(); // Reload to ensure write is committed
+      
+      _hasClearedDotOnOpen = true; // Mark that we've cleared the dot
+      debugPrint("📬 [NotificationsView] ✅ Dot cleared immediately on view open and persisted");
+      
+      // Now load notifications - but the dot should stay cleared
       await _notificationProvider!.getNotifications();
+
+      // CRITICAL: After notifications load, ensure dot stays cleared
+      // Even if there are unread notifications, user has seen them by opening the view
+      // The dot should only show again if NEW notifications arrive AFTER this
+      if (mounted) {
+        final updateNotificationVmAfterLoad = context.read<UpdateNotificationViewModel>();
+        if (updateNotificationVmAfterLoad.showNotification) {
+          // If dot got set back to true (shouldn't happen, but just in case), clear it again
+          updateNotificationVmAfterLoad.showNotification = false;
+          await sharedPrefs.setBool('showNotification', false);
+          debugPrint("📬 [NotificationsView] ✅ Dot re-cleared after notifications load");
+        }
+      }
 
       // Don't re-update dot based on unread status here - user has already seen notifications
       // The dot will only show again if new notifications arrive after this
@@ -143,14 +161,27 @@ class _NotificationsViewState extends State<NotificationsView>
             final updateNotificationVm = context
                 .read<UpdateNotificationViewModel>();
             updateNotificationVm.showNotification = false;
-            // Also update SharedPreferences to persist the cleared state
-            SharedPreferences.getInstance().then((sharedPrefs) {
-              sharedPrefs.setBool('showNotification', false);
-            });
-            debugPrint("📬 [NotificationsView] ✅ Dot cleared on return to view");
+            
+            // CRITICAL: Update SharedPreferences IMMEDIATELY and wait for it to complete
+            final sharedPrefs = await SharedPreferences.getInstance();
+            await sharedPrefs.setBool('showNotification', false);
+            await sharedPrefs.reload(); // Reload to ensure write is committed
+            
+            _hasClearedDotOnOpen = true; // Mark that we've cleared the dot
+            debugPrint("📬 [NotificationsView] ✅ Dot cleared on return to view and persisted");
             
             final provider = context.read<NotificationViewModel>();
             await provider.getNotifications();
+            
+            // CRITICAL: After notifications load, ensure dot stays cleared
+            if (mounted) {
+              final updateNotificationVmAfterLoad = context.read<UpdateNotificationViewModel>();
+              if (updateNotificationVmAfterLoad.showNotification) {
+                updateNotificationVmAfterLoad.showNotification = false;
+                await sharedPrefs.setBool('showNotification', false);
+                debugPrint("📬 [NotificationsView] ✅ Dot re-cleared after notifications load on return");
+              }
+            }
             // Don't re-update dot based on unread status - user has already seen notifications
           }
         });
@@ -185,45 +216,52 @@ class _NotificationsViewState extends State<NotificationsView>
                   .where((n) => n.read == false || n.read == null)
                   .length;
 
-              // Only update dot when counts change AND it's not an automatic refresh
-              // We detect automatic refresh by checking if we're in the resumed state
-              if (currentCount != _lastNotificationCount ||
-                  currentUnreadCount != _lastUnreadCount) {
-                final previousUnreadCount = _lastUnreadCount;
-                _lastNotificationCount = currentCount;
-                _lastUnreadCount = currentUnreadCount;
-
-                // Only update dot if unread count DECREASED (user read notifications)
-                // AND we haven't already cleared the dot on this open
-                // Don't update if we've already cleared the dot - it should stay cleared
-                if (!_hasClearedDotOnOpen && 
-                    (previousUnreadCount == 0 ||
-                    currentUnreadCount < previousUnreadCount)) {
-                  // Update dot immediately when user reads notifications
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) {
-                      try {
-                        final updateNotificationVm = context
-                            .read<UpdateNotificationViewModel>();
-                        updateNotificationVm.updateDotFromNotificationsList(
-                          value.notificationsList,
-                        );
-                        debugPrint(
-                          "📬 [NotificationsView] Dot updated (user read): $currentCount notifications, $currentUnreadCount unread",
-                        );
-                      } catch (e) {
-                        debugPrint(
-                          "❌ [NotificationsView] Error updating dot: $e",
-                        );
-                      }
-                    }
-                  });
-                } else {
-                  // Dot already cleared on open OR new notifications arrived
-                  // Don't update dot - it should stay cleared once view is opened
+              // CRITICAL: If dot was cleared on open, NEVER update it based on unread count
+              // User has seen the notifications by opening the view, so dot should stay cleared
+              // The dot will only show again if NEW notifications arrive AFTER the view is opened
+              if (_hasClearedDotOnOpen) {
+                // Dot was cleared on open - ensure it stays cleared
+                // Don't update based on unread count - user has already seen notifications
+                if (currentCount != _lastNotificationCount ||
+                    currentUnreadCount != _lastUnreadCount) {
+                  _lastNotificationCount = currentCount;
+                  _lastUnreadCount = currentUnreadCount;
                   debugPrint(
-                    "📬 [NotificationsView] Skipping dot update - already cleared on open or new notifications",
+                    "📬 [NotificationsView] Dot cleared on open - skipping update (counts: $currentCount total, $currentUnreadCount unread)",
                   );
+                }
+              } else {
+                // Dot was NOT cleared on open (shouldn't happen, but handle it)
+                // Only update dot when counts change
+                if (currentCount != _lastNotificationCount ||
+                    currentUnreadCount != _lastUnreadCount) {
+                  final previousUnreadCount = _lastUnreadCount;
+                  _lastNotificationCount = currentCount;
+                  _lastUnreadCount = currentUnreadCount;
+
+                  // Only update dot if unread count DECREASED (user read notifications)
+                  if (previousUnreadCount == 0 ||
+                      currentUnreadCount < previousUnreadCount) {
+                    // Update dot immediately when user reads notifications
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        try {
+                          final updateNotificationVm = context
+                              .read<UpdateNotificationViewModel>();
+                          updateNotificationVm.updateDotFromNotificationsList(
+                            value.notificationsList,
+                          );
+                          debugPrint(
+                            "📬 [NotificationsView] Dot updated (user read): $currentCount notifications, $currentUnreadCount unread",
+                          );
+                        } catch (e) {
+                          debugPrint(
+                            "❌ [NotificationsView] Error updating dot: $e",
+                          );
+                        }
+                      }
+                    });
+                  }
                 }
               }
             }

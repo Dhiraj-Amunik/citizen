@@ -4,7 +4,12 @@ class ComplaintsModel {
   List<Data>? data;
   int? unreadMessageCount;
 
-  ComplaintsModel({this.responseCode, this.message, this.data, this.unreadMessageCount});
+  ComplaintsModel({
+    this.responseCode,
+    this.message,
+    this.data,
+    this.unreadMessageCount,
+  });
 
   ComplaintsModel.fromJson(Map<String, dynamic> json) {
     responseCode = json['responseCode'];
@@ -13,7 +18,7 @@ class ComplaintsModel {
     if (json['data'] != null) {
       // Handle changed API response structure
       final dataValue = json['data'];
-      
+
       if (dataValue is List) {
         // Original structure: data is a list
         data = <Data>[];
@@ -34,14 +39,14 @@ class ComplaintsModel {
         // Check for common keys
         final possibleKeys = ['complaints', 'data', 'items', 'results', 'list'];
         List<dynamic>? listData;
-        
+
         for (final key in possibleKeys) {
           if (dataValue.containsKey(key) && dataValue[key] is List) {
             listData = dataValue[key] as List;
             break;
           }
         }
-        
+
         if (listData != null) {
           data = <Data>[];
           listData.forEach((v) {
@@ -106,29 +111,32 @@ class Data {
   List<String>? followUpOptions;
   int? unreadMessageCount;
 
-  Data(
-      {this.sId,
-      this.userId,
-      this.department,
-      this.authorityName,
-      this.threadId,
-      this.toMail,
-      this.messages,
-      this.status,
-      this.isActive,
-      this.lastSyncedAt,
-      this.createdAt,
-      this.updatedAt,
-      this.iV,
-      this.isFollowUpDue,
-      this.followUpQuestion,
-      this.followUpOptions,
-      this.unreadMessageCount});
+  Data({
+    this.sId,
+    this.userId,
+    this.user,
+    this.department,
+    this.authorityName,
+    this.threadId,
+    this.toMail,
+    this.messages,
+    this.status,
+    this.isActive,
+    this.lastSyncedAt,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+    this.isFollowUpDue,
+    this.followUpQuestion,
+    this.followUpOptions,
+    this.unreadMessageCount,
+  });
 
   Data.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
-    userId =
-        json['userId'] != null ? new UserId.fromJson(json['userId']) : null;
+    userId = json['userId'] != null
+        ? new UserId.fromJson(json['userId'])
+        : null;
     user = json['user'] != null ? ComplaintUser.fromJson(json['user']) : null;
     department = json['department'] != null
         ? new Department.fromJson(json['department'])
@@ -154,6 +162,48 @@ class Data {
         ? List<String>.from(json['followUpOptions'])
         : null;
     unreadMessageCount = json['unreadMessageCount'];
+  }
+
+  Data copyWith({
+    String? sId,
+    UserId? userId,
+    ComplaintUser? user,
+    Department? department,
+    String? authorityName,
+    String? threadId,
+    String? toMail,
+    List<Messages>? messages,
+    String? status,
+    bool? isActive,
+    String? lastSyncedAt,
+    String? createdAt,
+    String? updatedAt,
+    int? iV,
+    bool? isFollowUpDue,
+    String? followUpQuestion,
+    List<String>? followUpOptions,
+    int? unreadMessageCount,
+  }) {
+    return Data(
+      sId: sId ?? this.sId,
+      userId: userId ?? this.userId,
+      user: user ?? this.user,
+      department: department ?? this.department,
+      authorityName: authorityName ?? this.authorityName,
+      threadId: threadId ?? this.threadId,
+      toMail: toMail ?? this.toMail,
+      messages: messages ?? this.messages,
+      status: status ?? this.status,
+      isActive: isActive ?? this.isActive,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      iV: iV ?? this.iV,
+      isFollowUpDue: isFollowUpDue ?? this.isFollowUpDue,
+      followUpQuestion: followUpQuestion ?? this.followUpQuestion,
+      followUpOptions: followUpOptions ?? this.followUpOptions,
+      unreadMessageCount: unreadMessageCount ?? this.unreadMessageCount,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -260,18 +310,19 @@ class Messages {
   bool? isRead;
   String? readAt;
 
-  Messages(
-      {this.from,
-      this.to,
-      this.subject,
-      this.snippet,
-      this.date,
-      this.body,
-      this.normalizedBody,
-      this.attachments,
-      this.sId,
-      this.isRead,
-      this.readAt});
+  Messages({
+    this.from,
+    this.to,
+    this.subject,
+    this.snippet,
+    this.date,
+    this.body,
+    this.normalizedBody,
+    this.attachments,
+    this.sId,
+    this.isRead,
+    this.readAt,
+  });
 
   Messages.fromJson(Map<String, dynamic> json) {
     from = json['from'];
@@ -327,12 +378,7 @@ class Messages {
 }
 
 class ComplaintUser {
-  ComplaintUser({
-    this.avatar,
-    this.name,
-    this.email,
-    this.phone,
-  });
+  ComplaintUser({this.avatar, this.name, this.email, this.phone});
 
   factory ComplaintUser.fromJson(Map<String, dynamic> json) {
     return ComplaintUser(
@@ -349,12 +395,7 @@ class ComplaintUser {
   final String? phone;
 
   Map<String, dynamic> toJson() {
-    return {
-      'avatar': avatar,
-      'name': name,
-      'email': email,
-      'phone': phone,
-    };
+    return {'avatar': avatar, 'name': name, 'email': email, 'phone': phone};
   }
 }
 

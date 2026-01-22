@@ -11,7 +11,17 @@ class BaseViewModel extends ChangeNotifier {
 
   initialize() async {
     controller = SessionController.instance;
-    await getToken();
+
+    // Initial load
+    await Future.wait([getToken(), getRole()]);
+
+    // Listen for future changes (e.g. after login/logout)
+    controller.userAuthChange.listen((model) {
+      _token = model?.token;
+      _role = model?.isPartyMemeber;
+      notifyListeners();
+    });
+
     await onInit();
   }
 

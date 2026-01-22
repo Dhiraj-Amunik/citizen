@@ -351,10 +351,11 @@ class NotificationCard extends StatelessWidget {
                       color: AppPalettes.lightTextColor,
                       fontSize: 14.spMax,
                     ),
-                    // Force translation for notify representative and complaint notifications
-                    // Don't translate chat notifications - they contain user names in registered language
-                    // Other notification types (appointments, etc.) should also be translated
                     forceTranslation: shouldForceTranslate,
+                    // Pass userName from metadata to preserve it during translation
+                    namesToPreserve: notification.metadata?.userName != null && notification.metadata!.userName!.trim().isNotEmpty
+                        ? [notification.metadata!.userName!.trim()]
+                        : null,
                   ),
                   Padding(
                     padding: REdgeInsets.only(

@@ -205,21 +205,54 @@ class ThreadViewModel extends BaseViewModel {
     // Note: Bottom sheet is already closed in handle_multiple_files_sheet.dart
     // No need to pop here as it would close the form page
     try {
+      // Add delay to let system stabilize after image capture (critical for older devices)
+      await Future.delayed(const Duration(milliseconds: 200));
+      
       final data = await future;
-      if (data != null) {
+      if (data != null && data is List) {
+        // Validate files before adding
+        final validFiles = <File>[];
+        for (final item in data) {
+          if (item is File) {
+            try {
+              if (await item.exists()) {
+                final fileSize = await item.length();
+                if (fileSize > 0 && fileSize < 5 * 1024 * 1024) {
+                  validFiles.add(item);
+                }
+              }
+            } catch (e) {
+              debugPrint("Error validating file in addFiles: $e");
+              // Continue with other files
+            }
+          }
+        }
+        
+        if (validFiles.isEmpty) {
+          CommonSnackbar(
+            text: "No valid files to add. Please try again.",
+          ).showAnimatedDialog(type: QuickAlertType.error);
+          return;
+        }
+        
         List<File> tempFiles = [...multipleFiles];
-        tempFiles.addAll(data);
+        tempFiles.addAll(validFiles);
         if (tempFiles.length >= 6) {
-          return CommonSnackbar(
+          CommonSnackbar(
             text: "Max 5 Files are accepted",
           ).showAnimatedDialog(type: QuickAlertType.warning);
-        } else {
-          multipleFiles.addAll(await future);
-          notifyListeners();
+          return;
         }
+        
+        multipleFiles.addAll(validFiles);
+        notifyListeners();
       }
-    } catch (err) {
-      debugPrint("-------->$err");
+    } catch (err, stackTrace) {
+      debugPrint("Error in addFiles: $err");
+      debugPrint("Stack trace: $stackTrace");
+      CommonSnackbar(
+        text: "Failed to add files. Please try again.",
+      ).showAnimatedDialog(type: QuickAlertType.error);
     }
   }
 
