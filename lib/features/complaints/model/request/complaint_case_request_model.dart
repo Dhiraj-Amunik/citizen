@@ -19,16 +19,9 @@ class ComplaintCaseRequestModel {
     if (response != null) {
       data['response'] = response;
     }
-    // Always include feedback (even if empty) to ensure it's sent to API
+    // Only include feedback if it's provided (not null)
     if (feedback != null) {
       data['feedback'] = feedback!.toJson();
-    } else {
-      // If feedback is null, create empty feedback object
-      data['feedback'] = FeedbackModel(
-        message: "",
-        rating: 0,
-        feedbackType: "",
-      ).toJson();
     }
     if (date != null) {
       data['date'] = date;
@@ -42,11 +35,7 @@ class FeedbackModel {
   int? rating;
   String? feedbackType;
 
-  FeedbackModel({
-    this.message,
-    this.rating,
-    this.feedbackType,
-  });
+  FeedbackModel({this.message, this.rating, this.feedbackType});
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
@@ -59,34 +48,3 @@ class FeedbackModel {
     return data;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

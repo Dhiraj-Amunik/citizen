@@ -26,10 +26,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.initState();
     // Add app lifecycle observer to detect when app resumes
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Initialize locale synchronously (now safe since GeneralStream has default value)
     _currentLocale = GeneralStream.instance.locale;
-    
+
     // Listen to locale changes and update only when needed
     _localeSubscription = GeneralStream.instance.language.listen((locale) {
       if (mounted && _currentLocale != locale) {
@@ -76,8 +76,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return ScreenUtilInit(
       designSize: const Size(384.0, 832.0),
       minTextAdapt: true,
-      ensureScreenSize: true,
+      ensureScreenSize: false,
       splitScreenMode: true,
+
       builder: (_, _) {
         return RestartApp(
           child: MultiProvider(

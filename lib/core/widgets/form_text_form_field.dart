@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -25,7 +24,6 @@ class FormTextFormField extends StatefulWidget {
   final TextEditingController? controller;
   final bool? showCursor;
   final String? hintText;
-
   final TextStyle? textStyle;
   final TextStyle? headingStyle;
   final TextStyle? labelStyle;
@@ -880,15 +878,15 @@ class _FormTextFormFieldState extends State<FormTextFormField>
         }
       }
       
-      // Handle correction: replace mic session text instead of appending
+        // Handle correction: replace mic session text instead of appending
       if (isCorrection) {
         final baseText = _micSessionBaseText;
         var trimmedRecognized = recognizedWords.trim();
         
-        // For number fields, remove all spaces from speech input
+        // For number fields, extract only digits from speech input
         final isNumberField = _isNumberField(widget.keyboardType);
         if (isNumberField) {
-          trimmedRecognized = trimmedRecognized.replaceAll(RegExp(r'\s+'), ''); // Remove all spaces
+          trimmedRecognized = _extractDigitsOnly(trimmedRecognized);
         }
         
         // Edge case #2: Check if baseText already ends with recognizedWords (typed + spoken overlap)
@@ -987,10 +985,10 @@ class _FormTextFormFieldState extends State<FormTextFormField>
         // Get current controller text (already has previous results + baseText)
         var updatedText = controller.text;
         
-        // For number fields, remove all spaces from speech input
+        // For number fields, extract only digits from speech input
         final isNumberField = _isNumberField(widget.keyboardType);
         if (isNumberField) {
-          newWords = newWords.replaceAll(RegExp(r'\s+'), ''); // Remove all spaces
+          newWords = _extractDigitsOnly(newWords);
         }
         
         // Add space if needed before appending new words (only for non-number fields)
@@ -1053,11 +1051,11 @@ class _FormTextFormFieldState extends State<FormTextFormField>
         // Append translated words to current text
         var updatedText = currentText;
         
-        // For number fields, remove all spaces from translated words
+        // For number fields, extract only digits from translated words
         final isNumberField = _isNumberField(widget.keyboardType);
         var processedTranslatedWords = translatedWords;
         if (isNumberField) {
-          processedTranslatedWords = translatedWords.replaceAll(RegExp(r'\s+'), ''); // Remove all spaces
+          processedTranslatedWords = _extractDigitsOnly(translatedWords);
         }
         
         // Add space if needed before appending (only for non-number fields)
@@ -1096,12 +1094,21 @@ class _FormTextFormFieldState extends State<FormTextFormField>
         
         // Append original new words to current text
         var updatedText = cleanCurrentText;
-        if (updatedText.isNotEmpty && 
+        
+        // For number fields, extract only digits from speech input
+        final isNumberField = _isNumberField(widget.keyboardType);
+        var processedNewWords = newWords;
+        if (isNumberField) {
+          processedNewWords = _extractDigitsOnly(newWords);
+        }
+        
+        // Add space if needed (only for non-number fields)
+        if (!isNumberField && updatedText.isNotEmpty && 
             !_endsWithWhitespace(updatedText) && 
-            newWords.isNotEmpty) {
+            processedNewWords.isNotEmpty) {
           updatedText += ' ';
         }
-        updatedText += newWords;
+        updatedText += processedNewWords;
 
         if (widget.enforceFirstLetterUppercase &&
             !_containsNonAsciiCharacters(updatedText)) {
@@ -1775,6 +1782,13 @@ class _FormTextFormFieldState extends State<FormTextFormField>
   /// Android sometimes sends double spaces or trailing spaces that cause false corrections
   String _normalizeSpeech(String text) {
     return text.replaceAll(RegExp(r'\s+'), ' ').trim().toLowerCase();
+  }
+
+  /// Extract only numeric digits from speech input for number fields
+  /// This ensures that only integers are accepted when using microphone input
+  String _extractDigitsOnly(String text) {
+    // Remove all non-digit characters, keeping only 0-9
+    return text.replaceAll(RegExp(r'[^\d]'), '');
   }
 
   void _updateControllerText(
