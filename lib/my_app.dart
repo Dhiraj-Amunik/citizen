@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       minTextAdapt: true,
       ensureScreenSize: false,
       splitScreenMode: true,
-
+      useInheritedMediaQuery: true,
       builder: (_, _) {
         return RestartApp(
           child: MultiProvider(
@@ -93,11 +93,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,
               ],
+
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.lightTheme,
               initialRoute: Routes.wrapperPage.path,
               navigatorKey: RouteManager.navigatorKey,
               onGenerateRoute: RouteManager.onGenerateRoute,
+              builder: (context, child) {
+                return MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: const TextScaler.linear(1.0)),
+                  child: child!,
+                );
+              },
             ),
           ),
         );

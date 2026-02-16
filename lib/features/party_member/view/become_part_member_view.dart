@@ -33,10 +33,11 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
         provider.autoFillData(profile.profile);
 
         // Check if Hindi keyboard might be shown (Hindi language)
-        final isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+        final isHindiLanguage =
+            GeneralStream.instance.locale.languageCode == 'hi';
         // Hindi keyboard height is approximately 300px
         const hindiKeyboardHeight = 300.0;
-        
+
         return Consumer<BecomePartyMemViewModel>(
           builder: (context, value, _) {
             return Scaffold(
@@ -47,270 +48,289 @@ class BecomePartMemberView extends StatelessWidget with DateAndTimePicker {
                   final hasFocus = FocusScope.of(context).hasFocus;
                   final viewInsets = MediaQuery.of(context).viewInsets.bottom;
                   // Show padding if system keyboard is showing OR if Hindi keyboard might be showing (Hindi mode + focus)
-                  final shouldShowKeyboardPadding = isHindiLanguage && hasFocus && viewInsets == 0;
-                  
+                  final shouldShowKeyboardPadding =
+                      isHindiLanguage && hasFocus && viewInsets == 0;
+
                   return SingleChildScrollView(
                     padding: EdgeInsets.only(
                       // Only add extra padding for Hindi locale, not for English
-                      bottom: shouldShowKeyboardPadding 
-                          ? hindiKeyboardHeight 
+                      bottom: shouldShowKeyboardPadding
+                          ? hindiKeyboardHeight
                           : viewInsets,
                     ),
                     child: Form(
-                  key: value.formKey,
-                  autovalidateMode: provider.autoValidateMode,
-                  child:
-                      Column(
-                        children: [
-                          Visibility(
-                            visible: provider.visibility,
-                            child: Column(
-                              spacing: Dimens.textFromSpacing,
-                              children: [
-                                FormTextFormField(
-                                  isRequired: true,
-                                  headingText: localization.full_name,
-                                  hintText: localization.enter_your_full_name,
-                                  nextFocus: provider.parentNameFocus,
-                                  controller: provider.fullNameController,
-                                textCapitalization: TextCapitalization.sentences,
-                                enforceFirstLetterUppercase: true,
-                                  enableSpeechInput: true,
-                                  keyboardType: TextInputType.name,
-                                  validator: (text) => text?.validateName(
-                                    argument: localization.name_validator,
-                                  ),
-                                ),
-                                FormTextFormField(
-                                  isRequired: true,
-                                  headingText: localization.parents_name,
-                                  focus: provider.parentNameFocus,
-                                  nextFocus: provider.mobileFocus,
-                                  hintText: localization.enter_parent_name,
-                                  controller: provider.parentNameController,
-                                textCapitalization: TextCapitalization.sentences,
-                                enforceFirstLetterUppercase: true,
-                                  enableSpeechInput: true,
-                                  keyboardType: TextInputType.name,
-                                  validator: (text) => text?.validateName(
-                                    argument: localization.enter_parent_name,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (provider.visibility)
-                            SizedBox(height: Dimens.textFromSpacing),
-                          FormTextFormField(
-                            isRequired: true,
-                            // enabled: !provider.visibility,
-                            headingText: localization.mobile_number,
-                            focus: provider.mobileFocus,
-                            hintText: localization.enter_mobile_number,
-                            controller: provider.mobileNumberController,
-                            maxLength: 10,
-                            enableSpeechInput: true,
-                            textCapitalization: TextCapitalization.sentences,
-                            enforceFirstLetterUppercase: true,
-                            keyboardType: TextInputType.phone,
-                            validator: (value) => value?.validateNumber(
-                              argument: localization.phone_validator,
-                            ),
-                            onChanged: (text) {
-                              if (profile.profile?.phone != null &&
-                                  profile.profile!.phone!.trim() == text) {
-                                provider.autoFillData(profile.profile);
-                              }
-                            },
-                          ),
-                          SizedBox(height: Dimens.textFromSpacing),
-                          Visibility(
-                            visible: provider.visibility,
-                            child: Column(
-                              spacing: Dimens.textFromSpacing,
-                              children: [
-                                FormTextFormField(
-                                  isRequired: true,
-                                  headingText: localization.date_of_birth,
-                                  hintText: localization.dd_mm_yyyy,
-                                  keyboardType: TextInputType.none,
-                                  controller: provider.dobController,
-                                  suffixIcon: AppImages.calenderIcon,
-                                  showCursor: false,
-                                  onTap: () async {
-                                    final date = await customDatePicker();
-                                    if (date != null) {
-                                      provider.dobController.text =
-                                          userDateFormat(date);
-                                      provider.companyDateFormat =
-                                          companyDateFormat(date);
-                                    }
-                                  },
-                                  validator: (text) => text?.validate(
-                                    argument:
-                                        localization.date_of_birth_validator,
-                                  ),
-                                ),
-                                FormCommonDropDown<String>(
-                                  isRequired: true,
-                                  heading: localization.gender,
-                                  controller: provider.genderController,
-                                  items: provider.gendersList,
-                                  hintText: localization.select_gender,
-                                  listItemBuilder: (context, item, _, __) {
-                                    return TranslatedText(
-                                      text: item,
-                                      style: context.textTheme.bodySmall,
-                                      disableTranslation: true,
-                                    );
-                                  },
-                                  headerBuilder: (context, item, _) {
-                                    return TranslatedText(
-                                      text: item,
-                                      style: context.textTheme.bodySmall,
-                                      disableTranslation: true,
-                                    );
-                                  },
-                                  validator: (text) =>
-                                      text.toString().validateDropDown(
-                                        argument: localization.gender_validator,
+                      key: value.formKey,
+                      autovalidateMode: provider.autoValidateMode,
+                      child:
+                          Column(
+                            children: [
+                              Visibility(
+                                visible: provider.visibility,
+                                child: Column(
+                                  spacing: Dimens.textFromSpacing,
+                                  children: [
+                                    FormTextFormField(
+                                      isRequired: true,
+                                      headingText: localization.full_name,
+                                      hintText:
+                                          localization.enter_your_full_name,
+                                      nextFocus: provider.parentNameFocus,
+                                      controller: provider.fullNameController,
+                                      textCapitalization:
+                                          TextCapitalization.sentences,
+                                      enforceFirstLetterUppercase: true,
+                                      enableSpeechInput: true,
+                                      keyboardType: TextInputType.name,
+                                      validator: (text) => text?.validateName(
+                                        argument: localization.name_validator,
                                       ),
-                                ),
-                                FormCommonDropDown<String>(
-                                  isRequired: true,
-                                  heading: localization.marital_status,
-                                  controller: provider.maritalStatusController,
-                                  items: provider.maritalStatusList,
-                                  hintText: localization.select_status,
-                                  listItemBuilder: (context, item, _, __) {
-                                    return TranslatedText(
-                                      text: item,
-                                      style: context.textTheme.bodySmall,
-                                      disableTranslation: true,
-                                    );
-                                  },
-                                  headerBuilder: (context, item, _) {
-                                    return TranslatedText(
-                                      text: item,
-                                      style: context.textTheme.bodySmall,
-                                      disableTranslation: true,
-                                    );
-                                  },
-                                  validator: (text) =>
-                                      text.toString().validateDropDown(
-                                        argument: localization.select_status,
+                                    ),
+                                    FormTextFormField(
+                                      isRequired: true,
+                                      headingText: localization.parents_name,
+                                      focus: provider.parentNameFocus,
+                                      nextFocus: provider.mobileFocus,
+                                      hintText: localization.enter_parent_name,
+                                      controller: provider.parentNameController,
+                                      textCapitalization:
+                                          TextCapitalization.sentences,
+                                      enforceFirstLetterUppercase: true,
+                                      enableSpeechInput: true,
+                                      keyboardType: TextInputType.name,
+                                      validator: (text) => text?.validateName(
+                                        argument:
+                                            localization.enter_parent_name,
                                       ),
+                                    ),
+                                  ],
                                 ),
-                                AssemblyConstituencyDropDownWidget(
-                                  constituencyController:
-                                      provider.constituencyController,
-                                  initialData: profile.assemblyConstituencyData,
+                              ),
+                              if (provider.visibility)
+                                SizedBox(height: Dimens.textFromSpacing),
+                              FormTextFormField(
+                                isRequired: true,
+                                // enabled: !provider.visibility,
+                                headingText: localization.mobile_number,
+                                focus: provider.mobileFocus,
+                                hintText: localization.enter_mobile_number,
+                                controller: provider.mobileNumberController,
+                                maxLength: 10,
+                                enableSpeechInput: true,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                enforceFirstLetterUppercase: true,
+                                keyboardType: TextInputType.phone,
+                                validator: (value) => value?.validateNumber(
+                                  argument: localization.phone_validator,
                                 ),
-
-                                Consumer<BecomePartyMemViewModel>(
-                                  builder: (contextP, value, _) {
-                                    return UploadMultiFilesWidget(
-                                      onTap: () {
-                                        // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
-                                        showModalBottomSheet(
-                                          context: context,
-                                          isScrollControlled: false,
-                                          useRootNavigator: true,
-                                          builder: (context) => Padding(
-                                            padding: EdgeInsets.only(
-                                              bottom: MediaQuery.of(context).viewInsets.bottom,
-                                            ),
-                                            child: value.selectMultipleImages(context: context),
-                                          ),
+                                onChanged: (text) {
+                                  if (profile.profile?.phone != null &&
+                                      profile.profile!.phone!.trim() == text) {
+                                    provider.autoFillData(profile.profile);
+                                  }
+                                },
+                              ),
+                              SizedBox(height: Dimens.textFromSpacing),
+                              Visibility(
+                                visible: provider.visibility,
+                                child: Column(
+                                  spacing: Dimens.textFromSpacing,
+                                  children: [
+                                    FormTextFormField(
+                                      isRequired: true,
+                                      headingText: localization.date_of_birth,
+                                      hintText: localization.dd_mm_yyyy,
+                                      keyboardType: TextInputType.none,
+                                      controller: provider.dobController,
+                                      suffixIcon: AppImages.calenderIcon,
+                                      showCursor: false,
+                                      onTap: () async {
+                                        final date = await customDatePicker();
+                                        if (date != null) {
+                                          provider.dobController.text =
+                                              userDateFormat(date);
+                                          provider.companyDateFormat =
+                                              companyDateFormat(date);
+                                        }
+                                      },
+                                      validator: (text) => text?.validate(
+                                        argument: localization
+                                            .date_of_birth_validator,
+                                      ),
+                                    ),
+                                    FormCommonDropDown<String>(
+                                      isRequired: true,
+                                      heading: localization.gender,
+                                      controller: provider.genderController,
+                                      items: provider.gendersList,
+                                      hintText: localization.select_gender,
+                                      listItemBuilder: (context, item, _, __) {
+                                        return TranslatedText(
+                                          text: item,
+                                          style: context.textTheme.bodySmall,
+                                          disableTranslation: true,
                                         );
                                       },
-                                      onRemove: (int index) =>
-                                          value.removeImage(index),
-                                      multipleFiles: value.multipleFiles,
-                                    );
-                                  },
+                                      headerBuilder: (context, item, _) {
+                                        return TranslatedText(
+                                          text: item,
+                                          style: context.textTheme.bodySmall,
+                                          disableTranslation: true,
+                                        );
+                                      },
+                                      validator: (text) =>
+                                          text.toString().validateDropDown(
+                                            argument:
+                                                localization.gender_validator,
+                                          ),
+                                    ),
+                                    FormCommonDropDown<String>(
+                                      isRequired: true,
+                                      heading: localization.marital_status,
+                                      controller:
+                                          provider.maritalStatusController,
+                                      items: provider.maritalStatusList,
+                                      hintText: localization.select_status,
+                                      listItemBuilder: (context, item, _, __) {
+                                        return TranslatedText(
+                                          text: item,
+                                          style: context.textTheme.bodySmall,
+                                          disableTranslation: true,
+                                        );
+                                      },
+                                      headerBuilder: (context, item, _) {
+                                        return TranslatedText(
+                                          text: item,
+                                          style: context.textTheme.bodySmall,
+                                          disableTranslation: true,
+                                        );
+                                      },
+                                      validator: (text) =>
+                                          text.toString().validateDropDown(
+                                            argument:
+                                                localization.select_status,
+                                          ),
+                                    ),
+                                    AssemblyConstituencyDropDownWidget(
+                                      constituencyController:
+                                          provider.constituencyController,
+                                      initialData:
+                                          profile.assemblyConstituencyData,
+                                    ),
+
+                                    Consumer<BecomePartyMemViewModel>(
+                                      builder: (contextP, value, _) {
+                                        return UploadMultiFilesWidget(
+                                          onTap: () {
+                                            // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
+                                            showModalBottomSheet(
+                                              context: context,
+                                              isScrollControlled: false,
+                                              useRootNavigator: true,
+                                              builder: (context) => Padding(
+                                                padding: EdgeInsets.only(
+                                                  bottom: MediaQuery.of(
+                                                    context,
+                                                  ).viewInsets.bottom,
+                                                ),
+                                                child: value
+                                                    .selectMultipleImages(
+                                                      context: context,
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                          onRemove: (int index) =>
+                                              value.removeImage(index),
+                                          multipleFiles: value.multipleFiles,
+                                        );
+                                      },
+                                    ),
+                                    // Column(
+                                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                                    //   children: [
+                                    //     Text(
+                                    //       localization.photography,
+                                    //       style: context.textTheme.bodySmall,
+                                    //     ).onlyPadding(bottom: Dimens.gapX1B),
+                                    //     Consumer<BecomePartyMemViewModel>(
+                                    //       builder: (context, value, _) {
+                                    //         return ImageWidget(
+                                    //           onTap: () => provider.selectImage(),
+                                    //           onRemoveTap: () =>
+                                    //               provider.removeImage(),
+                                    //           imageFile:
+                                    //               provider.photographyPicture,
+                                    //         );
+                                    //       },
+                                    //     ),
+                                    //   ],
+                                    // ),
+                                    // FormTextFormField(
+                                    //   showCounterText: true,
+                                    //   headingText:
+                                    //       localization.reason_for_joining_party,
+                                    //   hintText: localization.explain_why_join_party,
+                                    //   controller: provider.reasonController,
+                                    //   maxLength: 150,
+                                    //   maxLines: 5,
+                                    //   // validator: (text) => text?.validate(
+                                    //   //   argument:
+                                    //   //       "Please enter reason for joining our party",
+                                    //   // ),
+                                    // ),
+                                  ],
                                 ),
-                                // Column(
-                                //   crossAxisAlignment: CrossAxisAlignment.start,
-                                //   children: [
-                                //     Text(
-                                //       localization.photography,
-                                //       style: context.textTheme.bodySmall,
-                                //     ).onlyPadding(bottom: Dimens.gapX1B),
-                                //     Consumer<BecomePartyMemViewModel>(
-                                //       builder: (context, value, _) {
-                                //         return ImageWidget(
-                                //           onTap: () => provider.selectImage(),
-                                //           onRemoveTap: () =>
-                                //               provider.removeImage(),
-                                //           imageFile:
-                                //               provider.photographyPicture,
-                                //         );
-                                //       },
-                                //     ),
-                                //   ],
-                                // ),
-                                // FormTextFormField(
-                                //   showCounterText: true,
-                                //   headingText:
-                                //       localization.reason_for_joining_party,
-                                //   hintText: localization.explain_why_join_party,
-                                //   controller: provider.reasonController,
-                                //   maxLength: 150,
-                                //   maxLines: 5,
-                                //   // validator: (text) => text?.validate(
-                                //   //   argument:
-                                //   //       "Please enter reason for joining our party",
-                                //   // ),
-                                // ),
-                              ],
-                            ),
+                              ),
+                            ],
+                          ).symmetricPadding(
+                            horizontal: Dimens.horizontalspacing,
+                            vertical: Dimens.paddingX2,
                           ),
-                        ],
-                      ).symmetricPadding(
-                        horizontal: Dimens.horizontalspacing,
-                        vertical: Dimens.paddingX2,
-                      ),
                     ),
-                );}),
-              bottomNavigationBar:
-                  Row(
-                        spacing: Dimens.gapX3,
-                        children: [
-                          CommonButton(
-                            onTap: () => provider.clear(),
-                            color: AppPalettes.whiteColor,
-                            borderColor: AppPalettes.primaryColor,
-                            textColor: AppPalettes.primaryColor,
-                            text: localization.clear,
-                            fullWidth: false,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: Dimens.paddingX8,
-                              vertical: Dimens.paddingX3,
-                            ),
-                          ),
-                          Expanded(
-                            child: CommonButton(
+                  );
+                },
+              ),
+              bottomNavigationBar: SafeArea(
+                child:
+                    Row(
+                          spacing: Dimens.gapX3,
+                          children: [
+                            CommonButton(
+                              onTap: () => provider.clear(),
+                              color: AppPalettes.whiteColor,
+                              borderColor: AppPalettes.primaryColor,
+                              textColor: AppPalettes.primaryColor,
+                              text: localization.clear,
+                              fullWidth: false,
                               padding: EdgeInsets.symmetric(
+                                horizontal: Dimens.paddingX8,
                                 vertical: Dimens.paddingX3,
                               ),
-                              isAnimationEnable: provider.isEnable,
-                              isEnable: provider.isEnable,
-                              isLoading: provider.isLoading,
-                              text: localization.submit_application,
-                              onTap: () => provider.submitApplication(
-                                parlimentConstituencyID:
-                                    profile.parlimentaryConstituencyData?.sId,
+                            ),
+                            Expanded(
+                              child: CommonButton(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: Dimens.paddingX3,
+                                ),
+                                isAnimationEnable: provider.isEnable,
+                                isEnable: provider.isEnable,
+                                isLoading: provider.isLoading,
+                                text: localization.submit_application,
+                                onTap: () => provider.submitApplication(
+                                  parlimentConstituencyID:
+                                      profile.parlimentaryConstituencyData?.sId,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      )
-                      .symmetricPadding(horizontal: Dimens.horizontalspacing)
-                      .onlyPadding(
-                        top: Dimens.textFromSpacing,
-                        bottom: Dimens.verticalspacing,
-                      ),
+                          ],
+                        )
+                        .symmetricPadding(horizontal: Dimens.horizontalspacing)
+                        .onlyPadding(
+                          top: Dimens.textFromSpacing,
+                          bottom: Dimens.verticalspacing,
+                        ),
+              ),
             );
           },
         );

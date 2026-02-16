@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
-import 'package:inldsevak/core/extensions/padding_extension.dart';
+
 import 'package:inldsevak/core/extensions/validation_extension.dart';
 import 'package:inldsevak/core/mixin/dateTime_mixin.dart';
 import 'package:inldsevak/core/utils/app_images.dart';
@@ -37,10 +37,11 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
         final provider = context.read<RequestAppointmentViewModel>();
         final textTheme = context.textTheme;
         // Check if Hindi keyboard might be shown (Hindi language)
-        final isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+        final isHindiLanguage =
+            GeneralStream.instance.locale.languageCode == 'hi';
         // Hindi keyboard height is approximately 300px
         const hindiKeyboardHeight = 300.0;
-        
+
         return Scaffold(
           appBar: commonAppBar(title: localization.request_appointment),
           body: Builder(
@@ -49,13 +50,14 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
               final hasFocus = FocusScope.of(context).hasFocus;
               final viewInsets = MediaQuery.of(context).viewInsets.bottom;
               // Show padding if system keyboard is showing OR if Hindi keyboard might be showing (Hindi mode + focus)
-              final shouldShowKeyboardPadding = isHindiLanguage && hasFocus && viewInsets == 0;
-              
+              final shouldShowKeyboardPadding =
+                  isHindiLanguage && hasFocus && viewInsets == 0;
+
               return SingleChildScrollView(
                 padding: EdgeInsets.only(
                   // Only add extra padding for Hindi locale, not for English
                   bottom: isHindiLanguage && shouldShowKeyboardPadding
-                      ? hindiKeyboardHeight 
+                      ? hindiKeyboardHeight
                       : (viewInsets > 0 ? viewInsets : 0),
                 ),
                 child: Padding(
@@ -71,135 +73,172 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                         child: Column(
                           spacing: Dimens.textFromSpacing,
                           children: [
-                        MlaDropDownWidget(
-                          mlaController: provider.mlaController,
-                        ),
-                        FormCommonDropDown<BookFor?>(
-                          isRequired: true,
-                          heading: localization.book_for,
-                          controller: provider.bookForController,
-                          items: provider.bookForList,
-                          headerBuilder: (context, data, _) {
-                            final text = data?.key == 'self' 
-                                ? localization.my_self 
-                                : localization.others;
-                            return Text(
-                              text,
-                              style: textTheme.bodySmall,
-                            );
-                          },
-                          listItemBuilder: (context, data, _, _) {
-                            final text = data?.key == 'self' 
-                                ? localization.my_self 
-                                : localization.others;
-                            return Text(
-                              text,
-                              style: textTheme.bodySmall,
-                            );
-                          },
-                          onChanged: (data) {
-                            if (data?.key == 'self') {
-                              provider.autoFillData(profileProvider);
-                            } else {
-                              provider.clearAutoFill();
-                            }
-                          },
-                          validator: (text) => text.toString().validateDropDown(
-                            argument: localization.dropdown_validator,
-                          ),
-                        ),
-                        FormTextFormField(
-                          isRequired: true,
-                            enableSpeechInput: true,
-                            textCapitalization: TextCapitalization.sentences,
-                            enforceFirstLetterUppercase: true,
-                          headingText: localization.name,
-                          minChar: 5,
-                          hintText: localization.enter_your_full_name,
-                          controller: provider.nameController,
-                          keyboardType: TextInputType.name,
-                          validator: (text) => text?.validate(
-                            argument: localization.name_validator,
-                          ),
-                        ),
-                        if (roleProvider.isPartyMember)
-                          FormTextFormField( 
-                             enableSpeechInput: true,
-                             textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                            isRequired: true,
-                            headingText: localization.membership_id,
-                            hintText: localization.membership_id,
-                            controller: provider.membershipController,
-                            keyboardType: TextInputType.name,
-                            validator: (text) => text?.validate(
-                              argument: localization.membership_validator,
+                            MlaDropDownWidget(
+                              mlaController: provider.mlaController,
                             ),
-                          ),
-                        FormTextFormField(
-                          maxLength: 10,
-                          isRequired: true,
-                            enableSpeechInput: true,
-                          headingText: localization.phone_number,
-                          hintText: localization.enter_mobile_number,
-                          controller: provider.phoneNumberController,
-                          keyboardType: TextInputType.number,
-                          textCapitalization: TextCapitalization.sentences,
-                          enforceFirstLetterUppercase: true,
-                          validator: (text) => text?.validateNumber(
-                            argument: localization
-                                .please_provide_valid_10_digit_number,
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            FormTextFormField(
+                            FormCommonDropDown<BookFor?>(
                               isRequired: true,
-                              headingText: localization.preferred_date,
-                              keyboardType: TextInputType.none,
-                              hintText: localization.dd_mm_yyyy,
-                              controller: provider.dateController,
-                              suffixIcon: AppImages.calenderIcon,
-                              showCursor: false,
-                              onTap: () async {
-                                final date = await customDatePicker(
-                                  startDate: DateTime.now(),
-                                  endDate: DateTime(
-                                    DateTime.now().year,
-                                    DateTime.now().month + 2,
-                                  ),
-                                );
-                                if (date != null) {
-                                  provider.companyDateFormat = date
-                                      .toString()
-                                      .toYyyyMmDd();
-                                  provider.dateController.text =
-                                      provider.companyDateFormat
-                                          ?.toDdMmYyyy() ??
-                                      "";
+                              heading: localization.book_for,
+                              controller: provider.bookForController,
+                              items: provider.bookForList,
+                              headerBuilder: (context, data, _) {
+                                final text = data?.key == 'self'
+                                    ? localization.my_self
+                                    : localization.others;
+                                return Text(text, style: textTheme.bodySmall);
+                              },
+                              listItemBuilder: (context, data, _, _) {
+                                final text = data?.key == 'self'
+                                    ? localization.my_self
+                                    : localization.others;
+                                return Text(text, style: textTheme.bodySmall);
+                              },
+                              onChanged: (data) {
+                                if (data?.key == 'self') {
+                                  provider.autoFillData(profileProvider);
+                                } else {
+                                  provider.clearAutoFill();
                                 }
                               },
-                              validator: (text) => text?.validate(
-                                argument: localization
-                                    .please_select_your_appointment_date,
-                              ),
+                              validator: (text) =>
+                                  text.toString().validateDropDown(
+                                    argument: localization.dropdown_validator,
+                                  ),
                             ),
-                            SizeBox.sizeHX2,
-                            Text(
-                              localization.appointment_note,
-                              style: textTheme.labelSmall?.copyWith(
-                                color: AppPalettes.redColor,
-                              ),
-                              textAlign: TextAlign.justify,
-                            ).horizontalPadding(Dimens.paddingX2),
-                            SizeBox.sizeHX1B,
                             FormTextFormField(
                               isRequired: true,
-                              headingText: localization.purpose_of_appointment,
-                              hintText:
-                                  localization.enter_your_appointment_reason,
-                              controller:
-                                  provider.purposeOfAppointmentController,
+                              enableSpeechInput: true,
+                              textCapitalization: TextCapitalization.sentences,
+                              enforceFirstLetterUppercase: true,
+                              headingText: localization.name,
+                              minChar: 5,
+                              hintText: localization.enter_your_full_name,
+                              controller: provider.nameController,
+                              keyboardType: TextInputType.name,
+                              validator: (text) => text?.validate(
+                                argument: localization.name_validator,
+                              ),
+                            ),
+                            if (roleProvider.isPartyMember)
+                              FormTextFormField(
+                                enableSpeechInput: true,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                enforceFirstLetterUppercase: true,
+                                isRequired: true,
+                                headingText: localization.membership_id,
+                                hintText: localization.membership_id,
+                                controller: provider.membershipController,
+                                keyboardType: TextInputType.name,
+                                validator: (text) => text?.validate(
+                                  argument: localization.membership_validator,
+                                ),
+                              ),
+                            FormTextFormField(
+                              maxLength: 10,
+                              isRequired: true,
+                              enableSpeechInput: true,
+                              headingText: localization.phone_number,
+                              hintText: localization.enter_mobile_number,
+                              controller: provider.phoneNumberController,
+                              keyboardType: TextInputType.number,
+                              textCapitalization: TextCapitalization.sentences,
+                              enforceFirstLetterUppercase: true,
+                              validator: (text) => text?.validateNumber(
+                                argument: localization
+                                    .please_provide_valid_10_digit_number,
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                FormTextFormField(
+                                  isRequired: true,
+                                  headingText: localization.preferred_date,
+                                  keyboardType: TextInputType.none,
+                                  hintText: localization.dd_mm_yyyy,
+                                  controller: provider.dateController,
+                                  suffixIcon: AppImages.calenderIcon,
+                                  showCursor: false,
+                                  onTap: () async {
+                                    final date = await customDatePicker(
+                                      startDate: DateTime.now(),
+                                      endDate: DateTime(
+                                        DateTime.now().year,
+                                        DateTime.now().month + 2,
+                                      ),
+                                    );
+                                    if (date != null) {
+                                      provider.companyDateFormat = date
+                                          .toString()
+                                          .toYyyyMmDd();
+                                      provider.dateController.text =
+                                          provider.companyDateFormat
+                                              ?.toDdMmYyyy() ??
+                                          "";
+                                    }
+                                  },
+                                  validator: (text) => text?.validate(
+                                    argument: localization
+                                        .please_select_your_appointment_date,
+                                  ),
+                                ),
+                                SizeBox.sizeHX2,
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: Dimens.paddingX2,
+                                  ),
+                                  child: Text(
+                                    localization.appointment_note,
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: AppPalettes.redColor,
+                                    ),
+                                    textAlign: TextAlign.justify,
+                                  ),
+                                ),
+                                SizeBox.sizeHX1B,
+                                FormTextFormField(
+                                  isRequired: true,
+                                  headingText:
+                                      localization.purpose_of_appointment,
+                                  hintText: localization
+                                      .enter_your_appointment_reason,
+                                  controller:
+                                      provider.purposeOfAppointmentController,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
+                                  enforceFirstLetterUppercase: true,
+                                  enableSpeechInput: true,
+                                  onMicAvailabilityDenied: (message) {
+                                    CommonSnackbar(
+                                      text: message.isEmpty
+                                          ? "Voice input is currently unavailable."
+                                          : message,
+                                    ).showSnackbar();
+                                  },
+                                  validator: (text) => text?.validate(
+                                    argument: localization
+                                        .appointment_purpose_validator,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // FormCommonDropDown<String>(
+                            //   isRequired: true,
+                            //   heading: localization.time_slot,
+                            //   hintText: localization.select_time_slot,
+                            //   controller: provider.timeSlotController,
+                            //   items: provider.timeSlotLists,
+                            //   validator: (text) => text.toString().validateDropDown(
+                            //     argument:
+                            //         "Please select time slot for your appointment",
+                            //   ),
+                            // ),
+                            FormTextFormField(
+                              isRequired: true,
+                              headingText: localization.description,
+                              hintText: localization.description_info,
+                              controller: provider.descriptionController,
+                              maxLines: 5,
                               textCapitalization: TextCapitalization.sentences,
                               enforceFirstLetterUppercase: true,
                               enableSpeechInput: true,
@@ -210,82 +249,61 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                                       : message,
                                 ).showSnackbar();
                               },
+
                               validator: (text) => text?.validate(
-                                argument:
-                                    localization.appointment_purpose_validator,
+                                argument: localization
+                                    .appointment_description_validator,
                               ),
+                            ),
+
+                            Consumer<RequestAppointmentViewModel>(
+                              builder: (contextP, value, _) {
+                                return UploadMultiFilesWidget(
+                                  onTap: () {
+                                    // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: false,
+                                      useRootNavigator: true,
+                                      builder: (context) => Padding(
+                                        padding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(
+                                            context,
+                                          ).viewInsets.bottom,
+                                        ),
+                                        child: value.selectMultipleImages(
+                                          context: context,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  onRemove: (int index) =>
+                                      value.removeImage(index),
+                                  multipleFiles: value.multipleFiles,
+                                );
+                              },
                             ),
                           ],
                         ),
-                        // FormCommonDropDown<String>(
-                        //   isRequired: true,
-                        //   heading: localization.time_slot,
-                        //   hintText: localization.select_time_slot,
-                        //   controller: provider.timeSlotController,
-                        //   items: provider.timeSlotLists,
-                        //   validator: (text) => text.toString().validateDropDown(
-                        //     argument:
-                        //         "Please select time slot for your appointment",
-                        //   ),
-                        // ),
-                        FormTextFormField(
-                          isRequired: true,
-                          headingText: localization.description,
-                          hintText: localization.description_info,
-                          controller: provider.descriptionController,
-                          maxLines: 5,
-                          textCapitalization: TextCapitalization.sentences,
-                          enforceFirstLetterUppercase: true,
-                          enableSpeechInput: true,
-                          onMicAvailabilityDenied: (message) {
-                            CommonSnackbar(
-                              text: message.isEmpty
-                                  ? "Voice input is currently unavailable."
-                                  : message,
-                            ).showSnackbar();
-                          },
-                          
-                          validator: (text) => text?.validate(
-                            argument:
-                                localization.appointment_description_validator,
-                          ),
-                        ),
-
-                        Consumer<RequestAppointmentViewModel>(
-                          builder: (contextP, value, _) {
-                            return UploadMultiFilesWidget(
-                              onTap: () {
-                                // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: false,
-                                  useRootNavigator: true,
-                                  builder: (context) => Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: MediaQuery.of(context).viewInsets.bottom,
-                                    ),
-                                    child: value.selectMultipleImages(context: context),
-                                  ),
-                                );
-                              },
-                              onRemove: (int index) => value.removeImage(index),
-                              multipleFiles: value.multipleFiles,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
                 ),
               );
             },
           ),
-          bottomNavigationBar:
-              Consumer2<RequestAppointmentViewModel, AppointmentsViewModel>(
-                builder: (contextP, value, appointment, _) {
-                  return Row(
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: Dimens.horizontalspacing,
+                right: Dimens.horizontalspacing,
+                top: Dimens.paddingX2,
+                bottom: Dimens.verticalspacing,
+              ),
+              child:
+                  Consumer2<RequestAppointmentViewModel, AppointmentsViewModel>(
+                    builder: (contextP, value, appointment, _) {
+                      return Row(
                         spacing: Dimens.gapX3,
                         children: [
                           CommonButton(
@@ -311,14 +329,11 @@ class RequestAppointmentView extends StatelessWidget with DateAndTimePicker {
                             ),
                           ),
                         ],
-                      )
-                      .symmetricPadding(horizontal: Dimens.horizontalspacing)
-                      .onlyPadding(
-                        top: Dimens.paddingX2,
-                        bottom: Dimens.verticalspacing,
                       );
-                },
-              ),
+                    },
+                  ),
+            ),
+          ),
         );
       },
     );

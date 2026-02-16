@@ -28,7 +28,7 @@ class _HomeViewState extends State<HomeView> {
         // (prevents duplicate display when navigating immediately).
         await prefs.setBool('disclaimer_dismissed', false);
         if (!mounted) return;
-        
+
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -40,7 +40,7 @@ class _HomeViewState extends State<HomeView> {
               }
               await prefs.setBool('disclaimer_dismissed', false);
             }
-            
+
             return DraggableSheetWidget(
               onCompleted: dismissNotice,
               radius: Dimens.radiusX4,
@@ -62,18 +62,31 @@ class _HomeViewState extends State<HomeView> {
         if (!role.isUIEnabled) {
           return Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-        return SafeArea(
-          top: false,
-          child: Scaffold(
-            body: Consumer<NavigationViewModel>(
-              builder: (_, navigation, _) {
-                return navigation.userWidgets[navigation.selectedTab];
+        return Consumer<NavigationViewModel>(
+          builder: (context, navigation, _) {
+            return PopScope(
+              canPop:
+                  navigation.selectedTab == 0, // Only allow pop if on home tab
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) {
+                  return; // Already popped, nothing to do
+                }
+                // If not on home tab, navigate to home tab instead of popping
+                if (navigation.selectedTab != 0) {
+                  navigation.selectedTab = 0;
+                }
               },
-            ),
-            extendBody: true,
-            resizeToAvoidBottomInset: false,
-            bottomNavigationBar: NavigationView(),
-          ),
+              child: SafeArea(
+                top: false,
+                child: Scaffold(
+                  body: navigation.userWidgets[navigation.selectedTab],
+                  extendBody: true,
+                  resizeToAvoidBottomInset: false,
+                  bottomNavigationBar: NavigationView(),
+                ),
+              ),
+            );
+          },
         );
       },
     );

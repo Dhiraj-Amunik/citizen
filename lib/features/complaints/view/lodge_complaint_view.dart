@@ -257,25 +257,27 @@ class _LodgeComplaintViewState extends State<LodgeComplaintView> {
                       );
                     },
                   ),
-                  bottomNavigationBar: Consumer<AddComplaintsViewModel>(
-                    builder: (context, value, _) {
-                      return CommonButton(
-                            isEnable: !value.isLoading,
-                            isLoading: value.isLoading,
-                            text: localization.raise_complaint,
-                            onTap: () => value.lodgeComplaints(
-                              constituencyID:
-                                  constituencyController.value?.sId ?? "",
-                            ),
-                          )
-                          .symmetricPadding(
-                            horizontal: Dimens.horizontalspacing,
-                          )
-                          .onlyPadding(
-                            top: Dimens.textFromSpacing,
-                            bottom: Dimens.verticalspacing,
-                          );
-                    },
+                  bottomNavigationBar: SafeArea(
+                    child: Consumer<AddComplaintsViewModel>(
+                      builder: (context, value, _) {
+                        return CommonButton(
+                              isEnable: !value.isLoading,
+                              isLoading: value.isLoading,
+                              text: localization.raise_complaint,
+                              onTap: () => value.lodgeComplaints(
+                                constituencyID:
+                                    constituencyController.value?.sId ?? "",
+                              ),
+                            )
+                            .symmetricPadding(
+                              horizontal: Dimens.horizontalspacing,
+                            )
+                            .onlyPadding(
+                              top: Dimens.textFromSpacing,
+                              bottom: Dimens.verticalspacing,
+                            );
+                      },
+                    ),
                   ),
                 );
               },

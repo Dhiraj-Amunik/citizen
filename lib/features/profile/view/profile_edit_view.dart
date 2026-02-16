@@ -79,10 +79,11 @@ class _ProfileEditViewState extends State<ProfileEditView>
               if (provider.assemblyConstituencyData != null) {
                 final match = constituencyProvider.assemblyConstituencyLists
                     .firstWhere(
-                  (constituency) =>
-                      constituency?.sId == provider.assemblyConstituencyData?.sId,
-                  orElse: () => null,
-                );
+                      (constituency) =>
+                          constituency?.sId ==
+                          provider.assemblyConstituencyData?.sId,
+                      orElse: () => null,
+                    );
                 if (match != null) {
                   assemblyconstituencyController.value = match;
                 } else {
@@ -90,7 +91,8 @@ class _ProfileEditViewState extends State<ProfileEditView>
                   constituencyProvider.assemblyConstituencyLists.add(
                     provider.assemblyConstituencyData!,
                   );
-                  assemblyconstituencyController.value = provider.assemblyConstituencyData!;
+                  assemblyconstituencyController.value =
+                      provider.assemblyConstituencyData!;
                 }
               }
             }
@@ -104,298 +106,323 @@ class _ProfileEditViewState extends State<ProfileEditView>
             return Builder(
               builder: (context) {
                 // Check if Hindi keyboard might be shown (Hindi language)
-                final isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+                final isHindiLanguage =
+                    GeneralStream.instance.locale.languageCode == 'hi';
                 // Hindi keyboard height is approximately 300px
                 const hindiKeyboardHeight = 300.0;
-                
+
                 // Check if any text field has focus (which would show Hindi keyboard)
                 final hasFocus = FocusScope.of(context).hasFocus;
                 final viewInsets = MediaQuery.of(context).viewInsets.bottom;
                 // Show padding if system keyboard is showing OR if Hindi keyboard might be showing (Hindi mode + focus)
-                final shouldShowKeyboardPadding = isHindiLanguage && hasFocus && viewInsets == 0;
-                
+                final shouldShowKeyboardPadding =
+                    isHindiLanguage && hasFocus && viewInsets == 0;
+
                 return SingleChildScrollView(
                   controller: _scrollController,
                   padding: EdgeInsets.only(
                     // Only add extra padding for Hindi locale, not for English
                     bottom: isHindiLanguage && shouldShowKeyboardPadding
-                        ? hindiKeyboardHeight 
+                        ? hindiKeyboardHeight
                         : (viewInsets > 0 ? viewInsets : 0),
                   ),
                   child: Column(
-                spacing: Dimens.widgetSpacing,
-                children: [
-                  Consumer2<AvatarViewModel, ProfileViewModel>(
-                    builder: (context, value, value2, _) {
-                      return ProfileAvatar(
-                        image: value2.profile?.avatar,
-                        onTap: () => value.selectImage(),
-                        onDelete: () => value.removeImage(),
-                        file: value.userAvatar,
-                      );
-                    },
-                  ),
-                  Form(
-                    key: provider.userDetailsFormKey,
-                    autovalidateMode: provider.autoValidateMode,
-                    child: Column(
-                      spacing: Dimens.textFromSpacing,
-                      children: [
-                        FormTextFormField(
-                          isRequired: true,
-                          controller: provider.nameController,
-                          prefixIcon: AppImages.userProfile,
-                          headingText: localization.name,
-                          nextFocus: provider.emailFocus,
-                          keyboardType: TextInputType.name,
-                        textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                          enableSpeechInput: true,
-                          validator: (text) => text?.validateName(
-                            argument: localization.name_validator,
-                          ),
-                        ),
-                        FormTextFormField(
-                          isRequired: true,
-                          focus: provider.emailFocus,
-                          controller: provider.emailController,
-                          prefixIcon: AppImages.emailIcon,
-                          headingText: localization.email,
-                          useEnglishKeyboard: true,
-                        textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                          enableSpeechInput: true,
-                          validator: (text) => text?.validateEmail(
-                            argument: localization.email_validator,
-                          ),
-                        ),
-                        FormTextFormField(
-                          isRequired: true,
-                          headingText: localization.mobile_number,
-                          prefixIcon: AppImages.phoneIcon,
-                          controller: provider.phoneNumberController,
-                         showDefaultSuffix: false,
-                          keyboardType: TextInputType.none,
-
-                          maxLength: 10,
-                          enabled: false,
-                        ),
-                        MapSearchLocation(
-                          findPincode: (text) async {
-                            try {
-                              // Validate pincode before processing
-                              final trimmedPincode = text.trim();
-                              
-                              // Check if pincode is valid (6 digits and numeric)
-                              if (trimmedPincode.length == 6) {
-                                final pincodeInt = int.tryParse(trimmedPincode);
-                                if (pincodeInt != null) {
-                                  // Valid numeric pincode - proceed with API call
-                              mapsProvider.districtController.text =
-                                  await constituencyProvider
-                                      .getParliamentaryConstituencies(
-                                            pincode: trimmedPincode,
-                                        parlimentController:
-                                            parliamentaryconstituencyController,
-                                      ) ??
-                                  "";
-                                } else {
-                                  // Invalid format - show error
-                                  debugPrint("⚠️ Invalid pincode format: $text");
-                                }
-                              }
-                            } catch (e) {
-                              debugPrint("❌ Error in findPincode callback: $e");
-                              // Error is already handled in getParliamentaryConstituencies
-                            }
-                          },
-                        ),
-
-                        ParliamentaryConstituencyDropDownWidget(
-                          initialData: provider.parlimentaryConstituencyData,
-                          constituencyController:
-                              parliamentaryconstituencyController,
-                          onChange: (constituency) {
-                            if (constituency == null) return;
-                            
-                            // Only clear assembly constituency if parliamentary constituency actually changed
-                            final currentParliamentaryId = provider.parlimentaryConstituencyData?.sId?.toString().trim();
-                            final newParliamentaryId = constituency.sId.toString().trim();
-                            final hasChanged = currentParliamentaryId != newParliamentaryId;
-                            
-                            if (hasChanged) {
-                              assemblyconstituencyController.clear();
-                            }
-                            
-                            // Only fetch assembly constituencies if parliamentary constituency changed or list is empty
-                            if (hasChanged ||
-                                constituencyProvider
-                                    .assemblyConstituencyLists
-                                    .isEmpty) {
-                              context
-                                  .read<ConstituencyViewModel>()
-                                  
-                                  .getAssemblyConstituencies(
-                                    id: constituency.sId,
-                                  );
-                            }
-                          },
-                        ),
-                        AssemblyConstituencyDropDownWidget(
-                          initialData: provider.assemblyConstituencyData,
-                          constituencyController:
-                              assemblyconstituencyController,
-                        ),
-                        FormTextFormField(
-                          isRequired: true,
-                          controller: provider.dobController,
-                          prefixIcon: AppImages.calenderIcon,
-                          showCursor: false,
-                          showDefaultSuffix: false,
-                          onTap: () async {
-                            final date = await customDatePicker();
-                            if (date != null) {
-                              provider.dobController.text = userDateFormat(
-                                date,
-                              );
-                              provider.companyDateFormat = companyDateFormat(
-                                date,
-                              );
-                            }
-                          },
-                          headingText: localization.date_of_birth,
-                          keyboardType: TextInputType.none,
-                          validator: (text) => text?.validate(
-                            argument: localization.date_of_birth_validator,
-                          ),
-                        ),
-                        FormCommonDropDown<String?>(
-                          isRequired: true,
-                          heading: localization.gender,
-                          prefixIcon: AppImages.genderIcon,
-                          controller: genderController,
-                          items: provider.genderList,
-                          hintText: localization.select_gender,
-                          validator: (text) => text.toString().validateDropDown(
-                            argument: localization.gender_validator,
-                          ),
-                        ),
-                        FormTextFormField(
-                          isRequired: true,
-                          headingText: localization.aadhaar_no,
-                          hintText: "0000 0000 0000",
-                          maxLength: 14,
-                          controller: provider.aadharController,
-                          prefixIcon: AppImages.aadharIcon,
-                          keyboardType: TextInputType.number,
-                        textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                          enableSpeechInput: true,
-                          validator: (text) => text?.validateAadhar(
-                            argument: localization.aadhar_validator,
-                          ),
-                          onChanged: (value) => provider.generateAadhar(value),
-                        ),
-                        Consumer<ProfileViewModel>(
-                          builder: (_, _, _) {
-                            return UploadImageWidget(
-                              title: localization.upload_aadhar,
-                              onTap: () => provider.selectImage(isAadhar: true),
-                              onRemoveTap: () =>
-                                  provider.removeImage(isAadhar: true),
-                              imageFile: provider.aadharImage,
-                              url: provider.aadharURL,
-                            );
-                          },
-                        ),
-                        Consumer<ProfileViewModel>(
-                          builder: (context, viewModel, _) {
-                            return FormTextFormField(
-                              isRequired: false,
-                              headingText: localization.voter_id,
-                              hintText: "ABC1234567",
-                              maxLength: 10,
-                              controller: viewModel.voterIdController,
-                              prefixIcon: AppImages.aadharIcon,
-                              keyboardType: TextInputType.text,
-                            textCapitalization: TextCapitalization.sentences,
-                            disableHindiKeyboardOverlay:  true,
-                            enforceFirstLetterUppercase: true,
+                    spacing: Dimens.widgetSpacing,
+                    children: [
+                      Consumer2<AvatarViewModel, ProfileViewModel>(
+                        builder: (context, value, value2, _) {
+                          return ProfileAvatar(
+                            image: value2.profile?.avatar,
+                            onTap: () => value.selectImage(),
+                            onDelete: () => value.removeImage(),
+                            file: value.userAvatar,
+                          );
+                        },
+                      ),
+                      Form(
+                        key: provider.userDetailsFormKey,
+                        autovalidateMode: provider.autoValidateMode,
+                        child: Column(
+                          spacing: Dimens.textFromSpacing,
+                          children: [
+                            FormTextFormField(
+                              isRequired: true,
+                              controller: provider.nameController,
+                              prefixIcon: AppImages.userProfile,
+                              headingText: localization.name,
+                              nextFocus: provider.emailFocus,
+                              keyboardType: TextInputType.name,
+                              textCapitalization: TextCapitalization.sentences,
+                              enforceFirstLetterUppercase: true,
                               enableSpeechInput: true,
-                              validator: (text) {
-                                // Don't validate at all if autoValidateMode is disabled (while typing)
-                                if (viewModel.autoValidateMode == AutovalidateMode.disabled) {
-                                  return null; // No validation while typing - only validate when tap on update profile
+                              validator: (text) => text?.validateName(
+                                argument: localization.name_validator,
+                              ),
+                            ),
+                            FormTextFormField(
+                              isRequired: true,
+                              focus: provider.emailFocus,
+                              controller: provider.emailController,
+                              prefixIcon: AppImages.emailIcon,
+                              headingText: localization.email,
+                              useEnglishKeyboard: true,
+                              textCapitalization: TextCapitalization.sentences,
+                              enforceFirstLetterUppercase: true,
+                              enableSpeechInput: true,
+                              validator: (text) => text?.validateEmail(
+                                argument: localization.email_validator,
+                              ),
+                            ),
+                            FormTextFormField(
+                              isRequired: true,
+                              headingText: localization.mobile_number,
+                              prefixIcon: AppImages.phoneIcon,
+                              controller: provider.phoneNumberController,
+                              showDefaultSuffix: false,
+                              keyboardType: TextInputType.none,
+
+                              maxLength: 10,
+                              enabled: false,
+                            ),
+                            MapSearchLocation(
+                              findPincode: (text) async {
+                                try {
+                                  // Validate pincode before processing
+                                  final trimmedPincode = text.trim();
+
+                                  // Check if pincode is valid (6 digits and numeric)
+                                  if (trimmedPincode.length == 6) {
+                                    final pincodeInt = int.tryParse(
+                                      trimmedPincode,
+                                    );
+                                    if (pincodeInt != null) {
+                                      // Valid numeric pincode - proceed with API call
+                                      mapsProvider.districtController.text =
+                                          await constituencyProvider
+                                              .getParliamentaryConstituencies(
+                                                pincode: trimmedPincode,
+                                                parlimentController:
+                                                    parliamentaryconstituencyController,
+                                              ) ??
+                                          "";
+                                    } else {
+                                      // Invalid format - show error
+                                      debugPrint(
+                                        "⚠️ Invalid pincode format: $text",
+                                      );
+                                    }
+                                  }
+                                } catch (e) {
+                                  debugPrint(
+                                    "❌ Error in findPincode callback: $e",
+                                  );
+                                  // Error is already handled in getParliamentaryConstituencies
                                 }
-                                
-                                // Since voter ID is optional, only validate if text is provided
-                                // Validation only happens when tap on update profile button
-                                if (text == null || text.isEmpty || text.trim().isEmpty) {
-                                  return null; // No error for empty optional field
+                              },
+                            ),
+
+                            ParliamentaryConstituencyDropDownWidget(
+                              initialData:
+                                  provider.parlimentaryConstituencyData,
+                              constituencyController:
+                                  parliamentaryconstituencyController,
+                              onChange: (constituency) {
+                                if (constituency == null) return;
+
+                                // Only clear assembly constituency if parliamentary constituency actually changed
+                                final currentParliamentaryId = provider
+                                    .parlimentaryConstituencyData
+                                    ?.sId
+                                    ?.toString()
+                                    .trim();
+                                final newParliamentaryId = constituency.sId
+                                    .toString()
+                                    .trim();
+                                final hasChanged =
+                                    currentParliamentaryId !=
+                                    newParliamentaryId;
+
+                                if (hasChanged) {
+                                  assemblyconstituencyController.clear();
                                 }
-                                
-                                // When form is submitted (autoValidateMode is onUserInteraction), validate the format
-                                final trimmedText = text.trim();
-                                return trimmedText.validateVoterID(
-                                  argument: localization.voter_id_validator,
+
+                                // Only fetch assembly constituencies if parliamentary constituency changed or list is empty
+                                if (hasChanged ||
+                                    constituencyProvider
+                                        .assemblyConstituencyLists
+                                        .isEmpty) {
+                                  context
+                                      .read<ConstituencyViewModel>()
+                                      .getAssemblyConstituencies(
+                                        id: constituency.sId,
+                                      );
+                                }
+                              },
+                            ),
+                            AssemblyConstituencyDropDownWidget(
+                              initialData: provider.assemblyConstituencyData,
+                              constituencyController:
+                                  assemblyconstituencyController,
+                            ),
+                            FormTextFormField(
+                              isRequired: true,
+                              controller: provider.dobController,
+                              prefixIcon: AppImages.calenderIcon,
+                              showCursor: false,
+                              showDefaultSuffix: false,
+                              onTap: () async {
+                                final date = await customDatePicker();
+                                if (date != null) {
+                                  provider.dobController.text = userDateFormat(
+                                    date,
+                                  );
+                                  provider.companyDateFormat =
+                                      companyDateFormat(date);
+                                }
+                              },
+                              headingText: localization.date_of_birth,
+                              keyboardType: TextInputType.none,
+                              validator: (text) => text?.validate(
+                                argument: localization.date_of_birth_validator,
+                              ),
+                            ),
+                            FormCommonDropDown<String?>(
+                              isRequired: true,
+                              heading: localization.gender,
+                              prefixIcon: AppImages.genderIcon,
+                              controller: genderController,
+                              items: provider.genderList,
+                              hintText: localization.select_gender,
+                              validator: (text) =>
+                                  text.toString().validateDropDown(
+                                    argument: localization.gender_validator,
+                                  ),
+                            ),
+                            FormTextFormField(
+                              isRequired: true,
+                              headingText: localization.aadhaar_no,
+                              hintText: "0000 0000 0000",
+                              maxLength: 14,
+                              controller: provider.aadharController,
+                              prefixIcon: AppImages.aadharIcon,
+                              keyboardType: TextInputType.number,
+                              textCapitalization: TextCapitalization.sentences,
+                              enforceFirstLetterUppercase: true,
+                              enableSpeechInput: true,
+                              validator: (text) => text?.validateAadhar(
+                                argument: localization.aadhar_validator,
+                              ),
+                              onChanged: (value) =>
+                                  provider.generateAadhar(value),
+                            ),
+                            Consumer<ProfileViewModel>(
+                              builder: (_, _, _) {
+                                return UploadImageWidget(
+                                  title: localization.upload_aadhar,
+                                  onTap: () =>
+                                      provider.selectImage(isAadhar: true),
+                                  onRemoveTap: () =>
+                                      provider.removeImage(isAadhar: true),
+                                  imageFile: provider.aadharImage,
+                                  url: provider.aadharURL,
                                 );
                               },
-                              onChanged: (value) => viewModel.generateVoter(value),
-                            );
-                          },
-                        ),
-                        Consumer<ProfileViewModel>(
-                          builder: (_, _, _) {
-                            return UploadImageWidget(
-                              title: localization.upload_voter_id,
-                              onTap: () =>
-                                  provider.selectImage(isAadhar: false),
-                              onRemoveTap: () =>
-                                  provider.removeImage(isAadhar: false),
-                              imageFile: provider.voterIdImage,
-                              url: provider.voterIdURL,
-                            );
-                          },
-                        ),
-                      ],
-                    ).symmetricPadding(horizontal: Dimens.horizontalspacing),
+                            ),
+                            Consumer<ProfileViewModel>(
+                              builder: (context, viewModel, _) {
+                                return FormTextFormField(
+                                  isRequired: false,
+                                  headingText: localization.voter_id,
+                                  hintText: "ABC1234567",
+                                  maxLength: 10,
+                                  controller: viewModel.voterIdController,
+                                  prefixIcon: AppImages.aadharIcon,
+                                  keyboardType: TextInputType.text,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
+                                  disableHindiKeyboardOverlay: true,
+                                  enforceFirstLetterUppercase: true,
+                                  enableSpeechInput: true,
+                                  validator: (text) {
+                                    // Don't validate at all if autoValidateMode is disabled (while typing)
+                                    if (viewModel.autoValidateMode ==
+                                        AutovalidateMode.disabled) {
+                                      return null; // No validation while typing - only validate when tap on update profile
+                                    }
+
+                                    // Since voter ID is optional, only validate if text is provided
+                                    // Validation only happens when tap on update profile button
+                                    if (text == null ||
+                                        text.isEmpty ||
+                                        text.trim().isEmpty) {
+                                      return null; // No error for empty optional field
+                                    }
+
+                                    // When form is submitted (autoValidateMode is onUserInteraction), validate the format
+                                    final trimmedText = text.trim();
+                                    return trimmedText.validateVoterID(
+                                      argument: localization.voter_id_validator,
+                                    );
+                                  },
+                                  onChanged: (value) =>
+                                      viewModel.generateVoter(value),
+                                );
+                              },
+                            ),
+                            Consumer<ProfileViewModel>(
+                              builder: (_, _, _) {
+                                return UploadImageWidget(
+                                  title: localization.upload_voter_id,
+                                  onTap: () =>
+                                      provider.selectImage(isAadhar: false),
+                                  onRemoveTap: () =>
+                                      provider.removeImage(isAadhar: false),
+                                  imageFile: provider.voterIdImage,
+                                  url: provider.voterIdURL,
+                                );
+                              },
+                            ),
+                          ],
+                        ).symmetricPadding(horizontal: Dimens.horizontalspacing),
+                      ),
+                    ],
                   ),
-                ],
-              ),
                 );
               },
             );
           },
         ),
-        bottomNavigationBar: Padding(
-          padding: EdgeInsetsGeometry.symmetric(
-            horizontal: Dimens.horizontalspacing,
-            vertical: Dimens.verticalspacing,
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: Dimens.horizontalspacing,
+              vertical: Dimens.verticalspacing,
+            ),
+            child:
+                Consumer4<
+                  ProfileViewModel,
+                  AvatarViewModel,
+                  MapSearchViewModel,
+                  ConstituencyViewModel
+                >(
+                  builder: (context, value, avatar, search, constituency, _) {
+                    return CommonButton(
+                      text: localization.update_profile,
+                      onTap: () => value.updateUserProfile(
+                        avatar: avatar,
+                        genderValue: genderController.value,
+                        mapModel: search,
+                        assemblyConstituenciesID:
+                            assemblyconstituencyController.value?.sId,
+                        parliamentaryConstituenciesID:
+                            parliamentaryconstituencyController.value?.sId,
+                      ),
+                      isLoading: value.isLoading,
+                      isEnable: !value.isLoading,
+                    );
+                  },
+                ),
           ),
-          child:
-              Consumer4<
-                ProfileViewModel,
-                AvatarViewModel,
-                MapSearchViewModel,
-                ConstituencyViewModel
-              >(
-                builder: (context, value, avatar, search, constituency, _) {
-                  return CommonButton(
-                    text: localization.update_profile,
-                    onTap: () => value.updateUserProfile(
-                      avatar: avatar,
-                      genderValue: genderController.value,
-                      mapModel: search,
-                      assemblyConstituenciesID:
-                          assemblyconstituencyController.value?.sId,
-                      parliamentaryConstituenciesID:
-                          parliamentaryconstituencyController.value?.sId,
-                    ),
-                    isLoading: value.isLoading,
-                    isEnable: !value.isLoading,
-                  );
-                },
-              ),
         ),
       ),
     );

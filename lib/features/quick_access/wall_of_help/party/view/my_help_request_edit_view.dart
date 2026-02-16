@@ -23,7 +23,8 @@ import 'package:inldsevak/features/quick_access/wall_of_help/model/type_of_help_
 import 'package:inldsevak/features/quick_access/wall_of_help/model/preferred_way_model.dart'
     as preferred;
 
-class MyHelpRequestEditView extends StatelessWidget with HandleMultipleFilesSheet {
+class MyHelpRequestEditView extends StatelessWidget
+    with HandleMultipleFilesSheet {
   MyHelpRequestEditView({super.key, required this.editableData});
   final model.FinancialRequest editableData;
 
@@ -261,7 +262,9 @@ class MyHelpRequestEditView extends StatelessWidget with HandleMultipleFilesShee
                               useRootNavigator: false,
                               builder: (bottomSheetContext) => Padding(
                                 padding: EdgeInsets.only(
-                                  bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
+                                  bottom: MediaQuery.of(
+                                    bottomSheetContext,
+                                  ).viewInsets.bottom,
                                 ),
                                 child: selectMultipleFiles(
                                   onTap: value.addFiles,
@@ -281,35 +284,38 @@ class MyHelpRequestEditView extends StatelessWidget with HandleMultipleFilesShee
             },
           ),
         ),
-        bottomNavigationBar: Padding(
-          padding: EdgeInsetsGeometry.symmetric(
-            horizontal: Dimens.horizontalspacing,
-            vertical: Dimens.verticalspacing,
-          ),
-          child: Consumer<MyHelpRequestEditViewModel>(
-            builder: (context, value, _) {
-              return Row(
-                spacing: Dimens.gapX3,
-                children: [
-                  CommonButton(
-                    onTap: value.clear,
-                    color: AppPalettes.whiteColor,
-                    borderColor: AppPalettes.primaryColor,
-                    textColor: AppPalettes.primaryColor,
-                    text: localization.clear,
-                    fullWidth: false,
-                  ),
-                  Expanded(
-                    child: CommonButton(
-                      isLoading: value.isLoading,
-                      isEnable: !value.isLoading,
-                      text: localization.update,
-                      onTap: () => value.updateFinancialHelp(editableData.sId),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: EdgeInsetsGeometry.symmetric(
+              horizontal: Dimens.horizontalspacing,
+              vertical: Dimens.verticalspacing,
+            ),
+            child: Consumer<MyHelpRequestEditViewModel>(
+              builder: (context, value, _) {
+                return Row(
+                  spacing: Dimens.gapX3,
+                  children: [
+                    CommonButton(
+                      onTap: value.clear,
+                      color: AppPalettes.whiteColor,
+                      borderColor: AppPalettes.primaryColor,
+                      textColor: AppPalettes.primaryColor,
+                      text: localization.clear,
+                      fullWidth: false,
                     ),
-                  ),
-                ],
-              );
-            },
+                    Expanded(
+                      child: CommonButton(
+                        isLoading: value.isLoading,
+                        isEnable: !value.isLoading,
+                        text: localization.update,
+                        onTap: () =>
+                            value.updateFinancialHelp(editableData.sId),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

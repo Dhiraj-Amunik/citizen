@@ -56,17 +56,17 @@ class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
 
   void _resetForm() {
     if (!mounted) return;
-    
+
     final provider = context.read<WallOfHelpViewModel>();
-    
+
     // Clear dropdown controllers
     urgencyController.clear();
     typeOfHelpController.clear();
     preferredWayController.clear();
-    
+
     // Clear all ViewModel form data (controllers, files, form state)
     provider.clear();
-    
+
     // Force a rebuild to ensure UI updates immediately
     if (mounted) {
       setState(() {});
@@ -123,292 +123,301 @@ class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
       child: Builder(
         builder: (context) {
           // Check if Hindi keyboard might be shown (Hindi language)
-          final isHindiLanguage = Localizations.localeOf(context).languageCode == 'hi';
+          final isHindiLanguage =
+              Localizations.localeOf(context).languageCode == 'hi';
           // Hindi keyboard height is approximately 300px
           const hindiKeyboardHeight = 300.0;
-          
+
           return Scaffold(
-        appBar: commonAppBar(title: localization.wall_of_help),
-        body: SingleChildScrollView(
+            appBar: commonAppBar(title: localization.wall_of_help),
+            body: SingleChildScrollView(
               padding: EdgeInsets.only(
                 left: Dimens.horizontalspacing,
                 right: Dimens.horizontalspacing,
                 top: Dimens.appBarSpacing,
                 // Only add extra padding for Hindi locale, not for English
                 bottom: isHindiLanguage
-                    ? hindiKeyboardHeight + MediaQuery.of(context).viewInsets.bottom + Dimens.appBarSpacing
-                    : MediaQuery.of(context).viewInsets.bottom + Dimens.appBarSpacing,
-          ),
-          child: Consumer<WallOfHelpViewModel>(
-            builder: (context, provider, _) {
-              return Form(
-                key: provider.formKey,
-                autovalidateMode: provider.autoValidateMode,
-                child: Column(
-                  spacing: Dimens.textFromSpacing,
-                  children: [
-                    FormTextFormField(
-                      isRequired: true,
-                      focus: provider.nameFocus,
-                      nextFocus: provider.phoneFocus,
-                      controller: provider.nameController,
-                      hintText: localization.enter_your_full_name,
-                      headingText: localization.name,
-                        enableSpeechInput: true,
-                      textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                      validator: (text) =>
-                          text?.validate(argument: localization.name_validator),
-                    ),
-
-                    FormTextFormField(
-                      isRequired: true,
-                      focus: provider.phoneFocus,
-                      nextFocus: provider.addressFocus,
-                      controller: provider.phoneController,
-                      hintText: localization.enter_mobile_number,
-                      headingText: localization.mobile_number,
-                        enableSpeechInput: true,
-                      maxLength: 10,
-                      textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                      keyboardType: TextInputType.phone,
-                      validator: (text) => text?.validate(
-                        argument: localization.phone_validator,
-                      ),
-                    ),
-                    FormTextFormField(
-                      isRequired: true,
-                      focus: provider.addressFocus,
-                      controller: provider.addressController,
-                      hintText: localization.enter_your_address,
-                      headingText: localization.address,
-                      enableSpeechInput: true,
-                      textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                      validator: (text) => text?.validate(
-                        argument: localization.address_validator,
-                      ),
-                    ),
-                    FormCommonDropDown<types.Data?>(
-                      isRequired: true,
-                      controller: typeOfHelpController,
-                      items: provider.typeOfHelpsList,
-                      heading: localization.type_of_help_needed,
-                      hintText: localization.choose_the_options,
-                    
-                      headerBuilder: (_, text, _) {
-                        return TranslatedText(
-                          text: text?.name?.capitalize() ?? "",
-                          style: textTheme.bodySmall,
-                          disableTranslation: false,
-                        );
-                      },
-                      listItemBuilder: (_, text, _, _) {
-                        return TranslatedText(
-                          text: text?.name?.capitalize() ?? "",
-                          style: textTheme.bodySmall,
-                          disableTranslation: false,
-                        );
-                      },
-                      validator: (text) => text.toString().validateDropDown(
-                        argument: localization.dropdown_validator,
-                      ),
-                      onChanged: (type) {
-                        provider.isLoading = false;
-                        provider.otherTypeController.clear();
-                      },
-                    ),
-                    if (typeOfHelpController.value?.name == "Others")
-                      FormTextFormField(
-                        isRequired: true,
-                        controller: provider.otherTypeController,
-                        hintText: "Enter your reason",
-                        headingText: "Be more specific",
-                        textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                        enableSpeechInput: true,
-                        validator: (text) => text?.validate(
-                          argument: "Others Help need to be specified",
+                    ? hindiKeyboardHeight +
+                          MediaQuery.of(context).viewInsets.bottom +
+                          Dimens.appBarSpacing
+                    : MediaQuery.of(context).viewInsets.bottom +
+                          Dimens.appBarSpacing,
+              ),
+              child: Consumer<WallOfHelpViewModel>(
+                builder: (context, provider, _) {
+                  return Form(
+                    key: provider.formKey,
+                    autovalidateMode: provider.autoValidateMode,
+                    child: Column(
+                      spacing: Dimens.textFromSpacing,
+                      children: [
+                        FormTextFormField(
+                          isRequired: true,
+                          focus: provider.nameFocus,
+                          nextFocus: provider.phoneFocus,
+                          controller: provider.nameController,
+                          hintText: localization.enter_your_full_name,
+                          headingText: localization.name,
+                          enableSpeechInput: true,
+                          textCapitalization: TextCapitalization.sentences,
+                          enforceFirstLetterUppercase: true,
+                          validator: (text) => text?.validate(
+                            argument: localization.name_validator,
+                          ),
                         ),
-                      ),
 
-                    FormTextFormField(
-                      isRequired: true,
-                      maxLines: 5,
-                      controller: provider.descriptionController,
-                      hintText: localization.enter_description_of_request,
-                      headingText: localization.description,
-                      textCapitalization: TextCapitalization.sentences,
-                      enforceFirstLetterUppercase: true,
-                      enableSpeechInput: true,
-                      validator: (text) => text?.validate(
-                        argument: localization.please_enter_few_words,
-                      ),
-                    ),
-                    FormCommonDropDown<String?>(
-                      isRequired: true,
-                      controller: urgencyController,
-                      items: provider.urgencyList,
-                      heading: localization.urgency_level,
-                      hintText: localization.choose_the_options,
-                      headerBuilder: (_, text, _) {
-                        return TranslatedText(
-                          text: text ?? "",
-                          style: textTheme.bodySmall,
-                          disableTranslation: false,
-                        );
-                      },
-                      listItemBuilder: (_, text, _, _) {
-                        return TranslatedText(
-                          text: text ?? "",
-                          style: textTheme.bodySmall,
-                          disableTranslation: false,
-                        );
-                      },
-                      validator: (text) => text.toString().validateDropDown(
-                        argument: localization.dropdown_validator,
-                      ),
-                    ),
-                    FormCommonDropDown<preferred.Data?>(
-                      isRequired: true,
-                      controller: preferredWayController,
-                      items: provider.preferredWaysList,
-                      heading: localization.preferred_way_to_receive_help,
-                      hintText: localization.choose_the_options,
-                      headerBuilder: (_, text, _) {
-                        return TranslatedText(
-                          text: text?.name?.capitalize() ?? "",
-                          style: textTheme.bodySmall,
-                          disableTranslation: false,
-                        );
-                      },
-                      listItemBuilder: (_, text, _, _) {
-                        return TranslatedText(
-                          text: text?.name?.capitalize() ?? "",
-                          style: textTheme.bodySmall,
-                          disableTranslation: false,
-                        );
-                      },
-                      validator: (text) => text.toString().validateDropDown(
-                        argument: localization.dropdown_validator,
-                      ),
-                      onChanged: (_) {
-                        provider.isLoading = false;
-                        provider.amountController.clear();
-                        provider.otherPreferredController.clear();
-                      },
-                    ),
-
-                    if (preferredWayController.value?.name == "Others")
-                      FormTextFormField(
-                        isRequired: true,
-                        controller: provider.otherPreferredController,
-                        hintText: "Enter your reason",
-                        headingText: "Be more specific",
-                        textCapitalization: TextCapitalization.sentences,
-                        enforceFirstLetterUppercase: true,
-                        enableSpeechInput: true,
-                        validator: (text) => text?.validate(
-                          argument: "Others Help need to be specified",
+                        FormTextFormField(
+                          isRequired: true,
+                          focus: provider.phoneFocus,
+                          nextFocus: provider.addressFocus,
+                          controller: provider.phoneController,
+                          hintText: localization.enter_mobile_number,
+                          headingText: localization.mobile_number,
+                          enableSpeechInput: true,
+                          maxLength: 10,
+                          textCapitalization: TextCapitalization.sentences,
+                          enforceFirstLetterUppercase: true,
+                          keyboardType: TextInputType.phone,
+                          validator: (text) => text?.validate(
+                            argument: localization.phone_validator,
+                          ),
                         ),
-                      ),
+                        FormTextFormField(
+                          isRequired: true,
+                          focus: provider.addressFocus,
+                          controller: provider.addressController,
+                          hintText: localization.enter_your_address,
+                          headingText: localization.address,
+                          enableSpeechInput: true,
+                          textCapitalization: TextCapitalization.sentences,
+                          enforceFirstLetterUppercase: true,
+                          validator: (text) => text?.validate(
+                            argument: localization.address_validator,
+                          ),
+                        ),
+                        FormCommonDropDown<types.Data?>(
+                          isRequired: true,
+                          controller: typeOfHelpController,
+                          items: provider.typeOfHelpsList,
+                          heading: localization.type_of_help_needed,
+                          hintText: localization.choose_the_options,
 
-                    if (["Financial"].contains(
-                          preferredWayController.value?.name?.split(" ")[0],
-                        ) ==
-                        true)
-                      Column(
-                        spacing: Dimens.textFromSpacing,
-                        children: [
+                          headerBuilder: (_, text, _) {
+                            return TranslatedText(
+                              text: text?.name?.capitalize() ?? "",
+                              style: textTheme.bodySmall,
+                              disableTranslation: false,
+                            );
+                          },
+                          listItemBuilder: (_, text, _, _) {
+                            return TranslatedText(
+                              text: text?.name?.capitalize() ?? "",
+                              style: textTheme.bodySmall,
+                              disableTranslation: false,
+                            );
+                          },
+                          validator: (text) => text.toString().validateDropDown(
+                            argument: localization.dropdown_validator,
+                          ),
+                          onChanged: (type) {
+                            provider.isLoading = false;
+                            provider.otherTypeController.clear();
+                          },
+                        ),
+                        if (typeOfHelpController.value?.name == "Others")
                           FormTextFormField(
                             isRequired: true,
-                            controller: provider.amountController,
-                            hintText: localization.enter_amount,
-                            headingText: '${localization.raise_amount} (₹)',
-                            maxLength: 10,
-                            enableSpeechInput: true,
+                            controller: provider.otherTypeController,
+                            hintText: "Enter your reason",
+                            headingText: "Be more specific",
+                            textCapitalization: TextCapitalization.sentences,
                             enforceFirstLetterUppercase: true,
-                            validator: (text) => text?.validateAmount(
-                              argument: localization.raise_amount_validator,
-                              argument2: localization.less_amount_validator,
+                            enableSpeechInput: true,
+                            validator: (text) => text?.validate(
+                              argument: "Others Help need to be specified",
                             ),
-                            keyboardType: TextInputType.number,
                           ),
+
+                        FormTextFormField(
+                          isRequired: true,
+                          maxLines: 5,
+                          controller: provider.descriptionController,
+                          hintText: localization.enter_description_of_request,
+                          headingText: localization.description,
+                          textCapitalization: TextCapitalization.sentences,
+                          enforceFirstLetterUppercase: true,
+                          enableSpeechInput: true,
+                          validator: (text) => text?.validate(
+                            argument: localization.please_enter_few_words,
+                          ),
+                        ),
+                        FormCommonDropDown<String?>(
+                          isRequired: true,
+                          controller: urgencyController,
+                          items: provider.urgencyList,
+                          heading: localization.urgency_level,
+                          hintText: localization.choose_the_options,
+                          headerBuilder: (_, text, _) {
+                            return TranslatedText(
+                              text: text ?? "",
+                              style: textTheme.bodySmall,
+                              disableTranslation: false,
+                            );
+                          },
+                          listItemBuilder: (_, text, _, _) {
+                            return TranslatedText(
+                              text: text ?? "",
+                              style: textTheme.bodySmall,
+                              disableTranslation: false,
+                            );
+                          },
+                          validator: (text) => text.toString().validateDropDown(
+                            argument: localization.dropdown_validator,
+                          ),
+                        ),
+                        FormCommonDropDown<preferred.Data?>(
+                          isRequired: true,
+                          controller: preferredWayController,
+                          items: provider.preferredWaysList,
+                          heading: localization.preferred_way_to_receive_help,
+                          hintText: localization.choose_the_options,
+                          headerBuilder: (_, text, _) {
+                            return TranslatedText(
+                              text: text?.name?.capitalize() ?? "",
+                              style: textTheme.bodySmall,
+                              disableTranslation: false,
+                            );
+                          },
+                          listItemBuilder: (_, text, _, _) {
+                            return TranslatedText(
+                              text: text?.name?.capitalize() ?? "",
+                              style: textTheme.bodySmall,
+                              disableTranslation: false,
+                            );
+                          },
+                          validator: (text) => text.toString().validateDropDown(
+                            argument: localization.dropdown_validator,
+                          ),
+                          onChanged: (_) {
+                            provider.isLoading = false;
+                            provider.amountController.clear();
+                            provider.otherPreferredController.clear();
+                          },
+                        ),
+
+                        if (preferredWayController.value?.name == "Others")
                           FormTextFormField(
                             isRequired: true,
-                            controller: provider.upiIdController,
-                            hintText: "Enter UPI Id",
-                            headingText: "U P I",
-                            enableSpeechInput: true,
+                            controller: provider.otherPreferredController,
+                            hintText: "Enter your reason",
+                            headingText: "Be more specific",
+                            textCapitalization: TextCapitalization.sentences,
                             enforceFirstLetterUppercase: true,
-                            disableHindiKeyboardOverlay: true,
-                            validator: (text) => text?.validateUPI(
-                              argument: "Enter valid UPI ID",
+                            enableSpeechInput: true,
+                            validator: (text) => text?.validate(
+                              argument: "Others Help need to be specified",
                             ),
                           ),
-                        ],
-                      ),
-                      
-                    UploadMultiFilesWidget(
-                      title: localization.supporting_documents,
-                      onTap: () {
-                        // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: false,
-                          useRootNavigator: false,
-                          builder: (bottomSheetContext) => Padding(
-                            padding: EdgeInsets.only(
-                              bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
-                            ),
-                            child: selectMultipleFiles(
-                              onTap: provider.addFiles,
-                              context: bottomSheetContext,
-                            ),
+
+                        if (["Financial"].contains(
+                              preferredWayController.value?.name?.split(" ")[0],
+                            ) ==
+                            true)
+                          Column(
+                            spacing: Dimens.textFromSpacing,
+                            children: [
+                              FormTextFormField(
+                                isRequired: true,
+                                controller: provider.amountController,
+                                hintText: localization.enter_amount,
+                                headingText: '${localization.raise_amount} (₹)',
+                                maxLength: 10,
+                                enableSpeechInput: true,
+                                enforceFirstLetterUppercase: true,
+                                validator: (text) => text?.validateAmount(
+                                  argument: localization.raise_amount_validator,
+                                  argument2: localization.less_amount_validator,
+                                ),
+                                keyboardType: TextInputType.number,
+                              ),
+                              FormTextFormField(
+                                isRequired: true,
+                                controller: provider.upiIdController,
+                                hintText: "Enter UPI Id",
+                                headingText: "U P I",
+                                enableSpeechInput: true,
+                                enforceFirstLetterUppercase: true,
+                                disableHindiKeyboardOverlay: true,
+                                validator: (text) => text?.validateUPI(
+                                  argument: "Enter valid UPI ID",
+                                ),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                      onRemove: (int index) => provider.removefile(index),
-                      multipleFiles: provider.multipleFiles,
+
+                        UploadMultiFilesWidget(
+                          title: localization.supporting_documents,
+                          onTap: () {
+                            // 🔥 Use plain bottom sheet for camera (DraggableSheet causes crashes on low-RAM)
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: false,
+                              useRootNavigator: false,
+                              builder: (bottomSheetContext) => Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: MediaQuery.of(
+                                    bottomSheetContext,
+                                  ).viewInsets.bottom,
+                                ),
+                                child: selectMultipleFiles(
+                                  onTap: provider.addFiles,
+                                  context: bottomSheetContext,
+                                ),
+                              ),
+                            );
+                          },
+                          onRemove: (int index) => provider.removefile(index),
+                          multipleFiles: provider.multipleFiles,
+                        ),
+                      ],
                     ),
-                  ],
+                  );
+                },
+              ),
+            ),
+            bottomNavigationBar: SafeArea(
+              child: Padding(
+                padding: EdgeInsetsGeometry.symmetric(
+                  horizontal: Dimens.horizontalspacing,
+                  vertical: Dimens.verticalspacing,
                 ),
-              );
-            },
-          ),
-        ),
-        bottomNavigationBar: Padding(
-          padding: EdgeInsetsGeometry.symmetric(
-            horizontal: Dimens.horizontalspacing,
-            vertical: Dimens.verticalspacing,
-          ),
-          child: Consumer<WallOfHelpViewModel>(
-            builder: (context, value, _) {
-              return Row(
-                spacing: Dimens.gapX3,
-                children: [
-                  CommonButton(
-                    onTap: _clearForm,
-                    color: AppPalettes.whiteColor,
-                    borderColor: AppPalettes.primaryColor,
-                    textColor: AppPalettes.primaryColor,
-                    text: localization.clear,
-                    fullWidth: false,
-                  ),
-                  Expanded(
-                    child: CommonButton(
-                      isLoading: value.isLoading,
-                      isEnable: !value.isLoading,
-                      text: localization.submit,
-                      onTap: () => _handleSubmit(value),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
+                child: Consumer<WallOfHelpViewModel>(
+                  builder: (context, value, _) {
+                    return Row(
+                      spacing: Dimens.gapX3,
+                      children: [
+                        CommonButton(
+                          onTap: _clearForm,
+                          color: AppPalettes.whiteColor,
+                          borderColor: AppPalettes.primaryColor,
+                          textColor: AppPalettes.primaryColor,
+                          text: localization.clear,
+                          fullWidth: false,
+                        ),
+                        Expanded(
+                          child: CommonButton(
+                            isLoading: value.isLoading,
+                            isEnable: !value.isLoading,
+                            text: localization.submit,
+                            onTap: () => _handleSubmit(value),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
           );
         },
       ),

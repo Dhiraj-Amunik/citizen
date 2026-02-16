@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
-import 'package:inldsevak/core/extensions/padding_extension.dart';
+
 import 'package:inldsevak/core/extensions/time_formatter.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
 import 'package:inldsevak/core/mixin/dateTime_mixin.dart';
@@ -32,10 +32,12 @@ class UpdateNotifyRepresentativeView extends StatefulWidget {
   const UpdateNotifyRepresentativeView({super.key, required this.model});
 
   @override
-  State<UpdateNotifyRepresentativeView> createState() => _UpdateNotifyRepresentativeViewState();
+  State<UpdateNotifyRepresentativeView> createState() =>
+      _UpdateNotifyRepresentativeViewState();
 }
 
-class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentativeView>
+class _UpdateNotifyRepresentativeViewState
+    extends State<UpdateNotifyRepresentativeView>
     with HandleMultipleFilesSheet, DateAndTimePicker {
   VoidCallback? _addressSyncListener;
   VoidCallback? _mapSearchViewModelListener;
@@ -47,7 +49,7 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
   void dispose() {
     // Cancel debounce timer
     _syncDebounceTimer?.cancel();
-    
+
     // Remove address sync listeners
     if (_addressSyncListener != null || _mapSearchViewModelListener != null) {
       try {
@@ -67,7 +69,7 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
         // Ignore errors if context is not available
       }
     }
-    
+
     super.dispose();
   }
 
@@ -79,7 +81,7 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
       create: (context) => UpdateNotifyRepresentativeViewModel(widget.model),
       builder: (context, _) {
         final provider = context.read<UpdateNotifyRepresentativeViewModel>();
-        
+
         // Set up listeners after provider is available (only once)
         if (!_listenersInitialized) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -88,12 +90,13 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
             _listenersInitialized = true;
           });
         }
-        
+
         // Check if Hindi keyboard might be shown (Hindi language)
-        final isHindiLanguage = Localizations.localeOf(context).languageCode == 'hi';
+        final isHindiLanguage =
+            Localizations.localeOf(context).languageCode == 'hi';
         // Hindi keyboard height is approximately 300px
         const hindiKeyboardHeight = 300.0;
-        
+
         return Scaffold(
           appBar: commonAppBar(title: localization.notify_representative),
           body: SingleChildScrollView(
@@ -102,7 +105,8 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
               right: Dimens.horizontalspacing,
               // Only add extra padding for Hindi locale, not for English
               bottom: isHindiLanguage
-                  ? hindiKeyboardHeight + MediaQuery.of(context).viewInsets.bottom
+                  ? hindiKeyboardHeight +
+                        MediaQuery.of(context).viewInsets.bottom
                   : MediaQuery.of(context).viewInsets.bottom,
             ),
             child: Consumer<UpdateNotifyRepresentativeViewModel>(
@@ -127,11 +131,17 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
                       ),
                       // Address Fields using MapSearchLocation
                       Column(
-                         spacing: Dimens.gapX2,
+                        spacing: Dimens.gapX2,
                         children: [
-                            Row(
+                          Row(
                             children: [
-                              TranslatedText(text: 'Event Address',style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w400,fontSize: 18.sp),),
+                              TranslatedText(
+                                text: 'Event Address',
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 18.sp,
+                                ),
+                              ),
                             ],
                           ),
                           Consumer<MapSearchViewModel>(
@@ -189,7 +199,8 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
                           final time = await custom24HrsTimePicker();
                           // Convert 24-hour format to 12-hour format with AM/PM
                           if (time != null && time.isNotEmpty) {
-                            provider.eventTimeController.text = time.to12HourTimeFormat();
+                            provider.eventTimeController.text = time
+                                .to12HourTimeFormat();
                           } else {
                             provider.eventTimeController.text = "";
                           }
@@ -228,7 +239,9 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
                                 useRootNavigator: false,
                                 builder: (bottomSheetContext) => Padding(
                                   padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
+                                    bottom: MediaQuery.of(
+                                      bottomSheetContext,
+                                    ).viewInsets.bottom,
                                   ),
                                   child: selectMultipleFiles(
                                     onTap: value.addFiles,
@@ -248,13 +261,21 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
               },
             ),
           ),
-          bottomNavigationBar:
-              Consumer2<
-                UpdateNotifyRepresentativeViewModel,
-                NotifyRepresentativeViewModel
-              >(
-                builder: (contextP, value, notify, _) {
-                  return CommonButton(
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: Dimens.horizontalspacing,
+                right: Dimens.horizontalspacing,
+                top: Dimens.textFromSpacing,
+                bottom: Dimens.verticalspacing,
+              ),
+              child:
+                  Consumer2<
+                    UpdateNotifyRepresentativeViewModel,
+                    NotifyRepresentativeViewModel
+                  >(
+                    builder: (contextP, value, notify, _) {
+                      return CommonButton(
                         isEnable: !value.isLoading,
                         isLoading: value.isLoading,
                         onTap: () {
@@ -263,64 +284,72 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
                           );
                         },
                         text: localization.update,
-                      )
-                      .symmetricPadding(horizontal: Dimens.horizontalspacing)
-                      .onlyPadding(
-                        top: Dimens.textFromSpacing,
-                        bottom: Dimens.verticalspacing,
                       );
-                },
-              ),
+                    },
+                  ),
+            ),
+          ),
         );
       },
     );
   }
-  
-  void _initializeListeners(BuildContext context, UpdateNotifyRepresentativeViewModel notifyProvider) {
+
+  void _initializeListeners(
+    BuildContext context,
+    UpdateNotifyRepresentativeViewModel notifyProvider,
+  ) {
     if (!mounted) return;
-    
+
     // Set up listeners for MapSearchViewModel controllers to sync address fields
     final mapsProvider = context.read<MapSearchViewModel>();
-    
+
     void syncAddressFields() {
       if (!mounted || _isSyncing) return;
-      
+
       // Cancel previous debounce timer
       _syncDebounceTimer?.cancel();
-      
+
       // Debounce sync to prevent multiple rapid calls (especially on older devices)
       _syncDebounceTimer = Timer(const Duration(milliseconds: 300), () async {
         if (!mounted || _isSyncing) return;
-        
+
         _isSyncing = true;
-        
+
         // Use microtask to prevent blocking UI thread
         await Future.microtask(() {
           if (!mounted) {
             _isSyncing = false;
             return;
           }
-          
+
           try {
             // Sync district and other fields from MapSearchViewModel
             // Batch updates to reduce rebuilds
-            notifyProvider.districtController.text = mapsProvider.districtController.text;
-            notifyProvider.areaController.text = mapsProvider.areaController.text;
-            notifyProvider.stateController.text = mapsProvider.stateController.text;
-            notifyProvider.pincodeController.text = mapsProvider.pincodeController.text;
-            notifyProvider.mandalController.text = mapsProvider.tehsilController.text;
-            notifyProvider.streetController.text = mapsProvider.areaController.text;
-            notifyProvider.villageController.text = mapsProvider.cityController.text.isNotEmpty
+            notifyProvider.districtController.text =
+                mapsProvider.districtController.text;
+            notifyProvider.areaController.text =
+                mapsProvider.areaController.text;
+            notifyProvider.stateController.text =
+                mapsProvider.stateController.text;
+            notifyProvider.pincodeController.text =
+                mapsProvider.pincodeController.text;
+            notifyProvider.mandalController.text =
+                mapsProvider.tehsilController.text;
+            notifyProvider.streetController.text =
+                mapsProvider.areaController.text;
+            notifyProvider.villageController.text =
+                mapsProvider.cityController.text.isNotEmpty
                 ? mapsProvider.cityController.text
                 : (mapsProvider.address?.subLocality ?? "");
-            
+
             // Store location coordinates
             if (mapsProvider.currentPosition != null) {
               notifyProvider.locationCoordinates = LocationCoordinates(
                 lat: mapsProvider.currentPosition!.latitude,
                 lng: mapsProvider.currentPosition!.longitude,
               );
-            } else if (mapsProvider.address?.latitude != null && mapsProvider.address?.longitude != null) {
+            } else if (mapsProvider.address?.latitude != null &&
+                mapsProvider.address?.longitude != null) {
               // Fallback to address model coordinates if currentPosition is not available
               notifyProvider.locationCoordinates = LocationCoordinates(
                 lat: mapsProvider.address!.latitude!,
@@ -335,10 +364,10 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
         });
       });
     }
-    
+
     // Store listener reference for cleanup
     _addressSyncListener = syncAddressFields;
-    
+
     // Add listeners to key controllers
     mapsProvider.districtController.addListener(_addressSyncListener!);
     mapsProvider.areaController.addListener(_addressSyncListener!);
@@ -346,11 +375,11 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
     mapsProvider.pincodeController.addListener(_addressSyncListener!);
     mapsProvider.tehsilController.addListener(_addressSyncListener!);
     mapsProvider.cityController.addListener(_addressSyncListener!);
-    
+
     // Also listen to address changes to trigger immediate sync when location is loaded
     _mapSearchViewModelListener = () {
       // When address is loaded, trigger immediate sync (bypass debounce)
-      if (mapsProvider.address != null && 
+      if (mapsProvider.address != null &&
           mapsProvider.districtController.text.isNotEmpty) {
         // Cancel any pending debounced sync
         _syncDebounceTimer?.cancel();
@@ -359,7 +388,7 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
       }
     };
     mapsProvider.addListener(_mapSearchViewModelListener!);
-    
+
     // Load existing data into MapSearchViewModel when editing
     // This populates the fields so "Use my location" can work with existing data
     final existingData = widget.model;
@@ -390,7 +419,6 @@ class _UpdateNotifyRepresentativeViewState extends State<UpdateNotifyRepresentat
     if (existingData.state != null && existingData.state!.isNotEmpty) {
       mapsProvider.stateController.text = existingData.state!;
     }
-    
   }
 }
 

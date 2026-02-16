@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/date_formatter.dart';
-import 'package:inldsevak/core/extensions/padding_extension.dart';
+
 import 'package:inldsevak/core/extensions/time_formatter.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
 import 'package:inldsevak/core/mixin/dateTime_mixin.dart';
@@ -29,10 +29,12 @@ class CreateNotifyRepresentativeView extends StatefulWidget {
   const CreateNotifyRepresentativeView({super.key});
 
   @override
-  State<CreateNotifyRepresentativeView> createState() => _CreateNotifyRepresentativeViewState();
+  State<CreateNotifyRepresentativeView> createState() =>
+      _CreateNotifyRepresentativeViewState();
 }
 
-class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentativeView>
+class _CreateNotifyRepresentativeViewState
+    extends State<CreateNotifyRepresentativeView>
     with HandleMultipleFilesSheet, DateAndTimePicker {
   VoidCallback? _addressSyncListener;
   VoidCallback? _mapSearchViewModelListener;
@@ -45,10 +47,10 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
   void dispose() {
     // Cancel debounce timer
     _syncDebounceTimer?.cancel();
-    
+
     // Dispose scroll controller
     _scrollController.dispose();
-    
+
     // Remove address sync listeners
     if (_addressSyncListener != null || _mapSearchViewModelListener != null) {
       try {
@@ -74,14 +76,16 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
     // Cache localization at the top of build to avoid multiple lookups
     // This significantly improves performance, especially for Hindi locale
     final localization = context.localizations;
-    
+
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => CreateNotifyRepresentativeViewModel()),
+        ChangeNotifierProvider(
+          create: (context) => CreateNotifyRepresentativeViewModel(),
+        ),
       ],
       builder: (context, _) {
         final provider = context.read<CreateNotifyRepresentativeViewModel>();
-        
+
         // Set up listeners after provider is available (only once)
         if (!_listenersInitialized) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -90,12 +94,13 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
             _listenersInitialized = true;
           });
         }
-        
+
         // Check if Hindi keyboard might be shown (Hindi language)
-        final isHindiLanguage = GeneralStream.instance.locale.languageCode == 'hi';
+        final isHindiLanguage =
+            GeneralStream.instance.locale.languageCode == 'hi';
         // Hindi keyboard height is approximately 300px
         const hindiKeyboardHeight = 300.0;
-        
+
         return Scaffold(
           appBar: commonAppBar(title: localization.notify_representative),
           body: SingleChildScrollView(
@@ -104,9 +109,12 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
               left: Dimens.horizontalspacing,
               right: Dimens.horizontalspacing,
               // Only add extra padding for Hindi locale, not for English
-              bottom: isHindiLanguage 
-                  ? hindiKeyboardHeight + MediaQuery.of(context).viewInsets.bottom + Dimens.verticalspacing 
-                  : MediaQuery.of(context).viewInsets.bottom + Dimens.verticalspacing,
+              bottom: isHindiLanguage
+                  ? hindiKeyboardHeight +
+                        MediaQuery.of(context).viewInsets.bottom +
+                        Dimens.verticalspacing
+                  : MediaQuery.of(context).viewInsets.bottom +
+                        Dimens.verticalspacing,
             ),
             child: Consumer<CreateNotifyRepresentativeViewModel>(
               builder: (contextP, value, _) {
@@ -129,62 +137,89 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
                           argument: localization.event_title_validatore,
                         ),
                       ),
-                    Column(
-                      spacing: Dimens.gapX2,
-                      children: [
+                      Column(
+                        spacing: Dimens.gapX2,
+                        children: [
                           Row(
                             children: [
                               TranslatedText(
-                                text: localization.address_details, // Use "Address Details" which is already localized
-                                style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w400,fontSize: 18.sp),
+                                text: localization
+                                    .address_details, // Use "Address Details" which is already localized
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 18.sp,
+                                ),
                               ),
                             ],
                           ),
-                      // Address Fields using MapSearchLocation
-                      Consumer<MapSearchViewModel>(
-                        builder: (context, mapsValue, _) {
-                          return MapSearchLocation(
-                            hideHouseNumber: true,
-                            hideUseMyLocation: true,
-                            hideFindButton: true,
-                            areaAndPincodeInRow: true,
-                            findPincode: (pincode) async {
-                              // Sync all address fields from MapSearchViewModel to provider
-                              // This ensures district, area, and other fields are synced when location is used
-                              debugPrint("📌 findPincode callback called with pincode: $pincode");
-                              debugPrint("   MapSearch - District: '${mapsValue.districtController.text}', Area: '${mapsValue.areaController.text}'");
-                              debugPrint("   MapSearch - Address model - District: '${mapsValue.address?.district}', Area: '${mapsValue.address?.area}'");
-                              
-                              provider.districtController.text = mapsValue.districtController.text;
-                              provider.areaController.text = mapsValue.areaController.text;
-                              provider.stateController.text = mapsValue.stateController.text;
-                              provider.pincodeController.text = mapsValue.pincodeController.text;
-                              provider.mandalController.text = mapsValue.tehsilController.text;
-                              provider.streetController.text = mapsValue.areaController.text;
-                              provider.villageController.text = mapsValue.cityController.text.isNotEmpty
-                                  ? mapsValue.cityController.text
-                                  : (mapsValue.address?.subLocality ?? "");
-                              
-                              debugPrint("   ✅ Synced to provider - District: '${provider.districtController.text}', Area: '${provider.areaController.text}'");
-                              
-                              // Store location coordinates
-                              if (mapsValue.currentPosition != null) {
-                                provider.locationCoordinates = LocationCoordinates(
-                                  lat: mapsValue.currentPosition!.latitude,
-                                  lng: mapsValue.currentPosition!.longitude,
-                                );
-                              } else if (mapsValue.address?.latitude != null && mapsValue.address?.longitude != null) {
-                                provider.locationCoordinates = LocationCoordinates(
-                                  lat: mapsValue.address!.latitude!,
-                                  lng: mapsValue.address!.longitude!,
-                                );
-                              }
+                          // Address Fields using MapSearchLocation
+                          Consumer<MapSearchViewModel>(
+                            builder: (context, mapsValue, _) {
+                              return MapSearchLocation(
+                                hideHouseNumber: true,
+                                hideUseMyLocation: true,
+                                hideFindButton: true,
+                                areaAndPincodeInRow: true,
+                                findPincode: (pincode) async {
+                                  // Sync all address fields from MapSearchViewModel to provider
+                                  // This ensures district, area, and other fields are synced when location is used
+                                  debugPrint(
+                                    "📌 findPincode callback called with pincode: $pincode",
+                                  );
+                                  debugPrint(
+                                    "   MapSearch - District: '${mapsValue.districtController.text}', Area: '${mapsValue.areaController.text}'",
+                                  );
+                                  debugPrint(
+                                    "   MapSearch - Address model - District: '${mapsValue.address?.district}', Area: '${mapsValue.address?.area}'",
+                                  );
+
+                                  provider.districtController.text =
+                                      mapsValue.districtController.text;
+                                  provider.areaController.text =
+                                      mapsValue.areaController.text;
+                                  provider.stateController.text =
+                                      mapsValue.stateController.text;
+                                  provider.pincodeController.text =
+                                      mapsValue.pincodeController.text;
+                                  provider.mandalController.text =
+                                      mapsValue.tehsilController.text;
+                                  provider.streetController.text =
+                                      mapsValue.areaController.text;
+                                  provider.villageController.text =
+                                      mapsValue.cityController.text.isNotEmpty
+                                      ? mapsValue.cityController.text
+                                      : (mapsValue.address?.subLocality ?? "");
+
+                                  debugPrint(
+                                    "   ✅ Synced to provider - District: '${provider.districtController.text}', Area: '${provider.areaController.text}'",
+                                  );
+
+                                  // Store location coordinates
+                                  if (mapsValue.currentPosition != null) {
+                                    provider.locationCoordinates =
+                                        LocationCoordinates(
+                                          lat: mapsValue
+                                              .currentPosition!
+                                              .latitude,
+                                          lng: mapsValue
+                                              .currentPosition!
+                                              .longitude,
+                                        );
+                                  } else if (mapsValue.address?.latitude !=
+                                          null &&
+                                      mapsValue.address?.longitude != null) {
+                                    provider.locationCoordinates =
+                                        LocationCoordinates(
+                                          lat: mapsValue.address!.latitude!,
+                                          lng: mapsValue.address!.longitude!,
+                                        );
+                                  }
+                                },
+                              );
                             },
-                          );
-                        },
+                          ),
+                        ],
                       ),
-                      ],
-                    ),
 
                       FormTextFormField(
                         isRequired: true,
@@ -202,7 +237,7 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
                               DateTime.now().month + 2,
                             ),
                           );
-                          if (date != null) { 
+                          if (date != null) {
                             provider.companyDateFormat = date
                                 .toString()
                                 .toYyyyMmDd();
@@ -226,7 +261,8 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
                           final time = await custom24HrsTimePicker();
                           // Convert 24-hour format to 12-hour format with AM/PM
                           if (time != null && time.isNotEmpty) {
-                            provider.eventTimeController.text = time.to12HourTimeFormat();
+                            provider.eventTimeController.text = time
+                                .to12HourTimeFormat();
                           } else {
                             provider.eventTimeController.text = "";
                           }
@@ -238,7 +274,8 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
                       FormTextFormField(
                         isRequired: true,
                         headingText: localization.description,
-                        hintText: localization.enter_detail_description, // Use localized hint text for description
+                        hintText: localization
+                            .enter_detail_description, // Use localized hint text for description
                         controller: provider.descriptionController,
                         maxLines: 5,
                         textCapitalization: TextCapitalization.sentences,
@@ -293,7 +330,9 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
                                 useRootNavigator: false,
                                 builder: (bottomSheetContext) => Padding(
                                   padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
+                                    bottom: MediaQuery.of(
+                                      bottomSheetContext,
+                                    ).viewInsets.bottom,
                                   ),
                                   child: selectMultipleFiles(
                                     onTap: value.addFiles,
@@ -313,90 +352,115 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
               },
             ),
           ),
-          bottomNavigationBar:
-              Consumer2<
-                CreateNotifyRepresentativeViewModel,
-                NotifyRepresentativeViewModel
-              >(
-                builder: (contextP, value, notify, _) {
-                  return CommonButton(
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: Dimens.horizontalspacing,
+                right: Dimens.horizontalspacing,
+                top: Dimens.textFromSpacing,
+                bottom: Dimens.verticalspacing,
+              ),
+              child:
+                  Consumer2<
+                    CreateNotifyRepresentativeViewModel,
+                    NotifyRepresentativeViewModel
+                  >(
+                    builder: (contextP, value, notify, _) {
+                      return CommonButton(
                         isEnable: !value.isLoading,
                         isLoading: value.isLoading,
                         onTap: () {
                           // Get MapSearchViewModel and pass it to ensure address fields are synced
-                          final mapSearchViewModel = context.read<MapSearchViewModel>();
-                          
+                          final mapSearchViewModel = context
+                              .read<MapSearchViewModel>();
+
                           provider.requestNotify(
                             onCompleted: notify.onRecentRefresh,
                             mapSearchViewModel: mapSearchViewModel,
                           );
                         },
                         text: localization.notify,
-                      )
-                      .symmetricPadding(horizontal: Dimens.horizontalspacing)
-                      .onlyPadding(
-                        top: Dimens.textFromSpacing,
-                        bottom: Dimens.verticalspacing,
                       );
-                },
-              ),
+                    },
+                  ),
+            ),
+          ),
         );
       },
     );
   }
-  
-  void _initializeListeners(BuildContext context, CreateNotifyRepresentativeViewModel notifyProvider) {
+
+  void _initializeListeners(
+    BuildContext context,
+    CreateNotifyRepresentativeViewModel notifyProvider,
+  ) {
     if (!mounted) return;
-    
+
     // Set up listeners for MapSearchViewModel controllers to sync address fields
     final mapsProvider = context.read<MapSearchViewModel>();
-    
+
     void syncAddressFields({bool immediate = false}) {
       if (!mounted || _isSyncing) return;
-      
+
       // Cancel previous debounce timer
       _syncDebounceTimer?.cancel();
-      
+
       // If immediate sync is requested (e.g., when address is loaded), skip debounce
       if (immediate) {
         if (_isSyncing) return;
         _isSyncing = true;
-        
+
         Future.microtask(() {
           if (!mounted) {
             _isSyncing = false;
             return;
           }
-          
+
           try {
             // Debug: Log what we're syncing
             debugPrint("🔄 Immediate sync triggered");
-            debugPrint("   MapSearch - District: '${mapsProvider.districtController.text}', Area: '${mapsProvider.areaController.text}'");
-            debugPrint("   MapSearch - City: '${mapsProvider.cityController.text}', Tehsil: '${mapsProvider.tehsilController.text}'");
-            debugPrint("   MapSearch - Address model - District: '${mapsProvider.address?.district}', Area: '${mapsProvider.address?.area}'");
-            
+            debugPrint(
+              "   MapSearch - District: '${mapsProvider.districtController.text}', Area: '${mapsProvider.areaController.text}'",
+            );
+            debugPrint(
+              "   MapSearch - City: '${mapsProvider.cityController.text}', Tehsil: '${mapsProvider.tehsilController.text}'",
+            );
+            debugPrint(
+              "   MapSearch - Address model - District: '${mapsProvider.address?.district}', Area: '${mapsProvider.address?.area}'",
+            );
+
             // Sync district and other fields from MapSearchViewModel
             // Batch updates to reduce rebuilds
-            notifyProvider.districtController.text = mapsProvider.districtController.text;
-            notifyProvider.areaController.text = mapsProvider.areaController.text;
-            notifyProvider.stateController.text = mapsProvider.stateController.text;
-            notifyProvider.pincodeController.text = mapsProvider.pincodeController.text;
-            notifyProvider.mandalController.text = mapsProvider.tehsilController.text;
-            notifyProvider.streetController.text = mapsProvider.areaController.text;
-            notifyProvider.villageController.text = mapsProvider.cityController.text.isNotEmpty
+            notifyProvider.districtController.text =
+                mapsProvider.districtController.text;
+            notifyProvider.areaController.text =
+                mapsProvider.areaController.text;
+            notifyProvider.stateController.text =
+                mapsProvider.stateController.text;
+            notifyProvider.pincodeController.text =
+                mapsProvider.pincodeController.text;
+            notifyProvider.mandalController.text =
+                mapsProvider.tehsilController.text;
+            notifyProvider.streetController.text =
+                mapsProvider.areaController.text;
+            notifyProvider.villageController.text =
+                mapsProvider.cityController.text.isNotEmpty
                 ? mapsProvider.cityController.text
                 : (mapsProvider.address?.subLocality ?? "");
-            
+
             // Debug: Log what was synced
-            debugPrint("   ✅ Synced - District: '${notifyProvider.districtController.text}', Area: '${notifyProvider.areaController.text}'");
-            
+            debugPrint(
+              "   ✅ Synced - District: '${notifyProvider.districtController.text}', Area: '${notifyProvider.areaController.text}'",
+            );
+
             // Store location coordinates
             if (mapsProvider.currentPosition != null) {
               notifyProvider.locationCoordinates = LocationCoordinates(
                 lat: mapsProvider.currentPosition!.latitude,
                 lng: mapsProvider.currentPosition!.longitude,
               );
-            } else if (mapsProvider.address?.latitude != null && mapsProvider.address?.longitude != null) {
+            } else if (mapsProvider.address?.latitude != null &&
+                mapsProvider.address?.longitude != null) {
               notifyProvider.locationCoordinates = LocationCoordinates(
                 lat: mapsProvider.address!.latitude!,
                 lng: mapsProvider.address!.longitude!,
@@ -410,7 +474,7 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
         });
         return;
       }
-      
+
       // Debounce sync to prevent multiple rapid calls (especially on older devices)
       _syncDebounceTimer = Timer(const Duration(milliseconds: 300), () async {
         if (!mounted || _isSyncing) return;
@@ -421,35 +485,41 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
             _isSyncing = false;
             return;
           }
-          
+
           try {
             // Sync district and other fields from MapSearchViewModel
             // Batch updates to reduce rebuilds
-            notifyProvider.districtController.text = mapsProvider.districtController.text;
-            notifyProvider.areaController.text = mapsProvider.areaController.text;
-            notifyProvider.stateController.text = mapsProvider.stateController.text;
-            notifyProvider.pincodeController.text = mapsProvider.pincodeController.text;
-            notifyProvider.mandalController.text = mapsProvider.tehsilController.text;
-            notifyProvider.streetController.text = mapsProvider.areaController.text;
-            notifyProvider.villageController.text = mapsProvider.cityController.text.isNotEmpty
+            notifyProvider.districtController.text =
+                mapsProvider.districtController.text;
+            notifyProvider.areaController.text =
+                mapsProvider.areaController.text;
+            notifyProvider.stateController.text =
+                mapsProvider.stateController.text;
+            notifyProvider.pincodeController.text =
+                mapsProvider.pincodeController.text;
+            notifyProvider.mandalController.text =
+                mapsProvider.tehsilController.text;
+            notifyProvider.streetController.text =
+                mapsProvider.areaController.text;
+            notifyProvider.villageController.text =
+                mapsProvider.cityController.text.isNotEmpty
                 ? mapsProvider.cityController.text
                 : (mapsProvider.address?.subLocality ?? "");
-            
+
             // Store location coordinates
             if (mapsProvider.currentPosition != null) {
               notifyProvider.locationCoordinates = LocationCoordinates(
                 lat: mapsProvider.currentPosition!.latitude,
                 lng: mapsProvider.currentPosition!.longitude,
               );
-            }
-             else if (mapsProvider.address?.latitude != null && mapsProvider.address?.longitude != null) {
+            } else if (mapsProvider.address?.latitude != null &&
+                mapsProvider.address?.longitude != null) {
               notifyProvider.locationCoordinates = LocationCoordinates(
                 lat: mapsProvider.address!.latitude!,
                 lng: mapsProvider.address!.longitude!,
               );
             }
-          }
-           catch (e) {
+          } catch (e) {
             debugPrint("Error syncing address fields: $e");
           } finally {
             _isSyncing = false;
@@ -457,16 +527,16 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
         });
       });
     }
-    
+
     // Store listener reference for cleanup
     _addressSyncListener = syncAddressFields;
-    
+
     // Add listeners to key controllers
     mapsProvider.districtController.addListener(_addressSyncListener!);
     mapsProvider.areaController.addListener(_addressSyncListener!);
     mapsProvider.stateController.addListener(_addressSyncListener!);
     mapsProvider.pincodeController.addListener(_addressSyncListener!);
-    
+
     // Also listen to address changes to trigger immediate sync when location is loaded
     _mapSearchViewModelListener = () {
       // When address is loaded, trigger immediate sync (bypass debounce)
@@ -474,9 +544,13 @@ class _CreateNotifyRepresentativeViewState extends State<CreateNotifyRepresentat
       // This ensures district and area are synced even if they're empty initially
       if (mapsProvider.address != null) {
         debugPrint("🔔 MapSearchViewModel listener fired - Address exists");
-        debugPrint("   Address District: '${mapsProvider.address?.district}', Area: '${mapsProvider.address?.area}'");
-        debugPrint("   Controllers District: '${mapsProvider.districtController.text}', Area: '${mapsProvider.areaController.text}'");
-        
+        debugPrint(
+          "   Address District: '${mapsProvider.address?.district}', Area: '${mapsProvider.address?.area}'",
+        );
+        debugPrint(
+          "   Controllers District: '${mapsProvider.districtController.text}', Area: '${mapsProvider.areaController.text}'",
+        );
+
         // Cancel any pending debounced sync
         _syncDebounceTimer?.cancel();
         // Add a small delay to ensure loadAddress has finished updating controllers

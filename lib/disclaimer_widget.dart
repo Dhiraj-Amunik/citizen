@@ -27,13 +27,13 @@ class DisclaimerNotice extends StatelessWidget {
             color: Colors.amber[700],
             size: Dimens.scaleX3,
           ),
+          
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TranslatedText(
-                  text: 
-                  localization.important_notice,
+                  text: localization.important_notice,
                   style: context.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.amber[900],
@@ -41,17 +41,24 @@ class DisclaimerNotice extends StatelessWidget {
                 ),
                 SizeBox.sizeHX2,
                 TranslatedText(
-                  text: 
-                  localization.disclaimer_description,
+                  text: localization.disclaimer_description,
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: Colors.amber[800],
-                  ), 
+                  ),
                 ),
               ],
             ),
           ),
+
           GestureDetector(
-            onTap: onDismiss,
+            onTap: () {
+              if (onDismiss != null) {
+                onDismiss!();
+              } else {
+                Navigator.pop(context);
+              }
+            },
+
             child: Container(
               padding: EdgeInsets.all(Dimens.paddingX1),
               decoration: BoxDecoration(
