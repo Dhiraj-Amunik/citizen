@@ -42,304 +42,331 @@ class _ProfileViewState extends State<ProfileView> with CupertinoDialogMixin {
         final roleProvider = context.read<RoleViewModel>();
 
         return Scaffold(
-      appBar: commonAppBar(title: localization.profile),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: Dimens.horizontalspacing,
-          vertical: Dimens.appBarSpacing,
-        ),
-        child: Column(
-          spacing: Dimens.widgetSpacing,
-          children: [
-            Consumer<ProfileViewModel>(
-              builder: (context, value, _) {
-                return ProfileHelper.getProfileBox(
-                  image: value.profile?.avatar,
-                  name: value.profile?.name,
-                  number: value.profile?.phone,
-                  onTap: () => RouteManager.pushNamed(Routes.profileEditView),
-                );
-              },
+          appBar: commonAppBar(title: localization.profile),
+          body: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: Dimens.horizontalspacing,
+              vertical: Dimens.appBarSpacing,
             ),
-            if (roleProvider.isPartyMember)
-              Column(
-                spacing: Dimens.widgetSpacing,
-                children: [
-                  Consumer<ProfileViewModel>(
-                    builder: (context, value, _) {
-                      return GestureDetector(
-                        onTap: () => RouteManager.pushNamed(Routes.idCardPage),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: Dimens.paddingX3,
-                            vertical: Dimens.paddingX3,
-                          ),
-                          decoration: boxDecorationRoundedWithShadow(
-                            Dimens.radiusX5,
-                            backgroundColor: AppPalettes.liteGreyColor,
-                          ),
-                          child: Row(
-                            spacing: Dimens.gapX2,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              UserDetailWidget(
-                                heading: context.textTheme.bodyMedium,
-                                scale: Dimens.scaleX7,
-                                profile: value.profile,
+            child: Column(
+              spacing: Dimens.widgetSpacing,
+              children: [
+                Consumer<ProfileViewModel>(
+                  builder: (context, value, _) {
+                    return ProfileHelper.getProfileBox(
+                      image: value.profile?.avatar,
+                      name: value.profile?.name,
+                      number: value.profile?.phone,
+                      onTap: () =>
+                          RouteManager.pushNamed(Routes.profileEditView),
+                    );
+                  },
+                ),
+                if (roleProvider.isPartyMember)
+                  Column(
+                    spacing: Dimens.widgetSpacing,
+                    children: [
+                      Consumer<ProfileViewModel>(
+                        builder: (context, value, _) {
+                          return GestureDetector(
+                            onTap: () =>
+                                RouteManager.pushNamed(Routes.idCardPage),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: Dimens.paddingX3,
+                                vertical: Dimens.paddingX3,
                               ),
-                              QrCodeWidget(
-                                height: 60,
-                                data: value.profile?.membershipId ?? "",
+                              decoration: boxDecorationRoundedWithShadow(
+                                Dimens.radiusX5,
+                                backgroundColor: AppPalettes.liteGreyColor,
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-
-                  Consumer<ProfileViewModel>(
-                    builder: (context, value, _) {
-                      if (value.profile?.inviteCode != null && 
-                          value.profile!.inviteCode!.trim().isNotEmpty) {
-                        return Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: Dimens.paddingX3,
-                            vertical: Dimens.paddingX3,
-                          ),
-                          decoration: boxDecorationRoundedWithShadow(
-                            Dimens.radiusX4,
-                            backgroundColor: AppPalettes.liteGreyColor,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
+                                spacing: Dimens.gapX2,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  TranslatedText(
-                                    text: localization.invite_code,
-                                    style: context.textTheme.bodySmall?.copyWith(
-                                      color: AppPalettes.blackColor,
-                                    ),
+                                  UserDetailWidget(
+                                    heading: context.textTheme.bodyMedium,
+                                    scale: Dimens.scaleX7,
+                                    profile: value.profile,
                                   ),
-
-                                  SizeBox.sizeHX1,
-                                  Text(
-                                     value.profile?.inviteCode ?? "",
-                                    style: context.textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      color: AppPalettes.blackColor,
-                                    ),
+                                  QrCodeWidget(
+                                    height: 60,
+                                    data: value.profile?.membershipId ?? "",
                                   ),
                                 ],
                               ),
-                              CommonHelpers.buildIcons(
-                                path: AppImages.copyIcon,
-                                padding: Dimens.paddingX2,
-                                iconSize: Dimens.scaleX2,
-                                onTap: () {
-                                  if (value.profile?.inviteCode != null) {
-                                    Clipboard.setData(
-                                      ClipboardData(text: value.profile!.inviteCode!),
-                                    );
-                                    CommonSnackbar(
-                                      text: localization.invite_code_copied,
-                                    ).showToast();
-                                  }
-                                },
+                            ),
+                          );
+                        },
+                      ),
+
+                      Consumer<ProfileViewModel>(
+                        builder: (context, value, _) {
+                          if (value.profile?.inviteCode != null &&
+                              value.profile!.inviteCode!.trim().isNotEmpty) {
+                            return Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: Dimens.paddingX3,
+                                vertical: Dimens.paddingX3,
                               ),
-                            ],
+                              decoration: boxDecorationRoundedWithShadow(
+                                Dimens.radiusX4,
+                                backgroundColor: AppPalettes.liteGreyColor,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TranslatedText(
+                                        text: localization.invite_code,
+                                        style: context.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: AppPalettes.blackColor,
+                                            ),
+                                      ),
+
+                                      SizeBox.sizeHX1,
+                                      Text(
+                                        value.profile?.inviteCode ?? "",
+                                        style: context.textTheme.bodyLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                              color: AppPalettes.blackColor,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  CommonHelpers.buildIcons(
+                                    path: AppImages.copyIcon,
+                                    padding: Dimens.paddingX2,
+                                    iconSize: Dimens.scaleX2,
+                                    onTap: () {
+                                      if (value.profile?.inviteCode != null) {
+                                        Clipboard.setData(
+                                          ClipboardData(
+                                            text: value.profile!.inviteCode!,
+                                          ),
+                                        );
+
+                                        CommonSnackbar(
+                                          text: localization.invite_code_copied,
+                                        ).showToast();
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                      ProfileHelper.getCommonBox(
+                        // "Notification History",
+                        // TODO: Use localization
+                        "Official Announcements",
+                        subtext: "View all official announcements",
+                        icon: AppImages.notificationIcon,
+                        onTap: () => RouteManager.pushNamed(
+                          Routes.notificationHistoryPage,
+                        ),
+                      ),
+                      ProfileHelper.getCommonBox(
+                        localization.party_information,
+                        subtext: localization.know_our_identity_slogan,
+                        icon: AppImages.partyInfoProfileIcon,
+                        onTap: () =>
+                            RouteManager.pushNamed(Routes.partyInformationPage),
+                      ),
+                      ProfileHelper.getCommonBox(
+                        localization.about_section,
+                        subtext: localization.app_mission_vision_history,
+                        icon: AppImages.aboutProfileIcon,
+                        onTap: () => RouteManager.pushNamed(Routes.aboutPage),
+                      ),
+                      ProfileHelper.getCommonBox(
+                        localization.leadership_information,
+                        subtext: localization.meet_our_leaders_key_member,
+                        icon: AppImages.leadershipProfileIcon,
+                        onTap: () =>
+                            RouteManager.pushNamed(Routes.leadershipInfoPage),
+                      ),
+                    ],
+                  ),
+                ProfileHelper.getCommonBox(
+                  localization.language,
+                  subtext: localization.language_subtext,
+                  icon: AppImages.translationIcon,
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(
+                          child: Container(
+                            padding: EdgeInsets.all(Dimens.paddingX4),
+                            decoration: BoxDecoration(
+                              color: AppPalettes.whiteColor,
+                              borderRadius: BorderRadius.circular(
+                                Dimens.paddingX4,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                SizeBox.sizeHX5,
+                                CommonButton(
+                                  color: AppPalettes.whiteColor,
+                                  textColor: AppPalettes.blackColor,
+                                  text: "English",
+                                  borderColor: AppPalettes.primaryColor,
+                                  onTap: () {
+                                    GeneralStream.instance.setLocale("en");
+                                    RouteManager.pop();
+                                  },
+                                ),
+                                SizeBox.sizeHX3,
+                                CommonButton(
+                                  color: AppPalettes.whiteColor,
+                                  textColor: AppPalettes.blackColor,
+                                  text: "Hindi ",
+                                  borderColor: AppPalettes.primaryColor,
+                                  onTap: () {
+                                    GeneralStream.instance.setLocale("hi");
+                                    RouteManager.pop();
+                                  },
+                                ),
+                                SizeBox.sizeHX5,
+                              ],
+                            ),
                           ),
                         );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                  ProfileHelper.getCommonBox(
-                    localization.party_information,
-                    subtext: localization.know_our_identity_slogan,
-                    icon: AppImages.partyInfoProfileIcon,
-                    onTap: () =>
-                        RouteManager.pushNamed(Routes.partyInformationPage),
-                  ),
-                  ProfileHelper.getCommonBox(
-                    localization.about_section,
-                    subtext: localization.app_mission_vision_history,
-                    icon: AppImages.aboutProfileIcon,
-                    onTap: () => RouteManager.pushNamed(Routes.aboutPage),
-                  ),
-                  ProfileHelper.getCommonBox(
-                    localization.leadership_information,
-                    subtext: localization.meet_our_leaders_key_member,
-                    icon: AppImages.leadershipProfileIcon,
-                    onTap: () =>
-                        RouteManager.pushNamed(Routes.leadershipInfoPage),
-                  ),
-                ],
-              ),
-            ProfileHelper.getCommonBox(
-              localization.language,
-              subtext: localization.language_subtext,
-              icon: AppImages.translationIcon,
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return Dialog(
-                      child: Container(
-                        padding: EdgeInsets.all(Dimens.paddingX4),
-                        decoration: BoxDecoration(
-                          color: AppPalettes.whiteColor,
-                          borderRadius: BorderRadius.circular(Dimens.paddingX4),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            SizeBox.sizeHX5,
-                            CommonButton(
-                              color: AppPalettes.whiteColor,
-                              textColor: AppPalettes.blackColor,
-                              text: "English",
-                              borderColor: AppPalettes.primaryColor,
-                              onTap: () {
-                                GeneralStream.instance.setLocale("en");
-                                RouteManager.pop();
-                              },
-                            ),
-                            SizeBox.sizeHX3,
-                            CommonButton(
-                              color: AppPalettes.whiteColor,
-                              textColor: AppPalettes.blackColor,
-                              text: "Hindi ",
-                              borderColor: AppPalettes.primaryColor,
-                              onTap: () {
-                                GeneralStream.instance.setLocale("hi");
-                                RouteManager.pop();
-                              },
-                            ),
-                            SizeBox.sizeHX5,
-                          ],
-                        ),
-                      ),
+                      },
                     );
                   },
-                );
-              },
-            ),
-            ProfileHelper.getCommonBox(
-              localization.terms_and_conditions,
-              subtext: localization.terms_and_conditions_subtext,
-              icon: AppImages.termsServices,
-              onTap: () =>
-                  _launchURL("https://sites.google.com/view/inldsevak/home"),
-            ),
-            ProfileHelper.getCommonBox(
-              localization.privacy_policy,
-              subtext: localization.privacy_policy_subtext,
-              icon: AppImages.privacyPolicy,
-              onTap: () =>
-                  _launchURL("https://sites.google.com/view/inldsevak/home"),
-            ),
-            // ProfileHelper.getCommonBox(
-            //   'Leaderboard',
-            //   subtext: 'See top monthly performers',
-            //   icon: AppImages.leaderboardIcon,
-            //   onTap: () => RouteManager.pushNamed(Routes.leaderBoardPage),
-            // ),
-            // ProfileHelper.getCommonBox(
-            //   'Coins History',
-            //   subtext: 'View your  earned coins',
-            //   icon: AppImages.dollarIcon,
-            //   onTap: () => RouteManager.pushNamed(Routes.coinsHistoryPage),
-            // ),
-            //  ProfileHelper.getCommonBox(
-            //   'Refer & Earn',
-            //   subtext: 'Invite friends and earn coins',
-            //   icon: AppImages.shareIcon,
-            //   onTap: () => RouteManager.pushNamed(Routes.coinsHistoryPage),
-            // ),
-            ProfileHelper.getCommonBox(
-              localization.help_and_support,
-              subtext: localization.help_and_support_subtext,
-              icon: AppImages.help,
-              onTap: () => RouteManager.pushNamed(Routes.helpAndSupportPage),
-            ),
-            ProfileHelper.getCommonBox(
-              localization.emergency_contacts,
-              subtext: localization.emergency_contacts_subtext,
-              icon: AppImages.phoneIcon,
-              onTap: () => RouteManager.pushNamed(Routes.emergencyContactsPage),
-            ),
-            Consumer<ProfileViewModel>(
-              builder: (context, profileValue, _) {
-                return ProfileHelper.getCommonBox(
-                  localization.share_app,
-                  subtext: localization.share_app_subtext,
-                  icon: AppImages.shareIcon,
-                  backgroundColor: AppPalettes.liteGreenColor,
+                ),
+
+                ProfileHelper.getCommonBox(
+                  localization.terms_and_conditions,
+                  subtext: localization.terms_and_conditions_subtext,
+                  icon: AppImages.termsServices,
+                  onTap: () => _launchURL(
+                    "https://sites.google.com/view/inldsevak/home",
+                  ),
+                ),
+                ProfileHelper.getCommonBox(
+                  localization.privacy_policy,
+                  subtext: localization.privacy_policy_subtext,
+                  icon: AppImages.privacyPolicy,
+                  onTap: () => _launchURL(
+                    "https://sites.google.com/view/inldsevak/home",
+                  ),
+                ),
+                // ProfileHelper.getCommonBox(
+                //   'Leaderboard',
+                //   subtext: 'See top monthly performers',
+                //   icon: AppImages.leaderboardIcon,
+                //   onTap: () => RouteManager.pushNamed(Routes.leaderBoardPage),
+                // ),
+                // ProfileHelper.getCommonBox(
+                //   'Coins History',
+                //   subtext: 'View your  earned coins',
+                //   icon: AppImages.dollarIcon,
+                //   onTap: () => RouteManager.pushNamed(Routes.coinsHistoryPage),
+                // ),
+                //  ProfileHelper.getCommonBox(
+                //   'Refer & Earn',
+                //   subtext: 'Invite friends and earn coins',
+                //   icon: AppImages.shareIcon,
+                //   onTap: () => RouteManager.pushNamed(Routes.coinsHistoryPage),
+                // ),
+                ProfileHelper.getCommonBox(
+                  localization.help_and_support,
+                  subtext: localization.help_and_support_subtext,
+                  icon: AppImages.help,
+                  onTap: () =>
+                      RouteManager.pushNamed(Routes.helpAndSupportPage),
+                ),
+                ProfileHelper.getCommonBox(
+                  localization.emergency_contacts,
+                  subtext: localization.emergency_contacts_subtext,
+                  icon: AppImages.phoneIcon,
+                  onTap: () =>
+                      RouteManager.pushNamed(Routes.emergencyContactsPage),
+                ),
+                Consumer<ProfileViewModel>(
+                  builder: (context, profileValue, _) {
+                    return ProfileHelper.getCommonBox(
+                      localization.share_app,
+                      subtext: localization.share_app_subtext,
+                      icon: AppImages.shareIcon,
+                      backgroundColor: AppPalettes.liteGreenColor,
+                      onTap: () {
+                        final referralCode = profileValue.profile?.inviteCode;
+                        String shareText =
+                            'SEVAK App is the simple way to raise issues and get them delivered.\nhttps://play.google.com/store/apps/details?id=org.amunik.sevak&pcampaignid=web_share';
+
+                        // Add referral code if available
+                        if (referralCode != null &&
+                            referralCode.trim().isNotEmpty) {
+                          shareText +=
+                              '\n\nUse my referral code: $referralCode';
+                        }
+
+                        SharePlus.instance.share(
+                          ShareParams(title: "SEVAK", text: shareText),
+                        );
+                      },
+                    );
+                  },
+                ),
+
+                ProfileHelper.getLogout(
+                  localization.logout,
                   onTap: () {
-                    final referralCode = profileValue.profile?.inviteCode;
-                    String shareText = 'SEVAK App is the simple way to raise issues and get them delivered.\nhttps://play.google.com/store/apps/details?id=org.amunik.sevak&pcampaignid=web_share';
-                    
-                    // Add referral code if available
-                    if (referralCode != null && referralCode.trim().isNotEmpty) {
-                      shareText += '\n\nUse my referral code: $referralCode';
-                    }
-                    
-                    SharePlus.instance.share(
-                      ShareParams(
-                        title: "SEVAK",
-                        text: shareText,
-                      ),
+                    customLeftCupertinoDialog(
+                      content: localization.logout_confirmation,
+                      leftButton: localization.logout,
+                      onTap: () async {
+                        await SessionController.instance.clearSession();
+                      },
                     );
                   },
-                );
-              },
+                ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   spacing: Dimens.gapX2,
+                //   children: [
+                //     CommonHelpers.buildIcons(
+                //       path: AppImages.instIcon,
+                //       color: AppPalettes.liteGreyColor,
+                //       padding: Dimens.paddingX3,
+                //       iconSize: Dimens.scaleX3,
+                //     ),
+                //     CommonHelpers.buildIcons(
+                //       path: AppImages.facebookIcon,
+                //       color: AppPalettes.liteGreyColor,
+                //       padding: Dimens.paddingX3,
+                //       iconSize: Dimens.scaleX3,
+                //     ),
+                //     CommonHelpers.buildIcons(
+                //       path: AppImages.twitterIcon,
+                //       color: AppPalettes.liteGreyColor,
+                //       padding: Dimens.paddingX3,
+                //       iconSize: Dimens.scaleX3,
+                //     ),
+                //   ],
+                // ),
+                SizeBox.sizeHX9,
+              ],
             ),
-            
-            ProfileHelper.getLogout(
-              localization.logout,
-              onTap: () {
-                customLeftCupertinoDialog(
-                  content: localization.logout_confirmation,
-                  leftButton: localization.logout,
-                  onTap: () async {
-                    await SessionController.instance.clearSession();
-                  },
-                );
-              },
-            ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   spacing: Dimens.gapX2,
-            //   children: [
-            //     CommonHelpers.buildIcons(
-            //       path: AppImages.instIcon,
-            //       color: AppPalettes.liteGreyColor,
-            //       padding: Dimens.paddingX3,
-            //       iconSize: Dimens.scaleX3,
-            //     ),
-            //     CommonHelpers.buildIcons(
-            //       path: AppImages.facebookIcon,
-            //       color: AppPalettes.liteGreyColor,
-            //       padding: Dimens.paddingX3,
-            //       iconSize: Dimens.scaleX3,
-            //     ),
-            //     CommonHelpers.buildIcons(
-            //       path: AppImages.twitterIcon,
-            //       color: AppPalettes.liteGreyColor,
-            //       padding: Dimens.paddingX3,
-            //       iconSize: Dimens.scaleX3,
-            //     ),
-            //   ],
-            // ),
-            SizeBox.sizeHX9,
-          ],
-        ),
-      ),
-      bottomNavigationBar: DummyNav(),
+          ),
+          bottomNavigationBar: DummyNav(),
         );
       },
     );

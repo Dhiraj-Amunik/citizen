@@ -226,15 +226,12 @@ class AddComplaintsViewModel extends BaseViewModel
 
         // Pop the lodge complaint view first, then push complaints view
         // This ensures clean navigation stack: Previous -> Complaints (not Previous -> Lodge -> Complaints)
+        // Replace the lodge complaint view with complaints view directly
+        // This avoids flashing the underlying screen (like INDLView)
         final navContext = RouteManager.navigatorKey.currentState?.context;
         if (navContext != null && navContext.mounted) {
           try {
-            // First pop the current route (lodge complaint view)
-            RouteManager.pop();
-            // Wait a moment for the pop to complete
-            await Future.delayed(const Duration(milliseconds: 100));
-            // Then push complaints view
-            await RouteManager.pushNamed(Routes.complaintsPage);
+            await RouteManager.pushReplacementNamed(Routes.complaintsPage);
           } catch (e) {
             debugPrint("Error navigating to complaints view: $e");
           }
@@ -366,23 +363,35 @@ class AddComplaintsViewModel extends BaseViewModel
   void filterByLevel(String level) {
     selectedLevel = level;
     filteredAuthorities = [];
-    
+
     for (var officer in allOfficers) {
       // Handle new API structure (level1Details) - all items are level 1
       if (officer.level1Details != null) {
         // New API format: each officer is already a level 1 authority
-        if (level.trim().toLowerCase().contains("level 1") || 
+        if (level.trim().toLowerCase().contains("level 1") ||
             level.trim().toLowerCase() == "1" ||
-            officer.level1Details!.level?.trim().toLowerCase().contains("level 1") == true) {
+            officer.level1Details!.level?.trim().toLowerCase().contains(
+                  "level 1",
+                ) ==
+                true) {
           // Create Authority object from level1Details
           // Use root name (officer.name) as primary, as it's the authority's actual name
           // IMPORTANT: Use officer.sId (main authority _id) not level1Details.sId for API submission
           final auth = authorities.Authority(
             level: officer.level1Details!.level ?? "Level 1",
-            email: officer.level1Details!.email ?? (officer.email?.isNotEmpty == true ? officer.email!.first : null),
+            email:
+                officer.level1Details!.email ??
+                (officer.email?.isNotEmpty == true
+                    ? officer.email!.first
+                    : null),
             index: officer.level1Details!.index,
-            name: officer.name ?? officer.level1Details!.name, // Prioritize root name (authority name)
-            sId: officer.sId, // Use main authority _id (not level1Details._id) - this is what API expects
+            name:
+                officer.name ??
+                officer
+                    .level1Details!
+                    .name, // Prioritize root name (authority name)
+            sId: officer
+                .sId, // Use main authority _id (not level1Details._id) - this is what API expects
           );
           filteredAuthorities.add(auth);
         }
@@ -399,7 +408,7 @@ class AddComplaintsViewModel extends BaseViewModel
         }
       }
     }
-    
+
     authortiyController.clear();
     notifyListeners();
   }
@@ -482,10 +491,10 @@ class AddComplaintsViewModel extends BaseViewModel
       await Future.delayed(const Duration(milliseconds: 400));
 
       final file = await createCameraImage();
-      
+
       // Additional delay after image capture to let system stabilize (critical for older devices)
       await Future.delayed(const Duration(milliseconds: 300));
-      
+
       if (file != null) {
         try {
           // Validate file exists and is valid

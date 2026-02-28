@@ -189,6 +189,7 @@ class _LodgeComplaintViewState extends State<LodgeComplaintView> {
                                             localization.department_validator,
                                       ),
                                 ),
+
                                 FormCommonDropDown<authorities.Authority>(
                                   isRequired: true,
                                   heading: localization.authority,
@@ -201,6 +202,7 @@ class _LodgeComplaintViewState extends State<LodgeComplaintView> {
                                       style: context.textTheme.bodySmall,
                                     );
                                   },
+
                                   headerBuilder: (p0, auth, p2) {
                                     return Text(
                                       "${auth.name}",
@@ -212,6 +214,7 @@ class _LodgeComplaintViewState extends State<LodgeComplaintView> {
                                         argument: "Please select one authority",
                                       ),
                                 ),
+
                                 FormTextFormField(
                                   isRequired: true,
                                   maxLines: 6,

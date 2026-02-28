@@ -164,8 +164,13 @@ extension ExtendedString on String {
   }
 
   String? validateUPI({String? argument}) {
-    if ((this).isEmpty ) {
+    if ((this).isEmpty) {
       return argument;
+    }
+    // UPI ID must contain '@' and follow the format: localpart@provider
+    final upiRegex = RegExp(r'^[a-zA-Z0-9._\-]+@[a-zA-Z0-9]+$');
+    if (!upiRegex.hasMatch(this)) {
+      return argument ?? 'Enter valid UPI ID';
     }
     return null;
   }

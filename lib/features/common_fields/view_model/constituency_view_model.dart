@@ -20,21 +20,21 @@ class ConstituencyViewModel extends BaseViewModel {
     try {
       // Trim and validate pincode format
       final trimmedPincode = pincode.trim();
-      
+
       if (trimmedPincode.isEmpty) {
         CommonSnackbar(
           text: "Please enter a valid Pincode !",
         ).showAnimatedDialog(type: QuickAlertType.warning);
         return null;
       }
-      
+
       if (trimmedPincode.length != 6) {
         CommonSnackbar(
           text: "Pincode must be 6 digits !",
         ).showAnimatedDialog(type: QuickAlertType.warning);
         return null;
       }
-      
+
       // Safely parse pincode - use tryParse to prevent FormatException
       final intCode = int.tryParse(trimmedPincode);
       if (intCode == null) {
@@ -43,7 +43,7 @@ class ConstituencyViewModel extends BaseViewModel {
         ).showAnimatedDialog(type: QuickAlertType.warning);
         return null;
       }
-      
+
       final model = RequestPincodeModel(pincode: intCode);
       final response = await ConstituenciesRepository()
           .getParliamentaryConstituencies(token: token, model: model);
@@ -67,7 +67,9 @@ class ConstituencyViewModel extends BaseViewModel {
             if (parliamentaryConstituencyLists.isNotEmpty) {
               parlimentController.value = parliamentaryConstituencyLists.first;
             }
-            debugPrint("✅ Loaded ${parliamentaryConstituencyLists.length} parliamentary constituencies");
+            debugPrint(
+              "✅ Loaded ${parliamentaryConstituencyLists.length} parliamentary constituencies",
+            );
             notifyListeners();
             return response.data?.district;
           } catch (e, stackTrace) {
@@ -81,7 +83,9 @@ class ConstituencyViewModel extends BaseViewModel {
           }
         }
       } else {
-        debugPrint("⚠️ Failed to get parliamentary constituencies: ${response.data?.message}");
+        debugPrint(
+          "⚠️ Failed to get parliamentary constituencies: ${response.data?.message}",
+        );
         await CommonSnackbar(
           text: response.data?.message ?? "No Constituencies Found !",
         ).showAnimatedDialog(type: QuickAlertType.warning);
@@ -126,11 +130,15 @@ class ConstituencyViewModel extends BaseViewModel {
             // Data is already parsed as List<Constituency> from ConstituencyModel.fromJson
             // Convert List<Constituency> to List<Constituency?> to match the field type
             assemblyConstituencyLists = List<Constituency?>.from(data);
-            debugPrint("✅ Loaded ${assemblyConstituencyLists.length} assembly constituencies");
+            debugPrint(
+              "✅ Loaded ${assemblyConstituencyLists.length} assembly constituencies",
+            );
             // Log first item for debugging
             if (assemblyConstituencyLists.isNotEmpty) {
               final first = assemblyConstituencyLists.first;
-              debugPrint("   Example - Name: ${first?.name}, sId: ${first?.sId}");
+              debugPrint(
+                "   Example - Name: ${first?.name}, sId: ${first?.sId}",
+              );
             }
           } catch (e, stackTrace) {
             debugPrint("❌ Error assigning assembly constituencies: $e");
@@ -144,7 +152,9 @@ class ConstituencyViewModel extends BaseViewModel {
         }
         notifyListeners();
       } else {
-        debugPrint("⚠️ Failed to get assembly constituencies: ${response.data?.message}");
+        debugPrint(
+          "⚠️ Failed to get assembly constituencies: ${response.data?.message}",
+        );
         debugPrint("   Response code: ${response.data?.responseCode}");
         assemblyConstituencyLists = [];
         notifyListeners();

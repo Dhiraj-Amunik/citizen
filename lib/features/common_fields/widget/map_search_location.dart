@@ -77,29 +77,30 @@ class _MapSearchLocationState extends State<MapSearchLocation>
 
   Future<void> _translateDistrictController() async {
     if (!mounted || _isTranslatingDistrict) return;
-    
+
     final mapSearchViewModel = context.read<MapSearchViewModel>();
     final districtText = mapSearchViewModel.districtController.text;
-    
+
     if (districtText.isEmpty) {
       _lastTranslatedDistrict = null;
       return;
     }
-    
+
     // Skip if this is the same text we already translated
     if (districtText == _lastTranslatedDistrict) return;
-    
+
     // Check if translation is needed
     final needsTranslation = TranslationHelper.needsTranslation(districtText);
     if (!needsTranslation) {
       _lastTranslatedDistrict = districtText;
       return;
     }
-    
+
     _isTranslatingDistrict = true;
     try {
       final translated = await TranslationHelper.translateText(districtText);
-      if (mounted && mapSearchViewModel.districtController.text == districtText) {
+      if (mounted &&
+          mapSearchViewModel.districtController.text == districtText) {
         // Only update if the text hasn't changed (user hasn't edited it)
         mapSearchViewModel.districtController.text = translated;
         _lastTranslatedDistrict = translated;
@@ -128,7 +129,7 @@ class _MapSearchLocationState extends State<MapSearchLocation>
             _districtController = value.districtController;
             _districtController?.addListener(_onDistrictTextChanged);
           }
-          
+
           return Column(
             spacing: Dimens.textFromSpacing,
 
@@ -159,8 +160,9 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                   textCapitalization: TextCapitalization.sentences,
                   enforceFirstLetterUppercase: true,
                   enableSpeechInput: true,
-                  validator: (text) =>
-                      text?.validate(argument: localization.house_number_validator),
+                  validator: (text) => text?.validate(
+                    argument: localization.house_number_validator,
+                  ),
                   autovalidateMode: value.addressAutovalidateMode,
                 ),
               // Area and Pincode in a single row if areaAndPincodeInRow is true
@@ -179,8 +181,9 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                             enforceFirstLetterUppercase: true,
                             enableSpeechInput: true,
                             maxLength: 30,
-                            validator: (text) =>
-                                text?.validate(argument: localization.area_validator),
+                            validator: (text) => text?.validate(
+                              argument: localization.area_validator,
+                            ),
                             autovalidateMode: value.addressAutovalidateMode,
                           ),
                         ),
@@ -196,8 +199,15 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                               enforceFirstLetterUppercase: true,
                               keyboardType: TextInputType.number,
                               maxLength: 6,
-                              validator: (text) =>
-                                  text?.validatePincode(argument: localization.enter_pincode),
+                              onChanged: (text) {
+                                if (text != null && text.trim().length == 6) {
+                                  widget.findPincode(text.trim());
+                                  value.clear(safeClear: false);
+                                }
+                              },
+                              validator: (text) => text?.validatePincode(
+                                argument: localization.enter_pincode,
+                              ),
                               autovalidateMode: value.addressAutovalidateMode,
                             ),
                           ),
@@ -216,8 +226,9 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                           enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
                           maxLength: 30,
-                          validator: (text) =>
-                              text?.validate(argument: localization.area_validator),
+                          validator: (text) => text?.validate(
+                            argument: localization.area_validator,
+                          ),
                           autovalidateMode: value.addressAutovalidateMode,
                         ),
                         FormCommonChild(
@@ -228,13 +239,23 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                                   hintText: localization.pincode_6_digits,
                                   controller: value.pincodeController,
                                   enableSpeechInput: true,
-                                  textCapitalization: TextCapitalization.sentences,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
                                   enforceFirstLetterUppercase: true,
                                   keyboardType: TextInputType.number,
                                   maxLength: 6,
-                                  validator: (text) =>
-                                      text?.validatePincode(argument: "Enter Pincode"),
-                                  autovalidateMode: value.addressAutovalidateMode,
+                                  onChanged: (text) {
+                                    if (text != null &&
+                                        text.trim().length == 6) {
+                                      widget.findPincode(text.trim());
+                                      value.clear(safeClear: false);
+                                    }
+                                  },
+                                  validator: (text) => text?.validatePincode(
+                                    argument: "Enter Pincode",
+                                  ),
+                                  autovalidateMode:
+                                      value.addressAutovalidateMode,
                                 )
                               : Row(
                                   spacing: Dimens.gapX4,
@@ -245,13 +266,24 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                                         hintText: localization.pincode_6_digits,
                                         controller: value.pincodeController,
                                         enableSpeechInput: true,
-                                        textCapitalization: TextCapitalization.sentences,
+                                        textCapitalization:
+                                            TextCapitalization.sentences,
                                         enforceFirstLetterUppercase: true,
                                         keyboardType: TextInputType.number,
                                         maxLength: 6,
+                                        onChanged: (text) {
+                                          if (text != null &&
+                                              text.trim().length == 6) {
+                                            widget.findPincode(text.trim());
+                                            value.clear(safeClear: false);
+                                          }
+                                        },
                                         validator: (text) =>
-                                            text?.validatePincode(argument: "Enter Pincode"),
-                                        autovalidateMode: value.addressAutovalidateMode,
+                                            text?.validatePincode(
+                                              argument: "Enter Pincode",
+                                            ),
+                                        autovalidateMode:
+                                            value.addressAutovalidateMode,
                                       ),
                                     ),
                                     Expanded(
@@ -263,11 +295,14 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                                         height: Dimens.scaleX5,
                                         onTap: () {
                                           customRightCupertinoDialog(
-                                            content: localization.do_you_want_to_change_pincode,
+                                            content: localization
+                                                .do_you_want_to_change_pincode,
                                             rightButton: localization.search,
                                             onTap: () {
                                               RouteManager.pop();
-                                              widget.findPincode(value.pincodeController.text);
+                                              widget.findPincode(
+                                                value.pincodeController.text,
+                                              );
                                               value.clear(safeClear: false);
                                             },
                                           );
@@ -288,15 +323,16 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: localization.tehsil,
                       hintText: localization.tehsil,
                       controller: value.tehsilController,
-                    textCapitalization: TextCapitalization.sentences,
-                    enforceFirstLetterUppercase: true,
+                      textCapitalization: TextCapitalization.sentences,
+                      enforceFirstLetterUppercase: true,
                       enableSpeechInput: true,
                       maxLength: 30,
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
                       ],
-                      validator: (text) =>
-                          text?.validate(argument: localization.tehsil_validator),
+                      validator: (text) => text?.validate(
+                        argument: localization.tehsil_validator,
+                      ),
                       autovalidateMode: value.addressAutovalidateMode,
                     ),
                   ),
@@ -328,15 +364,16 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: localization.district,
                       hintText: localization.district,
                       controller: value.districtController,
-                    textCapitalization: TextCapitalization.sentences,
-                    enforceFirstLetterUppercase: true,
+                      textCapitalization: TextCapitalization.sentences,
+                      enforceFirstLetterUppercase: true,
                       enableSpeechInput: true,
                       maxLength: 30,
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
                       ],
-                      validator: (text) =>
-                          text?.validate(argument: localization.district_validator),
+                      validator: (text) => text?.validate(
+                        argument: localization.district_validator,
+                      ),
                       autovalidateMode: value.addressAutovalidateMode,
                     ),
                   ),
@@ -346,14 +383,15 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       headingText: localization.state,
                       hintText: localization.state,
                       controller: value.stateController,
-                    textCapitalization: TextCapitalization.sentences,
-                    enforceFirstLetterUppercase: true,
+                      textCapitalization: TextCapitalization.sentences,
+                      enforceFirstLetterUppercase: true,
                       enableSpeechInput: true,
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
                       ],
-                      validator: (text) =>
-                          text?.validate(argument: localization.state_validator),
+                      validator: (text) => text?.validate(
+                        argument: localization.state_validator,
+                      ),
                       autovalidateMode: value.addressAutovalidateMode,
                     ),
                   ),

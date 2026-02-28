@@ -41,10 +41,12 @@ class LokVartaTabbar extends StatelessWidget {
     // Total with search: 131.5px, Without search: ~83px
     // Current SliverAppBar is 120.4px but needs 131.5px (11px short)
     // Increasing slightly to prevent overflow while keeping Column at min size
-    final double baseHeight = 120.sp; // Base for content without search field (increased from 110)
-    final double searchHeight = showSearch ? 70.sp : 0; // Search container height (increased from 65)
+    // Base height for title area + tabs + top/bottom padding
+    final double baseHeight = 100.sp;
+    // Search height = search bar (44) + top margin (8) + bottom margin (8) + buffer
+    final double searchHeight = showSearch ? 60.sp : 0;
     final double toolbarHeight = baseHeight + searchHeight;
-    
+
     return SliverAppBar(
       expandedHeight: toolbarHeight,
       collapsedHeight: toolbarHeight,
@@ -73,12 +75,14 @@ class LokVartaTabbar extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 if (!showSearch)
                   CommonHelpers.buildIcons(
                     color: AppPalettes.liteGreenColor,
                     padding: Dimens.paddingX2,
                     path: AppImages.searchIcon,
                     iconColor: AppPalettes.blackColor,
+                    iconSize: 18.sp,
                     onTap: onTap,
                   ).onlyPadding(right: Dimens.horizontalspacing),
               ],
@@ -86,10 +90,11 @@ class LokVartaTabbar extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
-              height: showSearch ? 44.sp : 0,
-              padding: EdgeInsets.symmetric(
-                horizontal: Dimens.horizontalspacing,
-              ),
+              height: showSearch ? 55.sp : 0,
+              margin: showSearch
+                  ? EdgeInsets.symmetric(vertical: Dimens.gapX2)
+                  : EdgeInsets.zero,
+              padding: showSearch ? EdgeInsets.zero : EdgeInsets.zero,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 250),
                 child: showSearch

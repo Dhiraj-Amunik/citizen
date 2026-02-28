@@ -299,7 +299,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                                   ),
                             ),
                             FormTextFormField(
-                              isRequired: true,
+                              isRequired: false,
                               headingText: localization.aadhaar_no,
                               hintText: "0000 0000 0000",
                               maxLength: 14,
@@ -309,9 +309,12 @@ class _ProfileEditViewState extends State<ProfileEditView>
                               textCapitalization: TextCapitalization.sentences,
                               enforceFirstLetterUppercase: true,
                               enableSpeechInput: true,
-                              validator: (text) => text?.validateAadhar(
-                                argument: localization.aadhar_validator,
-                              ),
+                              validator: (text) {
+                                if (text == null || text.isEmpty) return null;
+                                return text.validateAadhar(
+                                  argument: localization.aadhar_validator,
+                                );
+                              },
                               onChanged: (value) =>
                                   provider.generateAadhar(value),
                             ),
@@ -331,7 +334,7 @@ class _ProfileEditViewState extends State<ProfileEditView>
                             Consumer<ProfileViewModel>(
                               builder: (context, viewModel, _) {
                                 return FormTextFormField(
-                                  isRequired: false,
+                                  isRequired: true,
                                   headingText: localization.voter_id,
                                   hintText: "ABC1234567",
                                   maxLength: 10,
@@ -350,12 +353,11 @@ class _ProfileEditViewState extends State<ProfileEditView>
                                       return null; // No validation while typing - only validate when tap on update profile
                                     }
 
-                                    // Since voter ID is optional, only validate if text is provided
-                                    // Validation only happens when tap on update profile button
+                                    // Mandatory field
                                     if (text == null ||
                                         text.isEmpty ||
                                         text.trim().isEmpty) {
-                                      return null; // No error for empty optional field
+                                      return localization.voter_id_validator;
                                     }
 
                                     // When form is submitted (autoValidateMode is onUserInteraction), validate the format

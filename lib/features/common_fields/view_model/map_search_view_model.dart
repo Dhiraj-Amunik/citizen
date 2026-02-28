@@ -78,11 +78,12 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
 
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        
+
         // If still denied after request, ask again
         if (permission == LocationPermission.denied) {
           await customRightCupertinoDialog(
-            content: "Location permission is required to fetch your location. Please grant permission.",
+            content:
+                "Location permission is required to fetch your location. Please grant permission.",
             rightButton: "Grant Permission",
             onTap: () async {
               RouteManager.pop();
@@ -130,7 +131,8 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
         } catch (e) {
           debugPrint("⚠️ Error getting current position: $e");
           // Check if error is due to permission
-          if (e.toString().contains('permission') || e.toString().contains('denied')) {
+          if (e.toString().contains('permission') ||
+              e.toString().contains('denied')) {
             // Re-check permission and retry
             permission = await Geolocator.checkPermission();
             if (permission == LocationPermission.denied) {
@@ -140,7 +142,9 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
                 try {
                   currentPosition = await Geolocator.getCurrentPosition();
                 } catch (e2) {
-                  debugPrint("⚠️ Error getting position after permission retry: $e2");
+                  debugPrint(
+                    "⚠️ Error getting position after permission retry: $e2",
+                  );
                 }
               } else if (permission == LocationPermission.deniedForever) {
                 await customRightCupertinoDialog(
@@ -184,7 +188,8 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
       debugPrint("Error: $err");
       debugPrint("Stack Trace: $stackTrace");
       // Check if error is due to permission
-      if (err.toString().contains('permission') || err.toString().contains('denied')) {
+      if (err.toString().contains('permission') ||
+          err.toString().contains('denied')) {
         // Re-check permission and retry
         try {
           LocationPermission permission = await Geolocator.checkPermission();
@@ -202,7 +207,9 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
                   return;
                 }
               } catch (e) {
-                debugPrint("⚠️ Error getting position after permission retry in catch: $e");
+                debugPrint(
+                  "⚠️ Error getting position after permission retry in catch: $e",
+                );
               }
             }
           }
@@ -235,11 +242,15 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
         loadAddress(model: address);
         // Add a delay to ensure controllers are updated and listeners are triggered
         await Future.delayed(const Duration(milliseconds: 200));
-        
+
         // Debug: Print address details to verify parsing
-        debugPrint("📍 Address loaded - District: ${address?.district ?? 'null'}, Area: ${address?.area ?? 'null'}, City: ${address?.city ?? 'null'}, Tehsil: ${address?.tehsil ?? 'null'}");
-        debugPrint("📍 Controllers - District: ${districtController.text}, Area: ${areaController.text}, City: ${cityController.text}");
-        
+        debugPrint(
+          "📍 Address loaded - District: ${address?.district ?? 'null'}, Area: ${address?.area ?? 'null'}, City: ${address?.city ?? 'null'}, Tehsil: ${address?.tehsil ?? 'null'}",
+        );
+        debugPrint(
+          "📍 Controllers - District: ${districtController.text}, Area: ${areaController.text}, City: ${cityController.text}",
+        );
+
         await parlimentController(pincodeController.text);
         // Trigger listeners again to ensure sync happens after all updates
         await Future.delayed(const Duration(milliseconds: 100));
@@ -303,7 +314,6 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
           speed: 0,
           speedAccuracy: 0,
         );
-
       } else {
         await CommonSnackbar(
           text: "No Address found please try again",

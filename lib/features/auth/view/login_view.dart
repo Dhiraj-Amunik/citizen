@@ -33,17 +33,17 @@ class _LoginViewState extends State<LoginView> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Show language selection popup only on first install
       // Check both language_selected flag AND language_code to ensure it's truly first install
       final languageSelected = prefs.getBool('language_selected') ?? false;
       final languageCode = prefs.getString('language_code');
-      
+
       // Only show language selection if BOTH are missing (true first install)
       if (!languageSelected && languageCode == null) {
         // Set default to English if not already set
         await GeneralStream.instance.setLocale("en");
-        
+
         // Show language selection dialog
         _showLanguageDialog(context, prefs);
       } else {
@@ -126,9 +126,6 @@ class _LoginViewState extends State<LoginView> {
     bool isVisible = prefs.getBool('disclaimer_dismissed') ?? true;
 
     Future<void> dismissNotice() async {
-      if (context.mounted) {
-        RouteManager.pop();
-      }
       await prefs.setBool('disclaimer_dismissed', false);
     }
 

@@ -56,16 +56,13 @@ class CommonHelpers {
       return placeholder ??
           Container(
             color: AppPalettes.imageholderColor,
-            child: Image.asset(
-              AppImages.imagePlaceholder,
-              fit: BoxFit.contain,
-            ),
+            child: Image.asset(AppImages.imagePlaceholder, fit: BoxFit.contain),
           );
     }
-    
+
     return CachedNetworkImage(
       imageUrl: image,
-      fit: fit ?? BoxFit.contain,
+      fit: fit ?? BoxFit.cover,
       progressIndicatorBuilder: (context, child, progress) {
         return shimmer();
       },
@@ -192,10 +189,7 @@ class CommonHelpers {
       try {
         final token = await SessionController.instance.getToken();
         if (token != null && token.isNotEmpty) {
-          await EventsRepository().shareEvent(
-            token: token,
-            eventId: eventId,
-          );
+          await EventsRepository().shareEvent(token: token, eventId: eventId);
         }
       } catch (e) {
         debugPrint("Error calling share event API: $e");
@@ -245,9 +239,10 @@ class CommonHelpers {
     String? subject,
   }) async {
     try {
-      final RenderRepaintBoundary? boundary = widgetKey.currentContext
-          ?.findRenderObject() as RenderRepaintBoundary?;
-      
+      final RenderRepaintBoundary? boundary =
+          widgetKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+
       if (boundary == null) {
         CommonSnackbar(text: "Unable to capture widget").showToast();
         return;
@@ -257,7 +252,7 @@ class CommonHelpers {
       final ByteData? byteData = await image.toByteData(
         format: ui.ImageByteFormat.png,
       );
-      
+
       if (byteData == null) {
         CommonSnackbar(text: "Failed to generate image").showToast();
         return;
@@ -283,30 +278,80 @@ class CommonHelpers {
         ),
       );
     } catch (e) {
-      CommonSnackbar(
-        text: "Failed to share: ${e.toString()}",
-      ).showToast();
+      CommonSnackbar(text: "Failed to share: ${e.toString()}").showToast();
     }
   }
 
   /// Converts regular text to Unicode Mathematical Bold characters for bold appearance
   static String _toBoldText(String text) {
     const Map<String, String> boldMap = {
-      'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅',
-      'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉', 'K': '𝐊', 'L': '𝐋',
-      'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑',
-      'S': '𝐒', 'T': '𝐓', 'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗',
-      'Y': '𝐘', 'Z': '𝐙',
-      'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟',
-      'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣', 'k': '𝐤', 'l': '𝐥',
-      'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫',
-      's': '𝐬', 't': '𝐭', 'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱',
-      'y': '𝐲', 'z': '𝐳',
-      '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒',
-      '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗',
-      ' ': ' ', ':': ':', '&': '&',
+      'A': '𝐀',
+      'B': '𝐁',
+      'C': '𝐂',
+      'D': '𝐃',
+      'E': '𝐄',
+      'F': '𝐅',
+      'G': '𝐆',
+      'H': '𝐇',
+      'I': '𝐈',
+      'J': '𝐉',
+      'K': '𝐊',
+      'L': '𝐋',
+      'M': '𝐌',
+      'N': '𝐍',
+      'O': '𝐎',
+      'P': '𝐏',
+      'Q': '𝐐',
+      'R': '𝐑',
+      'S': '𝐒',
+      'T': '𝐓',
+      'U': '𝐔',
+      'V': '𝐕',
+      'W': '𝐖',
+      'X': '𝐗',
+      'Y': '𝐘',
+      'Z': '𝐙',
+      'a': '𝐚',
+      'b': '𝐛',
+      'c': '𝐜',
+      'd': '𝐝',
+      'e': '𝐞',
+      'f': '𝐟',
+      'g': '𝐠',
+      'h': '𝐡',
+      'i': '𝐢',
+      'j': '𝐣',
+      'k': '𝐤',
+      'l': '𝐥',
+      'm': '𝐦',
+      'n': '𝐧',
+      'o': '𝐨',
+      'p': '𝐩',
+      'q': '𝐪',
+      'r': '𝐫',
+      's': '𝐬',
+      't': '𝐭',
+      'u': '𝐮',
+      'v': '𝐯',
+      'w': '𝐰',
+      'x': '𝐱',
+      'y': '𝐲',
+      'z': '𝐳',
+      '0': '𝟎',
+      '1': '𝟏',
+      '2': '𝟐',
+      '3': '𝟑',
+      '4': '𝟒',
+      '5': '𝟓',
+      '6': '𝟔',
+      '7': '𝟕',
+      '8': '𝟖',
+      '9': '𝟗',
+      ' ': ' ',
+      ':': ':',
+      '&': '&',
     };
-    
+
     return text.split('').map((char) => boldMap[char] ?? char).join();
   }
 
@@ -326,10 +371,7 @@ class CommonHelpers {
         try {
           final token = await SessionController.instance.getToken();
           if (token != null && token.isNotEmpty) {
-            await EventsRepository().shareEvent(
-              token: token,
-              eventId: eventId,
-            );
+            await EventsRepository().shareEvent(token: token, eventId: eventId);
           }
         } catch (e) {
           debugPrint("Error calling share event API: $e");
@@ -337,25 +379,25 @@ class CommonHelpers {
         }
       }
       final StringBuffer shareText = StringBuffer();
-      
+
       // Header with bold styling
       shareText.writeln('━━━━━━━━━━━━━━━━━━━━');
       shareText.writeln('📅 ${_toBoldText('EVENT DETAILS')}');
       shareText.writeln('━━━━━━━━━━━━━━━━━━━━');
       shareText.writeln('');
-      
+
       if (title != null && title.isNotEmpty) {
         shareText.writeln('📌 ${_toBoldText('TITLE:')}');
         shareText.writeln(title);
         shareText.writeln('');
       }
-      
+
       if (eventType != null && eventType.isNotEmpty) {
         shareText.writeln('🏷️ ${_toBoldText('TYPE:')}');
         shareText.writeln(eventType);
         shareText.writeln('');
       }
-      
+
       if (dateAndTime != null && dateAndTime.isNotEmpty) {
         try {
           final formattedDateTime = dateAndTime.toDdMmmYyyyWithTime();
@@ -369,24 +411,24 @@ class CommonHelpers {
           shareText.writeln('');
         }
       }
-      
+
       if (location != null && location.isNotEmpty) {
         shareText.writeln('📍 ${_toBoldText('LOCATION:')}');
         shareText.writeln(location);
         shareText.writeln('');
       }
-      
+
       if (description != null && description.isNotEmpty) {
         shareText.writeln('📝 ${_toBoldText('DESCRIPTION:')}');
         shareText.writeln(description);
         shareText.writeln('');
       }
-      
+
       if (url != null && url.isNotEmpty) {
         shareText.writeln('🔗 ${_toBoldText('MORE INFO:')}');
         shareText.writeln(url);
       }
-      
+
       // If poster URL is available, add as link in text
       if (poster != null && poster.isNotEmpty && poster.showDataNull) {
         // Resolve URL - handle both full URLs and relative paths
@@ -398,18 +440,15 @@ class CommonHelpers {
             imageUrl = "${URLs.baseURL}/$imageUrl";
           }
         }
-        
+
         shareText.writeln('');
         shareText.writeln('🖼️ ${_toBoldText('IMAGE:')}');
         shareText.writeln(imageUrl);
       }
-      
+
       // Share text with image links
       await SharePlus.instance.share(
-        ShareParams(
-          text: shareText.toString(),
-          subject: title ?? 'Event',
-        ),
+        ShareParams(text: shareText.toString(), subject: title ?? 'Event'),
       );
     } catch (e) {
       CommonSnackbar(
@@ -432,31 +471,32 @@ class CommonHelpers {
         try {
           final token = await SessionController.instance.getToken();
           if (token != null && token.isNotEmpty) {
-            await EventsRepository().shareEvent(
-              token: token,
-              eventId: eventId,
-            );
+            await EventsRepository().shareEvent(token: token, eventId: eventId);
           }
         } catch (e) {
           debugPrint("Error calling share event API: $e");
           // Continue with sharing even if API call fails
         }
       }
-      
+
       // Filter out empty or invalid image URLs
       debugPrint("📤 Raw images from API: ${images?.length ?? 0}");
       if (images != null) {
         for (int i = 0; i < images.length; i++) {
-          debugPrint("📤 Image $i: ${images[i]} (valid: ${images[i].trim().isNotEmpty && images[i].showDataNull})");
+          debugPrint(
+            "📤 Image $i: ${images[i]} (valid: ${images[i].trim().isNotEmpty && images[i].showDataNull})",
+          );
         }
       }
-      
-      final validImages = images != null 
-          ? images.where((img) => img.trim().isNotEmpty && img.showDataNull).toList()
+
+      final validImages = images != null
+          ? images
+                .where((img) => img.trim().isNotEmpty && img.showDataNull)
+                .toList()
           : <String>[];
-      
+
       debugPrint("📤 Valid images after filtering: ${validImages.length}");
-      
+
       // Resolve first image URL for sharing as file
       String? firstImageUrl;
       if (validImages.isNotEmpty) {
@@ -470,49 +510,55 @@ class CommonHelpers {
         }
         firstImageUrl = imageUrl;
       }
-      
+
       debugPrint("📤 First image URL: ${firstImageUrl ?? 'none'}");
-      
+
       // Build text content with complete information
       final StringBuffer shareText = StringBuffer();
-      
+
       // Add TITLE heading and title (always include title when sharing)
       if (title != null && title.isNotEmpty) {
         shareText.writeln('${_toBoldText('TITLE:')}');
         shareText.writeln(title);
         shareText.writeln('');
       }
-      
+
       // Add CONTENT heading and complete content
       if (content != null && content.isNotEmpty) {
         shareText.writeln('${_toBoldText('CONTENT:')}');
         shareText.writeln(content);
         shareText.writeln('');
       }
-      
+
       // Add URL if available
       if (url != null && url.isNotEmpty) {
         shareText.writeln('${_toBoldText('MORE INFO:')}');
         shareText.writeln(url);
         shareText.writeln('');
       }
-      
+
       // Build final share text
       final finalShareText = shareText.toString().trim();
-      debugPrint("📤 Share text content: ${finalShareText.isNotEmpty ? 'Yes' : 'No'}");
+      debugPrint(
+        "📤 Share text content: ${finalShareText.isNotEmpty ? 'Yes' : 'No'}",
+      );
       debugPrint("📤 Share text length: ${finalShareText.length}");
       debugPrint("📤 Title: ${title ?? 'null'}");
-      debugPrint("📤 Content: ${content != null && content.isNotEmpty ? 'Yes (${content.length} chars)' : 'null or empty'}");
-      
+      debugPrint(
+        "📤 Content: ${content != null && content.isNotEmpty ? 'Yes (${content.length} chars)' : 'null or empty'}",
+      );
+
       // Ensure text is always non-empty
-      final textToShare = finalShareText.isNotEmpty 
-          ? finalShareText 
-          : (title != null && title.isNotEmpty 
-              ? '${_toBoldText('TITLE:')}\n$title' 
-              : 'Lok Varta');
-      
-      debugPrint("📤 Sharing with first image as file: ${firstImageUrl != null}");
-      
+      final textToShare = finalShareText.isNotEmpty
+          ? finalShareText
+          : (title != null && title.isNotEmpty
+                ? '${_toBoldText('TITLE:')}\n$title'
+                : 'Lok Varta');
+
+      debugPrint(
+        "📤 Sharing with first image as file: ${firstImageUrl != null}",
+      );
+
       // Download and share first image as file if available
       XFile? imageFile;
       if (firstImageUrl != null && firstImageUrl.isNotEmpty) {
@@ -520,7 +566,8 @@ class CommonHelpers {
           final network = NetworkRequester();
           final tempDir = await getTempPath();
           if (tempDir != null && tempDir.isNotEmpty) {
-            final fileName = 'lok_varta_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            final fileName =
+                'lok_varta_${DateTime.now().millisecondsSinceEpoch}.jpg';
             final temp = "$tempDir/$fileName";
             final response = await network.download(url: firstImageUrl);
             if (response != null) {
@@ -537,7 +584,7 @@ class CommonHelpers {
           // Continue with text-only sharing if image download fails
         }
       }
-      
+
       // Share with image file if available, otherwise text only
       await SharePlus.instance.share(
         ShareParams(
@@ -546,12 +593,15 @@ class CommonHelpers {
           subject: title ?? 'Lok Varta',
         ),
       );
-      
-      debugPrint("📤 Share completed - ${imageFile != null ? 'with image file' : 'text only'}");
+
+      debugPrint(
+        "📤 Share completed - ${imageFile != null ? 'with image file' : 'text only'}",
+      );
     } catch (e) {
       debugPrint("Error in shareLokVartaDetails: $e");
       CommonSnackbar(
-        text: "Failed to share: ${e.toString().length > 50 ? e.toString().substring(0, 50) + '...' : e.toString()}",
+        text:
+            "Failed to share: ${e.toString().length > 50 ? e.toString().substring(0, 50) + '...' : e.toString()}",
       ).showToast();
     }
   }
@@ -569,10 +619,7 @@ class CommonHelpers {
         try {
           final token = await SessionController.instance.getToken();
           if (token != null && token.isNotEmpty) {
-            await EventsRepository().shareEvent(
-              token: token,
-              eventId: eventId,
-            );
+            await EventsRepository().shareEvent(token: token, eventId: eventId);
           }
         } catch (e) {
           debugPrint("Error calling share event API: $e");
@@ -604,10 +651,7 @@ class CommonHelpers {
       }
 
       await SharePlus.instance.share(
-        ShareParams(
-          text: shareText.toString(),
-          subject: title ?? 'Article',
-        ),
+        ShareParams(text: shareText.toString(), subject: title ?? 'Article'),
       );
     } catch (e) {
       CommonSnackbar(

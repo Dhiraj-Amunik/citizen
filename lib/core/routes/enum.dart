@@ -56,7 +56,8 @@ enum Routes {
   coinsInfoPage(path: "/CoinsInfoView"),
   chatPage(path: "/ChatView"),
   allChatsPage(path: "/AllChatsView"),
-  interviewDetailedPage(path: "/InterviewDetailedWidget");
+  interviewDetailedPage(path: "/InterviewDetailedWidget"),
+  notificationHistoryPage(path: "/NotificationHistoryPage");
 
   final String path;
   final AxisDirection direction;
@@ -150,7 +151,7 @@ Widget getPage(Routes route, {dynamic arguments}) {
       return MyMembersMessagesListView();
     case Routes.photoDetailsPage:
       return PhotoDetailsView(media: arguments);
-    case Routes.notifyRepresentativePage: 
+    case Routes.notifyRepresentativePage:
       return NotifyRepresentativeView();
     case Routes.createNotifyRepresentativePage:
       return CreateNotifyRepresentativeView();
@@ -176,7 +177,7 @@ Widget getPage(Routes route, {dynamic arguments}) {
       return ChatView();
     case Routes.allChatsPage:
       return AllChatsView();
-    default:
-      return LoginView();
+    case Routes.notificationHistoryPage:
+      return const NotificationHistoryView();
   }
 }

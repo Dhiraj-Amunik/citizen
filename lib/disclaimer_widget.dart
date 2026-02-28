@@ -27,7 +27,7 @@ class DisclaimerNotice extends StatelessWidget {
             color: Colors.amber[700],
             size: Dimens.scaleX3,
           ),
-          
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,9 +54,8 @@ class DisclaimerNotice extends StatelessWidget {
             onTap: () {
               if (onDismiss != null) {
                 onDismiss!();
-              } else {
-                Navigator.pop(context);
               }
+              Navigator.pop(context);
             },
 
             child: Container(

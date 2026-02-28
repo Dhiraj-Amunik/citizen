@@ -56,7 +56,8 @@ class URLs {
   static const getComplaintByUserID = "/api/complaint/getComplaints"; /*Get*/
   static const complaintCase = "/api/complaint/complaintCase"; /*Post*/
   static const getDepartments = "/api/user/list-of-department-dropdown"; /*Get*/
-  static const getAuthority = "/api/user/list-of-level1-authorities-dropdown"; /*Post*/
+  static const getAuthority =
+      "/api/user/list-of-level1-authorities-dropdown"; /*Post*/
   static const getConstituencies =
       "/api/user/list-of-constituencies-dropdown"; /*Get*/
 
@@ -92,6 +93,11 @@ class URLs {
 
   //notifications
   static const notifications = "/api/user/notificationList"; /*Get*/
+  static const notificationHistory =
+      "/api/user/get-notification-history"; /*Get*/
+  static const getNotifyPopup = "/api/user/get-notify-popup"; /*Get*/
+  static const markNotificationRead =
+      "/api/user/mark-notification-read"; /*Post*/
 
   //Nearest Member
   static const getNearestMembers = "/api/user/nearest-party-member"; /*Post*/

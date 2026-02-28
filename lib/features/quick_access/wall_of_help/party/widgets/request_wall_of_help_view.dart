@@ -5,6 +5,7 @@ import 'package:inldsevak/core/extensions/context_extension.dart';
 import 'package:inldsevak/core/extensions/validation_extension.dart';
 import 'package:inldsevak/core/mixin/handle_multiple_files_sheet.dart';
 import 'package:inldsevak/core/utils/app_palettes.dart';
+import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/core/utils/dimens.dart';
 import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/common_button.dart';
@@ -240,13 +241,21 @@ class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
 
                         FormTextFormField(
                           isRequired: true,
-                          maxLines: 5,
-                          controller: provider.descriptionController,
-                          hintText: localization.enter_description_of_request,
                           headingText: localization.description,
+                          hintText: localization.description_info,
+                          controller: provider.descriptionController,
+                          maxLines: 5,
                           textCapitalization: TextCapitalization.sentences,
                           enforceFirstLetterUppercase: true,
                           enableSpeechInput: true,
+                          onMicAvailabilityDenied: (message) {
+                            CommonSnackbar(
+                              text: message.isEmpty
+                                  ? "Voice input is currently unavailable."
+                                  : message,
+                            ).showSnackbar();
+                          },
+
                           validator: (text) => text?.validate(
                             argument: localization.please_enter_few_words,
                           ),
@@ -264,6 +273,7 @@ class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
                               disableTranslation: false,
                             );
                           },
+                          
                           listItemBuilder: (_, text, _, _) {
                             return TranslatedText(
                               text: text ?? "",

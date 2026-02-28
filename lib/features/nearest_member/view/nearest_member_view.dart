@@ -168,11 +168,13 @@ class NearestMemberView extends StatelessWidget {
                                     arguments: data,
                                   ),
                                   showIcon: true,
-                                  isUsingSearchedLocation: value.searchedPosition != null,
+                                  isUsingSearchedLocation:
+                                      value.searchedPosition != null,
                                 );
                               },
                               separatorBuilder: (_, _) => SizeBox.sizeHX3,
                             ),
+                      SizeBox.sizeHX4,
                     ],
                   ),
                 ),

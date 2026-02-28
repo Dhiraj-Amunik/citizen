@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/secure/secure_storage.dart';
 import 'package:inldsevak/features/notification/models/notifications_model.dart';
+import 'package:inldsevak/features/notification/models/notify_popup_model.dart'; // Add this
 import 'package:inldsevak/features/notification/services/notification_repository.dart';
 import 'package:inldsevak/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -215,6 +216,47 @@ class NotificationViewModel extends BaseViewModel {
       notificationsList.addAll(apiNotifications);
     }
   }
+
+  // --- Popup Logic ---
+
+  Future<NotifyPopupItem?> checkNotifyPopup() async {
+    try {
+      final token = await SessionController.instance.getToken();
+
+      final response = await NotificationRepository().getNotifyPopupApi(
+        token: token,
+      );
+
+      if (response.data?.responseCode == 200) {
+        final messages = response.data?.data;
+        if (messages != null && messages.isNotEmpty) {
+          // Return the first message as popup
+          return messages.first;
+        }
+      }
+    } catch (e) {
+      debugPrint("Error checking notify popup: $e");
+    }
+    return null;
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    try {
+      final token = await SessionController.instance.getToken();
+      await NotificationRepository().markNotificationReadApi(
+        token: token,
+        data: {"markAll": true},
+      );
+      // Also update local unread count or refresh list if needed
+      // Ideally getNotifications should be called or manually update list status
+      for (var n in notificationsList) {
+        n.read = true;
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Error marking notifications as read: $e");
+    }
+  }
 }
 
 class UpdateNotificationViewModel extends ChangeNotifier {
@@ -308,11 +350,11 @@ class UpdateNotificationViewModel extends ChangeNotifier {
   Future<void> refreshFromSharedPreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // CRITICAL: Reload SharedPreferences to ensure we get the latest values
       // This is especially important when reading values set by background isolate
       await prefs.reload();
-      
+
       final flagValue = prefs.getBool('showNotification') ?? false;
       // Always update to ensure sync, even if value appears the same
       // This is important because the ViewModel might initialize before SharedPreferences is ready

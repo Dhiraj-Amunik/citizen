@@ -39,17 +39,22 @@ android {
         applicationId = "org.amunik.sevak"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // Set to API 23 (Android 6.0) for support in low-end devices
+        // minSdk 21 = Android 5.0 Lollipop — supports low-end devices
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Required for apps targeting API < 21 that have more than 65K methods
+        multiDexEnabled = true
+        // Limit resource configs to reduce APK size on low-end devices
+        resourceConfigurations += listOf("en", "hi")
         externalNativeBuild {
             cmake {
                 arguments += listOf("-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON")
             }
         }
     }
+
 
     signingConfigs {
         if (hasReleaseKeystore) {
@@ -88,5 +93,7 @@ flutter {
 }
 
 dependencies {
-    coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.1.5")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    // MultiDex support for Android < 5.0 and apps exceeding the 65K method limit
+    implementation("androidx.multidex:multidex:2.0.1")
 }

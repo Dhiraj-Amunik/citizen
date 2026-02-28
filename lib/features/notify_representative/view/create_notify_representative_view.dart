@@ -162,7 +162,9 @@ class _CreateNotifyRepresentativeViewState
                                 areaAndPincodeInRow: true,
                                 findPincode: (pincode) async {
                                   // Sync all address fields from MapSearchViewModel to provider
+
                                   // This ensures district, area, and other fields are synced when location is used
+
                                   debugPrint(
                                     "📌 findPincode callback called with pincode: $pincode",
                                   );

@@ -834,6 +834,7 @@ class _FormTextFormFieldState extends State<FormTextFormField>
   }
 
   Future<void> _onSpeechResult(SpeechRecognitionResult result) async {
+
     // Safety guard: prevent late async events from mutating text after stop
     if (!_isListening) {
       return;
@@ -848,17 +849,23 @@ class _FormTextFormFieldState extends State<FormTextFormField>
     }
     
     if (controller != null) {
+
       // Normalize both strings for comparison (handles whitespace variations from Android)
+
       final normalizedRecognized = _normalizeSpeech(recognizedWords);
+
       final normalizedLast = _normalizeSpeech(_lastRecognizedWords);
       
       // Skip if this is the same result as before (no change, accounting for whitespace variations)
+
       if (normalizedRecognized == normalizedLast) {
         return;
       }
       
       // recognizedWords contains ALL words recognized so far (cumulative)
+
       // Extract only the NEW words since the last update
+      
       String newWords = '';
       bool isCorrection = false;
       
@@ -1302,13 +1309,18 @@ class _FormTextFormFieldState extends State<FormTextFormField>
                   SystemChannels.textInput.invokeMethod('TextInput.hide');
                   
                   // Hide keyboard multiple times synchronously using scheduleMicrotask
+
                   // This ensures it runs before any other code
+
                   scheduleMicrotask(() {
                     SystemChannels.textInput.invokeMethod('TextInput.hide');
                   });
+
                   // Close all other Hindi keyboards first to prevent controller conflicts
                   _closeAllOtherHindiKeyboards();
+
                   // Show Hindi keyboard immediately
+
                   if (!_showHindiKeyboard) {
                     setState(() {
                       _showHindiKeyboard = true;

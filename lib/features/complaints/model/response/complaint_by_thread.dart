@@ -16,10 +16,10 @@ class ComplaintsByThreadsModel {
   ComplaintsByThreadsModel.fromJson(Map<String, dynamic> json) {
     responseCode = json['responseCode'];
     message = json['message'];
-    
+
     if (json['data'] != null) {
       final dataValue = json['data'];
-      
+
       // Check if data is a List (old structure)
       if (dataValue is List) {
         data = <Data>[];
@@ -34,7 +34,7 @@ class ComplaintsByThreadsModel {
             print("Error parsing thread message item: $e");
           }
         });
-      } 
+      }
       // Check if data is a Map (new structure)
       else if (dataValue is Map<String, dynamic>) {
         try {
@@ -81,6 +81,7 @@ class Data {
   String? readAt;
   bool? isDeleted;
   String? sId;
+  String? senderType;
 
   Data({
     this.messageId,
@@ -96,6 +97,7 @@ class Data {
     this.readAt,
     this.isDeleted,
     this.sId,
+    this.senderType,
   });
 
   Data.fromJson(Map<String, dynamic> json) {
@@ -111,6 +113,7 @@ class Data {
     readAt = json['readAt'];
     isDeleted = json['isDeleted'];
     sId = json['_id'];
+    senderType = json['senderType'];
     if (json['attachments'] != null) {
       attachments = <Attachments>[];
       json['attachments'].forEach((v) {
@@ -135,6 +138,7 @@ class Data {
       readAt: message.readAt,
       isDeleted: message.isDeleted,
       sId: message.sId,
+      senderType: message.senderType,
     );
   }
 
@@ -158,6 +162,9 @@ class Data {
     }
     if (this.sId != null) {
       data['_id'] = this.sId;
+    }
+    if (this.senderType != null) {
+      data['senderType'] = this.senderType;
     }
     if (this.attachments != null) {
       data['attachments'] = this.attachments!.map((v) => v.toJson()).toList();
@@ -285,9 +292,7 @@ class ComplaintThreadData {
       toMail: json['toMail'],
       cc: json['CC'] != null ? List<String>.from(json['CC']) : null,
       messages: json['messages'] != null
-          ? (json['messages'] as List)
-              .map((v) => Message.fromJson(v))
-              .toList()
+          ? (json['messages'] as List).map((v) => Message.fromJson(v)).toList()
           : null,
       status: json['status'],
       followUpCount: json['followUpCount'],
@@ -310,8 +315,8 @@ class ComplaintThreadData {
           : null,
       followUpQuestions: json['followUpQuestions'] != null
           ? (json['followUpQuestions'] as List)
-              .map((v) => FollowUpQuestion.fromJson(v))
-              .toList()
+                .map((v) => FollowUpQuestion.fromJson(v))
+                .toList()
           : null,
       feedback: json['feedback'] != null
           ? ThreadFeedback.fromJson(json['feedback'])
@@ -395,7 +400,9 @@ class ComplaintThreadData {
       data['followUpOptions'] = followUpOptions;
     }
     if (followUpQuestions != null) {
-      data['followUpQuestions'] = followUpQuestions!.map((v) => v.toJson()).toList();
+      data['followUpQuestions'] = followUpQuestions!
+          .map((v) => v.toJson())
+          .toList();
     }
     if (feedback != null) {
       data['feedback'] = feedback!.toJson();
@@ -519,12 +526,7 @@ class ThreadUserId {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      '_id': sId,
-      'name': name,
-      'email': email,
-      'phone': phone,
-    };
+    return {'_id': sId, 'name': name, 'email': email, 'phone': phone};
   }
 }
 
@@ -623,6 +625,7 @@ class Message {
   List<Attachments>? attachments;
   bool? isDeleted;
   String? sId;
+  String? senderType;
 
   Message({
     this.messageId,
@@ -638,6 +641,7 @@ class Message {
     this.attachments,
     this.isDeleted,
     this.sId,
+    this.senderType,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -654,11 +658,12 @@ class Message {
       readAt: json['readAt'],
       attachments: json['attachments'] != null
           ? (json['attachments'] as List)
-              .map((v) => Attachments.fromJson(v))
-              .toList()
+                .map((v) => Attachments.fromJson(v))
+                .toList()
           : null,
       isDeleted: json['isDeleted'],
       sId: json['_id'],
+      senderType: json['senderType'],
     );
   }
 
@@ -685,6 +690,9 @@ class Message {
     }
     if (sId != null) {
       data['_id'] = sId;
+    }
+    if (senderType != null) {
+      data['senderType'] = senderType;
     }
     return data;
   }

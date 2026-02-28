@@ -198,15 +198,20 @@ class _ThreadComplaintViewState extends State<ThreadComplaintView>
   }
 
   Widget _buildThreadMessage(threads.Data threadData, TextTheme textTheme) {
+    final isUserMessage =
+        threadData.from == "ajay.amunik@gmail.com" ||
+        threadData.from == "me" ||
+        threadData.senderType == "user";
+
     return Column(
-      crossAxisAlignment: threadData.from == "ajay.amunik@gmail.com"
+      crossAxisAlignment: isUserMessage
           ? CrossAxisAlignment.end
           : CrossAxisAlignment.start,
       children: [
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(Dimens.radiusX4),
-            color: threadData.from == "ajay.amunik@gmail.com"
+            color: isUserMessage
                 ? AppPalettes.liteGreenColor
                 : AppPalettes.backGroundColor,
           ),
@@ -215,14 +220,10 @@ class _ThreadComplaintViewState extends State<ThreadComplaintView>
                 horizontal: Dimens.marginX2,
                 vertical: Dimens.marginX2,
               ).copyWith(
-                left: threadData.from == "ajay.amunik@gmail.com"
-                    ? Dimens.marginX8
-                    : null,
-                right: threadData.from == "ajay.amunik@gmail.com"
-                    ? null
-                    : Dimens.marginX8,
+                left: isUserMessage ? Dimens.marginX8 : null,
+                right: isUserMessage ? null : Dimens.marginX8,
               ),
-          padding: threadData.from == "ajay.amunik@gmail.com"
+          padding: isUserMessage
               ? const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
@@ -233,7 +234,7 @@ class _ThreadComplaintViewState extends State<ThreadComplaintView>
                 ).copyWith(right: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: threadData.from == "ajay.amunik@gmail.com"
+            crossAxisAlignment: isUserMessage
                 ? CrossAxisAlignment.end
                 : CrossAxisAlignment.start,
             spacing: Dimens.gapX,

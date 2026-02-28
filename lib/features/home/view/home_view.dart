@@ -35,9 +35,7 @@ class _HomeViewState extends State<HomeView> {
           builder: (modalContext) {
             Future<void> dismissNotice() async {
               // Pop the modal bottom sheet using its own context
-              if (Navigator.of(modalContext).canPop()) {
-                Navigator.of(modalContext).pop();
-              }
+
               await prefs.setBool('disclaimer_dismissed', false);
             }
 

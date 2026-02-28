@@ -57,7 +57,7 @@ class _ParliamentaryConstituencyDropDownWidgetState
           builder: (context, value, child) {
             return FormCommonDropDown<Constituency?>(
               isRequired: true,
-        
+
               heading: localization.parliamentary_constituency,
               controller: widget.constituencyController,
               items: value.parliamentaryConstituencyLists,

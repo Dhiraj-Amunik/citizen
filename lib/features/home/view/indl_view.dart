@@ -33,6 +33,7 @@ import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:inldsevak/features/notification/widget/notification_popup_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Check and request location permission if denied
@@ -236,7 +237,39 @@ class _IndlViewState extends State<IndlView>
       // Check if data needs to be refreshed (notification received while app was closed)
       // This will update view models and trigger GIF animation update
       NotificationService.checkAndRefreshDataIfNeeded();
+
+      // Check for notify popup with small delay to ensure UI is ready
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        _checkAndShowNotifyPopup();
+      });
     });
+  }
+
+  Future<void> _checkAndShowNotifyPopup() async {
+    if (!mounted) return;
+    try {
+      final vm = context.read<NotificationViewModel>();
+      final popupItem = await vm.checkNotifyPopup();
+
+      if (popupItem != null && mounted) {
+        // Double check mounted before showing dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => NotificationPopupDialog(
+            item: popupItem,
+            onClose: () {
+              // Close the dialog first
+              Navigator.of(dialogContext).pop();
+              // Then call the API to mark read
+              vm.markAllNotificationsRead();
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error checking/showing notify popup: $e");
+    }
   }
 
   @override
@@ -262,6 +295,11 @@ class _IndlViewState extends State<IndlView>
 
         // Also check if data needs to be refreshed (notification received while in background)
         NotificationService.checkAndRefreshDataIfNeeded();
+
+        // Check for notify popup when resuming from background
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          _checkAndShowNotifyPopup();
+        });
       });
     }
   }
@@ -281,20 +319,22 @@ class _IndlViewState extends State<IndlView>
       for (int attempt = 0; attempt < 5; attempt++) {
         try {
           final prefs = await SharedPreferences.getInstance();
-          
+
           // CRITICAL: Reload SharedPreferences to ensure we get the latest values
           // This is important because background isolate writes might not be immediately visible
           await prefs.reload();
-          
-          final showNotificationFlag = prefs.getBool('showNotification') ?? false;
+
+          final showNotificationFlag =
+              prefs.getBool('showNotification') ?? false;
           debugPrint(
             "📬 [IndlView] Attempt ${attempt + 1}: SharedPreferences showNotification flag on resume: $showNotificationFlag",
           );
 
           // Also check for stored background notifications as additional indicator
-          final storedNotifications = await NotificationService.getStoredBackgroundNotifications();
+          final storedNotifications =
+              await NotificationService.getStoredBackgroundNotifications();
           final hasStoredNotifications = storedNotifications.isNotEmpty;
-          
+
           debugPrint(
             "📬 [IndlView] Stored background notifications count: ${storedNotifications.length}",
           );
@@ -352,11 +392,10 @@ class _IndlViewState extends State<IndlView>
       // Fallback: try to refresh one more time
       try {
         if (mounted) {
-          final updateNotificationVm = context.read<UpdateNotificationViewModel>();
+          final updateNotificationVm = context
+              .read<UpdateNotificationViewModel>();
           await updateNotificationVm.refreshFromSharedPreferences();
-          debugPrint(
-            "📬 [IndlView] ✅ Fallback refresh completed",
-          );
+          debugPrint("📬 [IndlView] ✅ Fallback refresh completed");
         }
       } catch (fallbackError) {
         debugPrint("❌ [IndlView] Error in fallback: $fallbackError");
@@ -498,6 +537,8 @@ class _IndlViewState extends State<IndlView>
       if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
         nearestMemberVm.getAllChats();
       }
+      // Check for notify popup
+      _checkAndShowNotifyPopup();
     });
   }
 
@@ -540,7 +581,7 @@ class _IndlViewState extends State<IndlView>
                   _blinkAnimationController.reset();
                 }
               }
-              
+
               return GestureDetector(
                 onTap: () async {
                   if (_isLoadingChats) return; // Prevent multiple taps

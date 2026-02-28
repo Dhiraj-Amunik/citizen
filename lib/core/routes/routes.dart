@@ -27,6 +27,7 @@ import 'package:inldsevak/features/notification/view/notifications_view.dart';
 import 'package:inldsevak/features/notify_representative/view/create_notify_representative_view.dart';
 import 'package:inldsevak/features/notify_representative/view/notify_representative_view.dart';
 import 'package:inldsevak/features/notify_representative/view/update_notify_representative_view.dart';
+import 'package:inldsevak/features/notification/view/notification_history_view.dart';
 import 'package:inldsevak/features/profile_tabs/view/about_view.dart';
 import 'package:inldsevak/features/profile_tabs/view/leadership_info_view.dart';
 import 'package:inldsevak/features/profile_tabs/view/party_information_view.dart';
@@ -84,7 +85,11 @@ class RouteManager {
     );
   }
 
-  static Future<T?> pushReplacementNamed<T extends Object?>(Routes route, {Object? arguments, Object? result}) {
+  static Future<T?> pushReplacementNamed<T extends Object?>(
+    Routes route, {
+    Object? arguments,
+    Object? result,
+  }) {
     return navigatorKey.currentState!.pushReplacementNamed<T, Object?>(
       route.path,
       arguments: arguments,
