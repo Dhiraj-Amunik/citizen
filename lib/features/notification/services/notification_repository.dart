@@ -41,6 +41,7 @@ class NotificationRepository {
     final response = await _network.get(
       token: token,
       path: URLs.getNotifyPopup,
+      data: {}, // Important: API requires empty JSON body even for GET requests
     );
 
     return response is APIException

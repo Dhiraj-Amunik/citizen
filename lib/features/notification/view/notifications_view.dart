@@ -9,6 +9,7 @@ import 'package:inldsevak/core/widgets/common_appbar.dart';
 import 'package:inldsevak/core/widgets/translated_text.dart';
 import 'package:inldsevak/features/notification/view_model/notification_view_model.dart';
 import 'package:inldsevak/features/notification/widget/dismissable_widget.dart';
+import 'package:inldsevak/core/helpers/translation_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,12 +24,13 @@ class _NotificationsViewState extends State<NotificationsView>
     with WidgetsBindingObserver {
   DateTime? _lastRefreshTime;
   bool _isInitialLoad = true;
-  bool _hasClearedDotOnOpen = false; // Track if we've cleared the dot on this open
+  bool _hasClearedDotOnOpen =
+      false; // Track if we've cleared the dot on this open
   int _lastNotificationCount = 0;
   int _lastUnreadCount =
       0; // Track last unread count to avoid unnecessary updates
   NotificationViewModel?
-      _notificationProvider; // Store provider reference for disposal
+  _notificationProvider; // Store provider reference for disposal
 
   @override
   void initState() {
@@ -39,22 +41,27 @@ class _NotificationsViewState extends State<NotificationsView>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Always load notifications when view is opened
       _notificationProvider = context.read<NotificationViewModel>();
-      
+
       // CRITICAL: Clear the dot IMMEDIATELY and PERSISTENTLY when notifications view is opened
       // User has "seen" the notifications by opening the view, so clear the dot
       // This must happen BEFORE loading notifications to prevent race conditions
       final updateNotificationVm = context.read<UpdateNotificationViewModel>();
       updateNotificationVm.showNotification = false;
-      
+
       // CRITICAL: Update SharedPreferences IMMEDIATELY and wait for it to complete
       // This ensures the cleared state persists even if notifications load and try to update the dot
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool('showNotification', false);
       await sharedPrefs.reload(); // Reload to ensure write is committed
-      
+
       _hasClearedDotOnOpen = true; // Mark that we've cleared the dot
-      debugPrint("📬 [NotificationsView] ✅ Dot cleared immediately on view open and persisted");
-      
+      debugPrint(
+        "📬 [NotificationsView] ✅ Dot cleared immediately on view open and persisted",
+      );
+
+      // CLEAR CACHE once to ensure long notifications get full re-translation
+      await TranslationHelper.clearCache();
+
       // Now load notifications - but the dot should stay cleared
       await _notificationProvider!.getNotifications();
 
@@ -62,12 +69,15 @@ class _NotificationsViewState extends State<NotificationsView>
       // Even if there are unread notifications, user has seen them by opening the view
       // The dot should only show again if NEW notifications arrive AFTER this
       if (mounted) {
-        final updateNotificationVmAfterLoad = context.read<UpdateNotificationViewModel>();
+        final updateNotificationVmAfterLoad = context
+            .read<UpdateNotificationViewModel>();
         if (updateNotificationVmAfterLoad.showNotification) {
           // If dot got set back to true (shouldn't happen, but just in case), clear it again
           updateNotificationVmAfterLoad.showNotification = false;
           await sharedPrefs.setBool('showNotification', false);
-          debugPrint("📬 [NotificationsView] ✅ Dot re-cleared after notifications load");
+          debugPrint(
+            "📬 [NotificationsView] ✅ Dot re-cleared after notifications load",
+          );
         }
       }
 
@@ -161,25 +171,30 @@ class _NotificationsViewState extends State<NotificationsView>
             final updateNotificationVm = context
                 .read<UpdateNotificationViewModel>();
             updateNotificationVm.showNotification = false;
-            
+
             // CRITICAL: Update SharedPreferences IMMEDIATELY and wait for it to complete
             final sharedPrefs = await SharedPreferences.getInstance();
             await sharedPrefs.setBool('showNotification', false);
             await sharedPrefs.reload(); // Reload to ensure write is committed
-            
+
             _hasClearedDotOnOpen = true; // Mark that we've cleared the dot
-            debugPrint("📬 [NotificationsView] ✅ Dot cleared on return to view and persisted");
-            
+            debugPrint(
+              "📬 [NotificationsView] ✅ Dot cleared on return to view and persisted",
+            );
+
             final provider = context.read<NotificationViewModel>();
             await provider.getNotifications();
-            
+
             // CRITICAL: After notifications load, ensure dot stays cleared
             if (mounted) {
-              final updateNotificationVmAfterLoad = context.read<UpdateNotificationViewModel>();
+              final updateNotificationVmAfterLoad = context
+                  .read<UpdateNotificationViewModel>();
               if (updateNotificationVmAfterLoad.showNotification) {
                 updateNotificationVmAfterLoad.showNotification = false;
                 await sharedPrefs.setBool('showNotification', false);
-                debugPrint("📬 [NotificationsView] ✅ Dot re-cleared after notifications load on return");
+                debugPrint(
+                  "📬 [NotificationsView] ✅ Dot re-cleared after notifications load on return",
+                );
               }
             }
             // Don't re-update dot based on unread status - user has already seen notifications

@@ -31,6 +31,7 @@ class NotificationPopupDialog extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Container(
+            constraints: BoxConstraints(maxHeight: context.screenHeight * 0.8),
             decoration: BoxDecoration(
               color: AppPalettes.whiteColor,
               borderRadius: BorderRadius.circular(20.r),
@@ -63,7 +64,8 @@ class NotificationPopupDialog extends StatelessWidget {
                 ),
 
                 SizedBox(height: Dimens.gapX2),
-                // Image Section (if present)
+
+                // Image Section (Fixed) - Moved outside scroll view
                 if (item.image != null && item.image!.isNotEmpty)
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX4),
@@ -80,35 +82,62 @@ class NotificationPopupDialog extends StatelessWidget {
                     ),
                   ),
 
+                if (item.image != null && item.image!.isNotEmpty)
+                  SizedBox(height: Dimens.gapX2),
+
+                // Scrollable Content Section (Only text content)
+                Flexible(
+                  child: Scrollbar(
+                    thumbVisibility: true, // Always show scroll indicator
+                    thickness: 4.w,
+                    radius: Radius.circular(Dimens.radiusX2),
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Dimens.paddingX4,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Actual Notification Title
+                          if (item.title != null)
+                            TranslatedText(
+                              text: item.title!,
+                              style: context.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppPalettes.blackColor,
+                                fontSize: 18.sp,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+
+                          if (item.title != null)
+                            SizedBox(height: Dimens.gapX2),
+
+                          // Message
+                          if (item.message != null)
+                            TranslatedText(
+                              text: item.message!,
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                color: AppPalettes.lightTextColor,
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          SizedBox(height: Dimens.gapX2),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Footer Section (Fixed)
                 Padding(
-                  padding: EdgeInsets.all(Dimens.paddingX4),
+                  padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX4),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Actual Notification Title
-                      if (item.title != null)
-                        TranslatedText(
-                          text: item.title!,
-                          style: context.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppPalettes.blackColor,
-                            fontSize: 18.sp,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
                       SizedBox(height: Dimens.gapX2),
-
-                      // Message
-                      if (item.message != null)
-                        TranslatedText(
-                          text: item.message!,
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            color: AppPalettes.lightTextColor,
-                            height: 1.5,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      SizedBox(height: Dimens.gapX4),
-
                       // Close Button
                       CommonButton(
                         onTap: onClose,

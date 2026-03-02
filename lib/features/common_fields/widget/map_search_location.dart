@@ -165,6 +165,7 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                   ),
                   autovalidateMode: value.addressAutovalidateMode,
                 ),
+
               // Area and Pincode in a single row if areaAndPincodeInRow is true
               widget.areaAndPincodeInRow == true
                   ? Row(
@@ -187,6 +188,7 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                             autovalidateMode: value.addressAutovalidateMode,
                           ),
                         ),
+
                         Expanded(
                           child: FormCommonChild(
                             heading: localization.pincode,
@@ -202,9 +204,11 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                               onChanged: (text) {
                                 if (text != null && text.trim().length == 6) {
                                   widget.findPincode(text.trim());
+                                  value.getDistrictFromPincode(text.trim());
                                   value.clear(safeClear: false);
                                 }
                               },
+
                               validator: (text) => text?.validatePincode(
                                 argument: localization.enter_pincode,
                               ),
@@ -231,6 +235,7 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                           ),
                           autovalidateMode: value.addressAutovalidateMode,
                         ),
+
                         FormCommonChild(
                           heading: localization.pincode,
                           isRequired: true,
@@ -248,6 +253,7 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                                     if (text != null &&
                                         text.trim().length == 6) {
                                       widget.findPincode(text.trim());
+                                      value.getDistrictFromPincode(text.trim());
                                       value.clear(safeClear: false);
                                     }
                                   },
@@ -275,6 +281,9 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                                           if (text != null &&
                                               text.trim().length == 6) {
                                             widget.findPincode(text.trim());
+                                            value.getDistrictFromPincode(
+                                              text.trim(),
+                                            );
                                             value.clear(safeClear: false);
                                           }
                                         },
@@ -301,6 +310,9 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                                             onTap: () {
                                               RouteManager.pop();
                                               widget.findPincode(
+                                                value.pincodeController.text,
+                                              );
+                                              value.getDistrictFromPincode(
                                                 value.pincodeController.text,
                                               );
                                               value.clear(safeClear: false);
@@ -345,9 +357,11 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                       textCapitalization: TextCapitalization.sentences,
                       enforceFirstLetterUppercase: true,
                       enableSpeechInput: true,
+
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
                       ],
+
                       validator: (text) =>
                           text?.validate(argument: localization.city_validator),
                       autovalidateMode: value.addressAutovalidateMode,
@@ -355,6 +369,7 @@ class _MapSearchLocationState extends State<MapSearchLocation>
                   ),
                 ],
               ),
+
               Row(
                 spacing: Dimens.gapX4,
                 children: [

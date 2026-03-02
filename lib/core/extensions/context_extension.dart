@@ -15,11 +15,13 @@ extension BuildContextExtension on BuildContext {
     }
     return loc;
   }
-  
+
   ThemeData get theme => Theme.of(this);
   Color get cardColor => theme.cardColor;
   Color get primaryColor => theme.primaryColor;
   Color get iconsColor => theme.iconTheme.color!;
   Color get scaffoldBackgroundColor => theme.scaffoldBackgroundColor;
   TextTheme get textTheme => theme.textTheme;
+  double get screenHeight => MediaQuery.sizeOf(this).height;
+  double get screenWidth => MediaQuery.sizeOf(this).width;
 }

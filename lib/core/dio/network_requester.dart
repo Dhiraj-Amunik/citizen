@@ -12,100 +12,121 @@ class NetworkRequester {
 
   void prepareRequest() {
     BaseOptions dioOptions = BaseOptions(
-        connectTimeout: const Duration(seconds: 90), // Increased for slow server responses
-        receiveTimeout: const Duration(seconds: 90), // Increased for slow server responses
-        baseUrl: URLs.baseURL,
-        contentType: Headers.jsonContentType,
-        responseType: ResponseType.json,
-        headers: {'Accept': Headers.jsonContentType},
-        // Enable connection pooling for better performance
-        persistentConnection: true,
-        followRedirects: true);
+      connectTimeout: const Duration(
+        seconds: 90,
+      ), // Increased for slow server responses
+      receiveTimeout: const Duration(
+        seconds: 90,
+      ), // Increased for slow server responses
+      baseUrl: URLs.baseURL,
+      contentType: Headers.jsonContentType,
+      responseType: ResponseType.json,
+      headers: {'Accept': Headers.jsonContentType},
+      // Enable connection pooling for better performance
+      persistentConnection: true,
+      followRedirects: true,
+    );
     _dio = Dio(dioOptions);
     _dio.interceptors.clear();
-    
+
     // Add retry interceptor for timeout errors
-    _dio.interceptors.add(InterceptorsWrapper(
-      onError: (error, handler) {
-        // Retry on timeout errors (max 1 retry)
-        if (error.type == DioExceptionType.connectionTimeout ||
-            error.type == DioExceptionType.receiveTimeout) {
-          final options = error.requestOptions;
-          final retryCount = (options.extra['retryCount'] as int?) ?? 0;
-          
-          if (retryCount < 1) {
-            options.extra['retryCount'] = retryCount + 1;
-            log("🔄 Retrying request due to timeout (attempt ${retryCount + 1})");
-            
-            // Retry the request
-            _dio.fetch(options).then(
-              (response) => handler.resolve(response),
-              onError: (e) => handler.reject(e),
-            );
-            return;
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (error, handler) {
+          // Retry on timeout errors (max 1 retry)
+          if (error.type == DioExceptionType.connectionTimeout ||
+              error.type == DioExceptionType.receiveTimeout) {
+            final options = error.requestOptions;
+            final retryCount = (options.extra['retryCount'] as int?) ?? 0;
+
+            if (retryCount < 1) {
+              options.extra['retryCount'] = retryCount + 1;
+              log(
+                "🔄 Retrying request due to timeout (attempt ${retryCount + 1})",
+              );
+
+              // Retry the request
+              _dio
+                  .fetch(options)
+                  .then(
+                    (response) => handler.resolve(response),
+                    onError: (e) => handler.reject(e),
+                  );
+              return;
+            }
           }
-        }
-        handler.next(error);
-      },
-    ));
-    
+          handler.next(error);
+        },
+      ),
+    );
+
     // Add language interceptor to include Accept-Language header
     // Also handle FormData content-type correctly
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        try {
-          // Get current locale from GeneralStream
-          final locale = GeneralStream.instance.locale;
-          final languageCode = locale.languageCode;
-          
-          // Add Accept-Language header (standard HTTP header for language preference)
-          options.headers['Accept-Language'] = languageCode;
-          
-          // If data is FormData, remove content-type header so Dio can set it automatically
-          // Dio will set it to multipart/form-data with boundary
-          if (options.data is FormData) {
-            options.headers.remove('content-type');
-            options.headers.remove('Content-Type');
-            options.contentType = null;
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          try {
+            // Get current locale from GeneralStream
+            final locale = GeneralStream.instance.locale;
+            final languageCode = locale.languageCode;
+
+            // Add Accept-Language header (standard HTTP header for language preference)
+            options.headers['Accept-Language'] = languageCode;
+
+            // If data is FormData, remove content-type header so Dio can set it automatically
+            // Dio will set it to multipart/form-data with boundary
+            if (options.data is FormData) {
+              options.headers.remove('content-type');
+              options.headers.remove('Content-Type');
+              options.contentType = null;
+            }
+
+            // Also add as query parameter if API requires it (uncomment if needed)
+            // options.queryParameters ??= {};
+            // options.queryParameters!['lang'] = languageCode;
+          } catch (e) {
+            // Fallback to English if GeneralStream is not available
+            options.headers['Accept-Language'] = 'en';
           }
-          
-          // Also add as query parameter if API requires it (uncomment if needed)
-          // options.queryParameters ??= {};
-          // options.queryParameters!['lang'] = languageCode;
-        } catch (e) {
-          // Fallback to English if GeneralStream is not available
-          options.headers['Accept-Language'] = 'en';
-        }
-        
-        handler.next(options);
-      },
-    ));
-    
-    _dio.interceptors.add(LogInterceptor(
-      error: true,
-      request: true,
-      requestBody: true,
-      requestHeader: true,
-      responseBody: true,
-      responseHeader: false,
-      logPrint: _printLog,
-    ));
+
+          handler.next(options);
+        },
+      ),
+    );
+
+    _dio.interceptors.add(
+      LogInterceptor(
+        error: true,
+        request: true,
+        requestBody: true,
+        requestHeader: true,
+        responseBody: true,
+        responseHeader: false,
+        logPrint: _printLog,
+      ),
+    );
   }
 
   _printLog(Object object) => log(object.toString());
 
-  Future<dynamic> get(
-      {required String path,
-      Map<String, dynamic>? query,
-      String? token}) async {
+  Future<dynamic> get({
+    required String path,
+    Map<String, dynamic>? query,
+    dynamic data,
+    String? token,
+  }) async {
     try {
       final options = Options(headers: {});
       if (token != null) {
         options.headers?['Authorization'] = 'Bearer $token';
       }
-          
-      final response =
-          await _dio.get(path, queryParameters: query, options: options);
+
+      final response = await _dio.get(
+        path,
+        queryParameters: query,
+        data: data,
+        options: options,
+      );
       return response.data;
     } on DioException catch (dioError) {
       return ExceptionHandler.handleError(dioError);
@@ -155,9 +176,7 @@ class NetworkRequester {
     String? token,
   }) async {
     try {
-      final options = Options(
-        headers: {},
-      );
+      final options = Options(headers: {});
 
       if (token != null) {
         options.headers?['Authorization'] = 'Bearer $token';
@@ -178,15 +197,9 @@ class NetworkRequester {
     }
   }
 
-  Future<dynamic> download({
-    required String url,
-    String? token,
-  }) async {
+  Future<dynamic> download({required String url, String? token}) async {
     try {
-      final options = Options(
-        responseType: ResponseType.bytes,
-        headers: {},
-      );
+      final options = Options(responseType: ResponseType.bytes, headers: {});
 
       if (token != null) {
         options.headers?['Authorization'] = 'Bearer $token';

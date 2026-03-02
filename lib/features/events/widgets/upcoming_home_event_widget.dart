@@ -24,8 +24,9 @@ class UpcomingEventWidget extends StatelessWidget {
         Routes.eventDetailsPage,
         arguments: RequestEventDetailsModel(eventId: event.sId!),
       ),
+
       child: Container(
-        width: 200.height(),
+        width: 200.width(),
         padding: EdgeInsets.symmetric(
           horizontal: Dimens.paddingX2,
           vertical: Dimens.paddingX2,
@@ -88,7 +89,7 @@ class UpcomingEventWidget extends StatelessWidget {
                               ),
                             ],
                           ),
-                      
+
                           Row(
                             spacing: Dimens.gapX1,
                             mainAxisSize: MainAxisSize.min,

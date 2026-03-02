@@ -235,40 +235,57 @@ class _IndlViewState extends State<IndlView>
       }
 
       // Check if data needs to be refreshed (notification received while app was closed)
-      // This will update view models and trigger GIF animation update
       NotificationService.checkAndRefreshDataIfNeeded();
 
-      // Check for notify popup with small delay to ensure UI is ready
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        _checkAndShowNotifyPopup();
+      // Trigger the popup API call directly in initState so it definitely fires on mount!
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) _checkAndShowNotifyPopup();
       });
     });
   }
 
+  bool _isCheckingPopup = false;
+  DateTime? _lastPopupCheckTime;
+
   Future<void> _checkAndShowNotifyPopup() async {
-    if (!mounted) return;
+    // Prevent multiple rapid calls within 2 seconds
+    if (!mounted || _isCheckingPopup) return;
+    if (_lastPopupCheckTime != null &&
+        DateTime.now().difference(_lastPopupCheckTime!).inSeconds < 2) {
+      return;
+    }
+
+    _isCheckingPopup = true;
+    _lastPopupCheckTime = DateTime.now();
+
     try {
       final vm = context.read<NotificationViewModel>();
       final popupItem = await vm.checkNotifyPopup();
 
       if (popupItem != null && mounted) {
-        // Double check mounted before showing dialog
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (dialogContext) => NotificationPopupDialog(
-            item: popupItem,
-            onClose: () {
-              // Close the dialog first
-              Navigator.of(dialogContext).pop();
-              // Then call the API to mark read
-              vm.markAllNotificationsRead();
-            },
-          ),
-        );
+        // Enforce a strict delay before showing the dialog.
+        // If this method was triggered from didChangeDependencies or initState,
+        // the widget might be attached but the Navigator might not be fully
+        // ready to accept a push route yet. Future.delayed fixes this reliably.
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (!mounted) return;
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (dialogContext) => NotificationPopupDialog(
+              item: popupItem,
+              onClose: () {
+                Navigator.of(dialogContext).pop();
+                vm.markAllNotificationsRead();
+              },
+            ),
+          );
+        });
       }
     } catch (e) {
       debugPrint("Error checking/showing notify popup: $e");
+    } finally {
+      _isCheckingPopup = false;
     }
   }
 
@@ -426,6 +443,9 @@ class _IndlViewState extends State<IndlView>
       }
     } catch (e) {
       debugPrint("Error refreshing unread counts: $e");
+    } finally {
+      // Also check for new popups during periodic refresh
+      _checkAndShowNotifyPopup();
     }
   }
 
@@ -476,6 +496,8 @@ class _IndlViewState extends State<IndlView>
       if (mounted) {
         CommonSnackbar(text: "Error refreshing page").showToast();
       }
+    } finally {
+      _checkAndShowNotifyPopup();
     }
   }
 
@@ -538,6 +560,7 @@ class _IndlViewState extends State<IndlView>
         nearestMemberVm.getAllChats();
       }
       // Check for notify popup
+      // This will be called whenever the view is re-inserted (e.g. switching back from another tab)
       _checkAndShowNotifyPopup();
     });
   }

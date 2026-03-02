@@ -48,6 +48,7 @@ class _ProfileViewState extends State<ProfileView> with CupertinoDialogMixin {
               horizontal: Dimens.horizontalspacing,
               vertical: Dimens.appBarSpacing,
             ),
+
             child: Column(
               spacing: Dimens.widgetSpacing,
               children: [

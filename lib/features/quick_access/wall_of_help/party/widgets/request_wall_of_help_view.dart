@@ -255,11 +255,11 @@ class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
                                   : message,
                             ).showSnackbar();
                           },
-
                           validator: (text) => text?.validate(
                             argument: localization.please_enter_few_words,
                           ),
                         ),
+
                         FormCommonDropDown<String?>(
                           isRequired: true,
                           controller: urgencyController,
@@ -273,7 +273,7 @@ class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
                               disableTranslation: false,
                             );
                           },
-                          
+
                           listItemBuilder: (_, text, _, _) {
                             return TranslatedText(
                               text: text ?? "",
@@ -281,6 +281,7 @@ class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
                               disableTranslation: false,
                             );
                           },
+
                           validator: (text) => text.toString().validateDropDown(
                             argument: localization.dropdown_validator,
                           ),
@@ -298,6 +299,7 @@ class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
                               disableTranslation: false,
                             );
                           },
+
                           listItemBuilder: (_, text, _, _) {
                             return TranslatedText(
                               text: text?.name?.capitalize() ?? "",
@@ -305,9 +307,11 @@ class _RequestWallOfHelpViewState extends State<RequestWallOfHelpView>
                               disableTranslation: false,
                             );
                           },
+
                           validator: (text) => text.toString().validateDropDown(
                             argument: localization.dropdown_validator,
                           ),
+
                           onChanged: (_) {
                             provider.isLoading = false;
                             provider.amountController.clear();

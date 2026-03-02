@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
+import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/auth/models/response/geocoding_search_modal.dart';
 import 'package:inldsevak/features/common_fields/model/address_model.dart';
+import 'package:inldsevak/features/common_fields/model/request_pincode_model.dart';
+import 'package:inldsevak/features/common_fields/services/constituencies_repository.dart';
 import 'package:inldsevak/features/common_fields/services/search_repository.dart';
 import 'package:quickalert/models/quickalert_type.dart';
-import 'package:geolocator/geolocator.dart';
 
-class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
+class MapSearchViewModel extends BaseViewModel with CupertinoDialogMixin {
   List<Predictions> searchplaces = [];
   AddressModel? address;
 
@@ -352,6 +355,27 @@ class MapSearchViewModel extends ChangeNotifier with CupertinoDialogMixin {
     areaController.text = model?.area ?? model?.subLocality ?? "";
     _shouldValidate = true;
     notifyListeners(); // Trigger listeners to sync with other view models
+  }
+
+  Future<void> getDistrictFromPincode(String pincode) async {
+    try {
+      final intPincode = int.tryParse(pincode);
+      if (intPincode == null) return;
+
+      final model = RequestPincodeModel(pincode: intPincode);
+      final response = await ConstituenciesRepository()
+          .getParliamentaryConstituencies(token: token, model: model);
+
+      if (response.data?.responseCode == 200) {
+        if (response.data?.district != null &&
+            response.data!.district!.isNotEmpty) {
+          districtController.text = response.data!.district!;
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      debugPrint("Error fetching district from pincode: $e");
+    }
   }
 }
 

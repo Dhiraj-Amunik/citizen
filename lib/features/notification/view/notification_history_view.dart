@@ -146,8 +146,8 @@ class NotificationHistoryItemCard extends StatelessWidget {
           // Image logic
           if (hasImage)
             Container(
-              width: 50.w,
-              height: 50.w,
+              width: 50.sp,
+              height: 50.sp,
               margin: EdgeInsets.only(right: Dimens.gapX3),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.r),
@@ -177,7 +177,7 @@ class NotificationHistoryItemCard extends StatelessWidget {
                 SizedBox(height: Dimens.gapX),
                 ReadMoreWidget(
                   text: notification.message ?? "",
-                  maxLines: 2,
+                  maxLines: 3,
                   style: AppStyles.bodyMedium.copyWith(
                     color: AppPalettes.lightTextColor,
                     fontSize: 14.spMax,

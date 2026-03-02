@@ -40,6 +40,7 @@ class Data {
   String? type;
   String? title;
   String? message;
+  String? image;
   Metadata? metadata;
   bool? read;
   bool? isActive;
@@ -48,23 +49,25 @@ class Data {
   String? updatedAt;
   int? iV;
 
-  Data(
-      {this.sId,
-      this.userId,
-      this.mlaId,
-      this.adminId,
-      this.appointmentId,
-      this.appointmentIdObject,
-      this.type,
-      this.title,
-      this.message,
-      this.metadata,
-      this.read,
-      this.isActive,
-      this.isDeleted,
-      this.createdAt,
-      this.updatedAt,
-      this.iV});
+  Data({
+    this.sId,
+    this.userId,
+    this.mlaId,
+    this.adminId,
+    this.appointmentId,
+    this.appointmentIdObject,
+    this.type,
+    this.title,
+    this.message,
+    this.image,
+    this.metadata,
+    this.read,
+    this.isActive,
+    this.isDeleted,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+  });
 
   Data.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -90,6 +93,7 @@ class Data {
     type = json['type'];
     title = json['title'];
     message = json['message'];
+    image = json['image'];
     metadata = json['metadata'] != null
         ? new Metadata.fromJson(json['metadata'])
         : null;
@@ -113,6 +117,7 @@ class Data {
     data['type'] = this.type;
     data['title'] = this.title;
     data['message'] = this.message;
+    data['image'] = this.image;
     if (this.appointmentIdObject != null) {
       data['appointmentId'] = this.appointmentIdObject!.toJson();
     } else if (this.appointmentId != null) {
@@ -174,7 +179,10 @@ class AppointmentId {
   AppointmentId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     date = json['date'];
-    rescheduledDate = json['resheduledDate'] ?? json['rescheduledDate'] ?? json['reScheduledDate'];
+    rescheduledDate =
+        json['resheduledDate'] ??
+        json['rescheduledDate'] ??
+        json['reScheduledDate'];
     timeSlot = json['timeSlot'];
     status = json['status'];
   }
