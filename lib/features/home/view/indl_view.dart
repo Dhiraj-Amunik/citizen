@@ -206,7 +206,6 @@ class _IndlViewState extends State<IndlView>
 
     // Add app lifecycle observer to detect when app comes back from background
     WidgetsBinding.instance.addObserver(this);
-
     // Load complaints when INLD view is opened
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _refreshUnreadCounts();
@@ -238,55 +237,8 @@ class _IndlViewState extends State<IndlView>
       NotificationService.checkAndRefreshDataIfNeeded();
 
       // Trigger the popup API call directly in initState so it definitely fires on mount!
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) _checkAndShowNotifyPopup();
-      });
+      NotificationService.triggerPopupIfAvailable();
     });
-  }
-
-  bool _isCheckingPopup = false;
-  DateTime? _lastPopupCheckTime;
-
-  Future<void> _checkAndShowNotifyPopup() async {
-    // Prevent multiple rapid calls within 2 seconds
-    if (!mounted || _isCheckingPopup) return;
-    if (_lastPopupCheckTime != null &&
-        DateTime.now().difference(_lastPopupCheckTime!).inSeconds < 2) {
-      return;
-    }
-
-    _isCheckingPopup = true;
-    _lastPopupCheckTime = DateTime.now();
-
-    try {
-      final vm = context.read<NotificationViewModel>();
-      final popupItem = await vm.checkNotifyPopup();
-
-      if (popupItem != null && mounted) {
-        // Enforce a strict delay before showing the dialog.
-        // If this method was triggered from didChangeDependencies or initState,
-        // the widget might be attached but the Navigator might not be fully
-        // ready to accept a push route yet. Future.delayed fixes this reliably.
-        Future.delayed(const Duration(milliseconds: 600), () {
-          if (!mounted) return;
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (dialogContext) => NotificationPopupDialog(
-              item: popupItem,
-              onClose: () {
-                Navigator.of(dialogContext).pop();
-                vm.markAllNotificationsRead();
-              },
-            ),
-          );
-        });
-      }
-    } catch (e) {
-      debugPrint("Error checking/showing notify popup: $e");
-    } finally {
-      _isCheckingPopup = false;
-    }
   }
 
   @override
@@ -314,9 +266,7 @@ class _IndlViewState extends State<IndlView>
         NotificationService.checkAndRefreshDataIfNeeded();
 
         // Check for notify popup when resuming from background
-        Future.delayed(const Duration(milliseconds: 1000), () {
-          _checkAndShowNotifyPopup();
-        });
+        NotificationService.triggerPopupIfAvailable();
       });
     }
   }
@@ -348,6 +298,7 @@ class _IndlViewState extends State<IndlView>
           );
 
           // Also check for stored background notifications as additional indicator
+
           final storedNotifications =
               await NotificationService.getStoredBackgroundNotifications();
           final hasStoredNotifications = storedNotifications.isNotEmpty;
@@ -445,7 +396,7 @@ class _IndlViewState extends State<IndlView>
       debugPrint("Error refreshing unread counts: $e");
     } finally {
       // Also check for new popups during periodic refresh
-      _checkAndShowNotifyPopup();
+      NotificationService.triggerPopupIfAvailable();
     }
   }
 
@@ -497,7 +448,7 @@ class _IndlViewState extends State<IndlView>
         CommonSnackbar(text: "Error refreshing page").showToast();
       }
     } finally {
-      _checkAndShowNotifyPopup();
+      NotificationService.triggerPopupIfAvailable();
     }
   }
 
@@ -561,7 +512,7 @@ class _IndlViewState extends State<IndlView>
       }
       // Check for notify popup
       // This will be called whenever the view is re-inserted (e.g. switching back from another tab)
-      _checkAndShowNotifyPopup();
+      NotificationService.triggerPopupIfAvailable();
     });
   }
 

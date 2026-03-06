@@ -22,6 +22,7 @@ import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/donation/view_model/donation_view_model.dart';
 import 'package:inldsevak/features/donation/widget/donation_dialog.dart';
 import 'package:inldsevak/features/navigation/view_model/navigation_view_model.dart';
+import 'package:inldsevak/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -74,13 +75,19 @@ class _DonateViewState extends State<DonateView> with WidgetsBindingObserver {
     if (!mounted) return;
     final navigationViewModel = context.read<NavigationViewModel>();
     final currentTab = navigationViewModel.selectedTab;
-    
+
     // Clear donation form when switching away from donate tab (tab index 1)
     if (_previousTab == 1 && currentTab != 1) {
       final donationViewModel = context.read<DonationViewModel>();
       donationViewModel.clear();
     }
     _previousTab = currentTab;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    NotificationService.triggerPopupIfAvailable();
   }
 
   @override
@@ -124,7 +131,8 @@ class _DonateViewState extends State<DonateView> with WidgetsBindingObserver {
                               keyboardType: TextInputType.number,
                             ),
                             TranslatedText(
-                              text: 'Your support, in any form, will help us create wonderful memories at this party.',
+                              text:
+                                  'Your support, in any form, will help us create wonderful memories at this party.',
                               style: context.textTheme.labelMedium?.copyWith(
                                 color: AppPalettes.lightTextColor,
                               ),
@@ -138,51 +146,114 @@ class _DonateViewState extends State<DonateView> with WidgetsBindingObserver {
                 );
               },
             ),
-          Container(
-            width: double.infinity,
-            decoration: boxDecorationRoundedWithShadow(
-              Dimens.radiusX4,
-           
-              border: Border.all(color: AppPalettes.primaryColor),
-            ),
-            child: Column(
-              spacing: Dimens.gapX,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    TranslatedText(text:  'UPI ID: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
-                    TranslatedText(text: '9988090768m@pnb',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
-                  ],
-                ),
-                Row(
-                  children: [
-                    TranslatedText(text: 'Name: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
-                    TranslatedText(text: 'Indian National Lokdal',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
-                  ],
-                ),
-                Row(
-                  children: [
-                    TranslatedText(text: 'Bank Name: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
-                    TranslatedText(text: 'Punjab National Bank',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
-                  ],
-                ),
-                Row(
-                  children: [
-                    TranslatedText(text: 'Account No: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
-                    TranslatedText(text: '1504002100125555',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
-                  ],
-                ),
-                Row(
-                  children: [
-                    TranslatedText(text: 'IFS Code: ',style: textTheme.bodySmall?.copyWith(color: AppPalettes.blackColor,fontWeight: FontWeight.w500)),
-                    TranslatedText(text: 'PUNB0148800',style: textTheme.bodySmall?.copyWith(color: AppPalettes.lightTextColor,fontWeight: FontWeight.w400)),
-                  ],
-                ),
+            Container(
+              width: double.infinity,
+              decoration: boxDecorationRoundedWithShadow(
+                Dimens.radiusX4,
 
-              ],
-            ).symmetricPadding(horizontal: Dimens.horizontalspacing,vertical: Dimens.verticalspacing),
-          ),
+                border: Border.all(color: AppPalettes.primaryColor),
+              ),
+              child:
+                  Column(
+                    spacing: Dimens.gapX,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          TranslatedText(
+                            text: 'UPI ID: ',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.blackColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          TranslatedText(
+                            text: '9988090768m@pnb',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.lightTextColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          TranslatedText(
+                            text: 'Name: ',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.blackColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          TranslatedText(
+                            text: 'Indian National Lokdal',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.lightTextColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          TranslatedText(
+                            text: 'Bank Name: ',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.blackColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          TranslatedText(
+                            text: 'Punjab National Bank',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.lightTextColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          TranslatedText(
+                            text: 'Account No: ',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.blackColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          TranslatedText(
+                            text: '1504002100125555',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.lightTextColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          TranslatedText(
+                            text: 'IFS Code: ',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.blackColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          TranslatedText(
+                            text: 'PUNB0148800',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppPalettes.lightTextColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ).symmetricPadding(
+                    horizontal: Dimens.horizontalspacing,
+                    vertical: Dimens.verticalspacing,
+                  ),
+            ),
             Text(
               localization.select_payment_options,
               style: textTheme.headlineSmall,
@@ -235,23 +306,27 @@ class _DonateViewState extends State<DonateView> with WidgetsBindingObserver {
               onTap: () async {
                 // Validate amount before proceeding
                 final amountText = provider.amount.text.trim();
-                
+
                 if (amountText.isEmpty) {
                   CommonSnackbar(text: "Please enter amount").showToast();
                   return;
                 }
-                
+
                 try {
                   final amount = int.parse(amountText);
                   if (amount < 10) {
-                    CommonSnackbar(text: "Please enter minimum of 10rs").showToast();
+                    CommonSnackbar(
+                      text: "Please enter minimum of 10rs",
+                    ).showToast();
                     return;
                   }
                 } catch (e) {
-                  CommonSnackbar(text: "Please enter a valid amount").showToast();
+                  CommonSnackbar(
+                    text: "Please enter a valid amount",
+                  ).showToast();
                   return;
                 }
-                
+
                 if (await provider.manualDonation()) {
                   if (provider.isUpiSelected) {
                     final launched = await launchUrl(
@@ -274,34 +349,40 @@ class _DonateViewState extends State<DonateView> with WidgetsBindingObserver {
                         return DraggableSheetWidget(
                           showClose: true,
                           size: 0.65,
-                          child: Column(
-                            spacing: Dimens.gapX2,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                localization.net_banking,
-                                style: context.textTheme.headlineSmall,
+                          child:
+                              Column(
+                                spacing: Dimens.gapX2,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    localization.net_banking,
+                                    style: context.textTheme.headlineSmall,
+                                  ),
+                                  TranslatedText(
+                                    text:
+                                        "Please donate to the below account details",
+                                    style: context.textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: AppPalettes.lightTextColor,
+                                        ),
+                                  ),
+                                  showBankDetails(
+                                    title: "Bank Name",
+                                    copyText: "Punjab national bank",
+                                  ),
+                                  showBankDetails(
+                                    title: "Account No",
+                                    copyText: "1504002100125555",
+                                  ),
+                                  showBankDetails(
+                                    title: "IFS Code",
+                                    copyText: "PUNB0148800",
+                                  ),
+                                ],
+                              ).symmetricPadding(
+                                horizontal: Dimens.widgetSpacing,
+                                vertical: Dimens.paddingX2,
                               ),
-                              TranslatedText(
-                                text: "Please donate to the below account details",
-                                style: context.textTheme.bodySmall?.copyWith(
-                                  color: AppPalettes.lightTextColor,
-                                ), 
-                              ),
-                              showBankDetails(
-                                title: "Bank Name",
-                                copyText: "Punjab national bank",
-                              ),
-                              showBankDetails(
-                                title: "Account No",
-                                copyText: "1504002100125555",
-                              ),
-                              showBankDetails(
-                                title: "IFS Code",
-                                copyText: "PUNB0148800",
-                              ),
-                            ],
-                          ).symmetricPadding(horizontal: Dimens.widgetSpacing,vertical: Dimens.paddingX2),
                         );
                       },
                     );

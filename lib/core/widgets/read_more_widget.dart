@@ -18,6 +18,10 @@ class ReadMoreWidget extends StatefulWidget {
   /// Optional list of names to preserve (not translate)
   /// If provided, these names will be extracted and preserved during translation
   final List<String>? namesToPreserve;
+
+  /// Optional image URL to display when expanded
+  final String? imageUrl;
+
   const ReadMoreWidget({
     super.key,
     required this.text,
@@ -27,6 +31,7 @@ class ReadMoreWidget extends StatefulWidget {
     String? expandedText,
     this.forceTranslation = false,
     this.namesToPreserve,
+    this.imageUrl,
   }) : collapsedText = collapsedText ?? 'Read more',
        expandedText = expandedText ?? 'Show less';
 
@@ -42,6 +47,7 @@ class _ReadMoreWidgetState extends State<ReadMoreWidget> {
   StreamSubscription<dynamic>? _languageSubscription;
   Map<String, String> _namePlaceholders =
       {}; // Map of placeholder -> original name
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -681,16 +687,44 @@ class _ReadMoreWidgetState extends State<ReadMoreWidget> {
       decorationColor: AppPalettes.primaryColor,
     );
     final displayText = _translatedText ?? widget.text;
-    return ReadMoreText(
-      displayText,
-      trimLines: widget.maxLines,
-      trimMode: TrimMode.Line,
-      textAlign: TextAlign.left,
-      trimCollapsedText: ' ${_translatedCollapsed ?? widget.collapsedText}',
-      trimExpandedText: ' ${_translatedExpanded ?? widget.expandedText}',
-      moreStyle: linkStyle,
-      lessStyle: linkStyle,
-      style: resolvedStyle,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isExpanded = !_isExpanded;
+            });
+          },
+          child: ReadMoreText(
+            displayText,
+            trimLines: widget.maxLines,
+            trimMode: TrimMode.Line,
+            textAlign: TextAlign.left,
+            trimCollapsedText:
+                ' ${_translatedCollapsed ?? widget.collapsedText}',
+            trimExpandedText: ' ${_translatedExpanded ?? widget.expandedText}',
+            moreStyle: linkStyle,
+            lessStyle: linkStyle,
+            style: resolvedStyle,
+          ),
+        ),
+        if (_isExpanded && widget.imageUrl != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                widget.imageUrl!,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

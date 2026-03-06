@@ -352,6 +352,7 @@ class NotificationCard extends StatelessWidget {
             ),
           ],
         ),
+
         child: Row(
           spacing: Dimens.gapX3,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,6 +384,7 @@ class NotificationCard extends StatelessWidget {
                         ? [notification.metadata!.userName!.trim()]
                         : null,
                   ),
+
                   if (notification.image != null &&
                       notification.image!.isNotEmpty)
                     Padding(

@@ -24,6 +24,7 @@ import 'package:inldsevak/features/quick_access/wall_of_help/view_model/wall_of_
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/financial_help_messages_view_model.dart';
 import 'package:inldsevak/features/nearest_member/view_model/nearest_member_view_model.dart';
 import 'package:inldsevak/features/nearest_member/view_model/my_member_message_view_model.dart';
+import 'package:inldsevak/features/notification/view_model/notification_history_view_model.dart';
 import 'package:inldsevak/features/surveys/view_model/survey_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -56,6 +57,7 @@ class AppProviders {
     ChangeNotifierProvider(create: (_) => ConstituencyViewModel()),
     ChangeNotifierProvider(create: (_) => MlaViewModel()),
     ChangeNotifierProvider(create: (_) => NotificationViewModel()),
+    ChangeNotifierProvider(create: (_) => NotificationHistoryViewModel()),
     ChangeNotifierProvider(create: (_) => SurveyViewModel()),
     ChangeNotifierProvider(create: (_) => ThreadIndexBuilder()),
     ChangeNotifierProvider(create: (_) => MyHelpRequestsViewModel()),
@@ -63,11 +65,7 @@ class AppProviders {
     ChangeNotifierProvider(create: (_) => NearestMemberViewModel()),
     ChangeNotifierProvider(create: (_) => MyMemberMessageViewModel()),
 
-
     //Notify
     ChangeNotifierProvider(create: (_) => NotifyRepresentativeViewModel()),
-
-
-
   ];
 }

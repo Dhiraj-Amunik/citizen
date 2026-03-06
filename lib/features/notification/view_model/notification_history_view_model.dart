@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/features/notification/models/notification_history_model.dart';
 import 'package:inldsevak/features/notification/services/notification_repository.dart';
+import 'package:inldsevak/notification_service.dart';
 
 class NotificationHistoryViewModel extends BaseViewModel {
   List<NotificationItem> notifications = [];
@@ -48,6 +49,18 @@ class NotificationHistoryViewModel extends BaseViewModel {
           } else {
             notifications.addAll(data.notifications ?? []);
           }
+
+          // Check if any unread notification is of type 'custom' to trigger popup instantly
+          final hasCustomNotification = (data.notifications ?? []).any(
+            (n) =>
+                n.type?.toLowerCase() == 'custom' &&
+                (n.read == false || n.read == null),
+          );
+
+          if (hasCustomNotification) {
+            NotificationService.triggerPopupIfAvailable();
+          }
+
           pagination = data.pagination;
 
           if (pagination != null) {

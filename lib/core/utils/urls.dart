@@ -47,17 +47,25 @@ class URLs {
 
   //complaints
   static const addComplaint = "/api/complaint/raiseComplaint"; /*Post*/
+
   static const getComplaintByThreadID =
       "/api/complaint/getchatbythreadId"; /*Post*/
+
   static const getComplaintByThreadId =
       "/api/complaint/getComplaintByThreadId"; /*Post*/
+
   static const replyToComplaintByThreadID =
       "/api/complaint/raiseComplaint"; /*Post*/
+
   static const getComplaintByUserID = "/api/complaint/getComplaints"; /*Get*/
+
   static const complaintCase = "/api/complaint/complaintCase"; /*Post*/
+
   static const getDepartments = "/api/user/list-of-department-dropdown"; /*Get*/
+
   static const getAuthority =
       "/api/user/list-of-level1-authorities-dropdown"; /*Post*/
+
   static const getConstituencies =
       "/api/user/list-of-constituencies-dropdown"; /*Get*/
 

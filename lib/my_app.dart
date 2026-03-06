@@ -66,6 +66,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) {
           NotificationService.checkAndRefreshDataIfNeeded();
+          NotificationService.triggerPopupIfAvailable();
         }
       });
     }

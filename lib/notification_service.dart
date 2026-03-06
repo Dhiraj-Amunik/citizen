@@ -11,6 +11,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:inldsevak/core/routes/routes.dart';
 import 'package:inldsevak/core/secure/secure_storage.dart';
 import 'package:inldsevak/features/notification/view_model/notification_view_model.dart';
+import 'package:inldsevak/features/notification/view_model/notification_history_view_model.dart';
 import 'package:inldsevak/features/nearest_member/model/nearest_members_model.dart'
     as nm;
 import 'package:inldsevak/features/nearest_member/view_model/my_member_message_view_model.dart';
@@ -26,6 +27,9 @@ import 'package:inldsevak/features/complaints/repository/complaints_repository.d
 import 'package:inldsevak/features/complaints/model/request/my_complaint_request_model.dart';
 import 'package:inldsevak/features/nearest_member/services/nearest_member_repository.dart';
 import 'package:inldsevak/features/notification/services/notification_repository.dart';
+import 'package:inldsevak/features/notification/widget/notification_popup_dialog.dart';
+import 'package:inldsevak/features/notification/models/notify_popup_model.dart';
+import 'package:flutter/material.dart' show BuildContext, showDialog;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,6 +39,9 @@ class NotificationService {
 
   static final FirebaseMessaging _firebaseMessaging =
       FirebaseMessaging.instance;
+
+  static bool _isPopupDialogOpen = false;
+  static bool _isFetchingPopup = false;
 
   @pragma('vm:entry-point')
   static Future<void> firebaseMessagingBackgroundHandler(
@@ -191,21 +198,31 @@ class NotificationService {
   static Future<void> cleanupOldProcessedMessages() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final processedMessages = prefs.getStringList('processed_background_messages') ?? [];
-      
+      final processedMessages =
+          prefs.getStringList('processed_background_messages') ?? [];
+
       // Keep only last 500 message IDs (reduce from 1000 to prevent storage issues)
       if (processedMessages.length > 500) {
-        final cleaned = processedMessages.sublist(processedMessages.length - 500);
+        final cleaned = processedMessages.sublist(
+          processedMessages.length - 500,
+        );
         await prefs.setStringList('processed_background_messages', cleaned);
-        log("📬 Cleaned up old processed messages: ${processedMessages.length - 500} removed");
+        log(
+          "📬 Cleaned up old processed messages: ${processedMessages.length - 500} removed",
+        );
       }
-      
+
       // Also clean up shown notification IDs
-      final shownNotifications = prefs.getStringList('shown_notification_ids') ?? [];
+      final shownNotifications =
+          prefs.getStringList('shown_notification_ids') ?? [];
       if (shownNotifications.length > 500) {
-        final cleaned = shownNotifications.sublist(shownNotifications.length - 500);
+        final cleaned = shownNotifications.sublist(
+          shownNotifications.length - 500,
+        );
         await prefs.setStringList('shown_notification_ids', cleaned);
-        log("📬 Cleaned up old shown notification IDs: ${shownNotifications.length - 500} removed");
+        log(
+          "📬 Cleaned up old shown notification IDs: ${shownNotifications.length - 500} removed",
+        );
       }
     } catch (e) {
       log("Error cleaning up processed messages: $e");
@@ -329,30 +346,31 @@ class NotificationService {
               final updateNotificationVm = navigatorContext
                   .read<UpdateNotificationViewModel>();
 
-              // OPTIMISTIC UPDATE: Immediately show dot when notification arrives
-              // This provides instant feedback to user
+              // OPTIMISTIC UPDATE: Immediately show dot
               updateNotificationVm.showNotification = true;
-              log(
-                "📬 ✅ Optimistic update: Dot shown immediately on new notification",
-              );
+              log("📬 [fetchLatestDataOnNotification] Notification dot shown");
 
-              // Don't fetch notifications automatically - this can hide the dot prematurely
-              // The dot will be verified when user opens notifications view
-              // This prevents the dot from disappearing before user sees the notification
-              log(
-                "📬 ✅ Dot will be verified when user opens notifications view",
-              );
+              // Fetch notification history - This will automatically trigger triggerPopupIfAvailable()
+              // if a 'custom' notification is found in the response (logic inside history VM)
+              final historyVm = navigatorContext
+                  .read<NotificationHistoryViewModel>();
+              historyVm
+                  .getHistory(isRefresh: true)
+                  .then((_) {
+                    log("📬 [fetchLatestDataOnNotification] History refreshed");
+                  })
+                  .catchError((e) {
+                    log(
+                      "❌ [fetchLatestDataOnNotification] History refresh error: $e",
+                    );
+                  });
+
+              // Safety fallback: Also check for popup directly
+              triggerPopupIfAvailable();
             } catch (e) {
-              log("❌ Error fetching notifications on notification: $e");
-              // Fallback: keep dot shown if API check fails (optimistic approach)
-              try {
-                final updateNotificationVm = navigatorContext
-                    .read<UpdateNotificationViewModel>();
-                updateNotificationVm.showNotification = true;
-                log("📬 Fallback: Keep notification dot shown");
-              } catch (e2) {
-                log("Error setting notification dot: $e2");
-              }
+              log(
+                "❌ [fetchLatestDataOnNotification] Error handling notification: $e",
+              );
             }
           }
         });
@@ -885,32 +903,35 @@ class NotificationService {
       // Try multiple sources in order of reliability
       final messageId = message.messageId;
       final data = message.data;
-      
+
       // Primary: Use Firebase message ID if available
       if (messageId != null && messageId.isNotEmpty) {
         return 'fcm_$messageId';
       }
-      
+
       // Secondary: Use notification ID from data
-      final notificationId = data['_id'] ?? 
-          data['notificationId'] ?? 
-          data['messageId'] ?? 
+      final notificationId =
+          data['_id'] ??
+          data['notificationId'] ??
+          data['messageId'] ??
           data['id'];
-      
+
       if (notificationId != null && notificationId.toString().isNotEmpty) {
         return 'data_${notificationId.toString()}';
       }
-      
+
       // Tertiary: Create ID from notification content (title + body + timestamp)
       final title = message.notification?.title ?? data['title'] ?? '';
-      final body = message.notification?.body ?? data['body'] ?? data['message'] ?? '';
+      final body =
+          message.notification?.body ?? data['body'] ?? data['message'] ?? '';
       final module = data['module'] ?? '';
       final moduleId = data['moduleId'] ?? '';
-      
+
       // Create a hash from content (for notifications without IDs)
       final contentHash = '${title}_${body}_${module}_${moduleId}'.hashCode;
-      final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000; // Round to seconds
-      
+      final timestamp =
+          DateTime.now().millisecondsSinceEpoch ~/ 1000; // Round to seconds
+
       return 'content_${contentHash}_$timestamp';
     } catch (e) {
       // Ultimate fallback: timestamp-based ID
@@ -937,28 +958,33 @@ class NotificationService {
   static Future<bool> _isNotificationAlreadyShown(RemoteMessage message) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Use the same message ID generation as main.dart
       final messageId = _generateUniqueMessageId(message);
-      
+
       // Check BOTH lists: processed_background_messages (from main.dart) and shown_notification_ids
-      final processedMessages = prefs.getStringList('processed_background_messages') ?? [];
-      final shownNotifications = prefs.getStringList('shown_notification_ids') ?? [];
-      
+      final processedMessages =
+          prefs.getStringList('processed_background_messages') ?? [];
+      final shownNotifications =
+          prefs.getStringList('shown_notification_ids') ?? [];
+
       // Check if this message was already processed or shown
-      if (processedMessages.contains(messageId) || shownNotifications.contains(messageId)) {
-        log("📬 ⚠️ Notification already shown (ID: $messageId) - skipping duplicate");
+      if (processedMessages.contains(messageId) ||
+          shownNotifications.contains(messageId)) {
+        log(
+          "📬 ⚠️ Notification already shown (ID: $messageId) - skipping duplicate",
+        );
         return true;
       }
-      
+
       // ATOMIC: Mark as shown immediately (before displaying)
       shownNotifications.add(messageId);
-      
+
       // Keep only last 1000 notification IDs to prevent storage bloat
       if (shownNotifications.length > 1000) {
         shownNotifications.removeRange(0, shownNotifications.length - 1000);
       }
-      
+
       await prefs.setStringList('shown_notification_ids', shownNotifications);
       log("📬 ✅ Notification marked as shown (ID: $messageId)");
       return false;
@@ -973,26 +999,30 @@ class NotificationService {
     try {
       final notification = message.notification;
       final data = message.data;
-      
+
       // Check if notification has title or body
-      final hasTitle = (notification?.title?.trim().isNotEmpty ?? false) ||
+      final hasTitle =
+          (notification?.title?.trim().isNotEmpty ?? false) ||
           (data['title']?.toString().trim().isNotEmpty ?? false);
-      final hasBody = (notification?.body?.trim().isNotEmpty ?? false) ||
+      final hasBody =
+          (notification?.body?.trim().isNotEmpty ?? false) ||
           (data['body']?.toString().trim().isNotEmpty ?? false) ||
           (data['message']?.toString().trim().isNotEmpty ?? false);
-      
+
       // At least one of title or body must be present
       if (!hasTitle && !hasBody) {
         // Check if we can generate meaningful content
         final generatedTitle = _generateTitleFromData(data);
         final generatedBody = _generateBodyFromData(data);
-        
+
         if (generatedTitle == null && generatedBody == null) {
-          log("📬 ❌ Invalid notification: No title, body, or generatable content");
+          log(
+            "📬 ❌ Invalid notification: No title, body, or generatable content",
+          );
           return false;
         }
       }
-      
+
       return true;
     } catch (e) {
       log("Error validating notification: $e");
@@ -1044,11 +1074,15 @@ class NotificationService {
     // If both are fallback, it means the notification has no real content
     if (title == 'SEVAK' && body == 'New notification') {
       // Check if we have any meaningful data
-      final hasModule = data['module'] != null && data['module'].toString().trim().isNotEmpty;
-      final hasType = data['type'] != null && data['type'].toString().trim().isNotEmpty;
-      
+      final hasModule =
+          data['module'] != null && data['module'].toString().trim().isNotEmpty;
+      final hasType =
+          data['type'] != null && data['type'].toString().trim().isNotEmpty;
+
       if (!hasModule && !hasType) {
-        log("📬 ❌ Notification has no meaningful content - preventing empty notification");
+        log(
+          "📬 ❌ Notification has no meaningful content - preventing empty notification",
+        );
         return;
       }
     }
@@ -1084,7 +1118,9 @@ class NotificationService {
     );
 
     // Log notification details for debugging
-    log("📬 Showing notification (ID: $notificationId) - Title: '$title', Body: '$body'");
+    log(
+      "📬 Showing notification (ID: $notificationId) - Title: '$title', Body: '$body'",
+    );
     log(
       "   Notification object - title: '${notification?.title}', body: '${notification?.body}'",
     );
@@ -1304,6 +1340,21 @@ class NotificationService {
       }
       final navigatorContext = RouteManager.navigatorKey.currentContext;
 
+      // Priority 1: Official Announcements & Custom Popups
+      if (module == 'announcement' ||
+          module == 'official_announcement' ||
+          module == 'custom' ||
+          data['type'] == 'announcement' ||
+          data['type'] == 'custom') {
+        log(
+          "📬 [NotificationService] Routing to Notification History (Announcement/Custom)",
+        );
+        RouteManager.pushNamed(Routes.notificationHistoryPage);
+        // Explicitly trigger the popup check
+        triggerPopupIfAvailable();
+        return;
+      }
+
       if (module == 'wallofhelp') {
         final request = _buildWallOfHelpRequest(
           moduleId.toString(),
@@ -1346,6 +1397,121 @@ class NotificationService {
       log("Error navigating from notification data: $e");
       // If navigation fails, direct user to notifications list as a safe fallback
       RouteManager.pushNamed(Routes.notificationsPage);
+    }
+  }
+
+  /// Trigger the notification popup if there are unread custom notifications
+  /// This can be called from anywhere using the global navigator context
+  static Future<void> triggerPopupIfAvailable() async {
+    try {
+      // Guard against multiple simultaneous calls or overlapping dialogs
+      if (_isPopupDialogOpen || _isFetchingPopup) {
+        log(
+          "📬 [triggerPopupIfAvailable] SKIPPING - Already fetching or showing popup",
+        );
+        return;
+      }
+
+      _isFetchingPopup = true;
+
+      log("📬 [triggerPopupIfAvailable] Starting process...");
+
+      // Initial delay to allow the app state to settle (especially on cold starts)
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      // RETRY LOGIC for Navigation Context: Keep trying for a valid context (app starting/transitioning)
+      BuildContext? context;
+      int retryCount = 0;
+      while (retryCount < 10) {
+        context = RouteManager.navigatorKey.currentContext;
+        if (context != null && context.mounted) break;
+
+        log(
+          "📬 [triggerPopupIfAvailable] Context not ready, retrying ($retryCount/10)...",
+        );
+        await Future.delayed(const Duration(milliseconds: 500));
+        retryCount++;
+      }
+
+      if (context == null || !context.mounted) {
+        log(
+          "📬 [triggerPopupIfAvailable] ❌ FAILED - No valid context found after context retries",
+        );
+        _isFetchingPopup = false;
+        return;
+      }
+
+      if (_isPopupDialogOpen) {
+        _isFetchingPopup = false;
+        return;
+      }
+
+      log("📬 [triggerPopupIfAvailable] ✅ Valid context found, fetching VM...");
+
+      // Use Provider.of instead of read for better compatibility in async gaps
+      final vm = Provider.of<NotificationViewModel>(context, listen: false);
+
+      log("📬 [triggerPopupIfAvailable] Calling checkNotifyPopup()...");
+      // API RETRY LOGIC: Sometimes the push arrives before the backend popup state is ready
+      NotifyPopupItem? popupItem;
+      int apiRetryCount = 0;
+      while (apiRetryCount < 3) {
+        popupItem = await vm.checkNotifyPopup();
+        if (popupItem != null) break;
+
+        log(
+          "📬 [triggerPopupIfAvailable] No active popup found, retrying API (${apiRetryCount + 1}/3)...",
+        );
+        await Future.delayed(const Duration(seconds: 2));
+        apiRetryCount++;
+      }
+
+      if (popupItem != null) {
+        log(
+          "📬 [triggerPopupIfAvailable] 🎉 Success! Popup found: ${popupItem.title}",
+        );
+
+        if (!context.mounted || _isPopupDialogOpen) {
+          log(
+            "📬 [triggerPopupIfAvailable] ❌ FAILED - Context lost or popup opened during fetch",
+          );
+          _isFetchingPopup = false;
+          return;
+        }
+
+        _isPopupDialogOpen = true;
+        log(
+          "📬 [triggerPopupIfAvailable] 🚀 Showing dialog on current screen...",
+        );
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          useRootNavigator: true,
+          builder: (dialogContext) => NotificationPopupDialog(
+            item: popupItem!,
+            onClose: () {
+              log("📬 [triggerPopupIfAvailable] User closed popup");
+              _isPopupDialogOpen = false;
+              Navigator.of(dialogContext).pop();
+              vm.markAllNotificationsRead();
+            },
+          ),
+        ).then((_) {
+          _isPopupDialogOpen = false;
+          _isFetchingPopup = false;
+        });
+      } else {
+        log(
+          "📬 [triggerPopupIfAvailable] ℹ️ Checked API $apiRetryCount times - No active popup found.",
+        );
+        _isFetchingPopup = false;
+      }
+    } catch (e, stack) {
+      _isPopupDialogOpen = false;
+      _isFetchingPopup = false;
+      log("❌ [triggerPopupIfAvailable] Critical Error: $e");
+      log("❌ [triggerPopupIfAvailable] Stack: $stack");
     }
   }
 }

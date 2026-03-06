@@ -15,6 +15,7 @@ import 'package:inldsevak/features/lok_varta/widgets/mla_details_silver_appbar.d
 import 'package:inldsevak/features/lok_varta/widgets/photo_widget.dart';
 import 'package:inldsevak/features/lok_varta/widgets/press_releases_widget.dart';
 import 'package:inldsevak/features/lok_varta/widgets/video_player_widget.dart';
+import 'package:inldsevak/notification_service.dart';
 import 'package:provider/provider.dart';
 
 class LokVartaView extends StatefulWidget {
@@ -52,31 +53,35 @@ class _LokVartaViewState extends State<LokVartaView>
         final provider = context.read<LokVartaViewModel>();
         final eventProvider = context.read<EventsViewModel>();
         final currentIndex = tabController.index;
-        
+
         // Only load if we haven't loaded this tab yet
         if (_loadedTabs.contains(currentIndex)) return;
-        
+
         switch (currentIndex) {
           case 0:
-            if (eventProvider.upcomingEventList.isEmpty && !eventProvider.isEventLoading) {
+            if (eventProvider.upcomingEventList.isEmpty &&
+                !eventProvider.isEventLoading) {
               _loadedTabs.add(currentIndex);
               eventProvider.getEvents(EventFilter.upcoming);
             }
             break;
           case 1:
-            if (eventProvider.ongoingEventList.isEmpty && !eventProvider.isEventLoading) {
+            if (eventProvider.ongoingEventList.isEmpty &&
+                !eventProvider.isEventLoading) {
               _loadedTabs.add(currentIndex);
               eventProvider.getEvents(EventFilter.ongoing);
             }
             break;
           case 2:
-            if (provider.pressReleasesList.isEmpty && !provider.isLokVartaLoading) {
+            if (provider.pressReleasesList.isEmpty &&
+                !provider.isLokVartaLoading) {
               _loadedTabs.add(currentIndex);
               provider.getLokVarta(LokVartaFilter.PressRelease);
             }
             break;
           case 3:
-            if (provider.interviewsList.isEmpty && !provider.isLokVartaLoading) {
+            if (provider.interviewsList.isEmpty &&
+                !provider.isLokVartaLoading) {
               _loadedTabs.add(currentIndex);
               provider.getLokVarta(LokVartaFilter.Interview);
             }
@@ -96,6 +101,12 @@ class _LokVartaViewState extends State<LokVartaView>
         }
       });
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    NotificationService.triggerPopupIfAvailable();
   }
 
   @override
@@ -137,7 +148,7 @@ class _LokVartaViewState extends State<LokVartaView>
                     );
                   },
                 ),
-             
+
                 Consumer<ShowSearchLokVartaProvider>(
                   builder: (contextP, search, _) {
                     // Auto-scroll when search opens
@@ -156,7 +167,7 @@ class _LokVartaViewState extends State<LokVartaView>
                       });
                     }
                     _previousSearchState = search.showSearchWidget;
-                                        return LokVartaTabbar(
+                    return LokVartaTabbar(
                       showSearch: search.showSearchWidget,
                       searchController: provider.searchController,
                       controller: tabController,
@@ -191,49 +202,55 @@ class _LokVartaViewState extends State<LokVartaView>
                 if (value.isLoading || events.isEventLoading) {
                   return Center(child: CustomAnimatedLoading());
                 }
-                
+
                 // Load data for current tab if empty and not already loaded
                 // Only load once per tab to prevent infinite loops when list is legitimately empty
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!mounted) return;
                   final currentIndex = tabController.index;
-                  
+
                   // Skip if we've already loaded this tab
                   if (_loadedTabs.contains(currentIndex)) return;
-                  
+
                   switch (currentIndex) {
                     case 0:
-                      if (events.upcomingEventList.isEmpty && !events.isEventLoading) {
+                      if (events.upcomingEventList.isEmpty &&
+                          !events.isEventLoading) {
                         _loadedTabs.add(currentIndex);
                         events.getEvents(EventFilter.upcoming);
                       }
                       break;
                     case 1:
-                      if (events.ongoingEventList.isEmpty && !events.isEventLoading) {
+                      if (events.ongoingEventList.isEmpty &&
+                          !events.isEventLoading) {
                         _loadedTabs.add(currentIndex);
                         events.getEvents(EventFilter.ongoing);
                       }
                       break;
                     case 2:
-                      if (value.pressReleasesList.isEmpty && !value.isLokVartaLoading) {
+                      if (value.pressReleasesList.isEmpty &&
+                          !value.isLokVartaLoading) {
                         _loadedTabs.add(currentIndex);
                         value.getLokVarta(LokVartaFilter.PressRelease);
                       }
                       break;
                     case 3:
-                      if (value.interviewsList.isEmpty && !value.isLokVartaLoading) {
+                      if (value.interviewsList.isEmpty &&
+                          !value.isLokVartaLoading) {
                         _loadedTabs.add(currentIndex);
                         value.getLokVarta(LokVartaFilter.Interview);
                       }
                       break;
                     case 4:
-                      if (value.videosList.isEmpty && !value.isLokVartaLoading) {
+                      if (value.videosList.isEmpty &&
+                          !value.isLokVartaLoading) {
                         _loadedTabs.add(currentIndex);
                         value.getLokVarta(LokVartaFilter.Videos);
                       }
                       break;
                     case 5:
-                      if (value.photoLists.isEmpty && !value.isLokVartaLoading) {
+                      if (value.photoLists.isEmpty &&
+                          !value.isLokVartaLoading) {
                         _loadedTabs.add(currentIndex);
                         value.getLokVarta(LokVartaFilter.PhotoGallery);
                       }
@@ -246,7 +263,9 @@ class _LokVartaViewState extends State<LokVartaView>
                     EventsBuildWidget(
                       data: events.upcomingEventList,
                       onRefresh: () async {
-                        _loadedTabs.remove(0); // Clear loaded flag to allow refresh
+                        _loadedTabs.remove(
+                          0,
+                        ); // Clear loaded flag to allow refresh
                         await events.getEvents(EventFilter.upcoming);
                       },
                       type: EventFilter.upcoming,
@@ -255,50 +274,68 @@ class _LokVartaViewState extends State<LokVartaView>
                     EventsBuildWidget(
                       data: events.ongoingEventList,
                       onRefresh: () async {
-                        _loadedTabs.remove(1); // Clear loaded flag to allow refresh
+                        _loadedTabs.remove(
+                          1,
+                        ); // Clear loaded flag to allow refresh
                         await events.getEvents(EventFilter.ongoing);
                       },
                       type: EventFilter.ongoing,
                       height: 0.1,
                     ),
                     // Show loading if press releases are loading and list is empty
-                    value.isLoadingFilter(LokVartaFilter.PressRelease) && value.pressReleasesList.isEmpty
+                    value.isLoadingFilter(LokVartaFilter.PressRelease) &&
+                            value.pressReleasesList.isEmpty
                         ? Center(child: CustomAnimatedLoading())
                         : PressReleasesWidget(
                             medias: value.pressReleasesList,
                             onRefresh: () async {
-                              _loadedTabs.remove(2); // Clear loaded flag to allow refresh
-                              await value.getLokVarta(LokVartaFilter.PressRelease);
+                              _loadedTabs.remove(
+                                2,
+                              ); // Clear loaded flag to allow refresh
+                              await value.getLokVarta(
+                                LokVartaFilter.PressRelease,
+                              );
                             },
                           ),
                     // Show loading if interviews are loading and list is empty
-                    value.isLoadingFilter(LokVartaFilter.Interview) && value.interviewsList.isEmpty
+                    value.isLoadingFilter(LokVartaFilter.Interview) &&
+                            value.interviewsList.isEmpty
                         ? Center(child: CustomAnimatedLoading())
                         : InterviewWidget(
                             medias: value.interviewsList,
                             onRefresh: () async {
-                              _loadedTabs.remove(3); // Clear loaded flag to allow refresh
+                              _loadedTabs.remove(
+                                3,
+                              ); // Clear loaded flag to allow refresh
                               await value.getLokVarta(LokVartaFilter.Interview);
                             },
                           ),
                     // Show loading if videos are loading and list is empty
-                    value.isLoadingFilter(LokVartaFilter.Videos) && value.videosList.isEmpty
+                    value.isLoadingFilter(LokVartaFilter.Videos) &&
+                            value.videosList.isEmpty
                         ? Center(child: CustomAnimatedLoading())
                         : VideoPlayerWidget(
                             medias: value.videosList,
                             onRefresh: () async {
-                              _loadedTabs.remove(4); // Clear loaded flag to allow refresh
+                              _loadedTabs.remove(
+                                4,
+                              ); // Clear loaded flag to allow refresh
                               await value.getLokVarta(LokVartaFilter.Videos);
                             },
                           ),
                     // Show loading if photos are loading and list is empty
-                    value.isLoadingFilter(LokVartaFilter.PhotoGallery) && value.photoLists.isEmpty
+                    value.isLoadingFilter(LokVartaFilter.PhotoGallery) &&
+                            value.photoLists.isEmpty
                         ? Center(child: CustomAnimatedLoading())
                         : PhotoWidget(
                             medias: value.photoLists,
                             onRefresh: () async {
-                              _loadedTabs.remove(5); // Clear loaded flag to allow refresh
-                              await value.getLokVarta(LokVartaFilter.PhotoGallery);
+                              _loadedTabs.remove(
+                                5,
+                              ); // Clear loaded flag to allow refresh
+                              await value.getLokVarta(
+                                LokVartaFilter.PhotoGallery,
+                              );
                             },
                           ),
                   ],

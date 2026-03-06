@@ -21,6 +21,7 @@ import 'package:inldsevak/features/navigation/view/navigation_view.dart';
 import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/l10n/general_stream.dart';
+import 'package:inldsevak/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,6 +34,12 @@ class ProfileView extends StatefulWidget with CupertinoDialogMixin {
 }
 
 class _ProfileViewState extends State<ProfileView> with CupertinoDialogMixin {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    NotificationService.triggerPopupIfAvailable();
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<dynamic>(

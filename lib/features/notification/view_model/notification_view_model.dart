@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/widgets.dart';
 import 'package:inldsevak/core/provider/base_view_model.dart';
 import 'package:inldsevak/core/secure/secure_storage.dart';
@@ -221,23 +222,71 @@ class NotificationViewModel extends BaseViewModel {
 
   Future<NotifyPopupItem?> checkNotifyPopup() async {
     try {
-      final token = await SessionController.instance.getToken();
+      // Ensure token is available before making API call (important on app resume/cold starts)
+      String? token = await SessionController.instance.getToken();
+      if (token == null || token.isEmpty) {
+        log("📬 [checkNotifyPopup] Token not found yet, waiting briefly...");
+        int retries = 0;
+        while ((token == null || token.isEmpty) && retries < 10) {
+          await Future.delayed(const Duration(milliseconds: 300));
+          token = await SessionController.instance.getToken();
+          retries++;
+        }
+      }
 
+      if (token == null || token.isEmpty) {
+        log("📬 [checkNotifyPopup] ❌ FAILED - No token after waiting");
+        return null;
+      }
+
+      log(
+        "📬 [checkNotifyPopup] Fetching notify popup from API with valid token...",
+      );
       final response = await NotificationRepository().getNotifyPopupApi(
         token: token,
       );
 
       if (response.data?.responseCode == 200) {
         final messages = response.data?.data;
+        log(
+          "📬 [checkNotifyPopup] Found ${messages?.length ?? 0} active popup items",
+        );
         if (messages != null && messages.isNotEmpty) {
           // Return the first message as popup
           return messages.first;
         }
+      } else {
+        log(
+          "📬 [checkNotifyPopup] API returned error or non-200 code: ${response.data?.responseCode}",
+        );
       }
     } catch (e) {
-      debugPrint("Error checking notify popup: $e");
+      log("❌ [checkNotifyPopup] Error checking notify popup: $e");
     }
     return null;
+  }
+
+  Future<void> markNotificationAsRead(String notificationId) async {
+    try {
+      final token = await SessionController.instance.getToken();
+      await NotificationRepository().markNotificationReadApi(
+        token: token,
+        data: {
+          "notificationId": notificationId,
+          "notificationIds": [notificationId],
+        },
+      );
+      // Update local unread count
+      final index = notificationsList.indexWhere(
+        (n) => n.sId == notificationId,
+      );
+      if (index != -1) {
+        notificationsList[index].read = true;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Error marking notification as read: $e");
+    }
   }
 
   Future<void> markAllNotificationsRead() async {
