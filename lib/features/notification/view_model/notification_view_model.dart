@@ -57,6 +57,7 @@ class NotificationViewModel extends BaseViewModel {
         final data = response.data?.data;
         if (data != null && data.isNotEmpty) {
           // Merge API notifications with stored background notifications
+
           await _mergeNotificationsWithStored(data);
         } else {
           // If no API data, keep stored notifications if any
@@ -351,41 +352,54 @@ class UpdateNotificationViewModel extends ChangeNotifier {
         return;
       }
 
-      // Call notifications API
-      final response = await NotificationRepository().getNotificationsApi(
-        token: token,
-      );
+      // Call notifications API (Regular)
+      final regularResponse = await NotificationRepository()
+          .getNotificationsApi(token: token);
 
-      if (response.data?.responseCode == 200) {
-        final notifications = response.data?.data ?? [];
+      // Call history API (Announcements)
+      final historyResponse = await NotificationRepository()
+          .getNotificationHistoryApi(token: token, page: 1, limit: 1);
 
-        // Check if there are any unread notifications
-        // A notification is unread if read == false or read == null
-        final hasUnreadNotifications = notifications.any((notification) {
-          return notification.read == false || notification.read == null;
-        });
+      bool hasUnreadRegular = false;
+      bool hasUnreadHistory = false;
 
-        // Update flag based on API response
-        if (_showNotification != hasUnreadNotifications) {
-          _showNotification = hasUnreadNotifications;
-          notifyListeners();
-          debugPrint(
-            "📬 [UpdateNotificationViewModel] ✅ API check: Found ${notifications.length} notifications, ${hasUnreadNotifications ? 'HAS' : 'NO'} unread - dot ${hasUnreadNotifications ? 'SHOWN' : 'HIDDEN'}",
-          );
-        } else {
-          debugPrint(
-            "📬 [UpdateNotificationViewModel] API check: Flag already correct (${hasUnreadNotifications ? 'HAS' : 'NO'} unread)",
-          );
-        }
-
-        // Also update SharedPreferences to keep it in sync
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('showNotification', hasUnreadNotifications);
+      if (regularResponse.data?.responseCode == 200) {
+        final notifications = regularResponse.data?.data ?? [];
+        hasUnreadRegular = notifications.any(
+          (n) => n.read == false || n.read == null,
+        );
       } else {
         debugPrint(
-          "⚠️ [UpdateNotificationViewModel] API check failed: ${response.error?.message}",
+          "⚠️ [UpdateNotificationViewModel] Regular notifications API check failed: ${regularResponse.error?.message}",
         );
       }
+
+      if (historyResponse.data?.responseCode == 200) {
+        hasUnreadHistory = (historyResponse.data?.data?.unreadCount ?? 0) > 0;
+      } else {
+        debugPrint(
+          "⚠️ [UpdateNotificationViewModel] History notifications API check failed: ${historyResponse.error?.message}",
+        );
+      }
+
+      final hasUnreadAny = hasUnreadRegular || hasUnreadHistory;
+
+      // Update flag based on combined results
+      if (_showNotification != hasUnreadAny) {
+        _showNotification = hasUnreadAny;
+        notifyListeners();
+        debugPrint(
+          "📬 [UpdateNotificationViewModel] ✅ Double Check: Regular unread: $hasUnreadRegular, History unread: $hasUnreadHistory -> dot ${hasUnreadAny ? 'SHOWN' : 'HIDDEN'}",
+        );
+      } else {
+        debugPrint(
+          "📬 [UpdateNotificationViewModel] Double Check: Flag already correct (Regular unread: $hasUnreadRegular, History unread: $hasUnreadHistory)",
+        );
+      }
+
+      // Sync SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('showNotification', hasUnreadAny);
     } catch (e) {
       debugPrint(
         "❌ [UpdateNotificationViewModel] Error checking unread notifications from API: $e",

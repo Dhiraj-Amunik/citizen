@@ -4,6 +4,7 @@ import 'package:inldsevak/core/utils/common_snackbar.dart';
 import 'package:inldsevak/features/home/services/dashboard_repository.dart';
 import 'package:inldsevak/features/volunter/models/response/volunteer_analytics_response_model.dart';
 import 'package:inldsevak/features/volunter/services/volunteer_repository.dart';
+import 'package:inldsevak/notification_service.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 
 class VolunteerAnalyticsViewModel extends BaseViewModel {
@@ -90,6 +91,13 @@ class VolunteerAnalyticsViewModel extends BaseViewModel {
         _isVolunteer = data!.data!.isVolunteer;
         _volunteerStatus = data.data!.volunteerStatus;
         _hasFetchedStatus = true;
+        
+        // Check for notifyPopup in dashboard response and trigger popup if exists
+        if (data.data?.notifyPopup != null) {
+          debugPrint("📬 [VolunteerAnalyticsViewModel] Found notifyPopup in dashboard response: ${data.data?.notifyPopup?.title}");
+          NotificationService.triggerPopupIfAvailable(pushItem: data.data?.notifyPopup);
+        }
+        
         notifyListeners();
       } else {
         _hasFetchedStatus = true; // Mark as fetched even if response is invalid

@@ -150,11 +150,14 @@ class NotificationHistoryItemCard extends StatelessWidget {
               ),
               if (hasImage) ...[
                 SizedBox(height: Dimens.gapX3),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(Dimens.radiusX2),
-                  child: CommonHelpers.getCacheNetworkImage(
-                    notification.image!,
-                    fit: BoxFit.cover,
+                SizedBox(
+                  width: double.infinity,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(Dimens.radiusX2),
+                    child: CommonHelpers.getCacheNetworkImage(
+                      notification.image!,
+                      fit: BoxFit.fitWidth,
+                    ),
                   ),
                 ),
               ],

@@ -42,6 +42,7 @@ class NotificationService {
 
   static bool _isPopupDialogOpen = false;
   static bool _isFetchingPopup = false;
+  static DateTime? _lastPopupAttempt;
 
   @pragma('vm:entry-point')
   static Future<void> firebaseMessagingBackgroundHandler(
@@ -642,6 +643,9 @@ class NotificationService {
       log(
         "📬 ✅ [checkAndRefreshDataIfNeeded] All data refreshed on app resume",
       );
+
+      // Trigger popup if available after data refresh
+      triggerPopupIfAvailable();
     } catch (e) {
       log("❌ [checkAndRefreshDataIfNeeded] Error: $e");
     }
@@ -828,6 +832,13 @@ class NotificationService {
         return 'Appointment Notification';
       }
 
+      if (module == 'announcement' ||
+          module == 'official_announcement' ||
+          module == 'official anouncement' ||
+          module == 'custom') {
+        return 'Official Announcement';
+      }
+
       // Try to use type as title if available
       if (type.isNotEmpty && type != 'general') {
         return type
@@ -884,6 +895,17 @@ class NotificationService {
         return 'Your appointment has been $status';
       }
 
+      if (module == 'announcement' ||
+          module == 'official_announcement' ||
+          module == 'official anouncement' ||
+          module == 'custom') {
+        final title = data['title'] ?? data['name'];
+        if (title != null && title.toString().trim().isNotEmpty) {
+          return title.toString();
+        }
+        return 'Important update from the team';
+      }
+
       // Try to use description or reason if available
       final description = data['description'] ?? data['reason'];
       if (description != null && description.toString().trim().isNotEmpty) {
@@ -930,7 +952,7 @@ class NotificationService {
       // Create a hash from content (for notifications without IDs)
       final contentHash = '${title}_${body}_${module}_${moduleId}'.hashCode;
       final timestamp =
-          DateTime.now().millisecondsSinceEpoch ~/ 1000; // Round to seconds
+          DateTime.now().millisecondsSinceEpoch; // Use full milliseconds
 
       return 'content_${contentHash}_$timestamp';
     } catch (e) {
@@ -962,17 +984,17 @@ class NotificationService {
       // Use the same message ID generation as main.dart
       final messageId = _generateUniqueMessageId(message);
 
-      // Check BOTH lists: processed_background_messages (from main.dart) and shown_notification_ids
-      final processedMessages =
-          prefs.getStringList('processed_background_messages') ?? [];
+      // CRITICAL FIX: Only check shown_notification_ids here.
+      // Do NOT check 'processed_background_messages' because main.dart sets that flag
+      // BEFORE calling this method - checking it here would cause every background
+      // notification to be dropped as a "duplicate".
       final shownNotifications =
           prefs.getStringList('shown_notification_ids') ?? [];
 
-      // Check if this message was already processed or shown
-      if (processedMessages.contains(messageId) ||
-          shownNotifications.contains(messageId)) {
+      // Check if this message was already shown to the user
+      if (shownNotifications.contains(messageId)) {
         log(
-          "📬 ⚠️ Notification already shown (ID: $messageId) - skipping duplicate",
+          "📬 ⚠️ [NotificationService] DROP - Notification already shown to user (ID: $messageId)",
         );
         return true;
       }
@@ -1035,13 +1057,19 @@ class NotificationService {
     // DEDUPLICATION: Check if notification was already shown
     final alreadyShown = await _isNotificationAlreadyShown(message);
     if (alreadyShown) {
-      log("📬 ⚠️ Duplicate notification detected and prevented");
+      final messageId = _generateUniqueMessageId(message);
+      log(
+        "📬 ⚠️ [NotificationService] DROP - Duplicate detected (ID: $messageId)",
+      );
       return;
     }
 
     // VALIDATION: Check if notification has valid content
     if (!_isValidNotification(message)) {
-      log("📬 ❌ Empty/invalid notification detected and prevented");
+      final data = message.data;
+      log(
+        "📬 ❌ [NotificationService] DROP - Empty/invalid content (Module: ${data['module']}, Type: ${data['type']})",
+      );
       return;
     }
 
@@ -1162,6 +1190,20 @@ class NotificationService {
 
       // Update chat icon by calling APIs when wallofhelp or nearestmember notifications are received
       _updateChatIconOnNotification(navigatorContext, data);
+
+      // STEP 10 IMPROVEMENT: If payload contains popup=true, trigger popup instantly
+      // using the provided payload data
+      if (data['popup'] == true || data['popup'] == 'true') {
+        log("📬 [NotificationService] Instant popup requested in payload");
+        final popupItem = NotifyPopupItem(
+          id: data['_id'] ?? data['id'] ?? data['notificationId'],
+          title: title,
+          message: body,
+          image: data['image'] ?? data['imageUrl'],
+          module: data['module'] ?? 'custom',
+        );
+        triggerPopupIfAvailable(pushItem: popupItem);
+      }
     }
   }
 
@@ -1287,13 +1329,65 @@ class NotificationService {
   // Handle notification that opened app from terminated state
   static Future<void> _getInitialNotification() async {
     try {
-      RemoteMessage? message = await FirebaseMessaging.instance
+      final RemoteMessage? message = await FirebaseMessaging.instance
           .getInitialMessage();
+
       if (message != null) {
+        log('📬 [KillState] App launched from killed state via notification');
+        log('📬 [KillState] Data: ${message.data}');
+
+        // ── Store flags in SharedPreferences ──────────────────────────────────
+        // We CANNOT call UI/Provider code here – the navigator isn't built yet.
+        // IndlView.initState will pick these flags up after the frame is ready.
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('pendingKillStatePopup', true);
+        await prefs.setBool('showNotification', true);
+        await prefs.setBool('needsDataRefresh', true);
+
+        log(
+          '📬 [KillState] pendingKillStatePopup flag set – IndlView will show popup',
+        );
+
+        // Navigation from the tapped notification (runs after navigator is ready)
         _handleNavigationFromMessage(message);
       }
     } catch (e) {
-      log("Error getting initial notification: $e");
+      log('❌ [KillState] Error in _getInitialNotification: $e');
+    }
+  }
+
+  /// Called by IndlView.initState to show the popup for kill-state launches.
+  /// This is the ONLY reliable place to do it because it runs after providers
+  /// and the navigator are both ready.
+  static Future<void> checkKillStatePopup() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
+      final pending = prefs.getBool('pendingKillStatePopup') ?? false;
+
+      if (!pending) {
+        log('📬 [KillState] No pending kill-state popup');
+        return;
+      }
+
+      // Clear the flag immediately so it doesn't show again on next resume
+      await prefs.setBool('pendingKillStatePopup', false);
+
+      log(
+        '📬 [KillState] pendingKillStatePopup flag found – scheduling popup...',
+      );
+
+      // Reset the cooldown so this call is never blocked
+      _lastPopupAttempt = null;
+      _isFetchingPopup = false;
+
+      // Small delay to let the first frame settle (providers, navigator all ready)
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      log('📬 [KillState] Triggering popup now...');
+      await triggerPopupIfAvailable();
+    } catch (e) {
+      log('❌ [KillState] Error in checkKillStatePopup: $e');
     }
   }
 
@@ -1400,118 +1494,133 @@ class NotificationService {
     }
   }
 
-  /// Trigger the notification popup if there are unread custom notifications
-  /// This can be called from anywhere using the global navigator context
-  static Future<void> triggerPopupIfAvailable() async {
-    try {
-      // Guard against multiple simultaneous calls or overlapping dialogs
-      if (_isPopupDialogOpen || _isFetchingPopup) {
+  /// Shows the notification popup dialog.
+  ///
+  /// This is the SINGLE entry point for showing the notification popup.
+  /// It is designed to be called from anywhere (lifecycle events, tab switches, etc.)
+  /// and is completely safe to call multiple times concurrently.
+  ///
+  /// [pushItem]: If provided, shows this item directly without an API call.
+  ///             Used for foreground push notifications with popup:true payload.
+  static Future<void> triggerPopupIfAvailable({
+    NotifyPopupItem? pushItem,
+  }) async {
+    // ──────────────────────────────────────────────────────────────────────────
+    // GUARD 1: If a dialog is already showing, do nothing.
+    // ──────────────────────────────────────────────────────────────────────────
+    if (_isPopupDialogOpen) {
+      log('📬 [Popup] SKIP – dialog already open');
+      return;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // GUARD 2: Cooldown – only for landing checks.
+    // Tapping a specific notification (pushItem) should NEVER be blocked by cooldown.
+    // ──────────────────────────────────────────────────────────────────────────
+    final now = DateTime.now();
+    if (pushItem == null && _lastPopupAttempt != null) {
+      final elapsed = now.difference(_lastPopupAttempt!);
+      if (elapsed < const Duration(seconds: 3)) {
         log(
-          "📬 [triggerPopupIfAvailable] SKIPPING - Already fetching or showing popup",
+          '📬 [Popup] SKIP – cooldown (${elapsed.inMilliseconds}ms since last attempt)',
         );
         return;
       }
+    }
+    _lastPopupAttempt = now;
 
-      _isFetchingPopup = true;
+    // ──────────────────────────────────────────────────────────────────────────
+    // GUARD 3: Lock – prevents multiple triggers from starting concurrently.
+    // ──────────────────────────────────────────────────────────────────────────
+    if (_isFetchingPopup && pushItem == null) {
+      log('📬 [Popup] SKIP – fetch already in progress');
+      return;
+    }
+    _isFetchingPopup = true;
 
-      log("📬 [triggerPopupIfAvailable] Starting process...");
+    try {
+      log('📬 [Popup] Starting... pushItem=${pushItem?.id ?? "none"}');
 
-      // Initial delay to allow the app state to settle (especially on cold starts)
-      await Future.delayed(const Duration(milliseconds: 1000));
-
-      // RETRY LOGIC for Navigation Context: Keep trying for a valid context (app starting/transitioning)
+      // ────────────────────────────────────────────────────────────────────────
+      // STEP 1: Get Navigator context
+      // ────────────────────────────────────────────────────────────────────────
       BuildContext? context;
-      int retryCount = 0;
-      while (retryCount < 10) {
+      for (int i = 0; i < 5; i++) {
         context = RouteManager.navigatorKey.currentContext;
         if (context != null && context.mounted) break;
-
-        log(
-          "📬 [triggerPopupIfAvailable] Context not ready, retrying ($retryCount/10)...",
-        );
-        await Future.delayed(const Duration(milliseconds: 500));
-        retryCount++;
+        log('📬 [Popup] Context not ready, retry ${i + 1}/5...');
+        await Future.delayed(const Duration(milliseconds: 300));
       }
 
       if (context == null || !context.mounted) {
-        log(
-          "📬 [triggerPopupIfAvailable] ❌ FAILED - No valid context found after context retries",
-        );
-        _isFetchingPopup = false;
+        log('📬 [Popup] ABORT – no valid context');
         return;
       }
 
-      if (_isPopupDialogOpen) {
-        _isFetchingPopup = false;
-        return;
-      }
+      // ────────────────────────────────────────────────────────────────────────
+      // STEP 2: Resolve the item to show
+      // ────────────────────────────────────────────────────────────────────────
+      NotifyPopupItem? itemToShow = pushItem;
 
-      log("📬 [triggerPopupIfAvailable] ✅ Valid context found, fetching VM...");
+      if (itemToShow == null) {
+        log('📬 [Popup] Checking primary API (get-notify-popup)...');
+        final vm = Provider.of<NotificationViewModel>(context, listen: false);
+        itemToShow = await vm.checkNotifyPopup();
 
-      // Use Provider.of instead of read for better compatibility in async gaps
-      final vm = Provider.of<NotificationViewModel>(context, listen: false);
-
-      log("📬 [triggerPopupIfAvailable] Calling checkNotifyPopup()...");
-      // API RETRY LOGIC: Sometimes the push arrives before the backend popup state is ready
-      NotifyPopupItem? popupItem;
-      int apiRetryCount = 0;
-      while (apiRetryCount < 3) {
-        popupItem = await vm.checkNotifyPopup();
-        if (popupItem != null) break;
-
-        log(
-          "📬 [triggerPopupIfAvailable] No active popup found, retrying API (${apiRetryCount + 1}/3)...",
-        );
-        await Future.delayed(const Duration(seconds: 2));
-        apiRetryCount++;
-      }
-
-      if (popupItem != null) {
-        log(
-          "📬 [triggerPopupIfAvailable] 🎉 Success! Popup found: ${popupItem.title}",
-        );
-
-        if (!context.mounted || _isPopupDialogOpen) {
+        // If primary API returns nothing, fallback to History logic (Count Comparison)
+        if (itemToShow == null) {
           log(
-            "📬 [triggerPopupIfAvailable] ❌ FAILED - Context lost or popup opened during fetch",
+            '📬 [Popup] No active popup in primary API – checking history count...',
           );
+
+          // CRITICAL: Release lock so the history VM can trigger the popup it finds
           _isFetchingPopup = false;
-          return;
+
+          final historyVm = Provider.of<NotificationHistoryViewModel>(
+            context,
+            listen: false,
+          );
+          await historyVm.getHistory(isRefresh: true);
+          return; // The history VM will call triggerPopupIfAvailable again with an item
         }
-
-        _isPopupDialogOpen = true;
-        log(
-          "📬 [triggerPopupIfAvailable] 🚀 Showing dialog on current screen...",
-        );
-
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          useRootNavigator: true,
-          builder: (dialogContext) => NotificationPopupDialog(
-            item: popupItem!,
-            onClose: () {
-              log("📬 [triggerPopupIfAvailable] User closed popup");
-              _isPopupDialogOpen = false;
-              Navigator.of(dialogContext).pop();
-              vm.markAllNotificationsRead();
-            },
-          ),
-        ).then((_) {
-          _isPopupDialogOpen = false;
-          _isFetchingPopup = false;
-        });
-      } else {
-        log(
-          "📬 [triggerPopupIfAvailable] ℹ️ Checked API $apiRetryCount times - No active popup found.",
-        );
-        _isFetchingPopup = false;
       }
-    } catch (e, stack) {
+
+      // ────────────────────────────────────────────────────────────────────────
+      // STEP 3: Show Dialog
+      // ────────────────────────────────────────────────────────────────────────
+      log(
+        '📬 [Popup] ✅ Showing dialog: "${itemToShow.title}" (ID: ${itemToShow.id})',
+      );
+      _isPopupDialogOpen = true;
+
+      // Capture final for closure
+      final vm = Provider.of<NotificationViewModel>(context, listen: false);
+      final finalItem = itemToShow;
+
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        useRootNavigator: true,
+        builder: (dialogContext) => NotificationPopupDialog(
+          item: finalItem,
+          onClose: () {
+            log('📬 [Popup] Dialog closed - marking read: ${finalItem.id}');
+            _isPopupDialogOpen = false;
+            Navigator.of(dialogContext).pop();
+
+            if (finalItem.id != null) {
+              vm.markNotificationAsRead(finalItem.id!);
+            }
+          },
+        ),
+      );
+
       _isPopupDialogOpen = false;
+    } catch (e, stack) {
+      log('❌ [Popup] Error: $e\n$stack');
+      _isPopupDialogOpen = false;
+    } finally {
       _isFetchingPopup = false;
-      log("❌ [triggerPopupIfAvailable] Critical Error: $e");
-      log("❌ [triggerPopupIfAvailable] Stack: $stack");
     }
   }
 }

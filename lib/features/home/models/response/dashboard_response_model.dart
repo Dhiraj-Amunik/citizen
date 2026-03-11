@@ -1,5 +1,6 @@
 import 'package:inldsevak/features/profile/models/response/user_profile_model.dart'
     as profile;
+import 'package:inldsevak/features/notification/models/notify_popup_model.dart';
 
 class DashboardResponseModel {
   DashboardResponseModel({
@@ -38,6 +39,7 @@ class DashboardData {
     this.isVolunteer,
     this.volunteerStatus,
     this.unReadNotificationsCount,
+    this.notifyPopup,
   });
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,9 @@ class DashboardData {
       isVolunteer: json['isVolunteer'] as bool?,
       volunteerStatus: json['volunteerStatus'] as String?,
       unReadNotificationsCount: json['unReadNotificationsCount'] as int?,
+      notifyPopup: json['notifyPopup'] == null
+          ? null
+          : NotifyPopupItem.fromJson(json['notifyPopup'] as Map<String, dynamic>),
     );
   }
 
@@ -63,6 +68,7 @@ class DashboardData {
   final bool? isVolunteer;
   final String? volunteerStatus;
   final int? unReadNotificationsCount;
+  final NotifyPopupItem? notifyPopup;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -70,6 +76,7 @@ class DashboardData {
       'isVolunteer': isVolunteer,
       'volunteerStatus': volunteerStatus,
       'unReadNotificationsCount': unReadNotificationsCount,
+      if (notifyPopup != null) 'notifyPopup': notifyPopup!.toJson(),
     };
   }
 }

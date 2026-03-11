@@ -25,6 +25,7 @@ import 'package:inldsevak/features/home/widgets/quick_access_widget.dart';
 import 'package:inldsevak/features/home/services/dashboard_repository.dart';
 import 'package:inldsevak/features/navigation/view_model/role_view_model.dart';
 import 'package:inldsevak/features/notification/view_model/notification_view_model.dart';
+import 'package:inldsevak/features/notification/view_model/notification_history_view_model.dart';
 import 'package:inldsevak/features/profile/view_model/profile_view_model.dart';
 import 'package:inldsevak/features/quick_access/wall_of_help/view_model/financial_help_messages_view_model.dart';
 import 'package:inldsevak/features/nearest_member/view_model/nearest_member_view_model.dart';
@@ -33,7 +34,6 @@ import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:inldsevak/core/mixin/cupertino_dialog_mixin.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:inldsevak/features/notification/widget/notification_popup_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Check and request location permission if denied
@@ -191,53 +191,52 @@ class _IndlViewState extends State<IndlView>
         curve: Curves.easeInOut,
       ),
     );
+
     // Initialize blink animation for badge
+
     _blinkAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
+
     _blinkAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
       CurvedAnimation(
         parent: _blinkAnimationController,
         curve: Curves.easeInOut,
       ),
     );
+
     // Animation will be started when there are unread messages
 
     // Add app lifecycle observer to detect when app comes back from background
+
     WidgetsBinding.instance.addObserver(this);
+
     // Load complaints when INLD view is opened
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _refreshUnreadCounts();
-      // Start periodic timer to refresh unread counts every 30 seconds
-      _startUnreadCountRefreshTimer();
-
-      // ANTI-FLASH LOGIC: Load notification dot from SharedPreferences ONLY (instant, no flash)
-      // Don't verify with API automatically - let the notifications view handle verification
-      // This prevents the dot from disappearing prematurely before user opens notifications
       try {
-        final updateNotificationVm = context
-            .read<UpdateNotificationViewModel>();
+        _refreshUnreadCounts();
+        _startUnreadCountRefreshTimer();
 
-        // Optimistic update from SharedPreferences (instant, prevents flash)
-        // This shows the dot immediately if a notification was received while app was closed
-        // The dot will be verified/hidden only when user opens the notifications view
-        await updateNotificationVm.refreshFromSharedPreferences();
-        debugPrint(
-          "📬 [IndlView] ✅ Notification dot loaded from SharedPreferences (instant, no flash)",
-        );
-        debugPrint(
-          "📬 [IndlView] ℹ️ Dot will be verified when user opens notifications view",
-        );
+        final prefs = await SharedPreferences.getInstance();
+        final showDot = prefs.getBool('showNotification') ?? false;
+        
+        if (mounted) {
+          // Use UpdateNotificationViewModel for the red dot state
+          context.read<UpdateNotificationViewModel>().showNotification = showDot;
+        }
+
+        // Refresh dashboard on start to check for notifyPopup and update member status
+        if (mounted) {
+          await _refreshDashboard(context);
+        }
+
+        // 1. Show tap-notification popup first (Priority)
+        await NotificationService.checkKillStatePopup();
       } catch (e) {
-        debugPrint("❌ [IndlView] Error loading notification dot: $e");
+        debugPrint("❌ [IndlView] Init sequence error: $e");
       }
-
-      // Check if data needs to be refreshed (notification received while app was closed)
-      NotificationService.checkAndRefreshDataIfNeeded();
-
-      // Trigger the popup API call directly in initState so it definitely fires on mount!
-      NotificationService.triggerPopupIfAvailable();
     });
   }
 
@@ -245,28 +244,24 @@ class _IndlViewState extends State<IndlView>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    // When app comes back from background/sleep, refresh unread counts and notification dot
     if (state == AppLifecycleState.resumed) {
-      debugPrint(
-        "📱 App resumed from background/sleep - refreshing unread counts and notification dot",
-      );
+      debugPrint('📱 [IndlView] App Resumed from background');
 
-      // Small delay to ensure app is fully resumed and SharedPreferences is synchronized
-      Future.delayed(const Duration(milliseconds: 500), () async {
+      Future.delayed(const Duration(milliseconds: 800), () async {
         if (!mounted) return;
 
-        // CRITICAL: Refresh notification dot from SharedPreferences with retry mechanism
-        // Background isolate writes might not be immediately visible, so we retry with delays
+        // 1. Refresh notification dot from SharedPreferences
         await _refreshNotificationDotOnResume();
 
-        // Refresh all unread counts to update GIF animation
+        // 2. Refresh all unread counts
         _refreshUnreadCounts();
 
-        // Also check if data needs to be refreshed (notification received while in background)
-        NotificationService.checkAndRefreshDataIfNeeded();
+        // 3. Refresh dashboard to check for notifyPopup
+        await _refreshDashboard(context);
 
-        // Check for notify popup when resuming from background
-        NotificationService.triggerPopupIfAvailable();
+        // 4. Fetch fresh data (notifications API + others) AND trigger popup
+        //    checkAndRefreshDataIfNeeded already calls triggerPopupIfAvailable at the end.
+        await NotificationService.checkAndRefreshDataIfNeeded();
       });
     }
   }
@@ -392,11 +387,11 @@ class _IndlViewState extends State<IndlView>
       if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
         nearestMemberVm.getAllChats();
       }
+
+      // Load notification history to check for new announcements (as requested by user)
+      context.read<NotificationHistoryViewModel>().getHistory(isRefresh: true);
     } catch (e) {
       debugPrint("Error refreshing unread counts: $e");
-    } finally {
-      // Also check for new popups during periodic refresh
-      NotificationService.triggerPopupIfAvailable();
     }
   }
 
@@ -448,7 +443,7 @@ class _IndlViewState extends State<IndlView>
         CommonSnackbar(text: "Error refreshing page").showToast();
       }
     } finally {
-      NotificationService.triggerPopupIfAvailable();
+      // Don't call here, it's redundant with didChangeDependencies and other triggers
     }
   }
 
@@ -478,6 +473,12 @@ class _IndlViewState extends State<IndlView>
           );
           debugPrint("✅ Party member status updated: $isPartyMember");
         }
+
+        // Check for notifyPopup and show it if exists
+        if (data.notifyPopup != null) {
+          debugPrint("📬 [IndlView] Found notifyPopup in dashboard response: ${data.notifyPopup?.title}");
+          NotificationService.triggerPopupIfAvailable(pushItem: data.notifyPopup);
+        }
       }
     } catch (e) {
       debugPrint("Error refreshing dashboard: $e");
@@ -488,31 +489,26 @@ class _IndlViewState extends State<IndlView>
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Load complaints when view becomes visible (e.g., when navigating back from another tab)
-    // The loadComplaintsIfNeeded method has guards to prevent unnecessary API calls
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final complaintsViewModel = context.read<ComplaintsViewModel>();
-      // Only try to load if complaints list is empty
       if (complaintsViewModel.complaintsList.isEmpty) {
         complaintsViewModel.loadComplaintsIfNeeded();
       }
-      // Refresh unread counts when returning to this view
       context
           .read<FinancialHelpMessagesViewModel>()
           .getMyFinancialHelpRequestMessages();
       context.read<NearestMemberViewModel>().getUnreadChatCount();
-      // Refresh complaints unread count
       context.read<ComplaintsViewModel>().getComplaints(
         showLoader: false,
         preserveSearch: true,
       );
-      // Refresh nearest member chats to get totalUnreadCount
       final nearestMemberVm = context.read<MyMemberMessageViewModel>();
       if (nearestMemberVm.token != null && nearestMemberVm.token!.isNotEmpty) {
         nearestMemberVm.getAllChats();
       }
-      // Check for notify popup
-      // This will be called whenever the view is re-inserted (e.g. switching back from another tab)
-      NotificationService.triggerPopupIfAvailable();
+      // NOTE: Popup is triggered only from lifecycle (resume) and checkAndRefreshDataIfNeeded.
+      // NOT here — didChangeDependencies fires too frequently (on every rebuild/navigation).
     });
   }
 

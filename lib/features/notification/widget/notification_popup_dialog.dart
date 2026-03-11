@@ -54,7 +54,11 @@ class NotificationPopupDialog extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX4),
                   child: TranslatedText(
-                    text: "You got an official announcement!",
+                    text:
+                        (item.type?.toLowerCase() == 'custom' ||
+                            item.module?.toLowerCase() == 'custom')
+                        ? "New Notification!"
+                        : "You got an official announcement!",
                     style: context.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppPalettes.primaryColor,
@@ -65,30 +69,10 @@ class NotificationPopupDialog extends StatelessWidget {
 
                 SizedBox(height: Dimens.gapX2),
 
-                // Image Section (Fixed) - Moved outside scroll view
-                if (item.image != null && item.image!.isNotEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: Dimens.paddingX4),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(Dimens.radiusX2),
-                      child: Image.network(
-                        item.image!,
-                        height: 150.h,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const SizedBox.shrink(),
-                      ),
-                    ),
-                  ),
-
-                if (item.image != null && item.image!.isNotEmpty)
-                  SizedBox(height: Dimens.gapX2),
-
-                // Scrollable Content Section (Only text content)
+                // Scrollable Content Section (Image + Title + Message)
                 Flexible(
                   child: Scrollbar(
-                    thumbVisibility: true, // Always show scroll indicator
+                    thumbVisibility: true,
                     thickness: 4.w,
                     radius: Radius.circular(Dimens.radiusX2),
                     child: SingleChildScrollView(
@@ -99,31 +83,52 @@ class NotificationPopupDialog extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Actual Notification Title
-                          if (item.title != null)
-                            TranslatedText(
-                              text: item.title!,
-                              style: context.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppPalettes.blackColor,
-                                fontSize: 18.sp,
+                          // Image Section (Now scrollable)
+                          if (item.image != null && item.image!.isNotEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(bottom: Dimens.gapX2),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  Dimens.radiusX2,
+                                ),
+                                child: Image.network(
+                                  item.image!,
+                                  width: double.infinity,
+                                  fit: BoxFit.fitWidth,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const SizedBox.shrink(),
+                                ),
                               ),
-                              textAlign: TextAlign.center,
                             ),
 
-                          if (item.title != null)
-                            SizedBox(height: Dimens.gapX2),
+                          // Actual Notification Title
+                          TranslatedText(
+                            text: (item.title != null && item.title!.isNotEmpty)
+                                ? item.title!
+                                : "Official Update",
+                            style: context.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppPalettes.blackColor,
+                              fontSize: 18.sp,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+
+                          SizedBox(height: Dimens.gapX2),
 
                           // Message
-                          if (item.message != null)
-                            TranslatedText(
-                              text: item.message!,
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                color: AppPalettes.lightTextColor,
-                                height: 1.5,
-                              ),
-                              textAlign: TextAlign.center,
+                          TranslatedText(
+                            text:
+                                (item.message != null &&
+                                    item.message!.isNotEmpty)
+                                ? item.message!
+                                : "Please check the official announcements section for details.",
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              color: AppPalettes.lightTextColor,
+                              height: 1.5,
                             ),
+                            textAlign: TextAlign.center,
+                          ),
                           SizedBox(height: Dimens.gapX2),
                         ],
                       ),

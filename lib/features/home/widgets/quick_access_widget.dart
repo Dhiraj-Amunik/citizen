@@ -13,6 +13,7 @@ import 'package:inldsevak/features/home/models/response/dashboard_response_model
 import 'package:inldsevak/features/home/services/dashboard_repository.dart';
 import 'package:inldsevak/features/home/view/indl_view.dart';
 import 'package:inldsevak/features/volunter/view/top_volunteers_view.dart';
+import 'package:inldsevak/notification_service.dart';
 
 class QuickAccessWidget extends StatelessWidget {
   final bool showParty;
@@ -38,13 +39,13 @@ class QuickAccessWidget extends StatelessWidget {
         fullWidth: true,
         color: AppPalettes.liteGreenColor,
       ),
-     
+
       QuickAccessModel(
         icon: AppImages.appointmentAccess,
         text: localization.appointments,
         route: Routes.appointmentPage,
       ),
-      
+
       QuickAccessModel(
         icon: AppImages.helpAccess,
         text: localization.wall_of_help,
@@ -130,7 +131,6 @@ class QuickAccessWidget extends StatelessWidget {
   }
 }
 
-
 Widget _getDialog(
   BuildContext context,
   TextTheme style,
@@ -188,22 +188,24 @@ Future<void> _handleQuickAccessTap(
     await _handleVolunteerTap(context);
     return;
   }
-  
+
   // Check volunteer status before navigating to become a party member
   if (data.route == Routes.becomePartMemberPage) {
     await _handleBecomePartyMemberTap(context);
     return;
   }
-  
+
   // Check location permission only when accessing nearest member
   if (data.route == Routes.nearestMemberPage) {
-    final hasPermission = await checkLocationPermissionForNearestMember(context);
+    final hasPermission = await checkLocationPermissionForNearestMember(
+      context,
+    );
     if (!hasPermission) {
       // Permission denied, don't navigate
       return;
     }
   }
-  
+
   RouteManager.pushNamed(data.route);
 }
 
@@ -222,23 +224,21 @@ Future<void> _handleVolunteerTap(BuildContext context) async {
     context: context,
     barrierDismissible: false,
     builder: (_) => const Center(
-      child: CircularProgressIndicator(
-        color: AppPalettes.primaryColor,
-      ),
+      child: CircularProgressIndicator(color: AppPalettes.primaryColor),
     ),
   );
   isDialogVisible = true;
 
   try {
     final token = await SessionController.instance.getToken();
-    final response =
-        await DashboardRepository().fetchDashboard(token: token);
+    final response = await DashboardRepository().fetchDashboard(token: token);
 
     closeDialog();
 
     if (response.error != null) {
-      CommonSnackbar(text: response.error?.message ?? "Unable to fetch status")
-          .showToast();
+      CommonSnackbar(
+        text: response.error?.message ?? "Unable to fetch status",
+      ).showToast();
       return;
     }
 
@@ -251,13 +251,23 @@ Future<void> _handleVolunteerTap(BuildContext context) async {
     }
 
     final DashboardData? data = dashboard?.data;
+
+    // Check for notifyPopup in dashboard response and trigger popup if exists
+    if (data?.notifyPopup != null) {
+      debugPrint(
+        "📬 [QuickAccessWidget] Found notifyPopup in dashboard response: ${data?.notifyPopup?.title}",
+      );
+      NotificationService.triggerPopupIfAvailable(pushItem: data?.notifyPopup);
+    }
+
     final status = data?.volunteerStatus?.toLowerCase().trim();
     final isVolunteer = data?.isVolunteer == true;
     final isPartyMember = data?.user?.isPartyMember == true;
 
     if (data?.user?.isPartyMember != null) {
-      await SessionController.instance
-          .setPartyMember(isPartyMember: data!.user!.isPartyMember ?? false);
+      await SessionController.instance.setPartyMember(
+        isPartyMember: data!.user!.isPartyMember ?? false,
+      );
     }
 
     // If user is an approved volunteer, navigate to analytics

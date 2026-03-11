@@ -41,32 +41,35 @@ String _generateUniqueMessageId(RemoteMessage message) {
     // Try multiple sources in order of reliability
     final messageId = message.messageId;
     final data = message.data;
-    
+
     // Primary: Use Firebase message ID if available
     if (messageId != null && messageId.isNotEmpty) {
       return 'fcm_$messageId';
     }
-    
+
     // Secondary: Use notification ID from data
-    final notificationId = data['_id'] ?? 
-        data['notificationId'] ?? 
-        data['messageId'] ?? 
+    final notificationId =
+        data['_id'] ??
+        data['notificationId'] ??
+        data['messageId'] ??
         data['id'];
-    
+
     if (notificationId != null && notificationId.toString().isNotEmpty) {
       return 'data_${notificationId.toString()}';
     }
-    
+
     // Tertiary: Create ID from notification content (title + body + timestamp)
     final title = message.notification?.title ?? data['title'] ?? '';
-    final body = message.notification?.body ?? data['body'] ?? data['message'] ?? '';
+    final body =
+        message.notification?.body ?? data['body'] ?? data['message'] ?? '';
     final module = data['module'] ?? '';
     final moduleId = data['moduleId'] ?? '';
-    
+
     // Create a hash from content (for notifications without IDs)
     final contentHash = '${title}_${body}_${module}_${moduleId}'.hashCode;
-    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000; // Round to seconds
-    
+    final timestamp =
+        DateTime.now().millisecondsSinceEpoch; // Use full milliseconds
+
     return 'content_${contentHash}_$timestamp';
   } catch (e) {
     // Ultimate fallback: timestamp-based ID
@@ -93,30 +96,38 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
   // This must happen BEFORE Firebase.initializeApp() to prevent Firebase auto-display
   try {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Generate a unique message ID from multiple sources for better deduplication
     final messageId = _generateUniqueMessageId(message);
-    
+
     // ATOMIC CHECK: Check and mark as processed in one operation
-    final processedMessages = prefs.getStringList('processed_background_messages') ?? [];
-    
+    final processedMessages =
+        prefs.getStringList('processed_background_messages') ?? [];
+
     // Check if this message was already processed
     if (processedMessages.contains(messageId)) {
-      print("📬 ⚠️ [Background Handler] Duplicate notification detected (ID: $messageId) - SKIPPING ENTIRELY");
+      print(
+        "📬 ⚠️ [Background Handler] Duplicate notification detected (ID: $messageId) - SKIPPING ENTIRELY",
+      );
       return; // Exit immediately - don't process at all
     }
-    
+
     // Mark message as processed IMMEDIATELY (before any other processing)
     processedMessages.add(messageId);
-    
+
     // Keep only last 1000 message IDs to prevent storage bloat
     if (processedMessages.length > 1000) {
       processedMessages.removeRange(0, processedMessages.length - 1000);
     }
-    
+
     // Save immediately to prevent race conditions
-    await prefs.setStringList('processed_background_messages', processedMessages);
-    print("📬 [Background Handler] Message marked as processed (ID: $messageId) - proceeding");
+    await prefs.setStringList(
+      'processed_background_messages',
+      processedMessages,
+    );
+    print(
+      "📬 [Background Handler] Message marked as processed (ID: $messageId) - proceeding",
+    );
   } catch (e) {
     print("❌ [Background Handler] Error in deduplication check: $e");
     // If deduplication fails, continue but log the error
