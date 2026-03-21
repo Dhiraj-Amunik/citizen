@@ -93,9 +93,13 @@ class VolunteerAnalyticsViewModel extends BaseViewModel {
         _hasFetchedStatus = true;
         
         // Check for notifyPopup in dashboard response and trigger popup if exists
-        if (data.data?.notifyPopup != null) {
-          debugPrint("📬 [VolunteerAnalyticsViewModel] Found notifyPopup in dashboard response: ${data.data?.notifyPopup?.title}");
-          NotificationService.triggerPopupIfAvailable(pushItem: data.data?.notifyPopup);
+        if (data.data?.notifyPopup != null && data.data!.notifyPopup!.isNotEmpty) {
+          debugPrint(
+            "📬 [VolunteerAnalyticsViewModel] Found ${data.data!.notifyPopup!.length} notifyPopup(s) in dashboard response. Showing first one: ${data.data?.notifyPopup?.first.title}",
+          );
+          NotificationService.triggerPopupIfAvailable(
+            pushItem: data.data!.notifyPopup!.first,
+          );
         }
         
         notifyListeners();

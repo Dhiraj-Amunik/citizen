@@ -68,9 +68,25 @@ class NotificationService {
       await prefs.setBool('showNotification', true);
       await prefs.setBool('needsDataRefresh', true);
 
+      // ✅ IMPORTANT: Set flag to check for popups if this is a custom/announcement notification
+      // This ensures that when the app launches, it will fetch the dashboard to get notifyPopup
+      final module = (message.data['module'] ?? '').toString().toLowerCase();
+      final type = (message.data['type'] ?? '').toString().toLowerCase();
+      final isPopupType =
+          module == 'custom' ||
+          module == 'announcement' ||
+          module == 'official_announcement' ||
+          type == 'custom' ||
+          type == 'announcement';
+
+      if (isPopupType) {
+        log(
+          "📬 Custom/Announcement notification detected - Setting popup check flag",
+        );
+        await prefs.setBool('pendingKillStatePopup', true);
+      }
+
       // Log notification details for debugging (especially for chat notifications)
-      final module = message.data['module'] ?? 'unknown';
-      final type = message.data['type'] ?? 'unknown';
       log(
         "📬 Background notification received - Module: $module, Type: $type - flags set, APIs will be called when app resumes",
       );
@@ -1370,6 +1386,17 @@ class NotificationService {
         return;
       }
 
+      // ✅ Check if popup was already shown from dashboard
+      // This prevents showing duplicate popups
+      final popupAlreadyShown =
+          prefs.getBool('popup_shown_from_dashboard') ?? false;
+      if (popupAlreadyShown) {
+        log('📬 [KillState] Popup already shown from dashboard, skipping');
+        await prefs.setBool('pendingKillStatePopup', false);
+        await prefs.setBool('popup_shown_from_dashboard', false);
+        return;
+      }
+
       // Clear the flag immediately so it doesn't show again on next resume
       await prefs.setBool('pendingKillStatePopup', false);
 
@@ -1382,7 +1409,7 @@ class NotificationService {
       _isFetchingPopup = false;
 
       // Small delay to let the first frame settle (providers, navigator all ready)
-      await Future.delayed(const Duration(milliseconds: 1500));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       log('📬 [KillState] Triggering popup now...');
       await triggerPopupIfAvailable();
@@ -1604,13 +1631,9 @@ class NotificationService {
         builder: (dialogContext) => NotificationPopupDialog(
           item: finalItem,
           onClose: () {
-            log('📬 [Popup] Dialog closed - marking read: ${finalItem.id}');
+            log('📬 [Popup] Dialog closed: ${finalItem.id}');
             _isPopupDialogOpen = false;
             Navigator.of(dialogContext).pop();
-
-            if (finalItem.id != null) {
-              vm.markNotificationAsRead(finalItem.id!);
-            }
           },
         ),
       );

@@ -227,12 +227,14 @@ class _IndlViewState extends State<IndlView>
           context.read<UpdateNotificationViewModel>().showNotification = showDot;
         }
 
-        // Refresh dashboard on start to check for notifyPopup and update member status
+        // ✅ CRITICAL: Refresh dashboard FIRST to check for notifyPopup (Kill State Custom Notifications)
+        // This ensures the API response with notifyPopup is available BEFORE showing popup
         if (mounted) {
           await _refreshDashboard(context);
+          debugPrint("✅ [IndlView] Dashboard refreshed on init");
         }
 
-        // 1. Show tap-notification popup first (Priority)
+        // ✅ Now that dashboard is loaded, check for popup (both from dashboard and kill state)
         await NotificationService.checkKillStatePopup();
       } catch (e) {
         debugPrint("❌ [IndlView] Init sequence error: $e");
@@ -256,10 +258,14 @@ class _IndlViewState extends State<IndlView>
         // 2. Refresh all unread counts
         _refreshUnreadCounts();
 
-        // 3. Refresh dashboard to check for notifyPopup
+        // ✅ 3. Refresh dashboard FIRST to check for notifyPopup (NEW notifications while app was in background)
         await _refreshDashboard(context);
 
-        // 4. Fetch fresh data (notifications API + others) AND trigger popup
+        // ✅ 4. Check for kill state popup as fallback
+        // (This will use cached popup or fetch from API if not found in dashboard)
+        await NotificationService.checkKillStatePopup();
+
+        // 5. Fetch fresh data (notifications API + others) AND trigger popup
         //    checkAndRefreshDataIfNeeded already calls triggerPopupIfAvailable at the end.
         await NotificationService.checkAndRefreshDataIfNeeded();
       });
@@ -453,7 +459,7 @@ class _IndlViewState extends State<IndlView>
       final response = await DashboardRepository().fetchDashboard(token: token);
 
       if (response.error != null) {
-        debugPrint("Error fetching dashboard: ${response.error?.message}");
+        debugPrint("❌ Error fetching dashboard: ${response.error?.message}");
         return;
       }
 
@@ -474,14 +480,46 @@ class _IndlViewState extends State<IndlView>
           debugPrint("✅ Party member status updated: $isPartyMember");
         }
 
-        // Check for notifyPopup and show it if exists
-        if (data.notifyPopup != null) {
-          debugPrint("📬 [IndlView] Found notifyPopup in dashboard response: ${data.notifyPopup?.title}");
-          NotificationService.triggerPopupIfAvailable(pushItem: data.notifyPopup);
+        // ✅ CRITICAL: Check for notifyPopup in dashboard response
+        // This handles custom notifications received while app was in kill state
+        if (data.notifyPopup != null && data.notifyPopup!.isNotEmpty) {
+          debugPrint(
+            "📬 [IndlView] ✅ Found ${data.notifyPopup!.length} notifyPopup(s) in dashboard response",
+          );
+          debugPrint(
+            "📬 [IndlView] First popup - Title: '${data.notifyPopup!.first.title}', Type: '${data.notifyPopup!.first.type}', Module: '${data.notifyPopup!.first.module}'",
+          );
+          
+          // ✅ Mark that popup will be shown from dashboard (for kill state skip logic)
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('popup_shown_from_dashboard', true);
+          
+          // Show the first popup immediately with delay to ensure UI is ready
+          Future.delayed(const Duration(milliseconds: 200), () {
+            if (mounted) {
+              NotificationService.triggerPopupIfAvailable(
+                pushItem: data.notifyPopup!.first,
+              );
+            }
+          });
+        } else {
+          debugPrint("📬 [IndlView] No notifyPopup in dashboard response - fetching history as fallback");
+          
+          // ✅ FALLBACK: If no popup in dashboard, fetch notification history
+          // to find and display unread custom/announcement notifications
+          if (mounted) {
+            try {
+              final historyVm = context.read<NotificationHistoryViewModel>();
+              await historyVm.getHistory(isRefresh: true);
+              debugPrint("📬 [IndlView] ✅ Fetched notification history for fallback popup");
+            } catch (e) {
+              debugPrint("📬 [IndlView] Error fetching history fallback: $e");
+            }
+          }
         }
       }
     } catch (e) {
-      debugPrint("Error refreshing dashboard: $e");
+      debugPrint("❌ Error refreshing dashboard: $e");
     }
   }
 

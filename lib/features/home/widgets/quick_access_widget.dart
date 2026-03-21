@@ -253,11 +253,13 @@ Future<void> _handleVolunteerTap(BuildContext context) async {
     final DashboardData? data = dashboard?.data;
 
     // Check for notifyPopup in dashboard response and trigger popup if exists
-    if (data?.notifyPopup != null) {
+    if (data?.notifyPopup != null && data!.notifyPopup!.isNotEmpty) {
       debugPrint(
-        "📬 [QuickAccessWidget] Found notifyPopup in dashboard response: ${data?.notifyPopup?.title}",
+        "📬 [QuickAccessWidget] Found ${data.notifyPopup!.length} notifyPopup(s) in dashboard response. Showing first one: ${data.notifyPopup?.first.title}",
       );
-      NotificationService.triggerPopupIfAvailable(pushItem: data?.notifyPopup);
+      NotificationService.triggerPopupIfAvailable(
+        pushItem: data.notifyPopup!.first,
+      );
     }
 
     final status = data?.volunteerStatus?.toLowerCase().trim();

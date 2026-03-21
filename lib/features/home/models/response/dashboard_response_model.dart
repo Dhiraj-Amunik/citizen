@@ -3,11 +3,7 @@ import 'package:inldsevak/features/profile/models/response/user_profile_model.da
 import 'package:inldsevak/features/notification/models/notify_popup_model.dart';
 
 class DashboardResponseModel {
-  DashboardResponseModel({
-    this.responseCode,
-    this.message,
-    this.data,
-  });
+  DashboardResponseModel({this.responseCode, this.message, this.data});
 
   factory DashboardResponseModel.fromJson(Map<String, dynamic> json) {
     return DashboardResponseModel(
@@ -48,27 +44,41 @@ class DashboardData {
     if (json['user'] != null) {
       userData = profile.Data.fromJson(json['user'] as Map<String, dynamic>);
     } else if (json['userDetails'] != null) {
-      userData = profile.Data.fromJson(json['userDetails'] as Map<String, dynamic>);
+      userData = profile.Data.fromJson(
+        json['userDetails'] as Map<String, dynamic>,
+      );
     }
-    
+
+    List<NotifyPopupItem>? notifyPopupList;
+    if (json['notifyPopup'] != null) {
+      if (json['notifyPopup'] is List) {
+        notifyPopupList = (json['notifyPopup'] as List)
+            .map((e) => NotifyPopupItem.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        notifyPopupList = [
+          NotifyPopupItem.fromJson(json['notifyPopup'] as Map<String, dynamic>),
+        ];
+      }
+    }
+
     return DashboardData(
       user: userData,
       userDetails: userData, // Same data, accessible via both names
       isVolunteer: json['isVolunteer'] as bool?,
       volunteerStatus: json['volunteerStatus'] as String?,
       unReadNotificationsCount: json['unReadNotificationsCount'] as int?,
-      notifyPopup: json['notifyPopup'] == null
-          ? null
-          : NotifyPopupItem.fromJson(json['notifyPopup'] as Map<String, dynamic>),
+      notifyPopup: notifyPopupList,
     );
   }
 
   final profile.Data? user;
-  final profile.Data? userDetails; // Alias for user, for API response compatibility
+  final profile.Data?
+  userDetails; // Alias for user, for API response compatibility
   final bool? isVolunteer;
   final String? volunteerStatus;
   final int? unReadNotificationsCount;
-  final NotifyPopupItem? notifyPopup;
+  final List<NotifyPopupItem>? notifyPopup;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -76,8 +86,8 @@ class DashboardData {
       'isVolunteer': isVolunteer,
       'volunteerStatus': volunteerStatus,
       'unReadNotificationsCount': unReadNotificationsCount,
-      if (notifyPopup != null) 'notifyPopup': notifyPopup!.toJson(),
+      if (notifyPopup != null)
+        'notifyPopup': notifyPopup!.map((e) => e.toJson()).toList(),
     };
   }
 }
-
